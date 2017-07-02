@@ -1,0 +1,2 @@
+# TtgcBot
+TtgcBot for Discord

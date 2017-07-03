@@ -23,6 +23,7 @@ from random import randint,choice
 from threading import Thread
 from INIfiles import *
 from logfile import *
+from PythonBDD import *
 import logging
 import time
 from EventManager import *
@@ -35,7 +36,6 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='a'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-global prefix
 global charbase
 charbase = {}
 global linked
@@ -136,6 +136,7 @@ def convert_str_into_dic(string):
     string = string.replace("{","")
     string = string.replace("}","")
     string = string.replace("'","")
+    #string = string.replace(" ","")
     ls = string.split(", ")
     dic = {}
     for i in range(len(ls)):
@@ -165,6 +166,19 @@ def sum_ls(ls1,ls2):
         lsf[i] += ls2[i]
     return lsf
 
+def get_prefix(ID):
+    ID = str(ID)
+    cfg = BDD("config")
+    cfg.load()
+    return cfg["prefix",ID]
+
+def set_prefix(ID,new):
+    ID = str(ID)
+    cfg = BDD("config")
+    cfg.load()
+    cfg["prefix",ID] = new
+    cfg.save()
+
 def save_data():
     pass
 
@@ -173,8 +187,12 @@ client = discord.Client()
 @client.event
 @asyncio.coroutine
 def on_message(message):
-    global prefix,charbase,char,file,linked,sex,logf,ideas,statut,events,vocal,vocalco,song,mobs,anoncer_isready
+    global charbase,char,file,linked,sex,logf,ideas,statut,events,vocal,vocalco,song,mobs,anoncer_isready
     logf.restart()
+    if message.server is None: return
+    #get prefix
+    if message.server is not None: prefix = get_prefix(message.server.id)
+    else: prefix = '/'
     #special values
     jdrchannel = False
     admin = False
@@ -192,7 +210,19 @@ def on_message(message):
     if message.channel.id == "237668457963847681": musicchannel = True
     #commands
     #########REWRITTEN##########
+    if message.content.startswith(prefix+'setprefix') and admin:
+        prefix = (message.content).replace(prefix+'setprefix ',"")
+        set_prefix(message.server.id,prefix)
+        logf.append("/setprefix","Changing command prefix into : "+prefix)
+        yield from client.send_message(message.channel,"Changing command prefix into : "+prefix)
+    if message.content.startswith(prefix+'rollindep'):
+        val = message.content
+        val = int(val.replace(prefix+"rollindep ",""))
+        result = randint(1,val)
+        yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
     #####NOT YET REWRITTEN######
+    #jdr commands
+    #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
         print(str(message.author)+" : "+msg)
@@ -239,6 +269,10 @@ def on_message(message):
         f.close()
     if message.content.startswith(prefix+'hentai') and nsfw:
         f = open("Hentai/"+choice(os.listdir("Hentai")),"rb")
+        yield from client.send_file(message.channel,f)
+        f.close()
+    if message.content.startswith(prefix+'onichan'):
+        f = open("onichan.jpg","rb")
         yield from client.send_file(message.channel,f)
         f.close()
     if message.content.startswith(prefix+'rule34') and nsfw:
@@ -294,6 +328,14 @@ def on_ready():
     global logf
     yield from client.change_presence(game=statut)
     logf.restart()
+    conf = BDD("config")
+    try: conf.load()
+    except:
+        conf.create_group("prefix")
+        for i in client.servers:
+            conf["prefix",str(i.id)] = '/'
+        conf.save()
+        logf.append("Initializing","Creating config file")
     logf.append("Initializing","Bot is now ready")
     logf.stop()
 
@@ -303,7 +345,7 @@ def main_task():
     yield from client.connect()
 
 def launch():
-    global file,prefix,charbase,linked,logf,ideas,events
+    global file,charbase,linked,logf,ideas,events
     logsys = LogSystem()
     logsys.limit = 20
     logsys.directory = "Logs"

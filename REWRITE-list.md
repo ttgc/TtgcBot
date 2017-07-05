@@ -7,6 +7,6 @@
 **Vocal commands**  
 
 ----
-Coming soon for next upgrade/update :
-**Ideas commands**
+Coming soon for next upgrade/update :  
+**Ideas commands**  
 **Vocal commands**

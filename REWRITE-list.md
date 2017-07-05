@@ -5,3 +5,8 @@
 **Ideas commands**  
 **Event commands**  
 **Vocal commands**  
+
+----
+Coming soon for next upgrade/update :
+**Ideas commands**
+**Vocal commands**

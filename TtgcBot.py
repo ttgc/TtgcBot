@@ -221,8 +221,6 @@ def on_message(message):
         result = randint(1,val)
         yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
     #####NOT YET REWRITTEN######
-    #jdr commands
-    #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
         print(str(message.author)+" : "+msg)
@@ -277,7 +275,7 @@ def on_message(message):
         f.close()
     if message.content.startswith(prefix+'rule34') and nsfw:
         yield from client.send_message(message.channel,"Rule 34 : *If it exists, there is porn on it*\nhttps://rule34.paheal.net/")
-    #Help commands
+##    #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
         msg = (message.content).replace(prefix+'debug ',"")
         print("running debug instruction : "+msg)
@@ -298,8 +296,21 @@ def on_message(message):
                 yield from client.send_message(message.author,i)
         f.close()
         yield from client.send_message(message.channel,"I've sent you a private message with the answer")
-##    save_data()
+    if message.content.startswith(prefix+'invite'):
+        botaskperm = discord.Permissions().all()
+        botaskperm.administrator = botaskperm.ban_members = botaskperm.kick_members = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_roles = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = botaskperm.mute_members = botaskperm.deafen_members = False
+        url = discord.utils.oauth_url(str(client.user.id),botaskperm)
+        embd = discord.Embed(title="TtgcBot (Alpha)",description="Invite TtgcBot (alpha) to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
+        embd.set_footer(text="TtgcBot version alpha developed by Ttgc",icon_url=client.user.avatar_url)
+        embd.set_image(url=client.user.avatar_url)
+        embd.set_author(name="Ttgc",icon_url="https://cdn.discordapp.com/avatars/222026592896024576/e1bf51b1158cc87cefcc54afc4849cee.webp?size=1024",url=url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        cfg = BDD("config")
+        cfg.load()
+        embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     logf.stop()
+##    save_data()
     yield from client.change_presence(game=statut)
 
 @client.event
@@ -321,6 +332,21 @@ def on_voice_state_update(before,after):
                 anoncer = vocalco.create_ffmpeg_player("Music/deco.mp3",after=reset_anoncer)
                 anoncer.start()
                 #leave
+@client.event
+@asyncio.coroutine
+def on_server_join(server):
+    cfg = BDD("config")
+    cfg.load()
+    cfg["prefix",str(server.id)] = '/'
+    cfg.save()
+
+@client.event
+@asyncio.coroutine
+def on_server_remove(server):
+    cfg = BDD("config")
+    cfg.load()
+    del(cfg["prefix",str(server.id)])
+    cfg.save()
 
 @client.event
 @asyncio.coroutine

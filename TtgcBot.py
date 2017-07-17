@@ -29,6 +29,7 @@ import time
 from EventManager import *
 import os
 import zipfile
+import sys
 
 logger = logging.getLogger('discord')
 logging.basicConfig(level=logging.INFO)
@@ -179,6 +180,38 @@ def set_prefix(ID,new):
     cfg["prefix",ID] = new
     cfg.save()
 
+def is_blacklisted(ID):
+    ID = str(ID)
+    bl = BDD("userlist")
+    bl.load()
+    black = True
+    try:
+        reason = bl["blacklist",ID]
+    except:
+        black = False
+        reason = ""
+    return black,reason
+
+def is_botmanager(ID):
+    ID = str(ID)
+    ul = BDD("userlist")
+    ul.load()
+    try:
+        get = ul["botmanager",ID]
+    except:
+        return False
+    return True
+
+def is_premium(ID):
+    ID = str(ID)
+    ul = BDD("userlist")
+    ul.load()
+    try:
+        get = ul["premium",ID]
+    except:
+        return False
+    return True
+
 def save_data():
     pass
 
@@ -189,18 +222,30 @@ client = discord.Client()
 def on_message(message):
     global charbase,char,file,linked,sex,logf,ideas,statut,events,vocal,vocalco,song,mobs,anoncer_isready
     logf.restart()
+    #exclusion
     if message.server is None: return
+    if message.author.bot: return
     #get prefix
     if message.server is not None: prefix = get_prefix(message.server.id)
     else: prefix = '/'
+    #blacklisting
+    blacklisted, reason = is_blacklisted(message.author.id)
+    if blacklisted:
+        if message.content.startswith(prefix):
+            yield from client.send_message(message.channel,"I'm sorry but "+message.author.mention+" is currently blacklisted")
+        return
     #special values
+    premium = False
     jdrchannel = False
     admin = False
     botowner = False
     nsfw = False
     musicchannel = False
+    botmanager = is_botmanager(message.author.id)
+    premium = is_premium(message.author.id)
+    if botmanager: premium = True
     if str(message.author.id) == "222026592896024576":
-        botowner = admin = True
+        botowner = botmanager = premium = admin = True
     if str(message.author) in linked:
         char = charbase[linked[str(message.author)]]
     if message.server != None:
@@ -220,7 +265,9 @@ def on_message(message):
         val = int(val.replace(prefix+"rollindep ",""))
         result = randint(1,val)
         yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
+    #jdr commands
     #####NOT YET REWRITTEN######
+    #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
         print(str(message.author)+" : "+msg)
@@ -275,7 +322,51 @@ def on_message(message):
         f.close()
     if message.content.startswith(prefix+'rule34') and nsfw:
         yield from client.send_message(message.channel,"Rule 34 : *If it exists, there is porn on it*\nhttps://rule34.paheal.net/")
-##    #Help commands
+    if message.content.startswith(prefix+'suggest'):
+        pass
+    if message.content.startswith(prefix+'shutdown') and botmanager:
+        yield from client.send_message(message.channel,"You are requesting a shutdown, please ensure that you want to perform it by typing `confirm`")
+        answer = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content='confirm')
+        if answer is None:
+            yield from client.send_message(message.channel,"Your request has timeout")
+            return
+        yield from client.logout()
+        sys.exit(0)
+    if message.content.startswith(prefix+'blacklist') and botmanager:
+        msg = message.content.replace(prefix+'blacklist ',"")
+        ls = msg.split(" | ")
+        blackid = int(ls[0])
+        bl = BDD("userlist")
+        bl.load()
+        bl["blacklist",str(blackid)] = ls[1]
+        bl.save()
+        yield from client.send_message(message.channel,"The following id has been blacklisted : `"+str(blackid)+"` for \n```"+ls[1]+"```")
+    if message.content.startswith(prefix+'unblacklist') and botmanager:
+        blackid = int(message.content.replace(prefix+'unblacklist ',""))
+        bl = BDD("userlist")
+        bl.load()
+        del(bl["blacklist",str(blackid)])
+        bl.save()
+        yield from client.send_message(message.channel,"The following id has been unblacklisted : `"+str(blackid)+"`")
+    if message.content.startswith(prefix+'setbotmanager') and botowner:
+        userid = int(message.content.replace(prefix+'setbotmanager ',""))
+        user = yield from client.get_user_info(str(userid))
+        ul = BDD("userlist")
+        ul.load()
+        ul["botmanager",str(userid)] = str(user)
+        ul.save()
+        yield from client.send_message(message.channel,"The ID has been set as botmanager succesful")
+    if message.content.startswith(prefix+'setpremium') and botowner:
+        userid = int(message.content.replace(prefix+'setpremium ',""))
+        user = yield from client.get_user_info(str(userid))
+        ul = BDD("userlist")
+        ul.load()
+        ul["premium",str(userid)] = str(user)
+        ul.save()
+        yield from client.send_message(message.channel,"The ID has been set as premium succesful")
+    #Vocal commands
+    #####NOT YET REWRITTEN######
+    #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
         msg = (message.content).replace(prefix+'debug ',"")
         print("running debug instruction : "+msg)
@@ -310,7 +401,6 @@ def on_message(message):
         embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     logf.stop()
-##    save_data()
     yield from client.change_presence(game=statut)
 
 @client.event
@@ -332,6 +422,7 @@ def on_voice_state_update(before,after):
                 anoncer = vocalco.create_ffmpeg_player("Music/deco.mp3",after=reset_anoncer)
                 anoncer.start()
                 #leave
+                
 @client.event
 @asyncio.coroutine
 def on_server_join(server):
@@ -362,6 +453,11 @@ def on_ready():
             conf["prefix",str(i.id)] = '/'
         conf.save()
         logf.append("Initializing","Creating config file")
+    if len(client.servers) != len(conf.file.section["prefix"]):
+        for i in client.servers:
+            if not str(i.id) in conf.file.section["prefix"]:
+                conf["prefix",str(i.id)] = '/'
+                if len(client.servers) == len(conf.file.section["prefix"]): break
     logf.append("Initializing","Bot is now ready")
     logf.stop()
 
@@ -379,6 +475,15 @@ def launch():
     logf = Logfile(str(tps.tm_mday)+"_"+str(tps.tm_mon)+"_"+str(tps.tm_year)+"_"+str(tps.tm_hour)+"_"+str(tps.tm_min)+"_"+str(tps.tm_sec),logsys)
     logf.start()
     logf.append("Initializing","Bot initialization...")
+    userlist = BDD("userlist")
+    try: userlist.load()
+    except:
+        userlist.create_group("blacklist")
+        userlist.create_group("premium")
+        userlist.create_group("botmanager")
+        userlist.save()
+        logf.append("Initializing","creating userlist file")
+    logf.append("Initializing","userlist loaded")
     logf.append("Initializing","Bot initialized successful")
     logf.stop()
 

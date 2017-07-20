@@ -293,7 +293,6 @@ def on_message(message):
         val = int(val.replace(prefix+"rollindep ",""))
         result = randint(1,val)
         yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
-    #####NOT YET REWRITTEN######
     #jdr commands
     if message.content.startswith(prefix+'roll') and jdrchannel:
         msg = (message.content).replace(prefix+'roll ',"")
@@ -634,7 +633,14 @@ def on_message(message):
     if message.content.startswith(prefix+'charset') and premium:
         char = charbase[message.content.split(" ")[2]]
         if message.content.startswith(prefix+'charset name'):
-            char.name = (message.content).split(" ")[3]#replace(prefix+'charset name ',"")
+            ls = (message.content).split(" ")
+            for i in range(3):
+                del(ls[0])
+            nm = ""
+            for i in ls:
+                nm += i
+                nm += " "
+            char.name = nm[:-1]#replace(prefix+'charset name ',"")
             yield from client.send_message(message.channel,"Changing name of character successful")
         elif message.content.startswith(prefix+'charset PV'):
             char.PVmax = int((message.content).split(" ")[3])#replace(prefix+'charset PV ',""))
@@ -737,25 +743,59 @@ def on_message(message):
     if message.content.startswith(prefix+'charinfo') and jdrchannel:
         if char.mod == 0: modd = "Offensiv"
         else: modd = "Defensiv"
-        yield from client.send_message(message.channel,"Character "+char.name+" :\nLore :"+char.lore+"\n\nPV="+str(char.PV)+"/"+str(char.PVmax)+"\nPM="+str(char.PM)+"/"+str(char.PMmax)
-                                  +"\nForce="+str(char.force)+"\nEsprit="+str(char.esprit)+"\nCharisme="+str(char.charisme)+"\nFurtivite="+str(char.furtivite)+"\nKarma="
-                                  +str(char.karma)+"\nMoney="+str(char.money)+"\nLight Points="+str(char.lp)+"\nDark Points="+str(char.dp)
-                                  +"\nMod="+modd)###########################
+        embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        #embd.set_image(url=message.author.avatar_url)
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+        embd.add_field(name="PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        embd.add_field(name="Force :",value=str(char.force),inline=True)
+        embd.add_field(name="Esprit :",value=str(char.esprit),inline=True)
+        embd.add_field(name="Charisme :",value=str(char.charisme),inline=True)
+        embd.add_field(name="Furtivite :",value=str(char.furtivite),inline=True)
+        embd.add_field(name="Karma :",value=str(char.karma),inline=True)
+        embd.add_field(name="Money :",value=str(char.money),inline=True)
+        embd.add_field(name="Light Points :",value=str(char.lp),inline=True)
+        embd.add_field(name="Dark Points :",value=str(char.dp),inline=True)
+        embd.add_field(name="Mod :",value=modd,inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+
     if message.content.startswith(prefix+'map') and premium:
         f = open("mapmonde.png","rb")
         yield from client.send_file(message.channel,f)
         f.close()
     if message.content.startswith(prefix+'stat') and jdrchannel:
-        yield from client.send_message(message.channel,"Stat of Character "+char.name+" :\nNumber of dice rolled : "+str(char.stat[0])+"\nNumber of Super Critic Success : "+str(char.stat[1])
-                                       +"\nNumber of Critic Success : "+str(char.stat[2])+"\nNumber of Success (without critic and super critic) : "+str(char.stat[3])+"\nNumber of Fail (without critic and super critic) : "
-                                       +str(char.stat[4])+"\nNumber of Critic Fail : "+str(char.stat[5])+"\nNumber of Super Critic Fail : "+str(char.stat[6]))
+        embd = discord.Embed(title="Stat of Character",description=char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        #embd.set_image(url=message.author.avatar_url)
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name="Dice rolled :",value=str(char.stat[0]),inline=True)
+        embd.add_field(name="Super Critic Success :",value=str(char.stat[1]),inline=True)
+        embd.add_field(name="Critic Success :",value=str(char.stat[2]),inline=True)
+        embd.add_field(name="Success (without critic and super critic) :",value=str(char.stat[3]),inline=True)
+        embd.add_field(name="Fail (without critic and super critic) :",value=str(char.stat[4]),inline=True)
+        embd.add_field(name="Critic Fail :",value=str(char.stat[5]),inline=True)
+        embd.add_field(name="Super Critic Fail :",value=str(char.stat[6]),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     if message.content.startswith(prefix+'globalstat') and jdrchannel:
         ls = [0,0,0,0,0,0,0]
         for i in charbase.values():
             ls = sum_ls(ls,i.stat)
-        yield from client.send_message(message.channel,"Stat of All Character :\nNumber of dice rolled : "+str(ls[0])+"\nNumber of Super Critic Success : "+str(ls[1])
-                                       +"\nNumber of Critic Success : "+str(ls[2])+"\nNumber of Success (without critic and super critic) : "+str(ls[3])+"\nNumber of Fail (without critic and super critic) : "
-                                       +str(ls[4])+"\nNumber of Critic Fail : "+str(ls[5])+"\nNumber of Super Critic Fail : "+str(ls[6]))
+        embd = discord.Embed(title="Stat of Character",description="all character (global stat)",colour=discord.Color(randint(0,int('ffffff',16))))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        #embd.set_image(url=message.author.avatar_url)
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name="Dice rolled :",value=str(ls[0]),inline=True)
+        embd.add_field(name="Super Critic Success :",value=str(ls[1]),inline=True)
+        embd.add_field(name="Critic Success :",value=str(ls[2]),inline=True)
+        embd.add_field(name="Success (without critic and super critic) :",value=str(ls[3]),inline=True)
+        embd.add_field(name="Fail (without critic and super critic) :",value=str(ls[4]),inline=True)
+        embd.add_field(name="Critic Fail :",value=str(ls[5]),inline=True)
+        embd.add_field(name="Super Critic Fail :",value=str(ls[6]),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     if message.content.startswith(prefix+'use') and jdrchannel:
         if message.content.startswith(prefix+'use lightpt'):
             if char.lp <= 0:
@@ -789,6 +829,7 @@ def on_message(message):
                 elif result == 4: yield from client.send_message(message.channel,"No effect")
                 elif result == 5: yield from client.send_message(message.channel,"-10%")
                 elif result == 6: yield from client.send_message(message.channel,"-20%")
+        #####NOT YET REWRITTEN######
     if message.content.startswith(prefix+'switchmod') and jdrchannel:
         if char.mod == 0:
             char.mod = 1

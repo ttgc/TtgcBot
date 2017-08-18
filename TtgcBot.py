@@ -293,9 +293,20 @@ def on_message(message):
         val = int(val.replace(prefix+"rollindep ",""))
         result = randint(1,val)
         yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
+    #####NOT YET REWRITTEN######
     #jdr commands
     if message.content.startswith(prefix+'roll') and jdrchannel:
-        msg = (message.content).replace(prefix+'roll ',"")
+        field = (message.content).replace(prefix+'roll ',"")
+        while " " in field: field = field.replace(" ","")
+        if "-" in field:
+            msg = field.split("-")[0]
+            modifier = -int(field.split("-")[1])
+        elif "+" in field:
+            msg = field.split("+")[0]
+            modifier = int(field.split("+")[1])
+        else:
+            msg = field
+            modifier = 0
         if msg == "force":
             char.stat[0] += 1
             dice = randint(1,100)
@@ -327,9 +338,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.force: char.stat[3] += 1
+                        elif result <= char.force+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.force))
+                        yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.force+modifier))
                 elif char.karma <= -5:
                     result += kar
                     if result == 42:
@@ -347,9 +358,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.force: char.stat[3] += 1
+                        elif result <= char.force+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.force))
+                        yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.force+modifier))
                 else:
                     if result == 42: char.stat[1] += 1
                     elif result == 66: char.stat[-1] += 1
@@ -359,9 +370,9 @@ def on_message(message):
                     elif result <= 10:
                         char.stat[2] += 1
                         char.karma -= 1
-                    elif result <= char.force: char.stat[3] += 1
+                    elif result <= char.force+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
-                    yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+"/"+str(char.force))
+                    yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+"/"+str(char.force+modifier))
             char.regenkarm[0] += char.regenkarm[1]
             if char.regenkarm[0] >= 1:
                 if char.karma < 0: char.karma += 1
@@ -398,9 +409,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.esprit: char.stat[3] += 1
+                        elif result <= char.esprit+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.esprit))
+                        yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.esprit+modifier))
                 elif char.karma <= -5:
                     result += kar
                     if result == 42:
@@ -418,9 +429,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.esprit: char.stat[3] += 1
+                        elif result <= char.esprit+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.esprit))
+                        yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.esprit+modifier))
                 else:
                     if result == 42: char.stat[1] += 1
                     elif result == 66: char.stat[-1] += 1
@@ -430,9 +441,9 @@ def on_message(message):
                     elif result <= 10:
                         char.stat[2] += 1
                         char.karma -= 1
-                    elif result <= char.esprit: char.stat[3] += 1
+                    elif result <= char.esprit+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
-                    yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+"/"+str(char.esprit))
+                    yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+"/"+str(char.esprit+modifier))
             if char.regenkarm[0] >= 1:
                 if char.karma < 0: char.karma += 1
                 elif char.karma > 0: char.karma -= 1
@@ -468,9 +479,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.charisme: char.stat[3] += 1
+                        elif result <= char.charisme+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.charisme))
+                        yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.charisme+modifier))
                 elif char.karma <= -5:
                     result += kar
                     if result == 42:
@@ -488,9 +499,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.charisme: char.stat[3] += 1
+                        elif result <= char.charisme+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.charisme))
+                        yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.charisme+modifier))
                 else:
                     if result == 42: char.stat[1] += 1
                     elif result == 66: char.stat[-1] += 1
@@ -500,9 +511,9 @@ def on_message(message):
                     elif result <= 10:
                         char.stat[2] += 1
                         char.karma -= 1
-                    elif result <= char.charisme: char.stat[3] += 1
+                    elif result <= char.charisme+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
-                    yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+"/"+str(char.charisme))
+                    yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+"/"+str(char.charisme+modifier))
             if char.regenkarm[0] >= 1:
                 if char.karma < 0: char.karma += 1
                 elif char.karma > 0: char.karma -= 1
@@ -538,9 +549,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.furtivite: char.stat[3] += 1
+                        elif result <= char.furtivite+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.furtivite))
+                        yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.furtivite+modifier))
                 elif char.karma <= -5:
                     result += kar
                     if result == 42:
@@ -558,9 +569,9 @@ def on_message(message):
                         elif result <= 10:
                             char.stat[2] += 1
                             char.karma -= 1
-                        elif result <= char.furtivite: char.stat[3] += 1
+                        elif result <= char.furtivite+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.furtivite))
+                        yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.furtivite+modifier))
                 else:
                     if result == 42: char.stat[1] += 1
                     elif result == 66: char.stat[-1] += 1
@@ -570,9 +581,9 @@ def on_message(message):
                     elif result <= 10:
                         char.stat[2] += 1
                         char.karma -= 1
-                    elif result <= char.furtivite: char.stat[3] += 1
+                    elif result <= char.furtivite+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
-                    yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+"/"+str(char.furtivite))
+                    yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+"/"+str(char.furtivite+modifier))
             if char.regenkarm[0] >= 1:
                 if char.karma < 0: char.karma += 1
                 elif char.karma > 0: char.karma -= 1
@@ -727,8 +738,7 @@ def on_message(message):
         char.karma = 0
         yield from client.send_message(message.channel,"Character has been reset")
     if message.content.startswith(prefix+'pay') and jdrchannel:
-        char = charbase[message.content.split(" ")[1]]
-        val = int((message.content).split(" ")[2])#replace(prefix+'pay ',""))
+        val = int((message.content).replace(prefix+'pay ',""))
         if char.money-val < 0:
             yield from client.send_message(message.channel,"No more money to pay !")
         else:
@@ -745,7 +755,6 @@ def on_message(message):
         else: modd = "Defensiv"
         embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
@@ -760,7 +769,6 @@ def on_message(message):
         embd.add_field(name="Dark Points :",value=str(char.dp),inline=True)
         embd.add_field(name="Mod :",value=modd,inline=True)
         yield from client.send_message(message.channel,embed=embd)
-
     if message.content.startswith(prefix+'map') and premium:
         f = open("mapmonde.png","rb")
         yield from client.send_file(message.channel,f)
@@ -768,7 +776,6 @@ def on_message(message):
     if message.content.startswith(prefix+'stat') and jdrchannel:
         embd = discord.Embed(title="Stat of Character",description=char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Dice rolled :",value=str(char.stat[0]),inline=True)
@@ -785,7 +792,6 @@ def on_message(message):
             ls = sum_ls(ls,i.stat)
         embd = discord.Embed(title="Stat of Character",description="all character (global stat)",colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos")
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Dice rolled :",value=str(ls[0]),inline=True)
@@ -829,7 +835,6 @@ def on_message(message):
                 elif result == 4: yield from client.send_message(message.channel,"No effect")
                 elif result == 5: yield from client.send_message(message.channel,"-10%")
                 elif result == 6: yield from client.send_message(message.channel,"-20%")
-        #####NOT YET REWRITTEN######
     if message.content.startswith(prefix+'switchmod') and jdrchannel:
         if char.mod == 0:
             char.mod = 1
@@ -1000,6 +1005,11 @@ def on_server_join(server):
     cfg.load()
     cfg["prefix",str(server.id)] = '/'
     cfg.save()
+    charbdd = BDD("character")
+    charbdd.load()
+    charbdd["charbase",str(server.id)] = str({})
+    charbdd["charlink",str(server.id)] = str({})
+    charbdd.save()
 
 @client.event
 @asyncio.coroutine
@@ -1008,6 +1018,13 @@ def on_server_remove(server):
     cfg.load()
     del(cfg["prefix",str(server.id)])
     cfg.save()
+    charbdd = BDD("character")
+    charbdd.load()
+    for i,k in charbdd["charbase",str(server.id)].items():
+        del(charbdd["charstat",str(i)])
+    del(charbdd["charbase",str(server.id)])
+    del(charbdd["charlink",str(server.id)])
+    charbdd.save()
 
 @client.event
 @asyncio.coroutine
@@ -1034,13 +1051,14 @@ def on_ready():
         charbdd.create_group("charstat")
         charbdd.save()
         logf.append("Initializing","creating character file")
-    if len(client.servers) != len(conf.file.section["prefix"]):
+    if len(client.servers) != len(conf.file.section["prefix"]) or len(client.servers) != len(charbdd.file.section["charbase"]):
         for i in client.servers:
             if not str(i.id) in conf.file.section["prefix"]:
                 conf["prefix",str(i.id)] = '/'
+            if not str(i.id) in charbdd.file.section["charbase"]:
                 charbdd["charbase",str(i.id)] = str({})
                 charbdd["charlink",str(i.id)] = str({})
-                if len(client.servers) == len(conf.file.section["prefix"]): break
+            if len(client.servers) == len(conf.file.section["prefix"]) and len(client.servers) == len(charbdd.file.section["charbase"]): break
         conf.save()
         charbdd.save()
     logf.append("Initializing","Bot is now ready")

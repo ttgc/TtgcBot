@@ -30,12 +30,16 @@ from EventManager import *
 import os
 import zipfile
 import sys
+import requests
 
 logger = logging.getLogger('discord')
 logging.basicConfig(level=logging.INFO)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='a')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
+
+global TOKEN
+TOKEN = ''
 
 global file
 global sex
@@ -245,6 +249,7 @@ client = discord.Client()
 @client.event
 @asyncio.coroutine
 def on_message(message):
+    global TOKEN
     global file,sex,logf,ideas,statut,events,vocal,vocalco,song,mobs,anoncer_isready
     logf.restart()
     #exclusion
@@ -259,6 +264,19 @@ def on_message(message):
         if message.content.startswith(prefix):
             yield from client.send_message(message.channel,"I'm sorry but "+message.author.mention+" is currently blacklisted")
         return
+    #message check
+    if not message.content.startswith(prefix):
+        conf = BDD("config")
+        conf.load()
+        try:
+            filtre = convert_str_into_ls_spe(conf["contentban",str(message.server.id)])
+        except KeyError:
+            filtre = []
+        for i in filtre:
+            if i in message.content:
+                yield from client.delete_message(message)
+                yield from client.send_message(message.author,"Your message contain some banned content on this server, so it was deleted")
+                return
     #special values
     premium = False
     jdrchannel = False
@@ -275,6 +293,10 @@ def on_message(message):
         if message.author == message.server.owner: admin = True
     if message.channel.id == "328551345177231360": jdrchannel = True
     if message.channel.name.startswith("nsfw-"): nsfw = True
+    else:
+        head = {'Authorization': "Bot "+TOKEN}
+        r = requests.get("https://discordapp.com/api/v7/channels/"+str(message.channel.id),headers=head)
+        nsfw = r.json()['nsfw']
     if message.channel.id == "237668457963847681": musicchannel = True
     #get charbase
     charbase,linked = get_charbase(message.server.id)
@@ -755,6 +777,7 @@ def on_message(message):
         else: modd = "Defensiv"
         embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
+        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
@@ -776,6 +799,7 @@ def on_message(message):
     if message.content.startswith(prefix+'stat') and jdrchannel:
         embd = discord.Embed(title="Stat of Character",description=char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
+        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Dice rolled :",value=str(char.stat[0]),inline=True)
@@ -792,6 +816,7 @@ def on_message(message):
             ls = sum_ls(ls,i.stat)
         embd = discord.Embed(title="Stat of Character",description="all character (global stat)",colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos")
+        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Dice rolled :",value=str(ls[0]),inline=True)
@@ -842,6 +867,9 @@ def on_message(message):
         else:
             char.mod = 0
             yield from client.send_message(message.channel,char.name+" is now on Offensiv mod !")
+    if message.content.startswith(prefix+'mj') and jdrchannel and premium:
+        if message.content.startswith(prefix+'mjcharinfo'):
+            pass
     #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
@@ -939,6 +967,52 @@ def on_message(message):
         ul["premium",str(userid)] = str(user)
         ul.save()
         yield from client.send_message(message.channel,"The ID has been set as premium succesful")
+    if message.content.startswith(prefix+'contentban') and admin:
+        content = message.content.replace(prefix+'contentban ',"")
+        conf = BDD("config")
+        conf.load()
+        if str(message.server.id) in conf.file.section["contentban"]:
+            ls = convert_str_into_ls_spe(conf["contentban",str(message.server.id)])
+        else:
+            ls = []
+        if len(ls) >= 20:
+            yield from client.send_message(message.channel,"Limit of contentban has been reached !\nYou can't add more banned content")
+        else:
+            ls.append(content)
+            temp = str(ls)
+            temp = temp.replace("[","{")
+            temp = temp.replace("]","}")
+            conf["contentban",str(message.server.id)] = temp
+            conf.save()
+            yield from client.send_message(message.channel,"The following content will now be banned on your server : `"+content+"`")
+    if message.content.startswith(prefix+'contentunban') and admin:
+        content = message.content.replace(prefix+'contentunban ',"")
+        conf = BDD("config")
+        conf.load()
+        if str(message.server.id) in conf.file.section["contentban"]:
+            ls = convert_str_into_ls_spe(conf["contentban",str(message.server.id)])
+            while content in ls:
+                ls.remove(content)
+            yield from client.send_message(message.channel,"The following content has now reauthorized on your server : `"+content+"`")
+            temp = str(ls)
+            temp = temp.replace("[","{")
+            temp = temp.replace("]","}")
+            conf["contentban",str(message.server.id)] = temp
+            conf.save()
+    if message.content.startswith(prefix+'warn') and admin:
+        target = []
+        for i in message.mentions:
+            target.append(str(i))
+        targetstr = str(target)
+        targetstr = targetstr.replace("[","")
+        targetstr = targetstr.replace("]","")
+        embd = discord.Embed(title="WARN",description=targetstr,colour=discord.Color(int('ff0000',16)))
+        embd.set_footer(text=str(message.timestamp))
+        #embd.set_image(url=message.author.avatar_url)
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="https://www.ggte.unicamp.br/ea/img/iconalerta.png")
+        embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     #Vocal commands
     #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
@@ -1036,6 +1110,7 @@ def on_ready():
     try: conf.load()
     except:
         conf.create_group("prefix")
+        conf.create_group("contentban")
         for i in client.servers:
             conf["prefix",str(i.id)] = '/'
         conf.save()
@@ -1066,7 +1141,8 @@ def on_ready():
 
 @asyncio.coroutine
 def main_task():
-    yield from client.login('')
+    global TOKEN
+    yield from client.login(TOKEN)
     yield from client.connect()
 
 def launch():

@@ -298,13 +298,12 @@ def on_message(message):
     premium = is_premium(message.author.id)
     MJrole = discord.utils.get(message.server.roles,id=get_mjrole(message.server.id))
     MJ = MJrole in message.author.roles
-    if MJ:
-        conf = BDD("config")
-        conf.load()
-        jdrlist = convert_str_into_dic(conf["JDRchannel",str(message.server.id)])
-        if str(message.channel.id) in jdrlist:
-            jdrchannel = True
-            chanMJ = (str(message.author.id) == jdrlist[str(message.channel.id)])
+    conf = BDD("config")
+    conf.load()
+    jdrlist = convert_str_into_dic(conf["JDRchannel",str(message.server.id)])
+    if str(message.channel.id) in jdrlist:
+        jdrchannel = True
+        if MJ: chanMJ = (str(message.author.id) == jdrlist[str(message.channel.id)])
     if botmanager: premium = True
     if str(message.author.id) == "222026592896024576":
         botowner = botmanager = premium = admin = True

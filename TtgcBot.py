@@ -228,6 +228,15 @@ def get_charbase(ID):
             k.stat[j] = int(k.stat[j])
     return dic,linked
 
+def get_mjrole(ID):
+    ID = str(ID)
+    conf = BDD("config")
+    conf.load()
+    try:
+        return conf["MJrole",ID]
+    except:
+        return None
+
 def save_data(ID,charbase,linked):
     ID = str(ID)
     charbdd = BDD("character")
@@ -262,7 +271,7 @@ def on_message(message):
     blacklisted, reason = is_blacklisted(message.author.id)
     if blacklisted:
         if message.content.startswith(prefix):
-            yield from client.send_message(message.channel,"I'm sorry but "+message.author.mention+" is currently blacklisted")
+            yield from client.send_message(message.channel,"I'm sorry but "+message.author.mention+" is currently blacklisted for :\n```"+str(reason)+"\n```")
         return
     #message check
     if not message.content.startswith(prefix):
@@ -284,14 +293,24 @@ def on_message(message):
     botowner = False
     nsfw = False
     musicchannel = False
+    chanMJ = False
     botmanager = is_botmanager(message.author.id)
     premium = is_premium(message.author.id)
+    MJrole = discord.utils.get(message.server.roles,id=get_mjrole(message.server.id))
+    MJ = MJrole in message.author.roles
+    if MJ:
+        conf = BDD("config")
+        conf.load()
+        jdrlist = convert_str_into_dic(conf["JDRchannel",str(message.server.id)])
+        if str(message.channel.id) in jdrlist:
+            jdrchannel = True
+            chanMJ = (str(message.author.id) == jdrlist[str(message.channel.id)])
     if botmanager: premium = True
     if str(message.author.id) == "222026592896024576":
         botowner = botmanager = premium = admin = True
     if message.server != None:
         if message.author == message.server.owner: admin = True
-    if message.channel.id == "328551345177231360": jdrchannel = True
+    #if message.channel.id == "328551345177231360": jdrchannel = True
     if message.channel.name.startswith("nsfw-"): nsfw = True
     else:
         head = {'Authorization': "Bot "+TOKEN}
@@ -299,7 +318,11 @@ def on_message(message):
         nsfw = r.json()['nsfw']
     if message.channel.id == "237668457963847681": musicchannel = True
     #get charbase
-    charbase,linked = get_charbase(message.server.id)
+    charbase_exist = True
+    try: charbase,linked = get_charbase(message.channel.id)
+    except:
+        charbase,linked = {},{}
+        charbase_exist = False
     char = None
     if str(message.author.id) in linked:
         char = charbase[linked[str(message.author.id)]]
@@ -315,7 +338,6 @@ def on_message(message):
         val = int(val.replace(prefix+"rollindep ",""))
         result = randint(1,val)
         yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
-    #####NOT YET REWRITTEN######
     #jdr commands
     if message.content.startswith(prefix+'roll') and jdrchannel:
         field = (message.content).replace(prefix+'roll ',"")
@@ -633,7 +655,7 @@ def on_message(message):
             yield from client.send_message(message.channel,"Result of test (intuition) :"+str(result))
         if char.karma > 10: char.karma = 10
         if char.karma < -10: char.karma = -10
-    if message.content.startswith(prefix+'charcreate') and premium:
+    if message.content.startswith(prefix+'charcreate') and chanMJ:
         name = (message.content).replace(prefix+'charcreate ',"")
         if name in charbase:
             yield from client.send_message(message.channel,"This Character already exists use `charselect` to select it and edit it")
@@ -641,16 +663,20 @@ def on_message(message):
         char = Character()
         charbase[name] = char
         yield from client.send_message(message.channel,"Creating new character called : "+name)
-    if message.content.startswith(prefix+'chardelete') and admin and premium:
+    if message.content.startswith(prefix+'chardelete') and admin and chanMJ:
         name = (message.content).replace(prefix+'chardelete ',"")
         yield from client.send_message(message.channel,"Please confirm that you want to delete `"+name+"` by typing `confirm`\nthis cannot be undone !")
         confirm = yield from client.wait_for_message(timeout=60,author=message.author,content="confirm",channel=message.channel)
         if confirm is None:
             yield from client.send_message(message.channel,"Action timeout")
             return
+        charbdd = BDD("character")
+        charbdd.load()
+        del(charbdd["charstat",name])
+        charbdd.save()
         del(charbase[name])
         yield from client.send_message(message.channel,"Character deleted")
-    if message.content.startswith(prefix+'link') and premium:
+    if message.content.startswith(prefix+'link') and chanMJ:
         msg = (message.content).replace(prefix+'link ',"")
         name = msg.split(" ")[0]
         if not name in charbase:
@@ -658,12 +684,12 @@ def on_message(message):
             return
         linked[str(message.mentions[0].id)] = name
         yield from client.send_message(message.channel,"Character "+charbase[name].name+" has been succesful linked to "+message.mentions[0].mention)
-    if message.content.startswith(prefix+'unlink') and premium:
+    if message.content.startswith(prefix+'unlink') and chanMJ:
         if len(message.mentions) == 0:
             del(linked[str(message.author.id)])
         else:
             del(linked[str(message.mentions[0].id)])
-    if message.content.startswith(prefix+'charset') and premium:
+    if message.content.startswith(prefix+'charset') and chanMJ:
         char = charbase[message.content.split(" ")[2]]
         if message.content.startswith(prefix+'charset name'):
             ls = (message.content).split(" ")
@@ -701,7 +727,7 @@ def on_message(message):
             char.dp += int((message.content).split(" ")[3])#replace(prefix+'charset dp ',""))
             if char.dp < 0: char.dp = 0
             yield from client.send_message(message.channel,"Changing Dark Points of character successful")
-    if message.content.startswith(prefix+'chardmg') and premium:
+    if message.content.startswith(prefix+'chardmg') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = int((message.content).split(" ")[2])#replace(prefix+'chardmg ',""))
         char.PV -= val
@@ -716,7 +742,7 @@ def on_message(message):
         for i in charbase.values():
             if not i.check_life():
                 playeffect += 1
-    if message.content.startswith(prefix+'globaldmg') and premium:
+    if message.content.startswith(prefix+'globaldmg') and chanMJ:
         val = int((message.content).replace(prefix+'globaldmg ',""))
         playeffect = 0
         for i in charbase.values():
@@ -729,14 +755,14 @@ def on_message(message):
                 f = open("you are dead.png","rb")
                 yield from client.send_file(message.channel,f)
                 f.close()
-    if message.content.startswith(prefix+'charheal') and premium:
+    if message.content.startswith(prefix+'charheal') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = int((message.content).split(" ")[2])#replace(prefix+'charheal ',""))
         char.PV += val
         if char.PV > char.PVmax: char.PV = char.PVmax
         yield from client.send_message(message.channel,"Character "+char.name+" has been healed from "+str(val)+" PV")
         yield from client.send_message(message.channel,"Remaining PV : "+str(char.PV))
-    if message.content.startswith(prefix+'getPM') and premium:
+    if message.content.startswith(prefix+'getPM') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = int((message.content).split(" ")[2])#replace(prefix+'getPM ',""))
         if char.PM + val < 0:
@@ -746,14 +772,14 @@ def on_message(message):
                 char.PM += val
                 if char.PM > char.PMmax: char.PM = char.PMmax
         yield from client.send_message(message.channel,"Remaining PM of character "+char.name+" : "+str(char.PM))
-    if message.content.startswith(prefix+'setkarma') and premium:
+    if message.content.startswith(prefix+'setkarma') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = int((message.content).split(" ")[2])#replace(prefix+'setkarma ',""))
         char.karma += val
         if char.karma < -10: char.karma = -10
         if char.karma > 10: char.karma = 10
         yield from client.send_message(message.channel,"Karma of "+char.name+" has currently a value of :"+str(char.karma))
-    if message.content.startswith(prefix+'resetchar') and premium:
+    if message.content.startswith(prefix+'resetchar') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         char.PV = char.PVmax
         char.PM = char.PMmax
@@ -767,7 +793,7 @@ def on_message(message):
             if val > 0:
                 char.money -= val
         yield from client.send_message(message.channel,"Remaining Money to "+char.name+" : "+str(char.money))
-    if message.content.startswith(prefix+'earnmoney') and premium:
+    if message.content.startswith(prefix+'earnmoney') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = int((message.content).split(" ")[2])#replace(prefix+'earnmoney ',""))
         char.money += val
@@ -792,7 +818,7 @@ def on_message(message):
         embd.add_field(name="Dark Points :",value=str(char.dp),inline=True)
         embd.add_field(name="Mod :",value=modd,inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if message.content.startswith(prefix+'map') and premium:
+    if message.content.startswith(prefix+'map') and chanMJ:
         f = open("mapmonde.png","rb")
         yield from client.send_file(message.channel,f)
         f.close()
@@ -867,9 +893,77 @@ def on_message(message):
         else:
             char.mod = 0
             yield from client.send_message(message.channel,char.name+" is now on Offensiv mod !")
-    if message.content.startswith(prefix+'mj') and jdrchannel and premium:
+    if message.content.startswith(prefix+'mj') and jdrchannel and chanMJ:
         if message.content.startswith(prefix+'mjcharinfo'):
             pass
+    if message.content.startswith(prefix+'setMJrole') and admin:
+        conf = BDD("config")
+        conf.load()
+        conf["MJrole",str(message.server.id)] = str(message.role_mentions[0].id)
+        conf.save()
+        yield from client.send_message(message.channel,"The role : "+message.role_mentions[0].mention+" has been set as MJ on this server")
+    if message.content.startswith(prefix+'JDRstart') and MJ:
+        conf = BDD("config")
+        conf.load()
+        jdrlist = convert_str_into_dic(conf["JDRchannel",str(message.server.id)])
+        chan = message.channel_mentions[0]
+        if str(chan.id) not in jdrlist:
+            jdrlist[str(chan.id)] = str(message.author.id)
+            conf["JDRchannel",str(message.server.id)] = str(jdrlist)
+            conf.save()
+            charbdd = BDD("character")
+            charbdd.load()
+            charbdd["charbase",str(chan.id)] = str({})
+            charbdd["charlink",str(chan.id)] = str({})
+            charbdd.save()
+            yield from client.send_message(message.channel,"New JDR in "+chan.mention+" (MJ : "+message.author.mention+")")
+        else:
+            yield from client.send_message(message.channel,"A JDR already exists in "+chan.mention+"\nYou can't create a new one in the same channel")
+    if message.content.startswith(prefix+'JDRdelete') and admin:
+        conf = BDD("config")
+        conf.load()
+        jdrlist = convert_str_into_dic(conf["JDRchannel",str(message.server.id)])
+        chan = message.channel_mentions[0]
+        if str(chan.id) in jdrlist:
+            yield from client.send_message(message.channel,"Are you sure you want to delete JDR in "+chan.mention+" ?\nThis cannot be undone !\nType `confirm` to continue")
+            confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm")
+            if confirm is None:
+                yield from client.send_message(message.channel,"Your action has timeout")
+                return
+            del(jdrlist[str(chan.id)])
+            conf["JDRchannel",str(message.server.id)] = str(jdrlist)
+            conf.save()
+            charbdd = BDD("character")
+            charbdd.load()
+            dic = convert_str_into_dic(charbdd["charbase",str(chan.id)])
+            for i,k in dic.items():
+                del(charbdd["charstat",str(i)])
+            del(charbdd["charbase",str(chan.id)])
+            del(charbdd["charlink",str(chan.id)])
+            charbdd.save()
+            charbase_exist = False
+            yield from client.send_message(message.channel,"JDR in "+chan.mention+" has been deleted succesful")
+    if message.content.startswith(prefix+'MJtransfer') and chanMJ:
+        if not MJrole in message.mentions[0].roles:
+            yield from client.send_message(message.channel,"I'm sorry but you can transfer ownership only to an other MJ")
+            return
+        yield from client.send_message(message.channel,"Would you transfer ownership of JDR in "+message.channel.mention+" to "+message.mentions[0].mention+" ?\ntype `confirm` to continue")
+        confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm")
+        if confirm is None:
+            yield from client.send_message(message.channel,"This action has timeout")
+            return
+        yield from client.send_message(message.channel,message.mentions[0].mention+"\n"+message.author.mention+" Want to give you the ownership of JDR in : "+message.channel.mention+"\nType `accept` to accept this")
+        confirm = yield from client.wait_for_message(timeout=60,author=message.mentions[0],channel=message.channel,content="accept")
+        if confirm is None:
+            yield from client.send_message(message.channel,message.mentions[0].mention+" doesn't accept or answer in time your proposition")
+            return
+        conf = BDD("config")
+        conf.load()
+        jdrlist = convert_str_into_dic(conf["JDRchannel",str(message.server.id)])
+        jdrlist[str(message.channel.id)] = str(message.mentions[0].id)
+        conf["JDRchannel",str(message.server.id)] = str(jdrlist)
+        conf.save()
+        yield from client.send_message(message.channel,"Ownership belong now to : "+message.mentions[0].mention)
     #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
@@ -1006,6 +1100,7 @@ def on_message(message):
         targetstr = str(target)
         targetstr = targetstr.replace("[","")
         targetstr = targetstr.replace("]","")
+        targetstr = targetstr.replace("'","")
         embd = discord.Embed(title="WARN",description=targetstr,colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(message.timestamp))
         #embd.set_image(url=message.author.avatar_url)
@@ -1014,6 +1109,7 @@ def on_message(message):
         embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
         yield from client.send_message(message.channel,embed=embd)
     #Vocal commands
+    #####NOT YET REWRITTEN######
     #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
         msg = (message.content).replace(prefix+'debug ',"")
@@ -1025,12 +1121,14 @@ def on_message(message):
         msg = f.read()
         ls = msg.split("\n\n")
         if message.content.startswith(prefix+'help normal'):
-            yield from client.send_message(message.author,"Here's the whole list of normal commands :\n"+ls[1])
+            yield from client.send_message(message.author,"Here's the whole list of normal commands :\n"+ls[0])
         elif message.content.startswith(prefix+'help vocal'):
-            yield from client.send_message(message.author,"Here's the whole list of vocal commands :\n"+ls[2])
+            yield from client.send_message(message.author,"Here's the whole list of vocal commands :\n"+ls[1])
         elif message.content.startswith(prefix+'help JDR'):
-            yield from client.send_message(message.author,"Here's the whole list of JDR commands :\n"+ls[3])
+            yield from client.send_message(message.author,"Here's the whole list of JDR commands :\n"+ls[2])
+            yield from client.send_message(message.author,ls[3])
         else:
+            yield from client.send_message(message.author,"Here's the whole list of my commands (somes will need some rights) :\n")
             for i in ls:
                 yield from client.send_message(message.author,i)
         f.close()
@@ -1048,7 +1146,7 @@ def on_message(message):
         cfg.load()
         embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    save_data(message.server.id,charbase,linked)
+    if charbase_exist: save_data(message.channel.id,charbase,linked)
     logf.stop()
     yield from client.change_presence(game=statut)
 
@@ -1078,12 +1176,8 @@ def on_server_join(server):
     cfg = BDD("config")
     cfg.load()
     cfg["prefix",str(server.id)] = '/'
+    cfg["JDRchannel",str(server.id)] = str({})
     cfg.save()
-    charbdd = BDD("character")
-    charbdd.load()
-    charbdd["charbase",str(server.id)] = str({})
-    charbdd["charlink",str(server.id)] = str({})
-    charbdd.save()
 
 @client.event
 @asyncio.coroutine
@@ -1091,13 +1185,21 @@ def on_server_remove(server):
     cfg = BDD("config")
     cfg.load()
     del(cfg["prefix",str(server.id)])
+    try: del(cfg["contentban",str(server.id)])
+    except: pass
+    try: del(cfg["MJrole",str(server.id)])
+    except: pass
+    del(cfg["JDRchannel",str(server.id)])
     cfg.save()
     charbdd = BDD("character")
     charbdd.load()
-    for i,k in charbdd["charbase",str(server.id)].items():
-        del(charbdd["charstat",str(i)])
-    del(charbdd["charbase",str(server.id)])
-    del(charbdd["charlink",str(server.id)])
+    for j in server.channels:
+        try:
+            for i,k in charbdd["charbase",str(j.id)].items():
+                del(charbdd["charstat",str(i)])
+            del(charbdd["charbase",str(j.id)])
+            del(charbdd["charlink",str(j.id)])
+        except: pass
     charbdd.save()
 
 @client.event
@@ -1111,8 +1213,11 @@ def on_ready():
     except:
         conf.create_group("prefix")
         conf.create_group("contentban")
+        conf.create_group("MJrole")
+        conf.create_group("JDRchannel")
         for i in client.servers:
             conf["prefix",str(i.id)] = '/'
+            conf["JDRchannel",str(i.id)] = str({})
         conf.save()
         logf.append("Initializing","Creating config file")
     charbdd = BDD("character")
@@ -1120,20 +1225,15 @@ def on_ready():
     except:
         charbdd.create_group("charbase")
         charbdd.create_group("charlink")
-        for i in client.servers:
-            charbdd["charbase",str(i.id)] = str({})
-            charbdd["charlink",str(i.id)] = str({})
         charbdd.create_group("charstat")
         charbdd.save()
         logf.append("Initializing","creating character file")
-    if len(client.servers) != len(conf.file.section["prefix"]) or len(client.servers) != len(charbdd.file.section["charbase"]):
+    if len(client.servers) != len(conf.file.section["prefix"]): 
         for i in client.servers:
             if not str(i.id) in conf.file.section["prefix"]:
                 conf["prefix",str(i.id)] = '/'
-            if not str(i.id) in charbdd.file.section["charbase"]:
-                charbdd["charbase",str(i.id)] = str({})
-                charbdd["charlink",str(i.id)] = str({})
-            if len(client.servers) == len(conf.file.section["prefix"]) and len(client.servers) == len(charbdd.file.section["charbase"]): break
+                conf["JDRchannel",str(i.id)] = str({})
+            if len(client.servers) == len(conf.file.section["prefix"]): break
         conf.save()
         charbdd.save()
     logf.append("Initializing","Bot is now ready")

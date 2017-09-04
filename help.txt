@@ -1,0 +1,49 @@
+Normal Commands :
+/help [group] - print this message, if group is precised, print only the commands which belong to this group, there are actually 3 groups : normal, vocal or JDR
+/tell msg - I can talk for you ;)
+/ttstell msg - I can tts it for you
+/rollindep number - Roll the dice with 'number' faces !
+/pi - pi is a very interesting number isn't it ?
+/joke - That's pretty funny (for some people)
+/nsfwjoke - NSFW - NSFW jokes are the best !
+/yay - I said YAY ! What's going on ?
+/choquedecu - I'm choque and decu !
+/hentai - NSFW - You don't need a drawing to understand
+/onichan - ONICHAAAAAAAAAAAAAAAAAAAAAAAAAAAN !!!!
+/rule34 - NSFW - If it exists there is porn on it
+/contentban - Admin only - Ban a specified content from your server, message containing it will de insta-deleted
+/contentunban - Admin only - Unban a specified content from your server
+/warn @mentions | reason - Admin only - Warn one or several user for the reason specified
+/invite - Invite the bot to your own server !
+
+Vocal Commands :
+Not yet available
+
+RPG(JDR) Commands for The Tale of Great Cosmos game :
+/setMJrole @role - Admin only - Set the role mentioned as MJ role on your server
+/JDRstart #channel - MJ only - Start a JDR(RPG) in the mentioned channel. By starting a JDR, you will be automatically assigned as the MJ of it (you become `MJ owner`)
+/JDRdelete #channel - Admin only - Delete a JDR in the mentioned channel
+
+All the following command have to been executed in a JDR(RPG) channel to work :
+/MJtransfer @mention - MJ owner only - transfer ownership of a JDR to an other MJ mentioned
+/charcreate name - MJ owner only - create a new PJ profile (NB : the name is only the database name, use a single word for it, you will be able to set full name after)
+/chardelete name - MJ owner only - delete a character
+/link name @mention - MJ owner only - Link a character to someone (mentioned)
+/unlink @mention - MJ owner only - Unlink a character from the person mentioned
+/roll stat[+bonus][-malus] - PJ only - Roll the dice ! with stat precised (force, esprit, charisme, furtivite, chance, malchance, intuition)
+/charset info name value - MJ owner only - Set the information `info` to a specified `value` for the precised character (info that can be set : PV, PM, force, epsrit, charisme, furtivite, lp, dp)
+/chardmg name value - MJ owner only - Inflict damages to a character
+/globaldmg value - MJ owner only - Inflict global damages to all characters
+/charheal name value - MJ owner only - Heal a character
+/getPM name value - MJ owner only - Give PM to a character (use negativ number to consume PM from a character)
+/setkarma name value - MJ owner only - add the number precised to the karma of a character
+/resetchar name - MJ owner only - Reset PV, PM and karma of a character
+/pay amount - PJ only - pay the amount precised
+/earnmoney name amount - MJ owner only - Give money to a character
+/charinfo - PJ only - Show information about your character
+/map - MJ owner only - Show the map
+/stat - PJ only - Show stats of rolled dice by your character
+/globalstat - Show stats of rolled dice by all characters
+/use lightpt - PJ only - Consume a light point
+/use darkpt - PJ only - Consume a dark point
+/switchmod - PJ only - Switch mod between offensiv and defensiv

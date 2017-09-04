@@ -2,9 +2,8 @@
 *List of all commands that will be rewritten soon*
   
 **Ideas commands**  
-**Event commands**  
-**Vocal commands**  
+**Event commands**   
 
 ----
 Coming soon for next upgrade/update :   
-Finalize : **JDR commands**
+**Vocal commands** 

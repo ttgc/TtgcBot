@@ -71,7 +71,7 @@ def singleton(classe_definie):
     return get_instance
 
 class Character:
-    def __init__(self,dic={"name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1}):
+    def __init__(self,dic={"name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0}):
         self.name = dic["name"]
         self.lore = dic["lore"]
         self.PVmax = dic["PVm"]
@@ -89,6 +89,8 @@ class Character:
         self.dp = dic["dp"]
         self.regenkarm = [0,dic["regenkarm"]]
         self.mod = dic["mod"]
+        self.default_mod = dic["default_mod"]
+        self.default_karma = dic["default_karma"]
         #mod 0 = offensiv / mod 1 = defensiv
 
     def __str__(self):
@@ -101,36 +103,14 @@ class Character:
             return True
 
     def stock(self):
-        return "<"+self.name+"|"+self.lore+"|"+str(self.PVmax)+"|"+str(self.PMmax)+"|"+str(self.force)+"|"+str(self.esprit)+"|"+str(self.charisme)+"|"+str(self.furtivite)+"|"+str(self.money)+"|"+str(self.lp)+"|"+str(self.dp)+"|"+str(self.regenkarm[1])+"|"+str(self.mod)+"|"+str(self.karma)+"|"+str(self.PV)+"|"+str(self.PM)+">"
-
-    def damage_inflict(self,roll,flat,dice,magic=False,allowcrit=True):
-        dmg = 0
-        if roll == 42 or roll == 66:
-            dmg = (flat+dice)*2.5
-            if self.mod == 0: dmg *= 2
-        elif (magic and roll <= self.esprit and roll != 66):
-            dmg = flat+randint(1,dice)
-            if allowcrit and roll <= 10: dmg *= 2
-            if self.mod == 0: dmg *= 2
-            if dmg < 0: dmg = 0
-        elif (not magic and roll <= self.force and roll != 66):
-            dmg = flat+randint(1,dice)
-            if allowcrit and roll <= 10: dmg *= 2
-            if self.mod == 0: dmg *= 2
-            if dmg < 0: dmg = 0
-        elif roll >= 91:
-            dmg = flat+randint(1,dice)
-            dmg *= 2
-            if self.mod == 0: dmg *= 2
-            if dmg < 0: dmg = 0
-        return dmg
+        return "<"+self.name+"|"+self.lore+"|"+str(self.PVmax)+"|"+str(self.PMmax)+"|"+str(self.force)+"|"+str(self.esprit)+"|"+str(self.charisme)+"|"+str(self.furtivite)+"|"+str(self.money)+"|"+str(self.lp)+"|"+str(self.dp)+"|"+str(self.regenkarm[1])+"|"+str(self.mod)+"|"+str(self.karma)+"|"+str(self.PV)+"|"+str(self.PM)+"|"+str(self.default_mod)+"|"+str(self.default_karma)+">"
 
 def unstockchar(string,name):
     string = string.replace("<","")
     string = string.replace(">","")
     ls = string.split("|")
     st = convert_str_into_ls(ls[-1])
-    return Character({"name":ls[0],"lore":ls[1],"PVm":int(ls[2]),"PMm":int(ls[3]),"force":int(ls[4]),"esprit":int(ls[5]),"charisme":int(ls[6]),"furtivite":int(ls[7]),"karma":int(ls[13]),"money":int(ls[8]),"stat":[0,0,0,0,0,0,0],"lp":int(ls[9]),"dp":int(ls[10]),"regenkarm":float(ls[11]),"mod":int(ls[12]),"PV":int(ls[14]),"PM":int(ls[15])})
+    return Character({"name":ls[0],"lore":ls[1],"PVm":int(ls[2]),"PMm":int(ls[3]),"force":int(ls[4]),"esprit":int(ls[5]),"charisme":int(ls[6]),"furtivite":int(ls[7]),"karma":int(ls[13]),"money":int(ls[8]),"stat":[0,0,0,0,0,0,0],"lp":int(ls[9]),"dp":int(ls[10]),"regenkarm":float(ls[11]),"mod":int(ls[12]),"PV":int(ls[14]),"PM":int(ls[15]),"default_mod":int(ls[16]),"default_karma":int(ls[17])})
 
 def convert_str_into_dic(string):
     if string == "{}": return {}
@@ -333,10 +313,32 @@ def on_message(message):
         logf.append("/setprefix","Changing command prefix into : "+prefix)
         yield from client.send_message(message.channel,"Changing command prefix into : "+prefix)
     if message.content.startswith(prefix+'rollindep'):
-        val = message.content
-        val = int(val.replace(prefix+"rollindep ",""))
-        result = randint(1,val)
-        yield from client.send_message(message.channel,"Result of rolling dice : "+str(result)+"/"+str(val))
+        expression = message.content.replace(prefix+"rollindep ","")
+        expression = expression.replace(" ","")
+        expression = expression.replace("-","+-")
+        operations = expression.split("+")
+        result = []
+        for i in operations:
+            if "d" in i:
+                rdmgen = i.split("d")
+                val = int(rdmgen[1])
+                repeat_sign = int(rdmgen[0])
+                repeat = abs(repeat_sign)
+                for k in range(repeat):
+                    if repeat_sign < 0:
+                        result.append(-randint(1,val))
+                    else:
+                        result.append(randint(1,val))
+            else:
+                result.append(int(i))
+        final_result = 0
+        final_expression = ""
+        for i in result:
+            final_result += i
+            final_expression += str(i)+" + "
+        final_expression = final_expression[:-3]
+        final_expression = final_expression.replace("+ -","- ")
+        yield from client.send_message(message.channel,"You rolled : `"+str(final_result)+"` ("+final_expression+")")
     #jdr commands
     if message.content.startswith(prefix+'roll') and jdrchannel:
         field = (message.content).replace(prefix+'roll ',"")
@@ -726,9 +728,20 @@ def on_message(message):
             char.dp += int((message.content).split(" ")[3])#replace(prefix+'charset dp ',""))
             if char.dp < 0: char.dp = 0
             yield from client.send_message(message.channel,"Changing Dark Points of character successful")
+        elif message.content.startswith(prefix+'charset defaultmod'):
+            ndm = (message.content).split(" ")[3]
+            if ndm == "offensiv" or ndm == "defensiv":
+                if ndm == "offensiv": ndm = 0
+                else: ndm = 1
+                char.default_mod = ndm
+            yield from client.send_message(message.channel,"Changing default mod of character successful")
+        elif message.content.startswith(prefix+'charset defaultkarma'):
+            ndk = int((message.content).split(" ")[3])
+            if ndk >= -10 and ndk <= 10: char.default_karma = ndk
+            yield from client.send_message(message.channel,"Changing default karma of character successful")
     if message.content.startswith(prefix+'chardmg') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
-        val = int((message.content).split(" ")[2])#replace(prefix+'chardmg ',""))
+        val = abs(int((message.content).split(" ")[2]))#replace(prefix+'chardmg ',""))
         char.PV -= val
         yield from client.send_message(message.channel,"Character "+char.name+" has lost "+str(val)+" PV")
         yield from client.send_message(message.channel,"Remaining PV : "+str(char.PV))
@@ -742,7 +755,7 @@ def on_message(message):
             if not i.check_life():
                 playeffect += 1
     if message.content.startswith(prefix+'globaldmg') and chanMJ:
-        val = int((message.content).replace(prefix+'globaldmg ',""))
+        val = abs(int((message.content).replace(prefix+'globaldmg ',"")))
         playeffect = 0
         for i in charbase.values():
             i.PV -= val
@@ -754,9 +767,18 @@ def on_message(message):
                 f = open("you are dead.png","rb")
                 yield from client.send_file(message.channel,f)
                 f.close()
+    if message.content.startswith(prefix+'globalheal') and chanMJ:
+        val = abs(int((message.content).replace(prefix+'globalheal ',"")))
+        for i in charbase.values():
+            i.PV += val
+            if i.PV > i.PVmax:
+                val = i.PV - i.PVmax
+                i.PV = i.PVmax
+            yield from client.send_message(message.channel,"Character "+i.name+" has been healed from "+str(val)+" PV")
+            yield from client.send_message(message.channel,"Remaining PV : "+str(i.PV))
     if message.content.startswith(prefix+'charheal') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
-        val = int((message.content).split(" ")[2])#replace(prefix+'charheal ',""))
+        val = abs(int((message.content).split(" ")[2]))#replace(prefix+'charheal ',""))
         char.PV += val
         if char.PV > char.PVmax: char.PV = char.PVmax
         yield from client.send_message(message.channel,"Character "+char.name+" has been healed from "+str(val)+" PV")
@@ -767,9 +789,8 @@ def on_message(message):
         if char.PM + val < 0:
             yield from client.send_message(message.channel,"No more PM !")
         else:
-            if val < 0 or admin:
-                char.PM += val
-                if char.PM > char.PMmax: char.PM = char.PMmax
+            char.PM += val
+            if char.PM > char.PMmax: char.PM = char.PMmax
         yield from client.send_message(message.channel,"Remaining PM of character "+char.name+" : "+str(char.PM))
     if message.content.startswith(prefix+'setkarma') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
@@ -782,7 +803,8 @@ def on_message(message):
         char = charbase[message.content.split(" ")[1]]
         char.PV = char.PVmax
         char.PM = char.PMmax
-        char.karma = 0
+        char.karma = char.default_karma
+        char.mod = char.default_mod
         yield from client.send_message(message.channel,"Character has been reset")
     if message.content.startswith(prefix+'pay') and jdrchannel:
         val = int((message.content).replace(prefix+'pay ',""))
@@ -963,6 +985,7 @@ def on_message(message):
         conf["JDRchannel",str(message.server.id)] = str(jdrlist)
         conf.save()
         yield from client.send_message(message.channel,"Ownership belong now to : "+message.mentions[0].mention)
+    #####NOT YET REWRITTEN######
     #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
@@ -1108,7 +1131,6 @@ def on_message(message):
         embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
         yield from client.send_message(message.channel,embed=embd)
     #Vocal commands
-    #####NOT YET REWRITTEN######
     #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
         msg = (message.content).replace(prefix+'debug ',"")
@@ -1145,6 +1167,12 @@ def on_message(message):
         cfg.load()
         embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if message.content.startswith(prefix+'ping'):
+        tps_start = time.clock()
+        yield from client.send_message(message.channel,":ping_pong: pong ! :ping_pong:")
+        tps_end = time.clock()
+        ping = round((tps_end-tps_start)*1000)
+        yield from client.send_message(message.channel,"ping value is currently : `"+str(ping)+" ms`")
     if charbase_exist: save_data(message.channel.id,charbase,linked)
     logf.stop()
     yield from client.change_presence(game=statut)
@@ -1213,7 +1241,7 @@ def on_ready():
         conf.create_group("prefix")
         conf.create_group("contentban")
         conf.create_group("MJrole")
-        conf.create_group("JDRchannel")
+        conf.create_group("JDRchannel")########
         for i in client.servers:
             conf["prefix",str(i.id)] = '/'
             conf["JDRchannel",str(i.id)] = str({})
@@ -1227,12 +1255,12 @@ def on_ready():
         charbdd.create_group("charstat")
         charbdd.save()
         logf.append("Initializing","creating character file")
-    if len(client.servers) != len(conf.file.section["prefix"]): 
+    if len(client.servers) != len(conf.file.section["prefix"]): #or len(client.servers) != len(charbdd.file.section["charbase"]):
         for i in client.servers:
             if not str(i.id) in conf.file.section["prefix"]:
                 conf["prefix",str(i.id)] = '/'
                 conf["JDRchannel",str(i.id)] = str({})
-            if len(client.servers) == len(conf.file.section["prefix"]): break
+            if len(client.servers) == len(conf.file.section["prefix"]): break #and len(client.servers) == len(charbdd.file.section["charbase"]): break
         conf.save()
         charbdd.save()
     logf.append("Initializing","Bot is now ready")

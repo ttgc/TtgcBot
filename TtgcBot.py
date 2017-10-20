@@ -117,7 +117,6 @@ def convert_str_into_dic(string):
     string = string.replace("{","")
     string = string.replace("}","")
     string = string.replace("'","")
-    #string = string.replace(" ","")
     ls = string.split(", ")
     dic = {}
     for i in range(len(ls)):
@@ -217,6 +216,10 @@ def get_mjrole(ID):
     except:
         return None
 
+def command_check(prefix,msg,cmd):
+    ctnt = msg.content.split(" ")[0]
+    return (ctnt == prefix+cmd)
+
 def save_data(ID,charbase,linked):
     ID = str(ID)
     charbdd = BDD("character")
@@ -289,7 +292,6 @@ def on_message(message):
         botowner = botmanager = premium = admin = True
     if message.server != None:
         if message.author == message.server.owner: admin = True
-    #if message.channel.id == "328551345177231360": jdrchannel = True
     if message.channel.name.startswith("nsfw-"): nsfw = True
     else:
         head = {'Authorization': "Bot "+TOKEN}
@@ -757,7 +759,7 @@ def on_message(message):
     if message.content.startswith(prefix+'globaldmg') and chanMJ:
         val = abs(int((message.content).replace(prefix+'globaldmg ',"")))
         playeffect = 0
-        for i in charbase.values():
+        for k,i in charbase.items():
             i.PV -= val
             yield from client.send_message(message.channel,"Character "+i.name+" has lost "+str(val)+" PV")
             yield from client.send_message(message.channel,"Remaining PV : "+str(i.PV))
@@ -767,15 +769,17 @@ def on_message(message):
                 f = open("you are dead.png","rb")
                 yield from client.send_file(message.channel,f)
                 f.close()
+            charbase[k] = i
     if message.content.startswith(prefix+'globalheal') and chanMJ:
         val = abs(int((message.content).replace(prefix+'globalheal ',"")))
-        for i in charbase.values():
+        for k,i in charbase.items():
             i.PV += val
             if i.PV > i.PVmax:
                 val = i.PV - i.PVmax
                 i.PV = i.PVmax
             yield from client.send_message(message.channel,"Character "+i.name+" has been healed from "+str(val)+" PV")
             yield from client.send_message(message.channel,"Remaining PV : "+str(i.PV))
+            charbase[k] = i
     if message.content.startswith(prefix+'charheal') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = abs(int((message.content).split(" ")[2]))#replace(prefix+'charheal ',""))
@@ -824,7 +828,6 @@ def on_message(message):
         else: modd = "Defensiv"
         embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
@@ -846,7 +849,6 @@ def on_message(message):
     if message.content.startswith(prefix+'stat') and jdrchannel:
         embd = discord.Embed(title="Stat of Character",description=char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Dice rolled :",value=str(char.stat[0]),inline=True)
@@ -863,7 +865,6 @@ def on_message(message):
             ls = sum_ls(ls,i.stat)
         embd = discord.Embed(title="Stat of Character",description="all character (global stat)",colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos")
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Dice rolled :",value=str(ls[0]),inline=True)
@@ -916,7 +917,42 @@ def on_message(message):
             yield from client.send_message(message.channel,char.name+" is now on Offensiv mod !")
     if message.content.startswith(prefix+'mj') and jdrchannel and chanMJ:
         if message.content.startswith(prefix+'mjcharinfo'):
-            pass
+            char = charbase[message.content.split(" ")[1]]
+            if char.mod == 0: modd = "Offensiv"
+            else: modd = "Defensiv"
+            embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+            embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            embd.add_field(name="PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+            embd.add_field(name="Force :",value=str(char.force),inline=True)
+            embd.add_field(name="Esprit :",value=str(char.esprit),inline=True)
+            embd.add_field(name="Charisme :",value=str(char.charisme),inline=True)
+            embd.add_field(name="Furtivite :",value=str(char.furtivite),inline=True)
+            embd.add_field(name="Karma :",value=str(char.karma),inline=True)
+            embd.add_field(name="Money :",value=str(char.money),inline=True)
+            embd.add_field(name="Light Points :",value=str(char.lp),inline=True)
+            embd.add_field(name="Dark Points :",value=str(char.dp),inline=True)
+            embd.add_field(name="Mod :",value=modd,inline=True)
+            yield from client.send_message(message.channel,embed=embd)
+        if message.content.startswith(prefix+'mjswitchmod'):
+            char = charbase[message.content.split(" ")[1]]
+            if char.mod == 0:
+                char.mod = 1
+                yield from client.send_message(message.channel,char.name+" is now on Defensiv mod !")
+            else:
+                char.mod = 0
+                yield from client.send_message(message.channel,char.name+" is now on Offensiv mod !")
+        if message.content.startswith(prefix+'mjpay'):
+            char = charbase[message.content.split(" ")[1]]
+            val = int((message.content).replace(prefix+'pay ',""))
+            if char.money-val < 0:
+                yield from client.send_message(message.channel,"No more money to pay !")
+            else:
+                if val > 0:
+                    char.money -= val
+            yield from client.send_message(message.channel,"Remaining Money to "+char.name+" : "+str(char.money))
     if message.content.startswith(prefix+'setMJrole') and admin:
         conf = BDD("config")
         conf.load()
@@ -985,6 +1021,36 @@ def on_message(message):
         conf["JDRchannel",str(message.server.id)] = str(jdrlist)
         conf.save()
         yield from client.send_message(message.channel,"Ownership belong now to : "+message.mentions[0].mention)
+    if message.content.startswith(prefix+'wiki'):
+        query = message.content.replace(prefix+'wiki ',"")
+        query = query.replace(" ","_")
+        info = requests.get("http://thetaleofgreatcosmos.fr/wiki/api.php?action=parse&page="+query+"&format=json&redirects=true")
+        exist_test = requests.get("http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query)
+        if exist_test.status_code != 200:
+            yield from client.send_message(message.channel,"Unexisting page. Statuts code : `"+str(exist_test.status_code)+"`")
+            return
+        descrip = info.json()["parse"]["text"]["*"]
+        descrip = descrip.split("</p>")[0]
+        while descrip.find("<") != -1:
+            descrip = descrip[:descrip.find("<")]+descrip[descrip.find(">")+1:]
+        if info.json()["parse"]["text"]["*"].find("<img") == -1:
+            img = None
+        else:
+            pos = info.json()["parse"]["text"]["*"].find("<img")
+            temp = info.json()["parse"]["text"]["*"]
+            temp = temp[pos+1:]
+            temp = temp[:temp.find("/>")]
+            temp = temp[temp.find("src=")+5:]
+            img = "http://thetaleofgreatcosmos.fr"+temp.split('"')[0]        
+        embd = discord.Embed(title=info.json()["parse"]["title"],description=descrip,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query,colour=discord.Color(randint(0,int('ffffff',16))))
+        embd.set_footer(text="The Tale of Great Cosmos - Wiki")
+        if img is not None:
+            embd.set_image(url=img)
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        if len(info.json()["parse"]["redirects"]) != 0:
+            embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     #####NOT YET REWRITTEN######
     #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
@@ -999,7 +1065,7 @@ def on_message(message):
         logf.append("/ttstell",str(message.author)+" : "+msg)
         yield from client.delete_message(message)
         yield from client.send_message(message.channel,msg,tts=True)
-    if message.content.startswith(prefix+'pi'):
+    if command_check(prefix,message,'pi'):
         yield from client.send_message(message.channel,"3,141 592 653 589 793 238 462 643 383 279 502 884 197 169 399 375 105 820 974 944 592 307 816 406 286 208 998 628 034 825 342 117 0679...\nhttp://www.nombrepi.com/")
     if message.content.startswith(prefix+'joke'):
         yield from client.send_message(message.channel,choice(["Pourquoi les japonais n'ont ils pas de chevaux ?\nParce qu'ils sont déjà poney (des japonais)",
@@ -1125,7 +1191,6 @@ def on_message(message):
         targetstr = targetstr.replace("'","")
         embd = discord.Embed(title="WARN",description=targetstr,colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(message.timestamp))
-        #embd.set_image(url=message.author.avatar_url)
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="https://www.ggte.unicamp.br/ea/img/iconalerta.png")
         embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
@@ -1167,6 +1232,9 @@ def on_message(message):
         cfg.load()
         embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if message.content.startswith(prefix+'jointhegame'):
+        inv = yield from client.create_invite(client.get_server("326648561976737792"),max_uses=1)
+        yield from client.send_message(message.author,"Rejoignez le serveur officiel The Tale of Great Cosmos (serveur FR) : \n"+str(inv.url))
     if message.content.startswith(prefix+'ping'):
         tps_start = time.clock()
         yield from client.send_message(message.channel,":ping_pong: pong ! :ping_pong:")

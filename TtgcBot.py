@@ -27,6 +27,7 @@ from PythonBDD import *
 import logging
 import time
 from EventManager import *
+from VocalUtilities import *
 import os
 import zipfile
 import sys
@@ -41,25 +42,11 @@ logger.addHandler(handler)
 global TOKEN
 TOKEN = ''
 
-global file
-global sex
-sex = False
 global logf
-global ideas
-ideas = {}
 global statut
 statut = discord.Game(name="Ohayo !")
-global events
-events = []
 global vocal
-vocal = False
-global vocalco
-global song
-song = None
-global mobs
-mobs = []
-global anoncer_isready
-anoncer_isready = True
+vocal = VocalSystem()
 
 def singleton(classe_definie):
     instances = {} # Dictionnaire de nos instances singletons
@@ -222,6 +209,10 @@ def command_check(prefix,msg,cmd):
 
 def save_data(ID,charbase,linked):
     ID = str(ID)
+    zp = zipfile.ZipFile("Backup-auto.zip","w")
+    for i in os.listdir("Data"):
+        zp.write("Data/"+i)
+    zp.close()
     charbdd = BDD("character")
     charbdd.load()
     dic = {}
@@ -234,15 +225,15 @@ def save_data(ID,charbase,linked):
         temp = temp.replace("[","{")
         temp = temp.replace("]","}")
         charbdd["charstat",str(i)] = temp
-    charbdd.save()
+        charbdd.save()
 
 client = discord.Client()
+vocal.bot = client
 
 @client.event
 @asyncio.coroutine
 def on_message(message):
-    global TOKEN
-    global file,sex,logf,ideas,statut,events,vocal,vocalco,song,mobs,anoncer_isready
+    global TOKEN,vocal,logf,statut
     logf.restart()
     #exclusion
     if message.server is None: return
@@ -703,7 +694,7 @@ def on_message(message):
                 nm += i
                 nm += " "
             char.name = nm[:-1]#replace(prefix+'charset name ',"")
-            yield from client.send_message(message.channel,"Changing name of character successful")
+            yield from client.send_message(message.channel,"Changing name of character successfulyield from client.send_message(message.channel,"Changing lore of character successful")
         elif message.content.startswith(prefix+'charset PV'):
             char.PVmax = int((message.content).split(" ")[3])#replace(prefix+'charset PV ',""))
             yield from client.send_message(message.channel,"Changing PV max of character successful")
@@ -946,7 +937,7 @@ def on_message(message):
                 yield from client.send_message(message.channel,char.name+" is now on Offensiv mod !")
         if message.content.startswith(prefix+'mjpay'):
             char = charbase[message.content.split(" ")[1]]
-            val = int((message.content).replace(prefix+'pay ',""))
+            val = int(message.content.split(" ")[2])
             if char.money-val < 0:
                 yield from client.send_message(message.channel,"No more money to pay !")
             else:
@@ -1052,7 +1043,7 @@ def on_message(message):
             embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         yield from client.send_message(message.channel,embed=embd)
     #####NOT YET REWRITTEN######
-    #Other commands (not JDR)
+    #normal command
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
         print(str(message.author)+" : "+msg)
@@ -1196,6 +1187,35 @@ def on_message(message):
         embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
         yield from client.send_message(message.channel,embed=embd)
     #Vocal commands
+    if message.content.startswith(prefix+'vocal') and premium:
+        msg = (message.content).replace(prefix+'vocal ',"")
+        msg = msg.lower()
+        if msg == "on" and not client.is_voice_connected(message.server):
+            yield from vocal.join(message.author.voice.voice_channel,message.channel)
+            yield from client.send_message(vocal.textchan,":white_check_mark: Connecting to vocal `"+str(message.author.voice.voice_channel)+"` and binding to `"+str(vocal.textchan)+"`")
+        elif msg == "off" and client.is_voice_connected(message.server) and ((vocal.textchan == message.channel) or admin):
+            chan = vocal.textchan
+            yield from vocal.leave()
+            yield from client.send_message(chan,"Disconnected from vocal")
+    if message.content.startswith(prefix+'ytplay') and vocal.vocal and (vocal.textchan == message.channel) and premium:
+        msg = (message.content).replace(prefix+'ytplay ',"")
+        yield from vocal.append(msg)
+        vocal.play()
+        yield from client.send_message(vocal.textchan,":arrow_forward: Adding song to queue")
+    if message.content.startswith(prefix+'musicskip') and vocal.vocal and (vocal.textchan == message.channel) and premium:
+        vocal.skip()
+        yield from client.send_message(vocal.textchan,":fast_forward: Skiping song")
+    if message.content.startswith(prefix+'playlocal') and premium and vocal.vocal and (vocal.textchan == message.channel):
+        msg = (message.content).replace(prefix+'playlocal ',"")
+        if not msg in os.listdir("Music/"):
+            if msg+".mp3" in os.listdir("Music/"): msg += ".mp3"
+            elif msg+".wav" in os.listdir("Music/"): msg += ".wav"
+            else:
+                yield from client.send_message(message.channel,"file not found")
+                return
+        yield from vocal.append("Music/"+msg,False)
+        vocal.play()
+        yield from client.send_message(vocal.textchan,":arrow_forward: Adding local song to queue")
     #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
         msg = (message.content).replace(prefix+'debug ',"")
@@ -1223,8 +1243,8 @@ def on_message(message):
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.ban_members = botaskperm.kick_members = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_roles = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = botaskperm.mute_members = botaskperm.deafen_members = False
         url = discord.utils.oauth_url(str(client.user.id),botaskperm)
-        embd = discord.Embed(title="TtgcBot (Alpha)",description="Invite TtgcBot (alpha) to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
-        embd.set_footer(text="TtgcBot version alpha developed by Ttgc",icon_url=client.user.avatar_url)
+        embd = discord.Embed(title="TtgcBot (Beta)",description="Invite TtgcBot (beta) to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
+        embd.set_footer(text="TtgcBot version beta developed by Ttgc",icon_url=client.user.avatar_url)
         embd.set_image(url=client.user.avatar_url)
         embd.set_author(name="Ttgc",icon_url="https://cdn.discordapp.com/avatars/222026592896024576/e1bf51b1158cc87cefcc54afc4849cee.webp?size=1024",url=url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
@@ -1241,29 +1261,33 @@ def on_message(message):
         tps_end = time.clock()
         ping = round((tps_end-tps_start)*1000)
         yield from client.send_message(message.channel,"ping value is currently : `"+str(ping)+" ms`")
-    if charbase_exist: save_data(message.channel.id,charbase,linked)
+    if message.content.startswith(prefix+'backup') and botowner:
+        zp = zipfile.ZipFile("Backup.zip","w")
+        for i in os.listdir("Data"):
+            zp.write("Data/"+i)
+        zp.close()
+        yield from client.send_file(message.author,"Backup.zip")
+    if charbase_exist:
+        try: save_data(message.channel.id,charbase,linked)
+        except:
+            me = yield from client.get_user_info("222026592896024576")
+            yield from client.send_file(me,"Backup-auto.zip",content="An error has occured when saving database, maybe some file has been corrupted, here is the autogenerated backup")
     logf.stop()
     yield from client.change_presence(game=statut)
 
 @client.event
 @asyncio.coroutine
 def on_voice_state_update(before,after):
-    global vocalco,vocal,anoncer_isready,song
-    def reset_anoncer():
-        global anoncer_isready
-        anoncer_isready = True
-    if song == None or song.is_done():
-        if before.voice.voice_channel != after.voice.voice_channel and vocal and anoncer_isready:
-            if after.voice.voice_channel == vocalco.channel:
-                anoncer_isready = False
-                anoncer = vocalco.create_ffmpeg_player("Music/reco.mp3",after=reset_anoncer)
-                anoncer.start()
-                #join
-            elif before.voice.voice_channel == vocalco.channel:
-                anoncer_isready = False
-                anoncer = vocalco.create_ffmpeg_player("Music/deco.mp3",after=reset_anoncer)
-                anoncer.start()
-                #leave
+    global vocal
+    if before.voice.voice_channel != after.voice.voice_channel and vocal.vocal and (not vocal.is_playing):
+        if after.voice.voice_channel == vocal.co.channel:
+            yield from vocal.append("Music/reco.mp3",False)
+            vocal.play()
+            #join
+        elif before.voice.voice_channel == vocal.co.channel:
+            yield from vocal.append("Music/deco.mp3",False)
+            vocal.play()
+            #leave
                 
 @client.event
 @asyncio.coroutine
@@ -1341,7 +1365,7 @@ def main_task():
     yield from client.connect()
 
 def launch():
-    global file,charbase,linked,logf,ideas,events
+    global logf
     logsys = LogSystem()
     logsys.limit = 20
     logsys.directory = "Logs"

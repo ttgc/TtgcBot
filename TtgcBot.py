@@ -45,17 +45,7 @@ TOKEN = ''
 global logf
 global statut
 statut = discord.Game(name="Ohayo !")
-global vocal
-vocal = VocalSystem()
-
-def singleton(classe_definie):
-    instances = {} # Dictionnaire de nos instances singletons
-    def get_instance():
-        if classe_definie not in instances:
-            # On crée notre premier objet de classe_definie
-            instances[classe_definie] = classe_definie()
-        return instances[classe_definie]
-    return get_instance
+global vocalcore
 
 class Character:
     def __init__(self,dic={"name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0}):
@@ -228,12 +218,13 @@ def save_data(ID,charbase,linked):
         charbdd.save()
 
 client = discord.Client()
-vocal.bot = client
+vocalcore = VocalCore()
+vocalcore.bot = client
 
 @client.event
 @asyncio.coroutine
 def on_message(message):
-    global TOKEN,vocal,logf,statut
+    global TOKEN,vocalcore,logf,statut
     logf.restart()
     #exclusion
     if message.server is None: return
@@ -298,6 +289,8 @@ def on_message(message):
     char = None
     if str(message.author.id) in linked:
         char = charbase[linked[str(message.author.id)]]
+    #get vocal
+    vocal = vocalcore.getvocal(str(message.server.id))
     #commands
     #########REWRITTEN##########
     if message.content.startswith(prefix+'setprefix') and admin:
@@ -694,8 +687,7 @@ def on_message(message):
                 nm += i
                 nm += " "
             char.name = nm[:-1]#replace(prefix+'charset name ',"")
-            yield from client.send_message(message.channel,"Changing name of character successfulyield from client.send_message(message.channel,"Changing lore of character successful")
-        elif message.content.startswith(prefix+'charset PV'):
+            yield from client.send_message(message.channel,"Changing name of character successful")
             char.PVmax = int((message.content).split(" ")[3])#replace(prefix+'charset PV ',""))
             yield from client.send_message(message.channel,"Changing PV max of character successful")
         elif message.content.startswith(prefix+'charset PM'):
@@ -1043,7 +1035,6 @@ def on_message(message):
             embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         yield from client.send_message(message.channel,embed=embd)
     #####NOT YET REWRITTEN######
-    #normal command
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
         print(str(message.author)+" : "+msg)
@@ -1191,21 +1182,23 @@ def on_message(message):
         msg = (message.content).replace(prefix+'vocal ',"")
         msg = msg.lower()
         if msg == "on" and not client.is_voice_connected(message.server):
+            vocal = VocalSystem(str(message.server.id),vocalcore)
             yield from vocal.join(message.author.voice.voice_channel,message.channel)
             yield from client.send_message(vocal.textchan,":white_check_mark: Connecting to vocal `"+str(message.author.voice.voice_channel)+"` and binding to `"+str(vocal.textchan)+"`")
-        elif msg == "off" and client.is_voice_connected(message.server) and ((vocal.textchan == message.channel) or admin):
+        elif msg == "off" and client.is_voice_connected(message.server) and (vocal is not None) and ((vocal.textchan == message.channel) or admin):
             chan = vocal.textchan
             yield from vocal.leave()
+            vocalcore.removefromlist(str(message.server.id))
             yield from client.send_message(chan,"Disconnected from vocal")
-    if message.content.startswith(prefix+'ytplay') and vocal.vocal and (vocal.textchan == message.channel) and premium:
+    if message.content.startswith(prefix+'ytplay') and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel) and premium:
         msg = (message.content).replace(prefix+'ytplay ',"")
         yield from vocal.append(msg)
         vocal.play()
         yield from client.send_message(vocal.textchan,":arrow_forward: Adding song to queue")
-    if message.content.startswith(prefix+'musicskip') and vocal.vocal and (vocal.textchan == message.channel) and premium:
+    if message.content.startswith(prefix+'musicskip') and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel) and premium:
         vocal.skip()
         yield from client.send_message(vocal.textchan,":fast_forward: Skiping song")
-    if message.content.startswith(prefix+'playlocal') and premium and vocal.vocal and (vocal.textchan == message.channel):
+    if message.content.startswith(prefix+'playlocal') and premium and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel):
         msg = (message.content).replace(prefix+'playlocal ',"")
         if not msg in os.listdir("Music/"):
             if msg+".mp3" in os.listdir("Music/"): msg += ".mp3"
@@ -1216,6 +1209,13 @@ def on_message(message):
         yield from vocal.append("Music/"+msg,False)
         vocal.play()
         yield from client.send_message(vocal.textchan,":arrow_forward: Adding local song to queue")
+    if message.content.startswith(prefix+'disconnectvocal') and botmanager:
+        yield from client.send_message(message.channel,"This will disconnect the bot from all vocal connections, are you sure ?\nType `confirm` to do it")
+        answer = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content='confirm')
+        if answer is None:
+            yield from client.send_message(message.channel,"Your request has timeout")
+            return
+        yield from vocalcore.interupt()
     #Help commands
     if message.content.startswith(prefix+'debug') and botowner:
         msg = (message.content).replace(prefix+'debug ',"")
@@ -1253,8 +1253,8 @@ def on_message(message):
         embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if message.content.startswith(prefix+'jointhegame'):
-        inv = yield from client.create_invite(client.get_server("326648561976737792"),max_uses=1)
-        yield from client.send_message(message.author,"Rejoignez le serveur officiel The Tale of Great Cosmos (serveur FR) : \n"+str(inv.url))
+        inv = yield from client.create_invite(client.get_server("326648561976737792"),max_age=3600)
+        yield from client.send_message(message.channel,"Rejoignez le serveur officiel The Tale of Great Cosmos (serveur FR) : \n"+str(inv.url))
     if message.content.startswith(prefix+'ping'):
         tps_start = time.clock()
         yield from client.send_message(message.channel,":ping_pong: pong ! :ping_pong:")
@@ -1272,14 +1272,54 @@ def on_message(message):
         except:
             me = yield from client.get_user_info("222026592896024576")
             yield from client.send_file(me,"Backup-auto.zip",content="An error has occured when saving database, maybe some file has been corrupted, here is the autogenerated backup")
+            yield from client.send_message(me,"The following user has made this shit : "+str(message.author)+" (ID="+str(message.author.id)+")")
+            yield from client.send_message(message.author,"Your command has failed ! It has created a black hole in my system. If new commands following this doesn't work, please wait until a god close this black hole")
+            yield from client.send_message(me,"Here is the list of things that I can do for trying to fix the problem :\n```\nrestore - Restore the database from auto-backup\nblacklist - Blacklist the user who cause crash\nshutdown - Shutdown me\neval - evaluate damage by checking size of files (allow to use another command after)\n```Answer to this with option selected, separate them with `|` to use many options")
+            os.rename("Backup-auto.zip","Backup-auto-save.zip")
+            cmd = yield from client.wait_until_message(author=me,channel=me)
+            while " " in cmd: cmd.replace(" ","")
+            cmd_list = cmd.lower().split("|")
+            for i in cmd_list:
+                if i == "restore":
+                    zpcor = zipfile.ZipFile("Backup-corrupted.zip","w")
+                    for k in os.listdir("Data"):
+                        zp.write("Data/"+k)
+                    zp.close()
+                    zp = zipfile.ZipFile("Backup-auto-save.zip","r")
+                    zp.exctractall()
+                    zp.close()
+                    yield from client.send_file(me,"Backup-corrupted.zip",content="Restored database, here is old database :")
+                    os.remove("Backup-corrupted.zip")
+                elif i == "blacklist":
+                    blackid = int(message.author.id)
+                    bl = BDD("userlist")
+                    bl.load()
+                    bl["blacklist",str(blackid)] = "Making crash the bot"
+                    bl.save()
+                    yield from client.send_message(me,"The following id has been blacklisted : `"+str(blackid)+"` for \n```Making crash the bot```")
+                elif i == "eval":
+                    string = "Eval result :\n```\n"
+                    for k in os.listdir("Data"):
+                        string += k+" - "
+                        string += str(os.stat("Data/"+k).st_size)+"Bytes\n"
+                    string += "```"
+                    yield from client.send_message(me,string)
+                    yield from client.send_message(me,"Here is the list of things that I can do for trying to fix the problem :\n```\nrestore - Restore the database from auto-backup\nblacklist - Blacklist the user who cause crash\nshutdown - Shutdown me\n```Answer to this with option selected, separate them with `|` to use many options")
+                    cmd = yield from client.wait_until_message(author=me,channel=me)
+                    while " " in cmd: cmd.replace(" ","")
+                    cmd_list += cmd.lower().split("|")
+                elif i == "shutdown":
+                    yield from client.logout()
+                    sys.exit(0)
     logf.stop()
     yield from client.change_presence(game=statut)
 
 @client.event
 @asyncio.coroutine
 def on_voice_state_update(before,after):
-    global vocal
-    if before.voice.voice_channel != after.voice.voice_channel and vocal.vocal and (not vocal.is_playing):
+    global vocalcore
+    vocal = vocalcore.getvocal(str(after.server.id))
+    if (vocal is not None) and vocal.vocal and (not vocal.is_playing) and before.voice.voice_channel != after.voice.voice_channel:
         if after.voice.voice_channel == vocal.co.channel:
             yield from vocal.append("Music/reco.mp3",False)
             vocal.play()

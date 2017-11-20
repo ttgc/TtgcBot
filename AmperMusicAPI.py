@@ -2,12 +2,28 @@
 #-*-coding:utf-8-*-
 #AmperMusicAPI
 
+##    TtgcBot - a bot for discord
+##    Copyright (C) 2017  Thomas PIOT
+##
+##    This program is free software: you can redistribute it and/or modify
+##    it under the terms of the GNU General Public License as published by
+##    the Free Software Foundation, either version 3 of the License, or
+##    (at your option) any later version.
+##
+##    This program is distributed in the hope that it will be useful,
+##    but WITHOUT ANY WARRANTY; without even the implied warranty of
+##    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##    GNU General Public License for more details.
+##
+##    You should have received a copy of the GNU General Public License
+##    along with this program. If not, see <http://www.gnu.org/licenses/>
+
 import requests
 import time
 #import json
 from threading import Thread
 
-token_bot = ''
+token_turtle = 'nytktIllKnIFa2ACEPHiAJ0jKfNhV7WI8ZIfUKp5E3ZN5lpJ5qu2Dejc67ycuL3w'
 
 class AmperMusicAPI:
     def __init__(self,token):
@@ -78,7 +94,7 @@ class AmperMusicAPI:
         return path+str(file['id'])+extension
 
 class AmperGeneratorProcess(Thread):
-    def __init__(self,theme,duration,title="New Project",path="",api=AmperMusicAPI(token_bot),wav=False):
+    def __init__(self,theme,duration,title="New Project",path="",api=AmperMusicAPI(token_turtle),wav=False):
         Thread.__init__(self)
         self.api = api
         self.theme = theme
@@ -102,7 +118,7 @@ class AmperGeneratorProcess(Thread):
         self.finished = True
 
 class AmperProcess:
-    def __init__(self,api=AmperMusicAPI(token_bot)):
+    def __init__(self,api=AmperMusicAPI(token_turtle)):
         self.is_bind = False
         self.data = None
         self.progress = 0

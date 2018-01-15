@@ -32,6 +32,7 @@ import os
 import zipfile
 import sys
 import requests
+import subprocess as sub
 
 logger = logging.getLogger('discord')
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +49,7 @@ statut = discord.Game(name="Ohayo !")
 global vocalcore
 
 class Character:
-    def __init__(self,dic={"name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0}):
+    def __init__(self,dic={"name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100}):
         self.name = dic["name"]
         self.lore = dic["lore"]
         self.PVmax = dic["PVm"]
@@ -64,10 +65,11 @@ class Character:
         self.stat = dic["stat"]
         self.lp = dic["lp"]
         self.dp = dic["dp"]
-        self.regenkarm = [0,dic["regenkarm"]]
         self.mod = dic["mod"]
         self.default_mod = dic["default_mod"]
         self.default_karma = dic["default_karma"]
+        self.intuition = dic["intuition"]
+        self.mental = dic["mentalhealth"]
         #mod 0 = offensiv / mod 1 = defensiv
 
     def __str__(self):
@@ -80,14 +82,14 @@ class Character:
             return True
 
     def stock(self):
-        return "<"+self.name+"|"+self.lore+"|"+str(self.PVmax)+"|"+str(self.PMmax)+"|"+str(self.force)+"|"+str(self.esprit)+"|"+str(self.charisme)+"|"+str(self.furtivite)+"|"+str(self.money)+"|"+str(self.lp)+"|"+str(self.dp)+"|"+str(self.regenkarm[1])+"|"+str(self.mod)+"|"+str(self.karma)+"|"+str(self.PV)+"|"+str(self.PM)+"|"+str(self.default_mod)+"|"+str(self.default_karma)+">"
+        return "<"+self.name+"|"+self.lore+"|"+str(self.PVmax)+"|"+str(self.PMmax)+"|"+str(self.force)+"|"+str(self.esprit)+"|"+str(self.charisme)+"|"+str(self.furtivite)+"|"+str(self.money)+"|"+str(self.lp)+"|"+str(self.dp)+"|"+str(self.mod)+"|"+str(self.karma)+"|"+str(self.PV)+"|"+str(self.PM)+"|"+str(self.default_mod)+"|"+str(self.default_karma)+"|"+str(self.intuition)+"|"+str(self.mental)+">"
 
 def unstockchar(string,name):
     string = string.replace("<","")
     string = string.replace(">","")
     ls = string.split("|")
     st = convert_str_into_ls(ls[-1])
-    return Character({"name":ls[0],"lore":ls[1],"PVm":int(ls[2]),"PMm":int(ls[3]),"force":int(ls[4]),"esprit":int(ls[5]),"charisme":int(ls[6]),"furtivite":int(ls[7]),"karma":int(ls[13]),"money":int(ls[8]),"stat":[0,0,0,0,0,0,0],"lp":int(ls[9]),"dp":int(ls[10]),"regenkarm":float(ls[11]),"mod":int(ls[12]),"PV":int(ls[14]),"PM":int(ls[15]),"default_mod":int(ls[16]),"default_karma":int(ls[17])})
+    return Character({"name":ls[0],"lore":ls[1],"PVm":int(ls[2]),"PMm":int(ls[3]),"force":int(ls[4]),"esprit":int(ls[5]),"charisme":int(ls[6]),"furtivite":int(ls[7]),"karma":int(ls[12]),"money":int(ls[8]),"stat":[0,0,0,0,0,0,0],"lp":int(ls[9]),"dp":int(ls[10]),"mod":int(ls[11]),"PV":int(ls[13]),"PM":int(ls[14]),"default_mod":int(ls[15]),"default_karma":int(ls[16]),"intuition":int(ls[17]),"mentalhealth":int(ls[18])})
 
 def convert_str_into_dic(string):
     if string == "{}": return {}
@@ -404,11 +406,6 @@ def on_message(message):
                     elif result <= char.force+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
                     yield from client.send_message(message.channel,"Result of test (force) :"+str(result)+"/"+str(char.force+modifier))
-            char.regenkarm[0] += char.regenkarm[1]
-            if char.regenkarm[0] >= 1:
-                if char.karma < 0: char.karma += 1
-                elif char.karma > 0: char.karma -= 1
-                char.regenkarm[0] -= 1
         elif msg == "esprit":
             char.stat[0] += 1
             dice = randint(1,100)
@@ -475,10 +472,6 @@ def on_message(message):
                     elif result <= char.esprit+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
                     yield from client.send_message(message.channel,"Result of test (esprit) :"+str(result)+"/"+str(char.esprit+modifier))
-            if char.regenkarm[0] >= 1:
-                if char.karma < 0: char.karma += 1
-                elif char.karma > 0: char.karma -= 1
-                char.regenkarm[0] -= 1
         elif msg == "charisme":
             char.stat[0] += 1
             dice = randint(1,100)
@@ -545,11 +538,7 @@ def on_message(message):
                     elif result <= char.charisme+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
                     yield from client.send_message(message.channel,"Result of test (charisme) :"+str(result)+"/"+str(char.charisme+modifier))
-            if char.regenkarm[0] >= 1:
-                if char.karma < 0: char.karma += 1
-                elif char.karma > 0: char.karma -= 1
-                char.regenkarm[0] -= 1
-        elif msg == "furtivite":
+        elif msg == "furtivite" or msg == "agilite":
             char.stat[0] += 1
             dice = randint(1,100)
             kar = randint(1,10)
@@ -582,7 +571,7 @@ def on_message(message):
                             char.karma -= 1
                         elif result <= char.furtivite+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.furtivite+modifier))
+                        yield from client.send_message(message.channel,"Result of test (agilite) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(char.furtivite+modifier))
                 elif char.karma <= -5:
                     result += kar
                     if result == 42:
@@ -602,7 +591,7 @@ def on_message(message):
                             char.karma -= 1
                         elif result <= char.furtivite+modifier: char.stat[3] += 1
                         else: char.stat[-3] += 1
-                        yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.furtivite+modifier))
+                        yield from client.send_message(message.channel,"Result of test (agilite) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(char.furtivite+modifier))
                 else:
                     if result == 42: char.stat[1] += 1
                     elif result == 66: char.stat[-1] += 1
@@ -614,32 +603,42 @@ def on_message(message):
                         char.karma -= 1
                     elif result <= char.furtivite+modifier: char.stat[3] += 1
                     else: char.stat[-3] += 1
-                    yield from client.send_message(message.channel,"Result of test (furtivite) :"+str(result)+"/"+str(char.furtivite+modifier))
-            if char.regenkarm[0] >= 1:
-                if char.karma < 0: char.karma += 1
-                elif char.karma > 0: char.karma -= 1
-                char.regenkarm[0] -= 1
+                    yield from client.send_message(message.channel,"Result of test (agilite) :"+str(result)+"/"+str(char.furtivite+modifier))
         elif msg == "chance":
-            result = randint(1,6)
-            yield from client.send_message(message.channel,"Result of test (chance) :"+str(result))
-            if result == 1: yield from client.send_message(message.channel,"No effect")
-            elif result == 2: yield from client.send_message(message.channel,"Free action")
-            elif result == 3: yield from client.send_message(message.channel,"Positiv effect")
-            elif result == 4: yield from client.send_message(message.channel,"One more action !")
-            elif result == 5: yield from client.send_message(message.channel,"+10%")
-            elif result == 6: yield from client.send_message(message.channel,"+20%")
-        elif msg == "malchance":
-            result = randint(1,6)
-            yield from client.send_message(message.channel,"Result of test (malchance) :"+str(result))
-            if result == 1: yield from client.send_message(message.channel,"No effect")
-            elif result == 2: yield from client.send_message(message.channel,"hard to act")
-            elif result == 3: yield from client.send_message(message.channel,"Negativ effect")
-            elif result == 4: yield from client.send_message(message.channel,"Action canceled")
-            elif result == 5: yield from client.send_message(message.channel,"-10%")
-            elif result == 6: yield from client.send_message(message.channel,"-20%")
+            resultc = randint(1,6)
+            yield from client.send_message(message.channel,"Result of test (chance) :"+str(resultc))
+            if resultc == 1: yield from client.send_message(message.channel,"No effect")
+            elif resultc == 2: yield from client.send_message(message.channel,"Free action")
+            elif resultc == 3: yield from client.send_message(message.channel,"Positiv effect")
+            elif resultc == 4: yield from client.send_message(message.channel,"+10%")
+            elif resultc == 5: yield from client.send_message(message.channel,"+20%")
+            elif resultc == 6: yield from client.send_message(message.channel,"One more action !")
+        #elif msg == "malchance":
+            resultm = randint(1,6)
+            yield from client.send_message(message.channel,"Result of test (malchance) :"+str(resultm))
+            if resultm == 1: yield from client.send_message(message.channel,"No effect")
+            elif resultm == 2: yield from client.send_message(message.channel,"hard to act")
+            elif resultm == 3: yield from client.send_message(message.channel,"Negativ effect")
+            elif resultm == 4: yield from client.send_message(message.channel,"-10%")
+            elif resultm == 5: yield from client.send_message(message.channel,"-20%")
+            elif resultm == 6: yield from client.send_message(message.channel,"Action canceled")
+            if resultc < resultm:
+                char.karma += 1
+                if char.karma > 10: char.karma = 10
+            else:
+                char.karma -= 1
+                if char.karma < -10: char.karma = -10
+            if resultc == resultm:
+                yield from client.send_message(message.channel,"You have won a chance bonus !")
+                if resultc == 1: yield from client.send_message(message.channel,"Switch battle mod just for the future action")
+                elif resultc == 2: yield from client.send_message(message.channel,"Action cannot be avoided")
+                elif resultc == 3: yield from client.send_message(message.channel,"Instant switch with an ally")
+                elif resultc == 4: yield from client.send_message(message.channel,"Reroll the dice if it fail (excepted 66)")
+                elif resultc == 5: yield from client.send_message(message.channel,"Action cant fail excepted critic and super-critic fail")
+                elif resultc == 6: yield from client.send_message(message.channel,"Choose a chance effect and a double effect")
         elif msg == "intuition":
             result = randint(1,6)
-            yield from client.send_message(message.channel,"Result of test (intuition) :"+str(result))
+            yield from client.send_message(message.channel,"Result of test (intuition) :"+str(result)+"/"+str(char.intuition+modifier))
         if char.karma > 10: char.karma = 10
         if char.karma < -10: char.karma = -10
     if message.content.startswith(prefix+'charcreate') and chanMJ:
@@ -650,7 +649,7 @@ def on_message(message):
         char = Character()
         charbase[name] = char
         yield from client.send_message(message.channel,"Creating new character called : "+name)
-    if message.content.startswith(prefix+'chardelete') and admin and chanMJ:
+    if message.content.startswith(prefix+'chardelete') and chanMJ:
         name = (message.content).replace(prefix+'chardelete ',"")
         yield from client.send_message(message.channel,"Please confirm that you want to delete `"+name+"` by typing `confirm`\nthis cannot be undone !")
         confirm = yield from client.wait_for_message(timeout=60,author=message.author,content="confirm",channel=message.channel)
@@ -688,6 +687,7 @@ def on_message(message):
                 nm += " "
             char.name = nm[:-1]#replace(prefix+'charset name ',"")
             yield from client.send_message(message.channel,"Changing name of character successful")
+        elif message.content.startswith(prefix+'charset PV'):
             char.PVmax = int((message.content).split(" ")[3])#replace(prefix+'charset PV ',""))
             yield from client.send_message(message.channel,"Changing PV max of character successful")
         elif message.content.startswith(prefix+'charset PM'):
@@ -702,9 +702,9 @@ def on_message(message):
         elif message.content.startswith(prefix+'charset charisme'):
             char.charisme = int((message.content).split(" ")[3])#replace(prefix+'charset charisme ',""))
             yield from client.send_message(message.channel,"Changing charisme of character successful")
-        elif message.content.startswith(prefix+'charset furtivite'):
+        elif message.content.startswith(prefix+'charset furtivite') or message.content.startswith(prefix+'charset agilite'):
             char.furtivite = int((message.content).split(" ")[3])#replace(prefix+'charset furtivite ',""))
-            yield from client.send_message(message.channel,"Changing furtivite of character successful")
+            yield from client.send_message(message.channel,"Changing agilite of character successful")
         elif message.content.startswith(prefix+'charset lp'):
             char.lp += int((message.content).split(" ")[3])#replace(prefix+'charset lp ',""))
             if char.lp < 0: char.lp = 0
@@ -719,11 +719,16 @@ def on_message(message):
                 if ndm == "offensiv": ndm = 0
                 else: ndm = 1
                 char.default_mod = ndm
-            yield from client.send_message(message.channel,"Changing default mod of character successful")
+                yield from client.send_message(message.channel,"Changing default mod of character successful")
         elif message.content.startswith(prefix+'charset defaultkarma'):
             ndk = int((message.content).split(" ")[3])
             if ndk >= -10 and ndk <= 10: char.default_karma = ndk
             yield from client.send_message(message.channel,"Changing default karma of character successful")
+        elif message.content.startswith(prefix+'charset intuition'):
+            val = int((message.content).split(" ")[3])
+            if val >= 1 and val <= 6:
+                char.intuition = val
+                yield from client.send_message(message.channel,"Changing intuition of character successful")
     if message.content.startswith(prefix+'chardmg') and chanMJ:
         char = charbase[message.content.split(" ")[1]]
         val = abs(int((message.content).split(" ")[2]))#replace(prefix+'chardmg ',""))
@@ -815,10 +820,12 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
         embd.add_field(name="PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        embd.add_field(name="Mental :",value=str(char.mental),inline=True)
+        embd.add_field(name="Intuition :",value=str(char.intuition),inline=True)
         embd.add_field(name="Force :",value=str(char.force),inline=True)
         embd.add_field(name="Esprit :",value=str(char.esprit),inline=True)
         embd.add_field(name="Charisme :",value=str(char.charisme),inline=True)
-        embd.add_field(name="Furtivite :",value=str(char.furtivite),inline=True)
+        embd.add_field(name="Agilite :",value=str(char.furtivite),inline=True)
         embd.add_field(name="Karma :",value=str(char.karma),inline=True)
         embd.add_field(name="Money :",value=str(char.money),inline=True)
         embd.add_field(name="Light Points :",value=str(char.lp),inline=True)
@@ -872,9 +879,9 @@ def on_message(message):
                 if result == 1: yield from client.send_message(message.channel,"No effect")
                 elif result == 2: yield from client.send_message(message.channel,"Free action")
                 elif result == 3: yield from client.send_message(message.channel,"Positiv effect")
-                elif result == 4: yield from client.send_message(message.channel,"No effect")
-                elif result == 5: yield from client.send_message(message.channel,"+10%")
-                elif result == 6: yield from client.send_message(message.channel,"+20%")
+                elif result == 4: yield from client.send_message(message.channel,"+10%")
+                elif result == 5: yield from client.send_message(message.channel,"+20%")
+                elif result == 6: yield from client.send_message(message.channel,"No effect")
         if message.content.startswith(prefix+'use darkpt'):
             if char.dp <= 0:
                 yield from client.send_message(message.channel,"No more Dark Points")
@@ -888,9 +895,9 @@ def on_message(message):
                 if result == 1: yield from client.send_message(message.channel,"No effect")
                 elif result == 2: yield from client.send_message(message.channel,"hard to act")
                 elif result == 3: yield from client.send_message(message.channel,"Negativ effect")
-                elif result == 4: yield from client.send_message(message.channel,"No effect")
-                elif result == 5: yield from client.send_message(message.channel,"-10%")
-                elif result == 6: yield from client.send_message(message.channel,"-20%")
+                elif result == 4: yield from client.send_message(message.channel,"-10%")
+                elif result == 5: yield from client.send_message(message.channel,"-20%")
+                elif result == 6: yield from client.send_message(message.channel,"No effect")
     if message.content.startswith(prefix+'switchmod') and jdrchannel:
         if char.mod == 0:
             char.mod = 1
@@ -898,6 +905,12 @@ def on_message(message):
         else:
             char.mod = 0
             yield from client.send_message(message.channel,char.name+" is now on Offensiv mod !")
+    if message.content.startswith(prefix+'setmental') and jdrchannel:
+        if "+" in message.content:
+            msg = message.content.replace("+","")
+            char.mental += int(msg)
+        else:
+            char.mental = int(msg)
     if message.content.startswith(prefix+'mj') and jdrchannel and chanMJ:
         if message.content.startswith(prefix+'mjcharinfo'):
             char = charbase[message.content.split(" ")[1]]
@@ -909,10 +922,12 @@ def on_message(message):
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
             embd.add_field(name="PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+            embd.add_field(name="Mental :",value=str(char.mental),inline=True)
+            embd.add_field(name="Intuition :",value=str(char.intuition),inline=True)
             embd.add_field(name="Force :",value=str(char.force),inline=True)
             embd.add_field(name="Esprit :",value=str(char.esprit),inline=True)
             embd.add_field(name="Charisme :",value=str(char.charisme),inline=True)
-            embd.add_field(name="Furtivite :",value=str(char.furtivite),inline=True)
+            embd.add_field(name="Agilite :",value=str(char.furtivite),inline=True)
             embd.add_field(name="Karma :",value=str(char.karma),inline=True)
             embd.add_field(name="Money :",value=str(char.money),inline=True)
             embd.add_field(name="Light Points :",value=str(char.lp),inline=True)
@@ -936,6 +951,12 @@ def on_message(message):
                 if val > 0:
                     char.money -= val
             yield from client.send_message(message.channel,"Remaining Money to "+char.name+" : "+str(char.money))
+        if message.content.startswith(prefix+'mjsetmental'):
+            if "+" in message.content:
+                msg = message.content.replace("+","")
+                char.mental += int(msg)
+            else:
+                char.mental = int(msg)
     if message.content.startswith(prefix+'setMJrole') and admin:
         conf = BDD("config")
         conf.load()
@@ -1097,7 +1118,18 @@ def on_message(message):
         if answer is None:
             yield from client.send_message(message.channel,"Your request has timeout")
             return
+        yield from vocalcore.interupt()
         yield from client.logout()
+        sys.exit(0)
+    if message.content.startswith(prefix+'reboot') and botmanager:
+        yield from client.send_message(message.channel,"You are requesting a reboot, please ensure that you want to perform it by typing `confirm`")
+        answer = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content='confirm')
+        if answer is None:
+            yield from client.send_message(message.channel,"Your request has timeout")
+            return
+        yield from vocalcore.interupt()
+        yield from client.logout()
+        sub.call(['bootbot.sh'])
         sys.exit(0)
     if message.content.startswith(prefix+'blacklist') and botmanager:
         msg = message.content.replace(prefix+'blacklist ',"")

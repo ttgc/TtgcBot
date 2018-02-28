@@ -36,12 +36,12 @@ def singleton(classe_definie):
 class _PythonBDDfiles:
     def __init__(self):
         #EDIT THE FILENAMES HERE
-        self.location = "./"
+        self.location = "Data/"
         self.config = "configBDD"
         #END OF EDIT
         if not os.access(self.location,os.F_OK):
             os.mkdir(self.location)
-        if not os.access(self.location+self.config,os.F_OK):
+        if not os.access(self.location+self.config+".ini",os.F_OK):
             cfg = INI()
             cfg.section_add("BDD")
             cfg.save(self.location+self.config)

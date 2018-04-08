@@ -4,5 +4,5 @@
 ----
 Coming soon for next upgrade/update :   
 
-**Ideas commands**  
-**Event commands**
+~~**Ideas commands**  
+**Event commands**~~

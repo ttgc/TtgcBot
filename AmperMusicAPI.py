@@ -23,7 +23,10 @@ import time
 #import json
 from threading import Thread
 
-token_turtle = 'nytktIllKnIFa2ACEPHiAJ0jKfNhV7WI8ZIfUKp5E3ZN5lpJ5qu2Dejc67ycuL3w'
+tokenf = INI()
+tokenf.load("token")
+token_turtle = tokenf.section["TOKEN"]["Amper"]
+del(tokenf)
 
 class AmperMusicAPI:
     def __init__(self,token):

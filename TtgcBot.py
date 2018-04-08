@@ -28,6 +28,8 @@ import logging
 import time
 from EventManager import *
 from VocalUtilities import *
+##from KeepRole import *
+from converter import *
 import os
 import zipfile
 import sys
@@ -41,7 +43,10 @@ handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(me
 logger.addHandler(handler)
 
 global TOKEN
-TOKEN = ''
+tokenf = INI()
+tokenf.load("token")
+TOKEN = tokenf.section["TOKEN"]["Bot"]
+del(tokenf)
 
 global logf
 global statut
@@ -90,34 +95,6 @@ def unstockchar(string,name):
     ls = string.split("|")
     st = convert_str_into_ls(ls[-1])
     return Character({"name":ls[0],"lore":ls[1],"PVm":int(ls[2]),"PMm":int(ls[3]),"force":int(ls[4]),"esprit":int(ls[5]),"charisme":int(ls[6]),"furtivite":int(ls[7]),"karma":int(ls[12]),"money":int(ls[8]),"stat":[0,0,0,0,0,0,0],"lp":int(ls[9]),"dp":int(ls[10]),"mod":int(ls[11]),"PV":int(ls[13]),"PM":int(ls[14]),"default_mod":int(ls[15]),"default_karma":int(ls[16]),"intuition":int(ls[17]),"mentalhealth":int(ls[18])})
-
-def convert_str_into_dic(string):
-    if string == "{}": return {}
-    string = string.replace("{","")
-    string = string.replace("}","")
-    string = string.replace("'","")
-    ls = string.split(", ")
-    dic = {}
-    for i in range(len(ls)):
-        temp = ls[i].split(": ")
-        dic[temp[0]] = temp[1]
-    return dic
-
-def convert_str_into_ls(string):
-    if string == "[]": return []
-    string = string.replace("[","")
-    string = string.replace("]","")
-    string = string.replace("'","")
-    ls = string.split(", ")
-    return ls
-
-def convert_str_into_ls_spe(string):
-    if string == "{}": return []
-    string = string.replace("{","")
-    string = string.replace("}","")
-    string = string.replace("'","")
-    ls = string.split(", ")
-    return ls
 
 def sum_ls(ls1,ls2):
     lsf = ls1[:]
@@ -276,6 +253,7 @@ def on_message(message):
         botowner = botmanager = premium = admin = True
     if message.server != None:
         if message.author == message.server.owner: admin = True
+    #if message.channel.id == "328551345177231360": jdrchannel = True
     if message.channel.name.startswith("nsfw-"): nsfw = True
     else:
         head = {'Authorization': "Bot "+TOKEN}
@@ -673,8 +651,10 @@ def on_message(message):
     if message.content.startswith(prefix+'unlink') and chanMJ:
         if len(message.mentions) == 0:
             del(linked[str(message.author.id)])
+            yield from client.send_message(message.channel,"Unlinked "+message.author.mention)
         else:
             del(linked[str(message.mentions[0].id)])
+            yield from client.send_message(message.channel,"Unlinked "+message.mentions[0].mention)
     if message.content.startswith(prefix+'charset') and chanMJ:
         char = charbase[message.content.split(" ")[2]]
         if message.content.startswith(prefix+'charset name'):
@@ -1055,7 +1035,6 @@ def on_message(message):
         if len(info.json()["parse"]["redirects"]) != 0:
             embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    #####NOT YET REWRITTEN######
     if message.content.startswith(prefix+'tell'):
         msg = (message.content).replace(prefix+'tell ',"")
         print(str(message.author)+" : "+msg)
@@ -1129,7 +1108,7 @@ def on_message(message):
             return
         yield from vocalcore.interupt()
         yield from client.logout()
-        sub.call(['bootbot.sh'])
+        sub.call(['./bootbot.sh'])
         sys.exit(0)
     if message.content.startswith(prefix+'blacklist') and botmanager:
         msg = message.content.replace(prefix+'blacklist ',"")
@@ -1196,19 +1175,136 @@ def on_message(message):
             conf["contentban",str(message.server.id)] = temp
             conf.save()
     if message.content.startswith(prefix+'warn') and admin:
+        conf = BDD("config")
+        conf.load()
+        try: warnls = conf["warnuser",str(message.server.id)]
+        except: warnls = "{}"
+        warnls = convert_str_into_dic(warnls)
         target = []
+        warncount = []
         for i in message.mentions:
             target.append(str(i))
+            try: warnls[str(i.id)] = str(int(warnls[str(i.id)])+1)
+            except: warnls[str(i.id)] = "1"
+            warncount.append(warnls[str(i.id)])
+        conf["warnuser",str(message.server.id)] = str(warnls)
+        conf.save()
         targetstr = str(target)
         targetstr = targetstr.replace("[","")
         targetstr = targetstr.replace("]","")
         targetstr = targetstr.replace("'","")
+        countstr = ""
+        for i in range(len(target)):
+            countstr += (target[i]+" : "+warncount[i]+"\n")
         embd = discord.Embed(title="WARN",description=targetstr,colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(message.timestamp))
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="https://www.ggte.unicamp.br/ea/img/iconalerta.png")
         embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
+        embd.add_field(name="Total warnings :",value=countstr,inline=True)
         yield from client.send_message(message.channel,embed=embd)
+        try: warnval = conf["warn",str(message.server.id)]
+        except: warnval = "{}"
+        warnval = convert_str_into_dic(warnval)
+        for i in range(len(warncount)):
+            if warncount[i] in warnval:
+                try:
+                    if warnval[warncount[i]] == "kick":
+                        yield from client.kick(message.mentions[i])
+                        yield from client.send_message(message.channel,target[i]+" has been kicked due to a high number of warnings")
+                        yield from client.send_message(message.mentions[i],"You have been **kicked** from : "+message.server.name+" due to a high number of warnings")
+                    elif warnval[warncount[i]] == "ban":
+                        yield from client.ban(message.mentions[i],0)
+                        yield from client.send_message(message.channel,target[i]+" has been banned due to a high number of warnings")
+                        yield from client.send_message(message.mentions[i],"You have been **banned** from : "+message.server.name+" due to a high number of warnings")
+                    else:
+                        rl = None
+                        for k in message.server.roles:
+                            if str(k.id) == warnval[warncount[i]]: 
+                                rl = k
+                                break;
+                        if rl is not None:
+                            yield from client.add_roles(message.mentions[i],rl)
+                            yield from client.send_message(message.channel,message.mentions[i].mention+" has got role "+rl.mention+" due to a high number of warnings")
+                except discord.Forbidden: pass
+    if message.content.startswith(prefix+'configwarn') and admin:
+        msg = message.content.replace(prefix+'configwarn ',"")
+        value = int(msg.split(" ")[0])
+        sanction = msg.split(" ")[1].lower()
+        conf = BDD("config")
+        conf.load()
+        try: warnls = conf["warn",str(message.server.id)]
+        except: warnls = "{}"
+        warnls = convert_str_into_dic(warnls)
+        if sanction == "assign":
+            rl = message.role_mentions[0]
+            warnls[str(value)] = str(rl.id)
+            yield from client.send_message(message.channel,"Assigned role assignement ("+rl.mention+") punishment for people with "+str(value)+" warnings")
+            conf["warn",str(message.server.id)] = str(warnls)
+            conf.save()
+            pass
+        elif sanction == "kick":
+            warnls[str(value)] = "kick"
+            yield from client.send_message(message.channel,"Assigned kick punishment for people with "+str(value)+" warnings")
+            conf["warn",str(message.server.id)] = str(warnls)
+            conf.save()
+            pass
+        elif sanction == "ban":
+            warnls[str(value)] = "ban"
+            yield from client.send_message(message.channel,"Assigned ban punishment for people with "+str(value)+" warnings")
+            conf["warn",str(message.server.id)] = str(warnls)
+            conf.save()
+            pass
+        elif sanction == "remove":
+            try: del(warnls[str(value)])
+            except: pass
+            conf["warn",str(message.server.id)] = str(warnls)
+            conf.save()
+            yield from client.send_message(message.channel,"Removing punishment for people with "+str(value)+" warnings")
+        else:
+            yield from client.send_message(message.channel,"Unknown punishment type for warn command")
+##BLOCKED UNTIL RESOLUTION OF ISSUES
+##
+##    #KeepRole commands
+##    if message.content.startswith(prefix+'keeprole') and admin:
+##        kr = KeepRoleServer(str(message.server.id))
+##        info = yield from client.application_info()
+##        if not message.server.get_member(info.id).server_permissions.manage_roles:
+##            yield from client.send_message(message.channel,"I'm not allowed to manage roles")
+##            return
+##        if message.content.startswith(prefix+'keeprole enabled'):
+##            msg = message.content.replace(prefix+'keeprole enabled ',"")
+##            msg = msg.lower()
+##            if (msg == "true" or msg == "1") and (not kr.enabled):
+##                kr.switch()
+##                yield from client.send_message(message.channel,"KeepRole enabled on this server")
+##            elif (msg == "false" or msg == "0") and kr.enabled:
+##                kr.switch()
+##                kr.setmembers({})
+##                yield from client.send_message(message.channel,"KeepRole disabled on this server")
+##        if message.content.startswith(prefix+'keeprole roles add'):
+##            ls = []
+##            strls = ""
+##            for i in message.role_mentions:
+##                if i.position < message.server.get_member(info.id).top_role.position:
+##                    ls.append(str(i.id))
+##                    strls += ("\n"+i.mention)
+##            kr.addroles(ls)
+##            yield from client.send_message(message.channel,"Adding following roles to KeepRole system : "+strls)
+##        if message.content.startswith(prefix+'keeprole roles delete'):
+##            ls = []
+##            strls = ""
+##            for i in message.role_mentions:
+##                if str(i.id) in kr.roles and i.position < message.server.get_member(info.id).top_role.position:
+##                    ls.append(str(i.id))
+##                    strls += ("\n"+i.mention)
+##            kr.removeroles(ls)
+##            yield from client.send_message(message.channel,"Deleting following roles from KeepRole system : "+strls)
+##        if message.content.startswith(prefix+'keeprole clear'):
+##            kr.setmembers({})
+##            yield from client.send_message(message.channel,"KeepRole members list purged successful")
+##
+##END OF BLOCUS
     #Vocal commands
     if message.content.startswith(prefix+'vocal') and premium:
         msg = (message.content).replace(prefix+'vocal ',"")
@@ -1273,7 +1369,7 @@ def on_message(message):
         yield from client.send_message(message.channel,"I've sent you a private message with the answer")
     if message.content.startswith(prefix+'invite'):
         botaskperm = discord.Permissions().all()
-        botaskperm.administrator = botaskperm.ban_members = botaskperm.kick_members = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_roles = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = botaskperm.mute_members = botaskperm.deafen_members = False
+        botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = botaskperm.mute_members = botaskperm.deafen_members = False
         url = discord.utils.oauth_url(str(client.user.id),botaskperm)
         embd = discord.Embed(title="TtgcBot (Beta)",description="Invite TtgcBot (beta) to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
         embd.set_footer(text="TtgcBot version beta developed by Ttgc",icon_url=client.user.avatar_url)
@@ -1360,6 +1456,28 @@ def on_voice_state_update(before,after):
             yield from vocal.append("Music/deco.mp3",False)
             vocal.play()
             #leave
+
+##BLOCKED UNTIL RESOLUTION OF ISSUES
+##
+##@client.event
+##@asyncio.coroutine
+##def on_member_join(member):
+##    kr = KeepRoleServer(str(member.server.id))
+##    if kr.enabled:
+##        yield from kr.apply(client)
+##
+##@client.event
+##@asyncio.coroutine
+##def on_member_remove(member):
+##    kr = KeepRoleServer(str(member.server.id))
+##    if kr.enabled:
+##        rolels = []
+##        for i in member.roles:
+##            if str(i.id) in kr.roles:
+##                rolels.append(str(i.id))
+##        kr.addmembers({str(member.id):rolels})
+##
+##END OF BLOCUS
                 
 @client.event
 @asyncio.coroutine
@@ -1369,7 +1487,7 @@ def on_server_join(server):
     cfg["prefix",str(server.id)] = '/'
     cfg["JDRchannel",str(server.id)] = str({})
     cfg.save()
-
+    
 @client.event
 @asyncio.coroutine
 def on_server_remove(server):
@@ -1417,8 +1535,21 @@ def on_ready():
         charbdd.create_group("charbase")
         charbdd.create_group("charlink")
         charbdd.create_group("charstat")
+        charbdd.create_group("warn")
+        charbdd.create_group("warnuser")
         charbdd.save()
         logf.append("Initializing","creating character file")
+    krsys = BDD("keeprole")
+    try: krsys.load()
+    except:
+        krsys.create_group("servers")
+        krsys.create_group("members")
+        krsys.create_group("roles")
+        krsys["servers","list"] = "{}"
+        krsys["servers","enabled"] = "{}"
+        krsys.save()
+        logf.append("Initializing","creating keeprole file")
+    
     if len(client.servers) != len(conf.file.section["prefix"]): #or len(client.servers) != len(charbdd.file.section["charbase"]):
         for i in client.servers:
             if not str(i.id) in conf.file.section["prefix"]:

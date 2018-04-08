@@ -24,6 +24,10 @@ from converter import *
 import discord
 import asyncio
 
+def Deprecated(cl):
+    print("Deprecated usage of : "+str(cl))
+
+@Deprecated
 class KeepRoleServer:
     def __init__(self,servID):
         self.id = servID

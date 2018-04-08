@@ -28,7 +28,7 @@ import logging
 import time
 from EventManager import *
 from VocalUtilities import *
-from KeepRole import *
+##from KeepRole import *
 from converter import *
 import os
 import zipfile
@@ -1263,44 +1263,48 @@ def on_message(message):
             yield from client.send_message(message.channel,"Removing punishment for people with "+str(value)+" warnings")
         else:
             yield from client.send_message(message.channel,"Unknown punishment type for warn command")
-    #KeepRole commands
-    if message.content.startswith(prefix+'keeprole') and admin:
-        kr = KeepRoleServer(str(message.server.id))
-        info = yield from client.application_info()
-        if not message.server.get_member(info.id).server_permissions.manage_roles:
-            yield from client.send_message(message.channel,"I'm not allowed to manage roles")
-            return
-        if message.content.startswith(prefix+'keeprole enabled'):
-            msg = message.content.replace(prefix+'keeprole enabled ',"")
-            msg = msg.lower()
-            if (msg == "true" or msg == "1") and (not kr.enabled):
-                kr.switch()
-                yield from client.send_message(message.channel,"KeepRole enabled on this server")
-            elif (msg == "false" or msg == "0") and kr.enabled:
-                kr.switch()
-                kr.setmembers({})
-                yield from client.send_message(message.channel,"KeepRole disabled on this server")
-        if message.content.startswith(prefix+'keeprole roles add'):
-            ls = []
-            strls = ""
-            for i in message.role_mentions:
-                if i.position < message.server.get_member(info.id).top_role.position:
-                    ls.append(str(i.id))
-                    strls += ("\n"+i.mention)
-            kr.addroles(ls)
-            yield from client.send_message(message.channel,"Adding following roles to KeepRole system : "+strls)
-        if message.content.startswith(prefix+'keeprole roles delete'):
-            ls = []
-            strls = ""
-            for i in message.role_mentions:
-                if str(i.id) in kr.roles and i.position < message.server.get_member(info.id).top_role.position:
-                    ls.append(str(i.id))
-                    strls += ("\n"+i.mention)
-            kr.removeroles(ls)
-            yield from client.send_message(message.channel,"Deleting following roles from KeepRole system : "+strls)
-        if message.content.startswith(prefix+'keeprole clear'):
-            kr.setmembers({})
-            yield from client.send_message(message.channel,"KeepRole members list purged successful")
+##BLOCKED UNTIL RESOLUTION OF ISSUES
+##
+##    #KeepRole commands
+##    if message.content.startswith(prefix+'keeprole') and admin:
+##        kr = KeepRoleServer(str(message.server.id))
+##        info = yield from client.application_info()
+##        if not message.server.get_member(info.id).server_permissions.manage_roles:
+##            yield from client.send_message(message.channel,"I'm not allowed to manage roles")
+##            return
+##        if message.content.startswith(prefix+'keeprole enabled'):
+##            msg = message.content.replace(prefix+'keeprole enabled ',"")
+##            msg = msg.lower()
+##            if (msg == "true" or msg == "1") and (not kr.enabled):
+##                kr.switch()
+##                yield from client.send_message(message.channel,"KeepRole enabled on this server")
+##            elif (msg == "false" or msg == "0") and kr.enabled:
+##                kr.switch()
+##                kr.setmembers({})
+##                yield from client.send_message(message.channel,"KeepRole disabled on this server")
+##        if message.content.startswith(prefix+'keeprole roles add'):
+##            ls = []
+##            strls = ""
+##            for i in message.role_mentions:
+##                if i.position < message.server.get_member(info.id).top_role.position:
+##                    ls.append(str(i.id))
+##                    strls += ("\n"+i.mention)
+##            kr.addroles(ls)
+##            yield from client.send_message(message.channel,"Adding following roles to KeepRole system : "+strls)
+##        if message.content.startswith(prefix+'keeprole roles delete'):
+##            ls = []
+##            strls = ""
+##            for i in message.role_mentions:
+##                if str(i.id) in kr.roles and i.position < message.server.get_member(info.id).top_role.position:
+##                    ls.append(str(i.id))
+##                    strls += ("\n"+i.mention)
+##            kr.removeroles(ls)
+##            yield from client.send_message(message.channel,"Deleting following roles from KeepRole system : "+strls)
+##        if message.content.startswith(prefix+'keeprole clear'):
+##            kr.setmembers({})
+##            yield from client.send_message(message.channel,"KeepRole members list purged successful")
+##
+##END OF BLOCUS
     #Vocal commands
     if message.content.startswith(prefix+'vocal') and premium:
         msg = (message.content).replace(prefix+'vocal ',"")
@@ -1453,23 +1457,27 @@ def on_voice_state_update(before,after):
             vocal.play()
             #leave
 
-@client.event
-@asyncio.coroutine
-def on_member_join(member):
-    kr = KeepRoleServer(str(member.server.id))
-    if kr.enabled:
-        yield from kr.apply(client)
-
-@client.event
-@asyncio.coroutine
-def on_member_remove(member):
-    kr = KeepRoleServer(str(member.server.id))
-    if kr.enabled:
-        rolels = []
-        for i in member.roles:
-            if str(i.id) in kr.roles:
-                rolels.append(str(i.id))
-        kr.addmembers({str(member.id):rolels})
+##BLOCKED UNTIL RESOLUTION OF ISSUES
+##
+##@client.event
+##@asyncio.coroutine
+##def on_member_join(member):
+##    kr = KeepRoleServer(str(member.server.id))
+##    if kr.enabled:
+##        yield from kr.apply(client)
+##
+##@client.event
+##@asyncio.coroutine
+##def on_member_remove(member):
+##    kr = KeepRoleServer(str(member.server.id))
+##    if kr.enabled:
+##        rolels = []
+##        for i in member.roles:
+##            if str(i.id) in kr.roles:
+##                rolels.append(str(i.id))
+##        kr.addmembers({str(member.id):rolels})
+##
+##END OF BLOCUS
                 
 @client.event
 @asyncio.coroutine

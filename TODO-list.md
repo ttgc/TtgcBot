@@ -13,3 +13,8 @@ This is the description of the command
 ```
 Suggest a command in TODO list on github and commit directly
 ```
+
+`/keeprole <subcommands> [params]`
+```
+Reimplementing KeepRole system
+```

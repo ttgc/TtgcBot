@@ -10,7 +10,7 @@
 CREATE TABLE public.Membre(
 	id_member        VARCHAR (25) CONSTRAINT membre_id_null NOT NULL ,
 	perms            CHAR (1)   ,
-	local_perms		 CHAR (1)   ,
+	--local_perms		 CHAR (1)   ,
 	CONSTRAINT prk_constraint_Membre PRIMARY KEY (id_member)
 )WITHOUT OIDS;
 
@@ -74,7 +74,9 @@ CREATE TABLE public.Characterr(
 	gm_default		     CHAR (1)   ,
 	id_inventory         INT   ,
 	id_member			 VARCHAR (25) ,
-	CONSTRAINT prk_constraint_Character PRIMARY KEY (charkey, id_server, id_channel)
+	CONSTRAINT prk_constraint_Character PRIMARY KEY (charkey, id_server, id_channel) ,
+	CONSTRAINT character_pvpvmax_check CHECK (PV <= PVmax) ,
+	CONSTRAINT charcater_pmpmmax_check CHECK (PM <= PMmax)
 )WITHOUT OIDS;
 
 
@@ -118,8 +120,9 @@ CREATE TABLE public.Inventaire(
 CREATE TABLE public.Serveur(
 	id_server    VARCHAR (25) CONSTRAINT serveur_id_null NOT NULL ,
 	MJrole       VARCHAR (25)  ,
-	prefix       VARCHAR (25) CONSTRAINT serveur_prefix_null NOT NULL CONSTRAINT serveur_prefix_default DEFAULT '/' ,
+	prefixx      VARCHAR (25) CONSTRAINT serveur_prefix_null NOT NULL CONSTRAINT serveur_prefix_default DEFAULT '/' ,
 	keeping_role BOOL CONSTRAINT serveur_keepingrole_null NOT NULL ,
+	adminrole	 VARCHAR (25)  ,
 	CONSTRAINT prk_constraint_Serveur PRIMARY KEY (id_server)
 )WITHOUT OIDS;
 
@@ -127,11 +130,11 @@ CREATE TABLE public.Serveur(
 ------------------------------------------------------------
 -- Table: Local Perms
 ------------------------------------------------------------
-CREATE TABLE public.Local_Perms(
-	code    CHAR (1) CONSTRAINT localperms_code_null NOT NULL ,
-	libelle VARCHAR (25) CONSTRAINT localperms_libelle_null NOT NULL ,
-	CONSTRAINT prk_constraint_Local_Perms PRIMARY KEY (code)
-)WITHOUT OIDS;
+--CREATE TABLE public.Local_Perms(
+	--code    CHAR (1) CONSTRAINT localperms_code_null NOT NULL ,
+	--libelle VARCHAR (25) CONSTRAINT localperms_libelle_null NOT NULL ,
+	--CONSTRAINT prk_constraint_Local_Perms PRIMARY KEY (code)
+--)WITHOUT OIDS;
 
 
 ------------------------------------------------------------
@@ -151,7 +154,7 @@ CREATE TABLE public.Word_Blocklist(
 CREATE TABLE public.Role(
 	id_role   VARCHAR (25) CONSTRAINT role_id_null NOT NULL ,
 	id_server VARCHAR (25) CONSTRAINT role_server_null NOT NULL ,
-	CONSTRAINT prk_constraint_Role PRIMARY KEY (id_role)
+	CONSTRAINT prk_constraint_Role PRIMARY KEY (id_role,id_server)
 )WITHOUT OIDS;
 
 
@@ -172,6 +175,7 @@ CREATE TABLE public.Blacklist(
 CREATE TABLE public.Contient(
 	id_item      INT CONSTRAINT contient_item_null NOT NULL ,
 	id_inventory INT CONSTRAINT contient_inventory_null NOT NULL ,
+	qte			 INT CONSTRAINT contient_qte_null NOT NULL CONSTRAINT contient_qte_check CHECK (qte > 0) ,
 	CONSTRAINT prk_constraint_Contient PRIMARY KEY (id_item,id_inventory)
 )WITHOUT OIDS;
 
@@ -189,8 +193,9 @@ CREATE TABLE public.Keeprole(
 
 
 ALTER TABLE public.Membre ADD CONSTRAINT FK_Membre_perms FOREIGN KEY (perms) REFERENCES public.Perms(code);
-ALTER TABLE public.Membre ADD CONSTRAINT FK_Membre_local_perms FOREIGN KEY (local_perms) REFERENCES public.Local_Perms(code);
+--ALTER TABLE public.Membre ADD CONSTRAINT FK_Membre_local_perms FOREIGN KEY (local_perms) REFERENCES public.Local_Perms(code);
 ALTER TABLE public.JDR ADD CONSTRAINT FK_JDR_id_member FOREIGN KEY (id_member) REFERENCES public.Membre(id_member);
+ALTER TABLE public.JDR ADD CONSTRAINT FK_JDR_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
 ALTER TABLE public.Characterr ADD CONSTRAINT FK_Character_id_serverchan FOREIGN KEY (id_server,id_channel) REFERENCES public.JDR(id_server,id_channel);
 --ALTER TABLE public.Characterr ADD CONSTRAINT FK_Character_id_channel FOREIGN KEY (id_channel) REFERENCES public.JDR(id_channel);
 ALTER TABLE public.Characterr ADD CONSTRAINT FK_Character_gm FOREIGN KEY (gm) REFERENCES public.Gamemods(gm_code);
@@ -204,15 +209,24 @@ ALTER TABLE public.Blacklist ADD CONSTRAINT FK_Blacklist_id_member FOREIGN KEY (
 ALTER TABLE public.Contient ADD CONSTRAINT FK_Contient_id_item FOREIGN KEY (id_item) REFERENCES public.Items(id_item);
 ALTER TABLE public.Contient ADD CONSTRAINT FK_Contient_id_inventory FOREIGN KEY (id_inventory) REFERENCES public.Inventaire(id_inventory);
 ALTER TABLE public.Keeprole ADD CONSTRAINT FK_Keeprole_id_member FOREIGN KEY (id_member) REFERENCES public.Membre(id_member);
-ALTER TABLE public.Keeprole ADD CONSTRAINT FK_Keeprole_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
-ALTER TABLE public.Keeprole ADD CONSTRAINT FK_Keeprole_id_role FOREIGN KEY (id_role) REFERENCES public.Role(id_role);
+--ALTER TABLE public.Keeprole ADD CONSTRAINT FK_Keeprole_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
+ALTER TABLE public.Keeprole ADD CONSTRAINT FK_Keeprole_id_role FOREIGN KEY (id_role,id_server) REFERENCES public.Role(id_role,id_server);
 
 INSERT INTO Perms VALUES ('N','None');
 INSERT INTO Perms VALUES ('O','Owner');
 INSERT INTO Perms VALUES ('M','Manager');
 INSERT INTO Perms VALUES ('P','Premium');
-INSERT INTO Local_perms VALUES ('N','None');
-INSERT INTO Local_perms VALUES ('A','Admin');
-INSERT INTO Membre VALUES ('NULL','N','N');
+--INSERT INTO Local_perms VALUES ('N','None');
+--INSERT INTO Local_perms VALUES ('A','Admin');
+INSERT INTO Membre VALUES ('NULL','N');
 INSERT INTO Gamemods VALUES ('O','Offensive');
 INSERT INTO Gamemods VALUES ('D','Defensive');
+
+
+CREATE TABLE public.Purge(
+	id_server VARCHAR (25) CONSTRAINT purge_server_null NOT NULL ,
+	datein DATE CONSTRAINT purge_datein_null NOT NULL ,
+	CONSTRAINT prk_constraint_purge PRIMARY KEY (id_server)
+)WITHOUT OIDS;
+
+ALTER TABLE public.Purge ADD CONSTRAINT FK_purge_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);

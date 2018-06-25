@@ -52,7 +52,7 @@ EXECUTE PROCEDURE initCharacter();
 
 CREATE FUNCTION inventory_Manager () RETURNS TRIGGER AS $inventory_Manager$
 DECLARE
-	poids INVENTAIRE.SIZE_%TYPE;
+	poids ITEMS.WEIGHT%TYPE;
 	it_poids ITEMS.WEIGHT%TYPE;
 BEGIN
 	IF INSERTING OR UPDATING THEN
@@ -60,14 +60,14 @@ BEGIN
 		WHERE id_inventory = new.id_inventory;
 		SELECT weight INTO it_poids FROM items
 		WHERE id_item = new.id_item;
-		poids := poids + it_poids;
+		poids := poids + (new.qte * it_poids);
 		SELECT size_max INTO it_poids FROM inventaire
 		WHERE id_inventory = new.id_inventory;
-		IF poids > it_poids THEN
+		IF CEIL(poids) > it_poids THEN
 			RAISE EXCEPTION 'Inventory size exceeded';
 		ELSE
 			UPDATE inventaire
-			SET size_ = poids
+			SET size_ = CEIL(poids)
 			WHERE id_inventory = new.id_inventory;
 		END IF;
 	END IF;
@@ -76,9 +76,9 @@ BEGIN
 		WHERE id_inventory = old.id_inventory;
 		SELECT weight INTO it_poids FROM items
 		WHERE id_item = old.id_item;
-		poids := poids - it_poids;
+		poids := poids - (old.qte * it_poids);
 		UPDATE inventaire
-		SET size_ = poids
+		SET size_ = CEIL(poids)
 		WHERE id_inventory = old.id_inventory;
 	END IF;
 END;
@@ -100,3 +100,29 @@ CREATE TRIGGER initInventory
 BEFORE INSERT ON inventaire
 FOR EACH ROW
 EXECUTE PROCEDURE initInventory();
+
+CREATE FUNCTION purge_date_check () RETURNS TRIGGER AS $purge_date_check$
+BEGIN
+	IF INSERTING THEN
+		new.datein := sysdate();
+	ELSE
+		new.datein = old.datein;
+	END IF;
+END;
+$purge_date_check$ LANGUAGE plpgsql;
+
+CREATE TRIGGER purge_date_check
+BEFORE INSERT OR UPDATE ON purge
+FOR EACH ROW
+EXECUTE PROCEDURE purge_date_check();
+
+CREATE FUNCTION item_updater () RETURNS TRIGGER AS $item_updater$
+BEGIN
+	new.weight := old.weight;
+END;
+$item_updater$ LANGUAGE plpgsql;
+
+CREATE TRIGGER item_updater
+BEFORE UPDATE ON items
+FOR EACH ROW
+EXECUTE PROCEDURE item_updater();

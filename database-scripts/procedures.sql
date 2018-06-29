@@ -732,3 +732,114 @@ BEGIN
 	RETURN nbr;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION JDRextend
+(
+	idserv JDR.id_server%TYPE,
+	src JDR.id_channel%TYPE,
+	target JDR.id_channel%TYPE
+) RETURNS void AS $$
+BEGIN
+	INSERT INTO JDRextension
+	VALUES (idserv,src,target);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION JDRstopextend
+(
+	idserv JDR.id_server%TYPE,
+	src JDR.id_channel%TYPE,
+	target JDR.id_channel%TYPE
+) RETURNS void AS $$
+BEGIN
+	DELETE FROM JDRextension
+	WHERE id_server = idserv AND id_src = src AND id_target = target;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION JDRstopallextend
+(
+	idserv JDR.id_server%TYPE,
+	src JDR.id_channel%TYPE
+) RETURNS void AS $$
+BEGIN
+	DELETE FROM JDRextension
+	WHERE id_server = idserv AND id_src = src;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_character
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF Characterr AS $$
+DECLARE
+	nbr INT;
+	src JDR.id_channel%TYPE;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM JDRextension
+	WHERE (id_server = idserv AND id_target = idchan);
+	IF nbr = 0 THEN
+		RETURN QUERY
+		SELECT * FROM Characterr
+		WHERE charkey = dbkey AND id_server = idserv AND id_channel = idchan;
+	ELSE
+		SELECT id_src INTO src FROM JDRextension
+		WHERE (id_server = idserv AND id_target = idchan);
+		RETURN QUERY
+		SELECT * FROM Characterr
+		WHERE charkey = dbkey AND id_server = src AND id_channel = idchan;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_allcharacter
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF Characterr AS $$
+DECLARE
+	nbr INT;
+	src JDR.id_channel%TYPE;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM JDRextension
+	WHERE (id_server = idserv AND id_target = idchan);
+	IF nbr = 0 THEN
+		RETURN QUERY
+		SELECT * FROM Characterr
+		WHERE id_server = idserv AND id_channel = idchan;
+	ELSE
+		SELECT id_src INTO src FROM JDRextension
+		WHERE (id_server = idserv AND id_target = idchan);
+		RETURN QUERY
+		SELECT * FROM Characterr
+		WHERE id_server = src AND id_channel = idchan;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_jdr
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF JDR AS $$
+DECLARE
+	nbr INT;
+	src JDR.id_channel%TYPE;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM JDRextension
+	WHERE (id_server = idserv AND id_target = idchan);
+	IF nbr = 0 THEN
+		RETURN QUERY
+		SELECT * FROM JDR
+		WHERE id_server = idserv AND id_channel = idchan;
+	ELSE
+		SELECT id_src INTO src FROM JDRextension
+		WHERE (id_server = idserv AND id_target = idchan);
+		RETURN QUERY
+		SELECT * FROM JDR
+		WHERE id_server = src AND id_channel = idchan;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;

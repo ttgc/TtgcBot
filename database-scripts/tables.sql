@@ -230,3 +230,13 @@ CREATE TABLE public.Purge(
 )WITHOUT OIDS;
 
 ALTER TABLE public.Purge ADD CONSTRAINT FK_purge_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
+
+CREATE TABLE public.JDRextension(
+	id_server VARCHAR (25) ,
+	id_src VARCHAR (25) ,
+	id_target VARCHAR (25) ,
+	CONSTRAINT prk_constraint_jdrextension PRIMARY KEY (id_target)
+)WITHOUT OIDS;
+
+ALTER TABLE public.JDRextension ADD CONSTRAINT FK_jdrextension_src FOREIGN KEY (id_server,id_src) REFERENCES public.JDR(id_server,id_channel);
+ALTER TABLE public.JDRextension ADD CONSTRAINT FK_jdrextension_target FOREIGN KEY (id_server,id_target) REFERENCES public.JDR(id_server,id_channel);

@@ -3,15 +3,22 @@ BEGIN
 	IF INSERTING THEN
 		new.creation := sysdate();
 		new.PJs := 0;
-	ELSE
+	END IF;
+	IF UPDATING THEN
 		new.creation := old.creation;
-		--new.PJs := old.PJs;
+		UPDATE JDRextension
+		SET id_src = new.id_channel
+		WHERE id_server = new.id_server AND id_src = old.id_channel;
+	END IF;
+	IF DELETING THEN
+		DELETE FROM JDRextension
+		WHERE id_server = old.id_server AND id_src = old.id_channel;
 	END IF;
 END;
 $initJDR$ LANGUAGE plpgsql;
 
 CREATE TRIGGER initJDR
-BEFORE INSERT OR UPDATE ON JDR
+BEFORE INSERT OR UPDATE OR DELETE ON JDR
 FOR EACH ROW
 EXECUTE PROCEDURE initJDR();
 
@@ -126,3 +133,29 @@ CREATE TRIGGER item_updater
 BEFORE UPDATE ON items
 FOR EACH ROW
 EXECUTE PROCEDURE item_updater();
+
+CREATE FUNCTION extendinit () RETURNS TRIGGER AS $extendinit$
+DECLARE
+	nbr INT;
+	mj JDR.id_member%TYPE;
+BEGIN
+	IF DELETING OR UPDATING THEN
+		PERFORM JDRdelete(old.id_server, old.id_target);
+	END IF;
+	IF INSERTING OR UPDATING THEN
+		SELECT COUNT(*) INTO nbr FROM JDR
+		WHERE (id_server = new.id_server AND id_channel = new.id_target);
+		SELECT id_member INTO mj FROM JDR
+		WHERE (id_server = new.id_server AND id_channel = new.id_src);
+		IF nbr > 0 THEN
+			PERFORM JDRdelete(new.id_server, new.id_target);
+		END IF;
+		PERFORM JDRcreate(new.id_server, new.id_target, mj);
+	END IF;
+END;
+$extendinit$ LANGUAGE plpgsql;
+
+CREATE TRIGGER extendinit
+BEFORE INSERT OR UPDATE OR DELETE ON JDRextension
+FOR EACH ROW
+EXECUTE PROCEDURE extendinit();

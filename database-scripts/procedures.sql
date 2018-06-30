@@ -635,7 +635,7 @@ CREATE OR REPLACE FUNCTION removeserver
 ) RETURNS void AS $$
 BEGIN
 	INSERT INTO purge
-	VALUES (idserv,sysdate());
+	VALUES (idserv,current_date);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -711,7 +711,7 @@ DECLARE
 	rol RECORD;
 BEGIN
 	nbr := 0;
-	datemin := sysdate() - days;
+	datemin := current_date - days;
 	FOR line IN (SELECT * FROM purge WHERE datein < datemin) LOOP
 		FOR jdrl IN (SELECT id_server,id_channel FROM JDR WHERE id_server = line.id_server) LOOP
 			PERFORM jdrdelete(jdrl.id_server,jdrl.id_channel);

@@ -34,27 +34,30 @@ class Database:
     def execute(self,command,**kwargs):
         self.cur = self.connection.cursor()
         try:
-            cur.execute(command,kwargs)
+            self.cur.execute(command,kwargs)
         except:
-            self.connection.rollback()
             return
-        self.connection.commit()
         return self.cur
 
     def call(self,proc,**kwargs):
         self.cur = self.connection.cursor()
         try:
-            cur.callproc(proc,kwargs)
+            self.cur.callproc(proc,kwargs)
         except:
-            self.connection.rollback()
             return
-        self.connection.commit()
         return self.cur
 
     def getcursor(self):
         return self.cur
 
-    def close(self):
+    def close(self,rollback=False):
+        if self.cur is not None:
+            self.cur.close()
+            self.cur = None
+        if rollback:
+            self.connection.rollback()
+        else:
+            self.connection.commit()
         self.connection.close()
 
 class DatabaseException(Exception):

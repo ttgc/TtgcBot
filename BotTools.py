@@ -28,7 +28,7 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT * FROM Serveur WHERE id_server = %(idserv)s;",idserv=ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the server")
         info = cur.fetchone()
         db.close()
@@ -65,7 +65,7 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT id_role FROM Keeprole WHERE id_server = %(idserv)s GROUP BY id_role;",idserv=self.ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the keeprole list")
         ls = []
         for i in cur:
@@ -77,7 +77,7 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT id_member FROM Keeprole WHERE id_server = %(idserv)s GROUP BY id_member;",idserv=self.ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the keeprole member list")
         ls = []
         for i in cur:
@@ -89,7 +89,7 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT id_member,id_role FROM Keeprole WHERE id_server = %(idserv)s;",idserv=self.ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the keeprole member/roles list")
         ls = cur.fetchall()
         db.close()
@@ -99,7 +99,7 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT content FROM Word_Blocklist WHERE id_server = %(idserv)s;",idserv=self.ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the blocked word list")
         ls = []
         for i in cur:
@@ -111,9 +111,11 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT id_channel,creation,PJs,id_member FROM JDR WHERE id_server = %(idserv)s;",idserv=self.ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the jdr list")
         ls = cur.fetchall()
+        db.close()
+        db = Database()
         cur = db.execute("SELECT id_target FROM JDRextension WHERE id_server = %(idserv)s;",idserv=self.ID)
         if cur is not None:
             extended = []
@@ -127,12 +129,12 @@ class DBServer:
 
     def blockword(self,string):
         db = Database()
-        db.call("blockword",idserv=self.id,word=string)
+        db.call("blockword",idserv=self.ID,word=string)
         db.close()
 
     def unblockword(self,string):
         db = Database()
-        db.call("unblockword",idserv=self.id,word=string)
+        db.call("unblockword",idserv=self.ID,word=string)
         db.close()
 
     def backuprolemember(self,member):
@@ -140,7 +142,7 @@ class DBServer:
         ls = self.keeprolelist()
         for i in member.roles:
             if str(i.id) in ls:
-                db.call("backuprolemember",idmemb=member.id,idserv=self.id,idrole=i.id)
+                db.call("backuprolemember",idmemb=member.id,idserv=self.ID,idrole=i.id)
         db.close()
 
     @asyncio.coroutine
@@ -148,24 +150,59 @@ class DBServer:
         db = Database()
         cur = db.execute("SELECT id_role FROM keeprole WHERE id_server = %(idserv)s AND id_member = %(idmemb)s;",idserv=self.ID,idmemb=member.id)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to restore roles of the member")
         ls = []
         for i in cur:
             ls.append(discord.utils.get(srv.roles,id=i[0]))
         yield from client.add_roles(member,ls)
         for i in ls:
-            db.call("restorerolemember",idmemb=member.id,idserv=self.id,idrole=i.id)
+            db.call("restorerolemember",idmemb=member.id,idserv=self.ID,idrole=i.id)
         db.close()
 
     def addkeeprole(self,roleid):
         db = Database()
-        db.call("addrole",idserv=self.id,idrole=roleid)
+        db.call("addrole",idserv=self.ID,idrole=roleid)
         db.close()
 
     def removekeeprole(self,roleid):
         db = Database()
-        db.call("removerole",idserv=self.id,idrole=roleid)
+        db.call("removerole",idserv=self.ID,idrole=roleid)
+        db.close()
+
+    def get_warned(self):
+        db = Database()
+        cur = db.execute("SELECT id_member,warn_number FROM warn WHERE id_server = %(idserv)s ORDER BY warn_number;",idserv=self.ID)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to find warn for this server")
+        ls = cur.fetchall()
+        db.close()
+        return ls
+
+    def get_warnconfig(self):
+        db = Database()
+        cur = db.execute("SELECT warn_number,sanction FROM warnconfig WHERE id_server = %(idserv)s ORDER BY warn_number;",idserv=self.ID)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to find warnconfig for this server")
+        ls = cur.fetchall()
+        db.close()
+        return ls
+
+    def warnconfig(self,nbr,act):
+        db = Database()
+        db.call("warnconfigure",idserv=self.ID,warns=nbr,action=act)
+        db.close()
+
+    def warnuser(self,memberid):
+        db = Database()
+        db.call("warnuser",idmemb=memberid,idserv=self.ID)
+        db.close()
+
+    def unwarnuser(self,memberid):
+        db = Database()
+        db.call("unwarnuser",idmemb=memberid,idserv=self.ID)
         db.close()
 
     def remove(self):
@@ -194,7 +231,7 @@ class DBJDR:
         db = Database()
         cur = db.call("get_jdr",idserv=srvid,idchan=channelid)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the JDR")
         info = cur.fetchone()
         db.close()
@@ -241,7 +278,7 @@ class DBJDR:
         db = Database()
         cur = db.call("get_character",dbkey=charkey,idserv=self.server,idchan=self.channel)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find character")
         rawchar = cur.fetchone()
         db.close()
@@ -254,17 +291,19 @@ class DBJDR:
             gmdefault = 0
         else:
             gmdefault = 1
-        inv = None ###TEMP
-        char = Character({"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
+        inv = Inventory()
+        inv.loadfromdb(rawchar[30])
+        char = Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
                           "charisme":rawchar[10],"furtivite":rawchar[11],"karma":rawchar[12],"default_karma":rawchar[13],"money":rawchar[14],"lp":rawchar[15],"dp":rawchar[16],
                           "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31]})
+        char.bind(self)
         return char
 
     def charlist(self):
         db = Database()
         cur = db.call("get_allcharacter",idserv=self.server,idchan=self.channel)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find character")
         ls = []
         for i in cur:
@@ -288,7 +327,7 @@ class BDMember:
         db = Database()
         cur = db.execute("SELECT * FROM Membre WHERE id_member = %(idmemb)s;",idmemb=ID)
         if cur is None:
-            db.close()
+            db.close(True)
             raise DatabaseException("unable to find the member")
         info = cur.fetchone()
         db.close()

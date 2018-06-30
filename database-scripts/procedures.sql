@@ -313,12 +313,12 @@ CREATE OR REPLACE FUNCTION switchmod
 	dbkey Characterr.charkey%TYPE,
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE,
-	def BOOLEAN
+	def_ BOOLEAN
 ) RETURNS void AS $$
 DECLARE
 	curmod Gamemods.gm_code%TYPE;
 BEGIN
-	IF def THEN
+	IF def_ THEN
 		SELECT gm_default INTO curmod FROM Characterr
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 		IF curmod = 'O' THEN
@@ -620,8 +620,8 @@ BEGIN
 	SELECT COUNT(*) INTO nbr FROM purge
 	WHERE id_server = idserv;
 	IF nbr = 0 THEN
-		INSERT INTO serveur (id_server,prefixx)
-		VALUES (idserv,'/');
+		INSERT INTO serveur (id_server,prefixx,keeping_role)
+		VALUES (idserv,'/',false);
 	ELSE
 		DELETE FROM purge
 		WHERE id_server = idserv;
@@ -840,6 +840,102 @@ BEGIN
 		RETURN QUERY
 		SELECT * FROM JDR
 		WHERE id_server = src AND id_channel = idchan;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Warn features
+CREATE OR REPLACE FUNCTION warnuser
+(
+	idmemb Warn.id_member%TYPE,
+	idserv Warn.id_server%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM warn
+	WHERE id_server = idserv AND id_member = idmemb;
+	IF nbr = 0 THEN
+		INSERT INTO warn
+		VALUES(idserv,idmemb,1);
+	ELSE
+		UPDATE warn
+		SET warn_number = warn_number + 1
+		WHERE id_server = idserv AND id_member = idmemb;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION unwarnuser
+(
+	idmemb Warn.id_member%TYPE,
+	idserv Warn.id_server%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT warn_number INTO nbr FROM warn
+	WHERE id_server = idserv AND id_member = idmemb;
+	IF nbr = 1 THEN
+		DELETE FROM warn
+		WHERE id_server = idserv AND id_member = idmemb;
+	ELSE
+		UPDATE warn
+		SET warn_number = warn_number + 1
+		WHERE id_server = idserv AND id_member = idmemb;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION warnconfigure
+(
+	idserv Warnconfig.id_server%TYPE,
+	warns Warnconfig.warn_number%TYPE,
+	action Warnconfig.sanction%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	IF LOWER(action) = 'disable' THEN
+		DELETE FROM warnconfig
+		WHERE (id_server = idserv AND warn_number = warns);
+	ELSE
+		SELECT COUNT(*) INTO nbr FROM warnconfig
+		WHERE (id_server = idserv AND warn_number = warns);
+		IF nbr = 0 THEN
+			INSERT INTO warnconfig
+			VALUES (idserv,warns,action);
+		ELSE
+			UPDATE warnconfig
+			SET sanction = action
+			WHERE (id_server = idserv AND warn_number = warns);
+		END IF;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Use function for JDR
+CREATE OR REPLACE FUNCTION usepoints
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	item VARCHAR
+) RETURNS void AS $$
+BEGIN
+	IF LOWER(item) = 'lightpt' THEN
+		UPDATE Characterr
+		SET light_points = light_points - 1,
+		karma = 10,
+		gm = 'D'
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(item) = 'darkpt' THEN
+		UPDATE Characterr
+		SET dark_points = dark_points - 1,
+		karma = -10,
+		gm = 'O'
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
 END;
 $$ LANGUAGE plpgsql;

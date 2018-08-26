@@ -213,6 +213,12 @@ class DBServer:
     def getJDR(self,channelid):
         return DBJDR(self.ID,channelid)
 
+    def jdrstart(self,channelid,mjid):
+        db = Database()
+        db.call("jdrcreate",idserv=self.ID,idchan=channelid,mj=mjid)
+        db.close()
+        return self.getJDR(channelid)
+
 def addserver(server):
     db = Database()
     db.call("addserver",idserv=server.id)
@@ -257,6 +263,11 @@ class DBJDR:
     def charcreate(self,chardbkey):
         db = Database()
         db.call("charcreate",dbkey=chardbkey,idserv=self.server,idchan=self.channel)
+        db.close()
+
+    def chardelete(self,chardbkey):
+        db = Database()
+        db.call("chardelete",dbkey=chardbkey,idserv=self.server,idchan=self.channel)
         db.close()
 
     def extend(self,channel_id):
@@ -313,15 +324,27 @@ class DBJDR:
 
     def get_charbase(self):
         ls = self.charlist()
-        charbase = {}
+        charbase = []
         for i in ls:
-            charbase[i] = self.get_character(i)
+            charbase.append(self.get_character(i))
         return charbase
 
     def get_serverinfo(self):
         return DBServer(self.server)
 
-class BDMember:
+    def get_finalizer(self):
+        db = Database()
+        cur = db.call("finalize",idserv=self.server,idchan=self.channel)
+        if cur is None:
+            db.close()
+            return []
+        ls = []
+        for i in cur:
+            ls.append((i[0],i[1]))
+        db.close()
+        return ls
+
+class DBMember:
     def __init__(self,ID):
         self.ID = ID
         db = Database()
@@ -341,6 +364,27 @@ class BDMember:
 
     def is_premium(self):
         return self.perm.upper() != "N"
+
+    def is_blacklisted(self):
+        db = Database()
+        cur = db.execute("SELECT COUNT(*) FROM blacklist WHERE id_member = %(idmemb)s;",idmemb=self.ID)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to retrieve blacklisting")
+        blacklisted = True
+        if cur.fetchone()[0] == 0:
+            blacklisted = False
+        db.close()
+        rs = ""
+        if blacklisted:
+            db = Database()
+            cur = db.execute("SELECT reason FROM blacklist WHERE id_member = %(idmemb)s;",idmemb=self.ID)
+            if cur is None:
+                db.close(True)
+                raise DatabaseException("unable to find reason for blacklisting")
+            rs = cur.fetchone()[0]
+            db.close()
+        return blacklisted,rs
 
 def grantuser(memberid,permcode):
     db = Database()

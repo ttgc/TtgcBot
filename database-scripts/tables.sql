@@ -259,3 +259,14 @@ CREATE TABLE public.warnconfig(
 ALTER TABLE public.warn ADD CONSTRAINT FK_warn_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
 ALTER TABLE public.warn ADD CONSTRAINT FK_warn_id_member FOREIGN KEY (id_member) REFERENCES public.Membre(id_member);
 ALTER TABLE public.warnconfig ADD CONSTRAINT FK_warnconfig_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
+
+--Adding finalize features
+CREATE TABLE public.finalize(
+	id_server VARCHAR (25) ,
+	id_channel VARCHAR (25) ,
+	title VARCHAR (50) ,
+	description VARCHAR (1000) CONSTRAINT finalize_descr_null NOT NULL ,
+	CONSTRAINT prk_constraint_finalize PRIMARY KEY (id_server,id_channel,title)
+)WITHOUT OIDS;
+
+ALTER TABLE public.finalize ADD CONSTRAINT FK_finalize_jdr FOREIGN KEY (id_server,id_channel) REFERENCES public.JDR(id_server,id_channel);

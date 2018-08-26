@@ -77,9 +77,12 @@ CREATE OR REPLACE FUNCTION jdrdelete
 DECLARE
 	line RECORD;
 BEGIN
+	PERFORM JDRstopallextend(idserv,idchan);
 	FOR line IN (SELECT charkey FROM Characterr WHERE id_server = idserv AND id_channel = idchan) LOOP
 		PERFORM chardelete(line.charkey, idserv, idchan);
 	END LOOP;
+	DELETE FROM finalize
+	WHERE id_server = idserv AND id_channel = idchan;
 	DELETE FROM JDR
 	WHERE id_server = idserv AND id_channel = idchan;
 END;
@@ -937,5 +940,53 @@ BEGIN
 		gm = 'O'
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--finalize features
+CREATE OR REPLACE FUNCTION finalize
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF finalize AS $$
+BEGIN
+	RETURN QUERY
+	SELECT title,description FROM finalize
+	WHERE id_server = idserv AND id_channel = idchan;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION set_finalize_field
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	titl finalize.title%TYPE,
+	descr finalize.description%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM finalize
+	WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
+	IF nbr = 0 THEN
+		INSERT INTO finalize
+		VALUES (idserv,idchan,titl,descr);
+	ELSE
+		UPDATE finalize
+		SET description = descr
+		WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION del_finalize_field
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	titl finalize.title%TYPE
+) RETURNS void AS $$
+BEGIN
+	DELETE FROM finalize
+	WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
 END;
 $$ LANGUAGE plpgsql;

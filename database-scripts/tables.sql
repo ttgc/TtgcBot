@@ -240,3 +240,33 @@ CREATE TABLE public.JDRextension(
 
 ALTER TABLE public.JDRextension ADD CONSTRAINT FK_jdrextension_src FOREIGN KEY (id_server,id_src) REFERENCES public.JDR(id_server,id_channel);
 ALTER TABLE public.JDRextension ADD CONSTRAINT FK_jdrextension_target FOREIGN KEY (id_server,id_target) REFERENCES public.JDR(id_server,id_channel);
+
+--Adding warn features
+CREATE TABLE public.warn(
+	id_server VARCHAR (25) ,
+	id_member VARCHAR (25) ,
+	warn_number	INT CONSTRAINT warn_warnnumber_null NOT NULL CONSTRAINT warn_warnnumber_check CHECK (warn_number > 0) ,
+	CONSTRAINT prk_constraint_warn PRIMARY KEY (id_server,id_member)
+)WITHOUT OIDS;
+
+CREATE TABLE public.warnconfig(
+	id_server VARCHAR (25) ,
+	warn_number INT CONSTRAINT warnconfig_warnnumber_check CHECK (warn_number > 0) ,
+	sanction VARCHAR (25) CONSTRAINT warnconfig_sanction_null NOT NULL ,
+	CONSTRAINT prk_constraint_warnconfig PRIMARY KEY (id_server,warn_number)
+)WITHOUT OIDS;
+
+ALTER TABLE public.warn ADD CONSTRAINT FK_warn_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
+ALTER TABLE public.warn ADD CONSTRAINT FK_warn_id_member FOREIGN KEY (id_member) REFERENCES public.Membre(id_member);
+ALTER TABLE public.warnconfig ADD CONSTRAINT FK_warnconfig_id_server FOREIGN KEY (id_server) REFERENCES public.Serveur(id_server);
+
+--Adding finalize features
+CREATE TABLE public.finalize(
+	id_server VARCHAR (25) ,
+	id_channel VARCHAR (25) ,
+	title VARCHAR (50) ,
+	description VARCHAR (1000) CONSTRAINT finalize_descr_null NOT NULL ,
+	CONSTRAINT prk_constraint_finalize PRIMARY KEY (id_server,id_channel,title)
+)WITHOUT OIDS;
+
+ALTER TABLE public.finalize ADD CONSTRAINT FK_finalize_jdr FOREIGN KEY (id_server,id_channel) REFERENCES public.JDR(id_server,id_channel);

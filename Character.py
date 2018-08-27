@@ -40,6 +40,7 @@ class Character:
         self.stat = dic["stat"]
         self.lp = dic["lp"]
         self.dp = dic["dp"]
+        #self.regenkarm = [0,dic["regenkarm"]]
         self.mod = dic["mod"]
         self.default_mod = dic["default_mod"]
         self.default_karma = dic["default_karma"]
@@ -59,6 +60,27 @@ class Character:
     def stock(self):
         return "<"+self.name+"|"+self.lore+"|"+str(self.PVmax)+"|"+str(self.PMmax)+"|"+str(self.force)+"|"+str(self.esprit)+"|"+str(self.charisme)+"|"+str(self.furtivite)+"|"+str(self.money)+"|"+str(self.lp)+"|"+str(self.dp)+"|"+str(self.mod)+"|"+str(self.karma)+"|"+str(self.PV)+"|"+str(self.PM)+"|"+str(self.default_mod)+"|"+str(self.default_karma)+"|"+str(self.intuition)+"|"+str(self.mental)+">"
 
+##    def damage_inflict(self,roll,flat,dice,magic=False,allowcrit=True):
+##        dmg = 0
+##        if roll == 42 or roll == 66:
+##            dmg = (flat+dice)*2.5
+##            if self.mod == 0: dmg *= 2
+##        elif (magic and roll <= self.esprit and roll != 66):
+##            dmg = flat+randint(1,dice)
+##            if allowcrit and roll <= 10: dmg *= 2
+##            if self.mod == 0: dmg *= 2
+##            if dmg < 0: dmg = 0
+##        elif (not magic and roll <= self.force and roll != 66):
+##            dmg = flat+randint(1,dice)
+##            if allowcrit and roll <= 10: dmg *= 2
+##            if self.mod == 0: dmg *= 2
+##            if dmg < 0: dmg = 0
+##        elif roll >= 91:
+##            dmg = flat+randint(1,dice)
+##            dmg *= 2
+##            if self.mod == 0: dmg *= 2
+##            if dmg < 0: dmg = 0
+##        return dmg
 
 def unstockchar(string,name):
     string = string.replace("<","")
@@ -135,6 +157,11 @@ def roll(client,channel,char,stat,modifier):
                 elif result <= char.force+modifier: char.stat[3] += 1
                 else: char.stat[-3] += 1
                 yield from client.send_message(channel,"Result of test (force) :"+str(result)+"/"+str(char.force+modifier))
+##            char.regenkarm[0] += char.regenkarm[1]
+##            if char.regenkarm[0] >= 1:
+##                if char.karma < 0: char.karma += 1
+##                elif char.karma > 0: char.karma -= 1
+##                char.regenkarm[0] -= 1
     elif stat == "esprit":
         char.stat[0] += 1
         dice = randint(1,100)
@@ -201,6 +228,10 @@ def roll(client,channel,char,stat,modifier):
                 elif result <= char.esprit+modifier: char.stat[3] += 1
                 else: char.stat[-3] += 1
                 yield from client.send_message(channel,"Result of test (esprit) :"+str(result)+"/"+str(char.esprit+modifier))
+##            if char.regenkarm[0] >= 1:
+##                if char.karma < 0: char.karma += 1
+##                elif char.karma > 0: char.karma -= 1
+##                char.regenkarm[0] -= 1
     elif stat == "charisme":
         char.stat[0] += 1
         dice = randint(1,100)
@@ -267,6 +298,10 @@ def roll(client,channel,char,stat,modifier):
                 elif result <= char.charisme+modifier: char.stat[3] += 1
                 else: char.stat[-3] += 1
                 yield from client.send_message(channel,"Result of test (charisme) :"+str(result)+"/"+str(char.charisme+modifier))
+##            if char.regenkarm[0] >= 1:
+##                if char.karma < 0: char.karma += 1
+##                elif char.karma > 0: char.karma -= 1
+##                char.regenkarm[0] -= 1
     elif stat == "furtivite" or stat == "agilite":
         char.stat[0] += 1
         dice = randint(1,100)
@@ -333,6 +368,10 @@ def roll(client,channel,char,stat,modifier):
                 elif result <= char.furtivite+modifier: char.stat[3] += 1
                 else: char.stat[-3] += 1
                 yield from client.send_message(channel,"Result of test (agilite) :"+str(result)+"/"+str(char.furtivite+modifier))
+##            if char.regenkarm[0] >= 1:
+##                if char.karma < 0: char.karma += 1
+##                elif char.karma > 0: char.karma -= 1
+##                char.regenkarm[0] -= 1
     elif stat == "chance":
         resultc = randint(1,6)
         yield from client.send_message(channel,"Result of test (chance) :"+str(resultc))

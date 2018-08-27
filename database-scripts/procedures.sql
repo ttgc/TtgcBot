@@ -77,9 +77,12 @@ CREATE OR REPLACE FUNCTION jdrdelete
 DECLARE
 	line RECORD;
 BEGIN
+	PERFORM JDRstopallextend(idserv,idchan);
 	FOR line IN (SELECT charkey FROM Characterr WHERE id_server = idserv AND id_channel = idchan) LOOP
 		PERFORM chardelete(line.charkey, idserv, idchan);
 	END LOOP;
+	DELETE FROM finalize
+	WHERE id_server = idserv AND id_channel = idchan;
 	DELETE FROM JDR
 	WHERE id_server = idserv AND id_channel = idchan;
 END;
@@ -107,11 +110,11 @@ BEGIN
 	PERFORM jdrcreate(idserv,dest,mj);
 	FOR line IN (SELECT * FROM Characterr WHERE id_server = idserv AND id_channel = src) LOOP
 		INSERT INTO inventaire (charkey)
-		VALUES (dbkey);
+		VALUES (line.charkey);
 		SELECT MAX(id_inventory) INTO inv FROM inventaire
-		WHERE charkey = dbkey;
+		WHERE charkey = line.charkey;
 		INSERT INTO Characterr
-		VALUES (line.charkey, line.name, line.lore, line.lvl, line.PV, line.PVmax, line.PM, line.PMmax, line.strength, line.spirit, line.charisma, line.agility, line.karma, line.defaultkarma, line.argent, line.light_points, line.dark_points, line.intuition, line.mental, line.rolled_dice, line.success, line.fail, line.critic_success, line.critic_fail, line.super_critic_success, line.super_critic_fail, idserv, dest, line.gm, line.gm_default, inv, line.id_member);
+		VALUES (line.charkey, line.nom, line.lore, line.lvl, line.PV, line.PVmax, line.PM, line.PMmax, line.strength, line.spirit, line.charisma, line.agility, line.karma, line.defaultkarma, line.argent, line.light_points, line.dark_points, line.intuition, line.mental, line.rolled_dice, line.succes, line.fail, line.critic_success, line.critic_fail, line.super_critic_success, line.super_critic_fail, idserv, dest, line.gm, line.gm_default, inv, line.id_member);
 	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
@@ -219,7 +222,7 @@ BEGIN
 	END IF;
 	IF LOWER(stat) = 'po' THEN
 		UPDATE Characterr
-		SET money = money + val
+		SET argent = argent + val
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
 	IF LOWER(stat) = 'int' THEN
@@ -294,7 +297,7 @@ BEGIN
 				ELSE
 					IF val <= valmax THEN
 						UPDATE Characterr
-						SET success = success + 1
+						SET succes = succes + 1
 						WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 					ELSE
 						UPDATE Characterr
@@ -313,12 +316,12 @@ CREATE OR REPLACE FUNCTION switchmod
 	dbkey Characterr.charkey%TYPE,
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE,
-	def BOOLEAN
+	def_ BOOLEAN
 ) RETURNS void AS $$
 DECLARE
 	curmod Gamemods.gm_code%TYPE;
 BEGIN
-	IF def THEN
+	IF def_ THEN
 		SELECT gm_default INTO curmod FROM Characterr
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 		IF curmod = 'O' THEN
@@ -620,8 +623,8 @@ BEGIN
 	SELECT COUNT(*) INTO nbr FROM purge
 	WHERE id_server = idserv;
 	IF nbr = 0 THEN
-		INSERT INTO serveur (id_server,prefixx)
-		VALUES (idserv,'/');
+		INSERT INTO serveur (id_server,prefixx,keeping_role)
+		VALUES (idserv,'/',false);
 	ELSE
 		DELETE FROM purge
 		WHERE id_server = idserv;
@@ -635,7 +638,7 @@ CREATE OR REPLACE FUNCTION removeserver
 ) RETURNS void AS $$
 BEGIN
 	INSERT INTO purge
-	VALUES (idserv,sysdate());
+	VALUES (idserv,current_date);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -711,7 +714,7 @@ DECLARE
 	rol RECORD;
 BEGIN
 	nbr := 0;
-	datemin := sysdate() - days;
+	datemin := current_date - days;
 	FOR line IN (SELECT * FROM purge WHERE datein < datemin) LOOP
 		FOR jdrl IN (SELECT id_server,id_channel FROM JDR WHERE id_server = line.id_server) LOOP
 			PERFORM jdrdelete(jdrl.id_server,jdrl.id_channel);
@@ -841,5 +844,149 @@ BEGIN
 		SELECT * FROM JDR
 		WHERE id_server = src AND id_channel = idchan;
 	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Warn features
+CREATE OR REPLACE FUNCTION warnuser
+(
+	idmemb Warn.id_member%TYPE,
+	idserv Warn.id_server%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM warn
+	WHERE id_server = idserv AND id_member = idmemb;
+	IF nbr = 0 THEN
+		INSERT INTO warn
+		VALUES(idserv,idmemb,1);
+	ELSE
+		UPDATE warn
+		SET warn_number = warn_number + 1
+		WHERE id_server = idserv AND id_member = idmemb;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION unwarnuser
+(
+	idmemb Warn.id_member%TYPE,
+	idserv Warn.id_server%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT warn_number INTO nbr FROM warn
+	WHERE id_server = idserv AND id_member = idmemb;
+	IF nbr = 1 THEN
+		DELETE FROM warn
+		WHERE id_server = idserv AND id_member = idmemb;
+	ELSE
+		UPDATE warn
+		SET warn_number = warn_number + 1
+		WHERE id_server = idserv AND id_member = idmemb;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION warnconfigure
+(
+	idserv Warnconfig.id_server%TYPE,
+	warns Warnconfig.warn_number%TYPE,
+	action Warnconfig.sanction%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	IF LOWER(action) = 'disable' THEN
+		DELETE FROM warnconfig
+		WHERE (id_server = idserv AND warn_number = warns);
+	ELSE
+		SELECT COUNT(*) INTO nbr FROM warnconfig
+		WHERE (id_server = idserv AND warn_number = warns);
+		IF nbr = 0 THEN
+			INSERT INTO warnconfig
+			VALUES (idserv,warns,action);
+		ELSE
+			UPDATE warnconfig
+			SET sanction = action
+			WHERE (id_server = idserv AND warn_number = warns);
+		END IF;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Use function for JDR
+CREATE OR REPLACE FUNCTION usepoints
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	item VARCHAR
+) RETURNS void AS $$
+BEGIN
+	IF LOWER(item) = 'lightpt' THEN
+		UPDATE Characterr
+		SET light_points = light_points - 1,
+		karma = 10,
+		gm = 'D'
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(item) = 'darkpt' THEN
+		UPDATE Characterr
+		SET dark_points = dark_points - 1,
+		karma = -10,
+		gm = 'O'
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--finalize features
+CREATE OR REPLACE FUNCTION finalize
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF finalize AS $$
+BEGIN
+	RETURN QUERY
+	SELECT title,description FROM finalize
+	WHERE id_server = idserv AND id_channel = idchan;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION set_finalize_field
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	titl finalize.title%TYPE,
+	descr finalize.description%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM finalize
+	WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
+	IF nbr = 0 THEN
+		INSERT INTO finalize
+		VALUES (idserv,idchan,titl,descr);
+	ELSE
+		UPDATE finalize
+		SET description = descr
+		WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION del_finalize_field
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	titl finalize.title%TYPE
+) RETURNS void AS $$
+BEGIN
+	DELETE FROM finalize
+	WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
 END;
 $$ LANGUAGE plpgsql;

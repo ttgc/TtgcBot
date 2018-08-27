@@ -77,8 +77,9 @@ def set_prefix(ID,new):
 
 def is_blacklisted(ID):
     try: member = DBMember(ID)
-    except: return False
-    return member.is_blacklisted()
+    except: return False,""
+    bl,rs = member.is_blacklisted()
+    return bl,rs
 
 def is_botmanager(ID):
     try: member = DBMember(ID)
@@ -118,9 +119,9 @@ def get_mjrole(ID):
     return srv.mjrole
 
 def command_check(prefix,msg,cmd,aliases=[]):
-    check = (msg.content.startswith(cmd+" ") or msg.content == cmd)#(ctnt == prefix+cmd)
+    check = (msg.content.startswith(prefix+cmd+" ") or msg.content == prefix+cmd)#(ctnt == prefix+cmd)
     for i in aliases:
-        check = (check or (msg.content.startswith(i+" ") or msg.content == i))
+        check = (check or (msg.content.startswith(prefix+i+" ") or msg.content == prefix+i))
     return check
 
 def get_args(prefix,msg,cmd,aliases=[]):
@@ -214,7 +215,7 @@ def on_message(message):
         charbase_exist = True
         charbase = jdr.get_charbase()
         for i in charbase:
-            if i.linked = str(message.author.id):
+            if i.linked == str(message.author.id):
                 char = i
                 break
     #get vocal
@@ -299,7 +300,12 @@ def on_message(message):
                     i.unlink()
                     break
             yield from client.send_message(message.channel,"Unlinked "+message.mentions[0].mention)
-    if command_check(prefix,message,'charset') and chanMJ:#message.content.startswith(prefix+'charset') and chanMJ:
+    if command_check(prefix,message,'charset name',['charsetname','charset PV','charsetpv','charsetPV','charset pv','charset PM','charsetpm','charsetPM','charset pm',
+                                                                         'charset force','charset strength','charset str','charsetstr','charset esprit','charset spirit','charset spr','charsetspr',
+                                                                         'charset charisme','charset charisma','charset cha','charsetcha','charset agilite','charset furtivite','charset agi',
+                                                                         'charset agility','charsetagi','charset lp','charsetlp','charset lightpt','charset dp','charsetdp','charset darkpt',
+                                                                         'charset defaultmod','charsetdmod','charset dmod','charset defaultkarma','charsetdkar','charset dkar','charset intuition',
+                                                                         'charset int','charsetint']) and chanMJ:#message.content.startswith(prefix+'charset') and chanMJ:
         char = jdr.get_character(get_args(prefix,message,'charset name',['charsetname','charset PV','charsetpv','charsetPV','charset pv','charset PM','charsetpm','charsetPM','charset pm',
                                                                          'charset force','charset strength','charset str','charsetstr','charset esprit','charset spirit','charset spr','charsetspr',
                                                                          'charset charisme','charset charisma','charset cha','charsetcha','charset agilite','charset furtivite','charset agi',
@@ -366,7 +372,7 @@ def on_message(message):
         if lr is None:
             yield from client.send_message(message.channel,"Action timeout")
             return
-        char.setlore(lr)
+        char.setlore(lr.content)
         yield from client.send_message(message.channel,"Changing lore of character successful")
     if command_check(prefix,message,'chardmg',['chardamage']) and chanMJ:#message.content.startswith(prefix+'chardmg') and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
@@ -415,7 +421,7 @@ def on_message(message):
             embd.add_field(name=i.name,value=str(i.PV)+" (+"+str(val)+")",inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'globalgetPM',['ggetPM','globalgetpm','ggetpm']) and chanMJ:
-        val = int((message.content).split(" ")[1]))#replace(prefix+'globalgetPM ',""))
+        val = int((message.content).split(" ")[1])#replace(prefix+'globalgetPM ',""))
         embd = discord.Embed(title="Global getPM",description="PM earned : "+str(val),colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
@@ -432,13 +438,12 @@ def on_message(message):
             if val < 0:
                 sign = ""
             embd.add_field(name=i.name,value=str(i.PM)+" ("+sign+str(val)+")",inline=True)
-            charbase[k] = i
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'charheal',[]) and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         val = abs(int((message.content).split(" ")[2]))#replace(prefix+'charheal ',""))
         if char.PV+val > char.PVmax: val=char.PVmax-char.PV#char.PV = char.PVmax
-        i = i.charset('pv',val)
+        char = char.charset('pv',val)
         embd = discord.Embed(title=char.name,description="Has been healed !",colour=discord.Color(int('00ff00',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
@@ -454,14 +459,14 @@ def on_message(message):
             return
         else:
             if char.PM+val > char.PMmax: val=char.PMmax-char.PM#char.PM = char.PMmax
-            i = i.charset('pm',val)
+            char = char.charset('pm',val)
         got = "recovered"
         if val < 0: got = "lost"
         embd = discord.Embed(title=char.name,description="Has "+got+" PM !",colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-        embd.add_field(name="Amount of PM "+got+" :",value=str(val),inline=True)
+        embd.add_field(name="Amount of PM "+got+" :",value=str(abs(val)),inline=True)
         embd.add_field(name="Remaining PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'setkarma',['addkarma','getkarma']) and chanMJ:
@@ -469,7 +474,7 @@ def on_message(message):
         val = int((message.content).split(" ")[2])#replace(prefix+'setkarma ',""))
         if char.karma+val < -10: val=-10-char.karma#char.karma = -10
         if char.karma+val > 10: val=10-char.karma#char.karma = 10
-        i = i.charset('kar',val)
+        char = char.charset('kar',val)
         got = "recovered"
         if val < 0: got = "lost"
         embd = discord.Embed(title=char.name,description="Has "+got+" karma !",colour=discord.Color(int('5B005B',16)))
@@ -488,7 +493,7 @@ def on_message(message):
         if char.money-val < 0:
             yield from client.send_message(message.channel,"No more money to pay ! (Remaining : "+str(char.money)+")")
         else:
-            i = i.charset('po',-val)
+            char = char.charset('po',-val)
             embd = discord.Embed(title=char.name,description="Has paid !",colour=discord.Color(int('ffff00',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
@@ -499,13 +504,14 @@ def on_message(message):
     if command_check(prefix,message,'earnmoney',['earnpo','earnPO']) and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         val = abs(int((message.content).split(" ")[2]))#replace(prefix+'earnmoney ',""))
-        i = i.charset('po',val)
+        char = char.charset('po',val)
         embd = discord.Embed(title=char.name,description="Has earned money !",colour=discord.Color(int('ffff00',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="Amount of money earned :",value=str(val),inline=True)
         embd.add_field(name="Remaining money :",value=str(char.money),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'charinfo',['characterinfo']) and jdrchannel:
         if char.mod == 0: modd = "Offensiv"
         else: modd = "Defensiv"
@@ -626,7 +632,8 @@ def on_message(message):
         if "+" in message.content or "-" in message.content: embd.add_field(name="Amount of mental "+got+" :",value=msg,inline=True)
         embd.add_field(name="Current mental :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if message.content.startswith(prefix+'mj') and jdrchannel and chanMJ:
+    if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
+                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll']) and jdrchannel and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo']):
             if char.mod == 0: modd = "Offensiv"
@@ -705,13 +712,13 @@ def on_message(message):
         srv.setmjrole(str(message.role_mentions[0].id))
         yield from client.send_message(message.channel,"The role : "+message.role_mentions[0].mention+" has been set as MJ on this server")
     if command_check(prefix,message,'JDRstart',['jdrstart','jdrcreate','JDRcreate']) and MJ:
+        chan = message.channel_mentions[0]
         try:
-            srv.getJDR(message.channel_mentions[0])
+            srv.getJDR(message.channel_mentions[0].id)
+            yield from client.send_message(message.channel,"A JDR already exists in "+chan.mention+"\nYou can't create a new one in the same channel")
         except DatabaseException:
-            chan = message.channel_mentions[0]
             srv.jdrstart(str(chan.id),str(message.author.id))
             yield from client.send_message(message.channel,"New JDR in "+chan.mention+" (MJ : "+message.author.mention+")")
-        yield from client.send_message(message.channel,"A JDR already exists in "+chan.mention+"\nYou can't create a new one in the same channel")
     if command_check(prefix,message,'JDRdelete',['jdrdelete']) and admin:
         chan = message.channel_mentions[0]
         curjdr = srv.getJDR(str(chan.id))
@@ -739,7 +746,7 @@ def on_message(message):
             return
         jdr.MJtransfer(str(message.mentions[0].id))
         yield from client.send_message(message.channel,"Ownership belong now to : "+message.mentions[0].mention)
-    if command_check(prefix,message,'JDRcopy') and admin:
+    if command_check(prefix,message,'JDRcopy',['jdrcopy']) and admin:
         if message.channel_mentions[0].server.id != message.server.id or message.channel_mentions[0].server.id != message.channel_mentions[1].server.id:
             yield from client.send_message(message.channel,"channels are not located on the same server")
             return
@@ -782,7 +789,7 @@ def on_message(message):
         if len(info.json()["parse"]["redirects"]) != 0:
             embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_chek(prefix,message,'finalize',['jdrfinalize','jdrend','JDRfinalize','JDRend']) and chanMJ:
+    if command_check(prefix,message,'finalize',['jdrfinalize','jdrend','JDRfinalize','JDRend']) and chanMJ:
         yield from client.send_message(message.channel,"Finalize command has been called !\nPlease be sure of what you are doing, there is no come back !\n**All JDR data will be deleted after the execution of this command and this cannot be undone !**\nEnter `confirm finalize` to start finalize operation (this will timeout in 60s without answer)")
         confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm finalize")
         if confirm is None:
@@ -793,15 +800,15 @@ def on_message(message):
         if vocal:
             yield from vocal.append("Music/never_give_up_tsfh.mp3",False)#above_and_beyond_audiomachine.mp3",False)
             vocal.play()
-        asyncio.sleep(2)
+        yield from asyncio.sleep(2)
         embd = discord.Embed(title="The Tale of Great Cosmos",colour=discord.Color(int("5B005B",16)))
         embd.set_image(url="https://cdn.discordapp.com/attachments/254997041858478080/317324181542928395/The_Tale_of_Great_Cosmos.png")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_footer(text=time.asctime())
         yield from client.send_message(message.channel,embed=embd)
-        asyncio.sleep(5)
+        yield from asyncio.sleep(5)
         msg = [("The Tale of Great Cosmos","Created by Ttgc\nAn original adventure in the world of Terae and the multiverse")]
-        msg += [("Game Master (MJ) :",str(discord.utils.get(message.server.members,id=curjdr.mj)))]
+        msg += [("Game Master (MJ) :",str(discord.utils.get(message.server.members,id=jdr.mj)))]
         ct = ""
         for i in charbase:
             if i.linked is not None: ct += (str(discord.utils.get(message.server.members,id=i.linked))+" as "+i.name+"\n")
@@ -814,7 +821,7 @@ def on_message(message):
         luck = []
         unluck = []
         rolled = []
-        gstat = []
+        gstat = [0,0,0,0,0,0,0]
         for i in charbase:
             gstat = sum_ls(gstat,i.stat)
             rolled.append(i.stat[0])
@@ -842,7 +849,7 @@ def on_message(message):
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_footer(text=time.asctime())
             yield from client.send_message(message.channel,embed=embd)
-            asyncio.sleep(10)
+            yield from asyncio.sleep(10)
         thanksmsg = yield from client.send_message(message.channel,"Thanks for playing **The Tale of Great Cosmos** !")
         yield from client.add_reaction(thanksmsg,"\U0001F4AF")
         yield from client.add_reaction(thanksmsg,"\U0001F51A")
@@ -852,7 +859,6 @@ def on_message(message):
         yield from client.send_message(message.channel,"Finalize is now over, see you soon for a next Party !")
         anoncer_isready = True
         jdr.delete()
-
     #####NOT YET REWRITTEN######
     #Other commands (not JDR)
     if message.content.startswith(prefix+'tell'):
@@ -1229,52 +1235,9 @@ def on_message(message):
             zp.write("Data/"+i)
         zp.close()
         yield from client.send_file(message.author,"Backup.zip")
-    if charbase_exist:
-        try: save_data(message.channel.id,charbase,linked)
-        except:
-            me = yield from client.get_user_info("222026592896024576")
-            yield from client.send_file(me,"Backup-auto.zip",content="An error has occured when saving database, maybe some file has been corrupted, here is the autogenerated backup")
-            yield from client.send_message(me,"The following user has made this shit : "+str(message.author)+" (ID="+str(message.author.id)+")")
-            yield from client.send_message(message.author,"Your command has failed ! It has created a black hole in my system. If new commands following this doesn't work, please wait until a god close this black hole")
-            yield from client.send_message(me,"Here is the list of things that I can do for trying to fix the problem :\n```\nrestore - Restore the database from auto-backup\nblacklist - Blacklist the user who cause crash\nshutdown - Shutdown me\neval - evaluate damage by checking size of files (allow to use another command after)\n```Answer to this with option selected, separate them with `|` to use many options")
-            os.rename("Backup-auto.zip","Backup-auto-save.zip")
-            cmd = yield from client.wait_until_message(author=me,channel=me)
-            while " " in cmd: cmd.replace(" ","")
-            cmd_list = cmd.lower().split("|")
-            for i in cmd_list:
-                if i == "restore":
-                    zpcor = zipfile.ZipFile("Backup-corrupted.zip","w")
-                    for k in os.listdir("Data"):
-                        zp.write("Data/"+k)
-                    zp.close()
-                    zp = zipfile.ZipFile("Backup-auto-save.zip","r")
-                    zp.exctractall()
-                    zp.close()
-                    yield from client.send_file(me,"Backup-corrupted.zip",content="Restored database, here is old database :")
-                    os.remove("Backup-corrupted.zip")
-                elif i == "blacklist":
-                    blackid = int(message.author.id)
-                    bl = BDD("userlist")
-                    bl.load()
-                    bl["blacklist",str(blackid)] = "Making crash the bot"
-                    bl.save()
-                    yield from client.send_message(me,"The following id has been blacklisted : `"+str(blackid)+"` for \n```Making crash the bot```")
-                elif i == "eval":
-                    string = "Eval result :\n```\n"
-                    for k in os.listdir("Data"):
-                        string += k+" - "
-                        string += str(os.stat("Data/"+k).st_size)+"Bytes\n"
-                    string += "```"
-                    yield from client.send_message(me,string)
-                    yield from client.send_message(me,"Here is the list of things that I can do for trying to fix the problem :\n```\nrestore - Restore the database from auto-backup\nblacklist - Blacklist the user who cause crash\nshutdown - Shutdown me\n```Answer to this with option selected, separate them with `|` to use many options")
-                    cmd = yield from client.wait_until_message(author=me,channel=me)
-                    while " " in cmd: cmd.replace(" ","")
-                    cmd_list += cmd.lower().split("|")
-                elif i == "shutdown":
-                    yield from client.logout()
-                    sys.exit(0)
     logf.stop()
     yield from client.change_presence(game=statut)
+
 
 @client.event
 @asyncio.coroutine
@@ -1316,34 +1279,13 @@ def on_voice_state_update(before,after):
 @client.event
 @asyncio.coroutine
 def on_server_join(server):
-    cfg = BDD("config")
-    cfg.load()
-    cfg["prefix",str(server.id)] = '/'
-    cfg["JDRchannel",str(server.id)] = str({})
-    cfg.save()
+    addserver(server)
 
 @client.event
 @asyncio.coroutine
 def on_server_remove(server):
-    cfg = BDD("config")
-    cfg.load()
-    del(cfg["prefix",str(server.id)])
-    try: del(cfg["contentban",str(server.id)])
-    except: pass
-    try: del(cfg["MJrole",str(server.id)])
-    except: pass
-    del(cfg["JDRchannel",str(server.id)])
-    cfg.save()
-    charbdd = BDD("character")
-    charbdd.load()
-    for j in server.channels:
-        try:
-            for i,k in charbdd["charbase",str(j.id)].items():
-                del(charbdd["charstat",str(i)])
-            del(charbdd["charbase",str(j.id)])
-            del(charbdd["charlink",str(j.id)])
-        except: pass
-    charbdd.save()
+    srv = DBServer(server.id)
+    srv.remove()
 
 @client.event
 @asyncio.coroutine
@@ -1351,47 +1293,10 @@ def on_ready():
     global logf
     yield from client.change_presence(game=statut)
     logf.restart()
-    conf = BDD("config")
-    try: conf.load()
-    except:
-        conf.create_group("prefix")
-        conf.create_group("contentban")
-        conf.create_group("MJrole")
-        conf.create_group("JDRchannel")########
-        for i in client.servers:
-            conf["prefix",str(i.id)] = '/'
-            conf["JDRchannel",str(i.id)] = str({})
-        conf.save()
-        logf.append("Initializing","Creating config file")
-    charbdd = BDD("character")
-    try: charbdd.load()
-    except:
-        charbdd.create_group("charbase")
-        charbdd.create_group("charlink")
-        charbdd.create_group("charstat")
-        charbdd.create_group("warn")
-        charbdd.create_group("warnuser")
-        charbdd.save()
-        logf.append("Initializing","creating character file")
-    krsys = BDD("keeprole")
-    try: krsys.load()
-    except:
-        krsys.create_group("servers")
-        krsys.create_group("members")
-        krsys.create_group("roles")
-        krsys["servers","list"] = "{}"
-        krsys["servers","enabled"] = "{}"
-        krsys.save()
-        logf.append("Initializing","creating keeprole file")
-    
-    if len(client.servers) != len(conf.file.section["prefix"]): #or len(client.servers) != len(charbdd.file.section["charbase"]):
-        for i in client.servers:
-            if not str(i.id) in conf.file.section["prefix"]:
-                conf["prefix",str(i.id)] = '/'
-                conf["JDRchannel",str(i.id)] = str({})
-            if len(client.servers) == len(conf.file.section["prefix"]): break #and len(client.servers) == len(charbdd.file.section["charbase"]): break
-        conf.save()
-        charbdd.save()
+    botaskperm = discord.Permissions().all()
+    botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
+    url = discord.utils.oauth_url(str(client.user.id),botaskperm)
+    print(url)
     logf.append("Initializing","Bot is now ready")
     logf.stop()
 
@@ -1410,15 +1315,6 @@ def launch():
     logf = Logfile(str(tps.tm_mday)+"_"+str(tps.tm_mon)+"_"+str(tps.tm_year)+"_"+str(tps.tm_hour)+"_"+str(tps.tm_min)+"_"+str(tps.tm_sec),logsys)
     logf.start()
     logf.append("Initializing","Bot initialization...")
-    userlist = BDD("userlist")
-    try: userlist.load()
-    except:
-        userlist.create_group("blacklist")
-        userlist.create_group("premium")
-        userlist.create_group("botmanager")
-        userlist.save()
-        logf.append("Initializing","creating userlist file")
-    logf.append("Initializing","userlist loaded")
     logf.append("Initializing","Bot initialized successful")
     logf.stop()
 

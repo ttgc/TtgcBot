@@ -110,11 +110,11 @@ BEGIN
 	PERFORM jdrcreate(idserv,dest,mj);
 	FOR line IN (SELECT * FROM Characterr WHERE id_server = idserv AND id_channel = src) LOOP
 		INSERT INTO inventaire (charkey)
-		VALUES (dbkey);
+		VALUES (line.charkey);
 		SELECT MAX(id_inventory) INTO inv FROM inventaire
-		WHERE charkey = dbkey;
+		WHERE charkey = line.charkey;
 		INSERT INTO Characterr
-		VALUES (line.charkey, line.name, line.lore, line.lvl, line.PV, line.PVmax, line.PM, line.PMmax, line.strength, line.spirit, line.charisma, line.agility, line.karma, line.defaultkarma, line.argent, line.light_points, line.dark_points, line.intuition, line.mental, line.rolled_dice, line.success, line.fail, line.critic_success, line.critic_fail, line.super_critic_success, line.super_critic_fail, idserv, dest, line.gm, line.gm_default, inv, line.id_member);
+		VALUES (line.charkey, line.nom, line.lore, line.lvl, line.PV, line.PVmax, line.PM, line.PMmax, line.strength, line.spirit, line.charisma, line.agility, line.karma, line.defaultkarma, line.argent, line.light_points, line.dark_points, line.intuition, line.mental, line.rolled_dice, line.succes, line.fail, line.critic_success, line.critic_fail, line.super_critic_success, line.super_critic_fail, idserv, dest, line.gm, line.gm_default, inv, line.id_member);
 	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
@@ -222,7 +222,7 @@ BEGIN
 	END IF;
 	IF LOWER(stat) = 'po' THEN
 		UPDATE Characterr
-		SET money = money + val
+		SET argent = argent + val
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
 	IF LOWER(stat) = 'int' THEN
@@ -297,7 +297,7 @@ BEGIN
 				ELSE
 					IF val <= valmax THEN
 						UPDATE Characterr
-						SET success = success + 1
+						SET succes = succes + 1
 						WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 					ELSE
 						UPDATE Characterr

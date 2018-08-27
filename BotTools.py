@@ -20,7 +20,7 @@
 import discord
 import asyncio
 from DatabaseManager import *
-from Character import *
+import Character as ch
 
 class DBServer:
     def __init__(self,ID):
@@ -302,9 +302,9 @@ class DBJDR:
             gmdefault = 0
         else:
             gmdefault = 1
-        inv = Inventory()
+        inv = ch.Inventory()
         inv.loadfromdb(rawchar[30])
-        char = Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
+        char = ch.Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
                           "charisme":rawchar[10],"furtivite":rawchar[11],"karma":rawchar[12],"default_karma":rawchar[13],"money":rawchar[14],"lp":rawchar[15],"dp":rawchar[16],
                           "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31]})
         char.bind(self)

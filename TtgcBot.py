@@ -220,8 +220,8 @@ def on_message(message):
                 break
     #get vocal
     vocal = vocalcore.getvocal(str(message.server.id))
+    
     #commands
-    #########REWRITTEN##########
     if command_check(prefix,message,'setprefix',['prefix']) and admin:#message.content.startswith(prefix+'setprefix') and admin:
         prefix = get_args(prefix,message,'setprefix',['prefix'])#(message.content).replace(prefix+'setprefix ',"")
         srv.setprefix(prefix)
@@ -859,23 +859,22 @@ def on_message(message):
         yield from client.send_message(message.channel,"Finalize is now over, see you soon for a next Party !")
         anoncer_isready = True
         jdr.delete()
-    #####NOT YET REWRITTEN######
     #Other commands (not JDR)
-    if message.content.startswith(prefix+'tell'):
+    if command_check(prefix,message,'tell') and not command_check(prefix,message,'tell --tts',['tell -t']):
         msg = (message.content).replace(prefix+'tell ',"")
-        print(str(message.author)+" : "+msg)
-        logf.append("/tell",str(message.author)+" : "+msg)
+        print(str(message.author)+" (from : "+str(message.server)+") : "+msg)
+        logf.append("/tell",str(message.author)+" (from : "+str(message.server)+") : "+msg)
         yield from client.delete_message(message)
         yield from client.send_message(message.channel,msg)
-    if message.content.startswith(prefix+'ttstell'):
-        msg = (message.content).replace(prefix+'ttstell ',"")
-        print(str(message.author)+" : "+msg)
-        logf.append("/ttstell",str(message.author)+" : "+msg)
+    if command_check(prefix,message,'tell --tts',['ttstell','telltts','tell -t']):
+        msg = get_args(prefix,message,'tell --tts',['ttstell','telltts','tell -t'])
+        print(str(message.author)+" (from : "+str(message.server)+") : "+msg)
+        logf.append("/ttstell",str(message.author)+" (from : "+str(message.server)+") : "+msg)
         yield from client.delete_message(message)
         yield from client.send_message(message.channel,msg,tts=True)
     if command_check(prefix,message,'pi'):
         yield from client.send_message(message.channel,"3,141 592 653 589 793 238 462 643 383 279 502 884 197 169 399 375 105 820 974 944 592 307 816 406 286 208 998 628 034 825 342 117 0679...\nhttp://www.nombrepi.com/")
-    if message.content.startswith(prefix+'joke'):
+    if command_check(prefix,message,'joke'):
         yield from client.send_message(message.channel,choice(["Pourquoi les japonais n'ont ils pas de chevaux ?\nParce qu'ils sont déjà poney (des japonais)",
                                                      "Pourquoi x^2 ressort-il de la foret en x ?\nParce qu'il s'est pris une racine !",
                                                      "Pourquoi 0 perd-il tous ses débats ?\nParce qu'il n'a pas d'argument !",
@@ -884,40 +883,37 @@ def on_message(message):
                                                      "Newton, Einstein et Pascal jouent à cache-cache\nEinstein commence à compter, Pascal part en courant se cacher \nNewton lui reste à coté d'Einstein et dessine un carré de 1 m de côté au sol et se place dedans\nEinstein se retourne et fait : 'Newton trouvé'\nCe à quoi Newton répond : 'non t'as trouvé 1 Newton sur 1 mètre carré, t'as trouvé 1 Pascal'",
                                                      "Heisenberg ,Schrodinger et Ohm sont dans une voiture quand ils sont stoppé par un agent de police. L’agent demande : « Savez-vous à quel vitesse vous roulez? » Heisenberg répond : « Non, mais je peux vous dire exactement où j’étais. »« Vous rouliez 20km/h au dessus de la limite ! »« Maintenant je suis perdu. »  L’agent pense qu’il y a lieu de faire une fouille et examine le coffre arrière et y découvre un chat mort. Il s’exclame : « Saviez-vous que vous avez un chat mort dans le coffre arrière. » Schrodinger répond : « Maintenant, je le sais! » L'agent décide de les arréter mais Ohm résiste.",
                                                      "Pourquoi les équations ont-elles le sens de l'humour?\nparce qu'elles ont du second degré!",
-                                                     "Que dit-on d'une étudiante en lettres qui prépare son doctorat ?\nElle part en thèse (parenthèse)"
-                                                     "-"]))
-
-    if message.content.startswith(prefix+'nsfwjoke') and nsfw:
+                                                     "Que dit-on d'une étudiante en lettres qui prépare son doctorat ?\nElle part en thèse (parenthèse)"]))
+    if command_check(prefix,message,'nsfwjoke') and nsfw:
         yield from client.send_message(message.channel,choice(["Une mère tente d'ecouter au travers d'une porte ce que font ses 3 filles qui viennent de ramener chacune un petit ami pour la première fois.\nLa première rigole, la mère entre et voyant les deux au pieux demande pourquoi elle rigole, ce a quoi la première lui repond : 'une petite queue dans un grand trou ça chatouille !'\nLa seconde crie de douleur, la mère entre et demande pourquoi : 'Une grosse queue dans un petit trou ça fait mal'\nEnfin la mere n'entends rien venant de la troisième chambre, elle entre et vois sa fille en train de faire une pipe, et lui demande pourquoi on ne l'entends pas, ce a quoi lui répond sa fille : 'Voyons maman, il faut pas parler la bouche pleine !'",
                                                      "Le sexe c'est comme les équations, à partir de 3 inconnues ça devient intéressant",
                                                      "Un candidat passe l’oral de l’examen de sciences naturelles. L’examinateur plonge la main dans un sac, en sort un petit oiseau dont il montre la queue à l’étudiant:\n– Quel est le nom de cet oiseau ?\n– Heu.. je ne sais pas ! répond l'étudiant.\n– Je vais vous donner une autre chance.\nL’examinateur plonge à nouveau la main dans le sac et en sort un autre oiseau dont à nouveau il monte la queue:\n– Et celui-ci ? Quel est son nom ?\n– Je ne vois vraiment pas, monsieur !\n– Désolé, jeune homme ! Je regret, mais je me vois obliger de vous mettre un zéro ! Au fait, quel est votre nom ?\nLe candidat se lève, ouvre sa braguette et dit:\n– Devinez !",
                                                      "Et que dit-on de deux boules de pétanque qui entrent en collisions ?\nElles partent en couille",
-                                                     "peut on appeller une maison vérouillée par son utilisateur lorsqu'il s'en va, une maison close ?",
-                                                     "-"]))
-    if message.content.startswith(prefix+'yay'):
+                                                     "peut on appeller une maison vérouillée par son utilisateur lorsqu'il s'en va, une maison close ?",]))
+    if command_check(prefix,message,'yay'):
         f = open("YAY.png","rb")
         yield from client.send_file(message.channel,f,content="YAY !")
         f.close()
-    if message.content.startswith(prefix+'setgame') and botowner:
+    if command_check(prefix,message,'setgame') and botowner:
         statut = discord.Game(name=(message.content).replace(prefix+'setgame ',""))
         yield from client.change_presence(game=statut)
-    if message.content.startswith(prefix+'choquedecu'):
+    if command_check(prefix,message,'choquedecu'):
         f=open("choquedecu.png","rb")
         yield from client.send_file(message.channel,f,content="#choquedecu")
         f.close()
-    if message.content.startswith(prefix+'hentai') and nsfw:
+    if command_check(prefix,message,'hentai') and nsfw:
         f = open("Hentai/"+choice(os.listdir("Hentai")),"rb")
         yield from client.send_file(message.channel,f)
         f.close()
-    if message.content.startswith(prefix+'onichan'):
+    if command_check(prefix,message,'onichan'):
         f = open("onichan.jpg","rb")
         yield from client.send_file(message.channel,f)
         f.close()
-    if message.content.startswith(prefix+'rule34') and nsfw:
+    if command_check(prefix,message,'rule34') and nsfw:
         yield from client.send_message(message.channel,"Rule 34 : *If it exists, there is porn on it*\nhttps://rule34.paheal.net/")
-    if message.content.startswith(prefix+'suggest'):
+    if command_check(prefix,message,'suggest'):
         pass
-    if message.content.startswith(prefix+'shutdown') and botmanager:
+    if command_check(prefix,message,'shutdown') and botmanager:
         yield from client.send_message(message.channel,"You are requesting a shutdown, please ensure that you want to perform it by typing `confirm`")
         answer = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content='confirm')
         if answer is None:
@@ -926,7 +922,7 @@ def on_message(message):
         yield from vocalcore.interupt()
         yield from client.logout()
         sys.exit(0)
-    if message.content.startswith(prefix+'reboot') and botmanager:
+    if command_check(prefix,message,'reboot') and botmanager:
         yield from client.send_message(message.channel,"You are requesting a reboot, please ensure that you want to perform it by typing `confirm`")
         answer = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content='confirm')
         if answer is None:
@@ -936,204 +932,133 @@ def on_message(message):
         yield from client.logout()
         sub.call(['./bootbot.sh'])
         sys.exit(0)
-    if message.content.startswith(prefix+'blacklist') and botmanager:
+    if command_check(prefix,message,'blacklist') and botmanager:
         msg = message.content.replace(prefix+'blacklist ',"")
         ls = msg.split(" | ")
-        blackid = int(ls[0])
-        bl = BDD("userlist")
-        bl.load()
-        bl["blacklist",str(blackid)] = ls[1]
-        bl.save()
+        blackid = ls[0]
+        blacklist(blackid,ls[1])
         yield from client.send_message(message.channel,"The following id has been blacklisted : `"+str(blackid)+"` for \n```"+ls[1]+"```")
-    if message.content.startswith(prefix+'unblacklist') and botmanager:
-        blackid = int(message.content.replace(prefix+'unblacklist ',""))
-        bl = BDD("userlist")
-        bl.load()
-        del(bl["blacklist",str(blackid)])
-        bl.save()
+    if command_check(prefix,message,'unblacklist') and botmanager:
+        blackid = message.content.replace(prefix+'unblacklist ',"")
+        try:
+            mb = DBMember(blackid)
+        except: return
+        mb.unblacklist()
         yield from client.send_message(message.channel,"The following id has been unblacklisted : `"+str(blackid)+"`")
-    if message.content.startswith(prefix+'setbotmanager') and botowner:
-        userid = int(message.content.replace(prefix+'setbotmanager ',""))
-        user = yield from client.get_user_info(str(userid))
-        ul = BDD("userlist")
-        ul.load()
-        ul["botmanager",str(userid)] = str(user)
-        ul.save()
+    if command_check(prefix,message,'setbotmanager') and botowner:
+        userid = message.content.replace(prefix+'setbotmanager ',"")
+        grantuser(userid,'M')
         yield from client.send_message(message.channel,"The ID has been set as botmanager succesful")
-    if message.content.startswith(prefix+'setpremium') and botowner:
-        userid = int(message.content.replace(prefix+'setpremium ',""))
-        user = yield from client.get_user_info(str(userid))
-        ul = BDD("userlist")
-        ul.load()
-        ul["premium",str(userid)] = str(user)
-        ul.save()
+    if command_check(prefix,message,'setpremium') and botowner:
+        userid = message.content.replace(prefix+'setpremium ',"")
+        grantuser(userid,'P')
         yield from client.send_message(message.channel,"The ID has been set as premium succesful")
-    if message.content.startswith(prefix+'contentban') and admin:
-        content = message.content.replace(prefix+'contentban ',"")
-        conf = BDD("config")
-        conf.load()
-        if str(message.server.id) in conf.file.section["contentban"]:
-            ls = convert_str_into_ls_spe(conf["contentban",str(message.server.id)])
+    if command_check(prefix,message,'contentban') and admin:
+        content = get_args(prefix,message,'contentban')
+        if len(srv.wordblocklist()) < 20:
+            if content.startswith(prefix):
+                yield from client.send_message(message.channel,"You can't block any content beginning with your server prefix")
+            else:
+                srv.blockword(content)
+                yield from client.send_message(message.channel,"The following content will now be banned on your server : `"+content+"`")
         else:
-            ls = []
-        if len(ls) >= 20:
             yield from client.send_message(message.channel,"Limit of contentban has been reached !\nYou can't add more banned content")
-        else:
-            ls.append(content)
-            temp = str(ls)
-            temp = temp.replace("[","{")
-            temp = temp.replace("]","}")
-            conf["contentban",str(message.server.id)] = temp
-            conf.save()
-            yield from client.send_message(message.channel,"The following content will now be banned on your server : `"+content+"`")
-    if message.content.startswith(prefix+'contentunban') and admin:
+    if command_check(prefix,message,'contentunban') and admin:
         content = message.content.replace(prefix+'contentunban ',"")
-        conf = BDD("config")
-        conf.load()
-        if str(message.server.id) in conf.file.section["contentban"]:
-            ls = convert_str_into_ls_spe(conf["contentban",str(message.server.id)])
-            while content in ls:
-                ls.remove(content)
-            yield from client.send_message(message.channel,"The following content has now reauthorized on your server : `"+content+"`")
-            temp = str(ls)
-            temp = temp.replace("[","{")
-            temp = temp.replace("]","}")
-            conf["contentban",str(message.server.id)] = temp
-            conf.save()
-    if message.content.startswith(prefix+'warn') and admin:
-        conf = BDD("config")
-        conf.load()
-        try: warnls = conf["warnuser",str(message.server.id)]
-        except: warnls = "{}"
-        warnls = convert_str_into_dic(warnls)
-        target = []
-        warncount = []
-        for i in message.mentions:
-            target.append(str(i))
-            try: warnls[str(i.id)] = str(int(warnls[str(i.id)])+1)
-            except: warnls[str(i.id)] = "1"
-            warncount.append(warnls[str(i.id)])
-        conf["warnuser",str(message.server.id)] = str(warnls)
-        conf.save()
-        targetstr = str(target)
-        targetstr = targetstr.replace("[","")
-        targetstr = targetstr.replace("]","")
-        targetstr = targetstr.replace("'","")
+        srv.unblockword(content)
+        yield from client.send_message(message.channel,"The following content has now reauthorized on your server : `"+content+"`")
+    if command_check(prefix,message,'warn') and admin:
         countstr = ""
-        for i in range(len(target)):
-            countstr += (target[i]+" : "+warncount[i]+"\n")
-        embd = discord.Embed(title="WARN",description=targetstr,colour=discord.Color(int('ff0000',16)))
+        targetstr = ""
+        for i in message.mentions:
+            srv.warnuser(str(i.id))
+            try: nbr = str(srv.get_warnnbr(DBMember(str(i.id))))
+            except DatabaseException: nbr = "0"
+            countstr += (str(i)+" : "+nbr+"\n")
+            targetstr += (str(i)+", ")
+        embd = discord.Embed(title="WARN",description=targetstr[:-2],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(message.timestamp))
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="https://www.ggte.unicamp.br/ea/img/iconalerta.png")
         embd.add_field(name="Reason :",value=message.content.split("|")[1],inline=True)
         embd.add_field(name="Total warnings :",value=countstr,inline=True)
         yield from client.send_message(message.channel,embed=embd)
-        try: warnval = conf["warn",str(message.server.id)]
-        except: warnval = "{}"
-        warnval = convert_str_into_dic(warnval)
-        for i in range(len(warncount)):
-            if warncount[i] in warnval:
-                try:
-                    if warnval[warncount[i]] == "kick":
-                        yield from client.kick(message.mentions[i])
-                        yield from client.send_message(message.channel,target[i]+" has been kicked due to a high number of warnings")
-                        yield from client.send_message(message.mentions[i],"You have been **kicked** from : "+message.server.name+" due to a high number of warnings")
-                    elif warnval[warncount[i]] == "ban":
-                        yield from client.ban(message.mentions[i],0)
-                        yield from client.send_message(message.channel,target[i]+" has been banned due to a high number of warnings")
-                        yield from client.send_message(message.mentions[i],"You have been **banned** from : "+message.server.name+" due to a high number of warnings")
-                    else:
-                        rl = None
-                        for k in message.server.roles:
-                            if str(k.id) == warnval[warncount[i]]: 
-                                rl = k
-                                break;
-                        if rl is not None:
-                            yield from client.add_roles(message.mentions[i],rl)
-                            yield from client.send_message(message.channel,message.mentions[i].mention+" has got role "+rl.mention+" due to a high number of warnings")
-                except discord.Forbidden: pass
-    if message.content.startswith(prefix+'configwarn') and admin:
+        cfg = srv.get_warnconfig()
+        for i in message.mentions:
+            for k in cfg:
+                if srv.get_warnnbr(DBMember(str(i.id))) >= k[0]:
+                    try:
+                        if k[1] == "kick":
+                            yield from client.kick(i)
+                            yield from client.send_message(message.channel,i.mention+" has been kicked due to a high number of warnings")
+                            yield from client.send_message(i,"You have been **kicked** from : "+message.server.name+" due to a high number of warnings")
+                        elif k[1] == "ban":
+                            yield from client.ban(i,0)
+                            yield from client.send_message(message.channel,i.mention+" has been banned due to a high number of warnings")
+                            yield from client.send_message(i,"You have been **banned** from : "+message.server.name+" due to a high number of warnings")
+                        else:
+                            rl = None
+                            for j in message.server.roles:
+                                if str(j.id) == k[1]: 
+                                    rl = j
+                                    break
+                            if rl is not None:
+                                yield from client.add_roles(i,rl)
+                                yield from client.send_message(message.channel,i.mention+" has got role "+rl.mention+" due to a high number of warnings")
+                    except discord.Forbidden: pass
+                    break
+    if command_check(prefix,message,'configwarn') and admin:
         msg = message.content.replace(prefix+'configwarn ',"")
         value = int(msg.split(" ")[0])
         sanction = msg.split(" ")[1].lower()
-        conf = BDD("config")
-        conf.load()
-        try: warnls = conf["warn",str(message.server.id)]
-        except: warnls = "{}"
-        warnls = convert_str_into_dic(warnls)
         if sanction == "assign":
             rl = message.role_mentions[0]
-            warnls[str(value)] = str(rl.id)
+            srv.warnconfig(value,str(rl.id))
             yield from client.send_message(message.channel,"Assigned role assignement ("+rl.mention+") punishment for people with "+str(value)+" warnings")
-            conf["warn",str(message.server.id)] = str(warnls)
-            conf.save()
-            pass
         elif sanction == "kick":
-            warnls[str(value)] = "kick"
+            srv.warnconfig(value,"kick")
             yield from client.send_message(message.channel,"Assigned kick punishment for people with "+str(value)+" warnings")
-            conf["warn",str(message.server.id)] = str(warnls)
-            conf.save()
-            pass
         elif sanction == "ban":
-            warnls[str(value)] = "ban"
+            srv.warnconfig(value,"ban")
             yield from client.send_message(message.channel,"Assigned ban punishment for people with "+str(value)+" warnings")
-            conf["warn",str(message.server.id)] = str(warnls)
-            conf.save()
-            pass
         elif sanction == "remove":
-            try: del(warnls[str(value)])
-            except: pass
-            conf["warn",str(message.server.id)] = str(warnls)
-            conf.save()
+            srv.warnconfig(value,"disable")
             yield from client.send_message(message.channel,"Removing punishment for people with "+str(value)+" warnings")
         else:
             yield from client.send_message(message.channel,"Unknown punishment type for warn command")
-##BLOCKED UNTIL RESOLUTION OF ISSUES
-##
-##    #KeepRole commands
-##    if message.content.startswith(prefix+'keeprole') and admin:
-##        kr = KeepRoleServer(str(message.server.id))
-##        info = yield from client.application_info()
-##        if not message.server.get_member(info.id).server_permissions.manage_roles:
-##            yield from client.send_message(message.channel,"I'm not allowed to manage roles")
-##            return
-##        if message.content.startswith(prefix+'keeprole enabled'):
-##            msg = message.content.replace(prefix+'keeprole enabled ',"")
-##            msg = msg.lower()
-##            if (msg == "true" or msg == "1") and (not kr.enabled):
-##                kr.switch()
-##                yield from client.send_message(message.channel,"KeepRole enabled on this server")
-##            elif (msg == "false" or msg == "0") and kr.enabled:
-##                kr.switch()
-##                kr.setmembers({})
-##                yield from client.send_message(message.channel,"KeepRole disabled on this server")
-##        if message.content.startswith(prefix+'keeprole roles add'):
-##            ls = []
-##            strls = ""
-##            for i in message.role_mentions:
-##                if i.position < message.server.get_member(info.id).top_role.position:
-##                    ls.append(str(i.id))
-##                    strls += ("\n"+i.mention)
-##            kr.addroles(ls)
-##            yield from client.send_message(message.channel,"Adding following roles to KeepRole system : "+strls)
-##        if message.content.startswith(prefix+'keeprole roles delete'):
-##            ls = []
-##            strls = ""
-##            for i in message.role_mentions:
-##                if str(i.id) in kr.roles and i.position < message.server.get_member(info.id).top_role.position:
-##                    ls.append(str(i.id))
-##                    strls += ("\n"+i.mention)
-##            kr.removeroles(ls)
-##            yield from client.send_message(message.channel,"Deleting following roles from KeepRole system : "+strls)
-##        if message.content.startswith(prefix+'keeprole clear'):
-##            kr.setmembers({})
-##            yield from client.send_message(message.channel,"KeepRole members list purged successful")
-##
-##END OF BLOCUS
+    #KeepRole commands
+    if command_check(prefix,message,'keeprole',['kr']) and admin:
+        info = yield from client.application_info()
+        if not message.server.get_member(info.id).server_permissions.manage_roles:
+            yield from client.send_message(message.channel,"I'm not allowed to manage roles")
+            return
+        if command_check(prefix,message,'keeprole enabled',['kr enabled','kr switch','keeprole switch']):
+            srv.togglekeeprole()
+            srv = DBServer(srv.ID)
+            if srv.keepingrole:
+                yield from client.send_message(message.channel,"KeepRole enabled on this server")
+            else:
+                yield from client.send_message(message.channel,"KeepRole disabled on this server")
+        if command_check(prefix,message,'keeprole roles add',['kr roles add','kr roles +','keeprole roles +']):
+            strls = ""
+            for i in message.role_mentions:
+                if i.position < message.server.get_member(info.id).top_role.position:
+                    strls += ("\n"+i.mention)
+                    srv.addkeeprole(str(i.id))
+            yield from client.send_message(message.channel,"Adding following roles to KeepRole system : "+strls)
+        if command_check(prefix,message,'keeprole roles delete',['kr roles delete','kr roles -','keeprole roles -','kr roles del','keeprole roles del']):
+            strls = ""
+            for i in message.role_mentions:
+                if i.position < message.server.get_member(info.id).top_role.position:
+                    strls += ("\n"+i.mention)
+                    srv.removekeeprole(str(i.id))
+            yield from client.send_message(message.channel,"Deleting following roles from KeepRole system : "+strls)
+        if command_check(prefix,message,'keeprole clear',['kr clear']):
+            srv.clearkeeprole()
+            yield from client.send_message(message.channel,"KeepRole members list purged successful")
     #Vocal commands
-    if message.content.startswith(prefix+'vocal') and premium:
-        msg = (message.content).replace(prefix+'vocal ',"")
+    if command_check(prefix,message,'vocal on',['vocal off','music on','music off']) and premium:
+        msg = get_args(prefix,message,'vocal',['music'])
         msg = msg.lower()
         if msg == "on" and not client.is_voice_connected(message.server):
             vocal = VocalSystem(str(message.server.id),vocalcore)
@@ -1144,15 +1069,15 @@ def on_message(message):
             yield from vocal.leave()
             vocalcore.removefromlist(str(message.server.id))
             yield from client.send_message(chan,"Disconnected from vocal")
-    if message.content.startswith(prefix+'ytplay') and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel) and premium:
-        msg = (message.content).replace(prefix+'ytplay ',"")
+    if command_check(prefix,message,'ytplay',['play']) and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel) and premium:
+        msg = get_args(prefix,message,'ytplay',['play'])
         yield from vocal.append(msg)
         vocal.play()
         yield from client.send_message(vocal.textchan,":arrow_forward: Adding song to queue")
-    if message.content.startswith(prefix+'musicskip') and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel) and premium:
+    if command_check(prefix,message,'musicskip',['skip']) and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel) and premium:
         vocal.skip()
         yield from client.send_message(vocal.textchan,":fast_forward: Skiping song")
-    if message.content.startswith(prefix+'playlocal') and premium and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel):
+    if command_check(prefix,message,'playlocal') and botmanager and (vocal is not None) and vocal.vocal and (vocal.textchan == message.channel):
         msg = (message.content).replace(prefix+'playlocal ',"")
         if not msg in os.listdir("Music/"):
             if msg+".mp3" in os.listdir("Music/"): msg += ".mp3"
@@ -1163,14 +1088,17 @@ def on_message(message):
         yield from vocal.append("Music/"+msg,False)
         vocal.play()
         yield from client.send_message(vocal.textchan,":arrow_forward: Adding local song to queue")
-    if message.content.startswith(prefix+'disconnectvocal') and botmanager:
+    if command_check(prefix,message,'disconnectvocal') and botmanager:
         yield from client.send_message(message.channel,"This will disconnect the bot from all vocal connections, are you sure ?\nType `confirm` to do it")
         answer = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content='confirm')
         if answer is None:
             yield from client.send_message(message.channel,"Your request has timeout")
             return
         yield from vocalcore.interupt()
-    if message.content.startswith(prefix+'apart') and chanMJ and message.author.voice.voice_channel is not None:
+    if command_check(prefix,message,'apart') and chanMJ and message.author.voice.voice_channel is not None:
+        linked = []
+        for i in charbase:
+            if i.linked is not None: linked.append(i.linked)
         if len(message.mentions) == 0:
             ls = list(message.author.voice.voice_channel.voice_members)
             for i in ls:
@@ -1185,12 +1113,12 @@ def on_message(message):
                     else:
                         yield from client.server_voice_state(i,mute=True,deafen=True)
     #Help commands
-    if message.content.startswith(prefix+'debug') and botowner:
-        msg = (message.content).replace(prefix+'debug ',"")
+    if command_check(prefix,message,'debug',['eval']) and botowner:
+        msg = get_args(prefix,message,'debug',['eval'])
         print("running debug instruction : "+msg)
         logf.append("/debug","running debug instruction : "+msg)
         exec(msg)
-    if message.content.startswith(prefix+'help'):
+    if command_check(prefix,message,'help','?'):
         f = open("help.txt","r")
         msg = f.read()
         ls = msg.split("\n\n")
@@ -1207,74 +1135,42 @@ def on_message(message):
                 yield from client.send_message(message.author,i)
         f.close()
         yield from client.send_message(message.channel,"I've sent you a private message with the answer")
-    if message.content.startswith(prefix+'invite'):
+    if command_check(prefix,message,'invite',['invit']):
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
         url = discord.utils.oauth_url(str(client.user.id),botaskperm)
-        embd = discord.Embed(title="TtgcBot (Beta)",description="Invite TtgcBot (beta) to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
-        embd.set_footer(text="TtgcBot version beta developed by Ttgc",icon_url=client.user.avatar_url)
+        embd = discord.Embed(title="TtgcBot",description="Invite TtgcBot to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
+        embd.set_footer(text="TtgcBot version 1.0 developed by Ttgc",icon_url=client.user.avatar_url)
         embd.set_image(url=client.user.avatar_url)
         embd.set_author(name="Ttgc",icon_url="https://cdn.discordapp.com/avatars/222026592896024576/e1bf51b1158cc87cefcc54afc4849cee.webp?size=1024",url=url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-        cfg = BDD("config")
-        cfg.load()
-        embd.add_field(name="TtgcBot is currently on :",value=str(len(cfg.file.section["prefix"])),inline=True)
+        embd.add_field(name="TtgcBot is currently on :",value=str(len(client.servers))+" servers",inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if message.content.startswith(prefix+'jointhegame'):
+    if command_check(prefix,message,'jointhegame',['jointtgc','joinTTGC','ttgc','TTGC']):
         inv = yield from client.create_invite(client.get_server("326648561976737792"),max_age=3600)
         yield from client.send_message(message.channel,"Rejoignez le serveur officiel The Tale of Great Cosmos (serveur FR) : \n"+str(inv.url))
-    if message.content.startswith(prefix+'ping'):
+    if command_check(prefix,message,'ping'):
         tps_start = time.clock()
         yield from client.send_message(message.channel,":ping_pong: pong ! :ping_pong:")
         tps_end = time.clock()
         ping = round((tps_end-tps_start)*1000)
         yield from client.send_message(message.channel,"ping value is currently : `"+str(ping)+" ms`")
-    if message.content.startswith(prefix+'backup') and botowner:
-        zp = zipfile.ZipFile("Backup.zip","w")
-        for i in os.listdir("Data"):
-            zp.write("Data/"+i)
-        zp.close()
-        yield from client.send_file(message.author,"Backup.zip")
     logf.stop()
     yield from client.change_presence(game=statut)
 
+@client.event
+@asyncio.coroutine
+def on_member_join(member):
+    srv = DBServer(str(member.server.id))
+    if srv.keepingrole:
+        yield from srv.restorerolemember(client,member.server,member)
 
 @client.event
 @asyncio.coroutine
-def on_voice_state_update(before,after):
-    global vocalcore
-    vocal = vocalcore.getvocal(str(after.server.id))
-    if (vocal is not None) and vocal.vocal and (not vocal.is_playing) and before.voice.voice_channel != after.voice.voice_channel:
-        if after.voice.voice_channel == vocal.co.channel:
-            yield from vocal.append("Music/reco.mp3",False)
-            vocal.play()
-            #join
-        elif before.voice.voice_channel == vocal.co.channel:
-            yield from vocal.append("Music/deco.mp3",False)
-            vocal.play()
-            #leave
-
-##BLOCKED UNTIL RESOLUTION OF ISSUES
-##
-##@client.event
-##@asyncio.coroutine
-##def on_member_join(member):
-##    kr = KeepRoleServer(str(member.server.id))
-##    if kr.enabled:
-##        yield from kr.apply(client)
-##
-##@client.event
-##@asyncio.coroutine
-##def on_member_remove(member):
-##    kr = KeepRoleServer(str(member.server.id))
-##    if kr.enabled:
-##        rolels = []
-##        for i in member.roles:
-##            if str(i.id) in kr.roles:
-##                rolels.append(str(i.id))
-##        kr.addmembers({str(member.id):rolels})
-##
-##END OF BLOCUS
+def on_member_remove(member):
+    srv = DBServer(str(member.server.id))
+    if srv.keepingrole:
+        srv.backuprolemember(member)
                 
 @client.event
 @asyncio.coroutine
@@ -1297,6 +1193,22 @@ def on_ready():
     botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
     url = discord.utils.oauth_url(str(client.user.id),botaskperm)
     print(url)
+    logf.append("Initializing","Generating invite link : "+str(url))
+    srvid = []
+    for i in client.servers:
+        srvid.append(str(i.id))
+        if str(i.id) not in srvlist():
+            addserver(i)
+            logf.append("Initializing","This server has invited the bot during off period, adding it to the database : "+str(i)+" (ID="+str(i.id)+")")
+    logf.append("Initializing","Added new servers to the database successful")
+    purgeservers(365)
+    logf.append("Initializing","Purge servers who has kicked the bot at least one year ago successful")
+    for i in srvlist():
+        if i not in srvid:
+            srv = DBServer(i)
+            logf.append("Initializing","This server has kicked the bot during off period, removing it from the database : ID="+str(i))
+            srv.remove()
+    logf.append("Initializing","Removed old servers from the database successful")
     logf.append("Initializing","Bot is now ready")
     logf.stop()
 

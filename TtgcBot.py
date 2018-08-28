@@ -1139,8 +1139,8 @@ def on_message(message):
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
         url = discord.utils.oauth_url(str(client.user.id),botaskperm)
-        embd = discord.Embed(title="TtgcBot (Beta)",description="Invite TtgcBot (beta) to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
-        embd.set_footer(text="TtgcBot version beta developed by Ttgc",icon_url=client.user.avatar_url)
+        embd = discord.Embed(title="TtgcBot",description="Invite TtgcBot to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
+        embd.set_footer(text="TtgcBot version 1.0 developed by Ttgc",icon_url=client.user.avatar_url)
         embd.set_image(url=client.user.avatar_url)
         embd.set_author(name="Ttgc",icon_url="https://cdn.discordapp.com/avatars/222026592896024576/e1bf51b1158cc87cefcc54afc4849cee.webp?size=1024",url=url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
@@ -1194,7 +1194,9 @@ def on_ready():
     url = discord.utils.oauth_url(str(client.user.id),botaskperm)
     print(url)
     logf.append("Initializing","Generating invite link : "+str(url))
+    srvid = []
     for i in client.servers:
+        srvid.append(str(i.id))
         if str(i.id) not in srvlist():
             addserver(i)
             logf.append("Initializing","This server has invited the bot during off period, adding it to the database : "+str(i)+" (ID="+str(i.id)+")")
@@ -1202,7 +1204,7 @@ def on_ready():
     purgeservers(365)
     logf.append("Initializing","Purge servers who has kicked the bot at least one year ago successful")
     for i in srvlist():
-        if i not in client.servers:
+        if i not in srvid:
             srv = DBServer(i)
             logf.append("Initializing","This server has kicked the bot during off period, removing it from the database : ID="+str(i))
             srv.remove()

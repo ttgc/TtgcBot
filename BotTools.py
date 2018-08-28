@@ -63,7 +63,7 @@ class DBServer:
 
     def keeprolelist(self):
         db = Database()
-        cur = db.execute("SELECT id_role FROM Keeprole WHERE id_server = %(idserv)s GROUP BY id_role;",idserv=self.ID)
+        cur = db.execute("SELECT id_role FROM role WHERE id_server = %(idserv)s GROUP BY id_role;",idserv=self.ID)
         if cur is None:
             db.close(True)
             raise DatabaseException("unable to find the keeprole list")
@@ -154,8 +154,9 @@ class DBServer:
             raise DatabaseException("unable to restore roles of the member")
         ls = []
         for i in cur:
-            ls.append(discord.utils.get(srv.roles,id=i[0]))
-        yield from client.add_roles(member,ls)
+            rl = discord.utils.get(srv.roles,id=i[0])
+            ls.append(rl)
+            yield from client.add_roles(member,rl)
         for i in ls:
             db.call("restorerolemember",idmemb=member.id,idserv=self.ID,idrole=i.id)
         db.close()
@@ -170,6 +171,11 @@ class DBServer:
         db.call("removerole",idserv=self.ID,idrole=roleid)
         db.close()
 
+    def clearkeeprole(self):
+        db = Database()
+        db.call("clearkeeprole",idserv=self.ID)
+        db.close()
+
     def get_warned(self):
         db = Database()
         cur = db.execute("SELECT id_member,warn_number FROM warn WHERE id_server = %(idserv)s ORDER BY warn_number;",idserv=self.ID)
@@ -180,9 +186,19 @@ class DBServer:
         db.close()
         return ls
 
+    def get_warnnbr(self,dbmember):
+        db = Database()
+        cur = db.execute("SELECT warn_number FROM warn WHERE id_server = %(idserv)s AND id_member = %(idmemb)s;",idserv=self.ID,idmemb=dbmember.ID)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to find warn number for this server and user")
+        result = cur.fetchone()[0]
+        db.close()
+        return result
+
     def get_warnconfig(self):
         db = Database()
-        cur = db.execute("SELECT warn_number,sanction FROM warnconfig WHERE id_server = %(idserv)s ORDER BY warn_number;",idserv=self.ID)
+        cur = db.execute("SELECT warn_number,sanction FROM warnconfig WHERE id_server = %(idserv)s ORDER BY warn_number DESC;",idserv=self.ID)
         if cur is None:
             db.close(True)
             raise DatabaseException("unable to find warnconfig for this server")
@@ -229,6 +245,18 @@ def purgeservers(days_):
     db = Database()
     db.call("purgeserver",days=days_)
     db.close()
+
+def srvlist():
+    db = Database()
+    cur = db.execute("SELECT id_server FROM Serveur WHERE id_server NOT IN (SELECT id_server FROM purge)")
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("unable to find the server list")
+    ls = []
+    for i in cur:
+        ls.append(i[0])
+    db.close()
+    return ls
 
 class DBJDR:
     def __init__(self,srvid,channelid):
@@ -353,6 +381,9 @@ class DBMember:
             db.close(True)
             raise DatabaseException("unable to find the member")
         info = cur.fetchone()
+        if info is None:
+            db.close(True)
+            raise DatabaseException("unexisting member")
         db.close()
         self.perm = info[1]
 
@@ -360,7 +391,7 @@ class DBMember:
         return self.perm.upper() == "O"
 
     def is_manager(self):
-        return self.perm.upper() == "M"
+        return (self.perm.upper() == "M" or self.is_owner())
 
     def is_premium(self):
         return self.perm.upper() != "N"
@@ -386,7 +417,23 @@ class DBMember:
             db.close()
         return blacklisted,rs
 
+    def unblacklist(self):
+        if not self.is_blacklisted()[0]: return
+        db = Database()
+        db.call("switchblacklist",idmemb=self.ID,eventual_reason="")
+        db.close()
+
 def grantuser(memberid,permcode):
     db = Database()
     db.call("grantperms",idmemb=memberid,perm=permcode)
     db.close()
+
+def blacklist(memberid,reason):
+    try:
+        mb = DBMember(memberid)
+        if mb.is_blacklisted()[0]: return
+    except DatabaseException: pass
+    db = Database()
+    db.call("switchblacklist",idmemb=memberid,eventual_reason=reason)
+    db.close()
+    return DBMember(memberid)

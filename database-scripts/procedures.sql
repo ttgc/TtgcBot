@@ -613,6 +613,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION clearkeeprole
+(
+	idserv Serveur.id_server%TYPE
+) RETURNS int AS $$
+DECLARE
+	nbr INT;
+BEGIN
+	SELECT COUNT(id_member) INTO nbr FROM keeprole
+	WHERE id_server = idserv;
+	DELETE FROM keeprole
+	WHERE id_server = idserv;
+	RETURN nbr;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION addserver
 (
 	idserv Serveur.id_server%TYPE
@@ -682,7 +697,7 @@ CREATE OR REPLACE FUNCTION blockword
 DECLARE
 	nbr INT;
 BEGIN
-	SELECT COUNT(*) FROM word_blocklist
+	SELECT COUNT(*) INTO nbr FROM word_blocklist
 	WHERE (content = word AND id_server = idserv);
 	IF nbr = 0 THEN
 		INSERT INTO word_blocklist (content,id_server)
@@ -855,10 +870,17 @@ CREATE OR REPLACE FUNCTION warnuser
 ) RETURNS void AS $$
 DECLARE
 	nbr INT;
+	nbr2 INT;
 BEGIN
 	SELECT COUNT(*) INTO nbr FROM warn
 	WHERE id_server = idserv AND id_member = idmemb;
 	IF nbr = 0 THEN
+		SELECT COUNT(*) INTO nbr2 FROM membre
+		WHERE id_member = idmemb;
+		IF nbr = 0 THEN
+			INSERT INTO membre
+			VALUES (idmemb,'N');
+		END IF;
 		INSERT INTO warn
 		VALUES(idserv,idmemb,1);
 	ELSE

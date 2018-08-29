@@ -39,7 +39,7 @@ class Item:
         cur = db.call("createitem",name=self.name,descr=self.description,poids=self.weight)
         if cur is None:
             db.close(True)
-            raise DatabaseErrror("unable to create the item")
+            raise DatabaseError("unable to create the item")
         self.ID = cur.fetchone()[0]
         db.close()
 
@@ -58,6 +58,22 @@ class Item:
         db = Database()
         db.call("deleteitem",item=self.ID)
         db.close()
+
+    def find(name):
+        db = Database()
+        cur = db.execute("SELECT id_item,description,weight FROM Items WHERE nom = %(nom)s;",nom=name)
+        if cur is None:
+            db.close(True)
+            raise DatabaseError("unable to find the item")
+        it = cur.fetchone()
+        if it is None:
+            db.close(True)
+            return None
+        db.close()
+        item = Item(name,it[1],it[2])
+        item.ID = it[0]
+        return item
+    find = staticmethod(find)
 
 class Inventory:
     def __init__(self,maxw=20):

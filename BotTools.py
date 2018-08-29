@@ -360,6 +360,16 @@ class DBJDR:
     def get_serverinfo(self):
         return DBServer(self.server)
 
+    def set_finalizer_field(self,title,content):
+        db = Database()
+        db.call("set_finalize_field",idserv=self.server,idchan=self.channel,titl=title,descr=content)
+        db.close()
+
+    def del_finalizer_field(self,title):
+        db = Database()
+        db.call("del_finalize_field",idserv=self.server,idchan=self.channel,titl=title)
+        db.close()
+
     def get_finalizer(self):
         db = Database()
         cur = db.call("finalize",idserv=self.server,idchan=self.channel)

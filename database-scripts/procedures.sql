@@ -416,7 +416,7 @@ BEGIN
 	WHERE (id_inventory = inv AND id_item = item);
 	IF nbr = 0 THEN
 		INSERT INTO contient
-		VALUES (id_item,id_inventory,quantite);
+		VALUES (item,inv,quantite);
 	ELSE
 		UPDATE contient
 		SET qte = qte + quantite
@@ -757,7 +757,18 @@ CREATE OR REPLACE FUNCTION JDRextend
 	src JDR.id_channel%TYPE,
 	target JDR.id_channel%TYPE
 ) RETURNS void AS $$
+DECLARE
+	nbr INT;
+	mj MEMBRE.id_member%TYPE;
 BEGIN
+	SELECT COUNT(*) INTO nbr FROM jdr
+	WHERE id_server = idserv AND id_channel = target;
+	IF nbr <> 0 THEN
+		PERFORM JDRdelete(idserv,target);
+	END IF;
+	SELECT id_member INTO mj FROM jdr
+	WHERE id_server = idserv AND id_channel = src;
+	PERFORM JDRcreate(idserv,target,mj);
 	INSERT INTO JDRextension
 	VALUES (idserv,src,target);
 END;
@@ -772,6 +783,7 @@ CREATE OR REPLACE FUNCTION JDRstopextend
 BEGIN
 	DELETE FROM JDRextension
 	WHERE id_server = idserv AND id_src = src AND id_target = target;
+	PERFORM JDRdelete(idserv,target);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -780,9 +792,12 @@ CREATE OR REPLACE FUNCTION JDRstopallextend
 	idserv JDR.id_server%TYPE,
 	src JDR.id_channel%TYPE
 ) RETURNS void AS $$
+DECLARE
+	line RECORD;
 BEGIN
-	DELETE FROM JDRextension
-	WHERE id_server = idserv AND id_src = src;
+	FOR line IN (SELECT id_target FROM JDRextension WHERE id_server = idserv AND id_src = src) LOOP
+		PERFORM JDRstopextend(idserv,src,line.id_target);
+	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -807,7 +822,7 @@ BEGIN
 		WHERE (id_server = idserv AND id_target = idchan);
 		RETURN QUERY
 		SELECT * FROM Characterr
-		WHERE charkey = dbkey AND id_server = src AND id_channel = idchan;
+		WHERE charkey = dbkey AND id_server = idserv AND id_channel = src;
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -832,7 +847,7 @@ BEGIN
 		WHERE (id_server = idserv AND id_target = idchan);
 		RETURN QUERY
 		SELECT * FROM Characterr
-		WHERE id_server = src AND id_channel = idchan;
+		WHERE id_server = idserv AND id_channel = src;
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -857,7 +872,7 @@ BEGIN
 		WHERE (id_server = idserv AND id_target = idchan);
 		RETURN QUERY
 		SELECT * FROM JDR
-		WHERE id_server = src AND id_channel = idchan;
+		WHERE id_server = idserv AND id_channel = src;
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -877,7 +892,7 @@ BEGIN
 	IF nbr = 0 THEN
 		SELECT COUNT(*) INTO nbr2 FROM membre
 		WHERE id_member = idmemb;
-		IF nbr = 0 THEN
+		IF nbr2 = 0 THEN
 			INSERT INTO membre
 			VALUES (idmemb,'N');
 		END IF;
@@ -906,7 +921,7 @@ BEGIN
 		WHERE id_server = idserv AND id_member = idmemb;
 	ELSE
 		UPDATE warn
-		SET warn_number = warn_number + 1
+		SET warn_number = warn_number - 1
 		WHERE id_server = idserv AND id_member = idmemb;
 	END IF;
 END;
@@ -966,14 +981,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 --finalize features
-CREATE OR REPLACE FUNCTION finalize
+CREATE OR REPLACE FUNCTION finalizer
 (
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE
 ) RETURNS SETOF finalize AS $$
 BEGIN
 	RETURN QUERY
-	SELECT title,description FROM finalize
+	SELECT * FROM finalize
 	WHERE id_server = idserv AND id_channel = idchan;
 END;
 $$ LANGUAGE plpgsql;

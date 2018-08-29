@@ -128,13 +128,13 @@ class Inventory:
 
     def additem(self,it,qte):
         db = Database()
-        db.call("additem",dbkey=char.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
+        db.call("additem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
         db.close()
         self.loadfromdb(self.ID)
         
     def rmitem(self,it,qte):
         db = Database()
-        db.call("removeitem",dbkey=char.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
+        db.call("removeitem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
         db.close()
         self.loadfromdb(self.ID)
 

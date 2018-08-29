@@ -603,7 +603,7 @@ def on_message(message):
             for i in char.inventory.items.keys():
                 if i.name == itname:
                     char.inventory -= i
-                    yield from client.send_message(message.channel,char.name+" Has consumed "+str(qte)+" : "+i.name)
+                    yield from client.send_message(message.channel,char.name+" has consumed : "+i.name)
                     return
             yield from client.send_message(message.channel,"Item not found in your inventory !")
     if command_check(prefix,message,'switchmod',['switchmode']) and jdrchannel:
@@ -658,7 +658,7 @@ def on_message(message):
             embd.add_field(name="Next "+statmin[0]+" :",value=str(statmin[1]+dice),inline=True)
         elif char.lvl == 4:
             dice = randint(1,100)
-            embd.add_field(name="Level up bonus :","PV or PM upgrade : +"+str(dice),inline=True)
+            embd.add_field(name="Level up bonus :",value="PV or PM upgrade : +"+str(dice),inline=True)
             embd.add_field(name="Current PV :",value=str(char.PV),inline=True)
             embd.add_field(name="Current PM :",value=str(char.PM),inline=True)
         elif char.lvl == 5:
@@ -692,16 +692,21 @@ def on_message(message):
             qte = 1
             if len(message.content.split(" ")) > 4: qte = abs(int(message.content.split(" ")[4]))
             item = Item.find(message.content.split(" ")[3].replace("_"," "))
+            keyitem = None
+            for i in char.inventory.items.keys():
+                if i.ID == item.ID:
+                    keyitem = i
+                    break
             if item is None:
                 yield from client.send_message(message.channel,"unexisting item")
-            elif item not in char.inventory.items:
+            elif keyitem is None:
                 yield from client.send_message(message.channel,"This item is not in this inventory")
             else:
-                qte = min(qte,char.inventory.items[item])
+                qte = min(qte,char.inventory.items[keyitem])
                 char.inventory.rmitem(item,qte)
                 yield from client.send_message(message.channel,"item removed successful")
         else:
-            embd = discord.Embed(title=char.name,description="Inventory ("+char.inventory.weight+"/"+char.inventory.maxweight+")",colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd = discord.Embed(title=char.name,description="Inventory ("+str(char.inventory.weight)+"/"+str(char.inventory.maxweight)+")",colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
@@ -710,7 +715,7 @@ def on_message(message):
                 embd.add_field(name=i.name,value=itstr,inline=True)
             yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
-                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll']) and jdrchannel and chanMJ:
+                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv']) and jdrchannel and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo']):
             if char.mod == 0: modd = "Offensiv"
@@ -735,7 +740,7 @@ def on_message(message):
             embd.add_field(name="Mental :",value=str(char.mental),inline=True)
             yield from client.send_message(message.channel,embed=embd)
         if command_check(prefix,message,'mjinventory',['MJinventory','mjinv','MJinv']):
-            embd = discord.Embed(title=char.name,description="Inventory ("+char.inventory.weight+"/"+char.inventory.maxweight+")",colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd = discord.Embed(title=char.name,description="Inventory ("+str(char.inventory.weight)+"/"+str(char.inventory.maxweight)+")",colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
@@ -803,7 +808,7 @@ def on_message(message):
         try:
             srv.getJDR(message.channel_mentions[0].id)
             yield from client.send_message(message.channel,"A JDR already exists in "+chan.mention+"\nYou can't create a new one in the same channel")
-        except DatabaseException:
+        except:
             srv.jdrstart(str(chan.id),str(message.author.id))
             yield from client.send_message(message.channel,"New JDR in "+chan.mention+" (MJ : "+message.author.mention+")")
     if command_check(prefix,message,'JDRdelete',['jdrdelete']) and admin:
@@ -907,11 +912,15 @@ def on_message(message):
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'setfinalizer'):
         msg = get_args(prefix,message,'setfinalizer')
-        jdr.set_finalizer_field(msg.split("|")[0],msg.split("|")[1])
-        yield from client.send_message(message.channel,"Added finalizer field : "+msg.split("|")[0]+" successful with the following content :\n```"+msg.split("|")[0]+"```")
+        titl = msg.split("|")[0]
+        while titl.endswith(" "): titl = titl[:-1]
+        ct = msg.split("|")[1]
+        while ct.startswith(" "): ct = ct[1:]
+        jdr.set_finalizer_field(titl,ct)
+        yield from client.send_message(message.channel,"Added finalizer field : "+titl+" successful with the following content :\n```"+ct+"```")
     if command_check(prefix,message,'delfinalizer',['deletefinalizer']):
-        msg = get_args(prefix,message,'setfinalizer')
-        jdr.del_finalizer_field(msg.split("|")[0],msg.split("|")[1])
+        msg = get_args(prefix,message,'delfinalizer',['deletefinalizer'])
+        jdr.del_finalizer_field(msg)
         yield from client.send_message(message.channel,"Deleted finalizer field : "+msg+" successful")
     if command_check(prefix,message,'finalize',['jdrfinalize','jdrend','JDRfinalize','JDRend']) and chanMJ:
         yield from client.send_message(message.channel,"Finalize command has been called !\nPlease be sure of what you are doing, there is no come back !\n**All JDR data will be deleted after the execution of this command and this cannot be undone !**\nEnter `confirm finalize` to start finalize operation (this will timeout in 60s without answer)")
@@ -1107,6 +1116,7 @@ def on_message(message):
         srv.unblockword(content)
         yield from client.send_message(message.channel,"The following content has now reauthorized on your server : `"+content+"`")
     if command_check(prefix,message,'warn') and admin:
+        if len(message.content.split("|")) < 2: return
         countstr = ""
         targetstr = ""
         for i in message.mentions:
@@ -1167,7 +1177,7 @@ def on_message(message):
             yield from client.send_message(message.channel,"Unknown punishment type for warn command")
     if command_check(prefix,message,'setadminrole',['adminrole']) and message.author == message.server.owner:
         srv.setadminrole(message.role_mentions[0].id)
-        yield from client.send_message(message.channel,"The new adminrole for your server is now : "+role_mentions[0].mention)
+        yield from client.send_message(message.channel,"The new adminrole for your server is now : "+message.role_mentions[0].mention)
     if command_check(prefix,message,'unwarn') and admin:
         countstr = ""
         targetstr = ""
@@ -1175,7 +1185,6 @@ def on_message(message):
             srv.unwarnuser(str(i.id))
             try: nbr = str(srv.get_warnnbr(DBMember(str(i.id))))
             except DatabaseException: nbr = "0"
-            if nbr is None: nbr = "0"
             countstr += (str(i)+" : "+nbr+"\n")
             targetstr += (str(i)+", ")
         embd = discord.Embed(title="UNWARN",description=targetstr[:-2],colour=discord.Color(int('00ff00',16)))
@@ -1261,7 +1270,7 @@ def on_message(message):
             for i,k in mblist.items():
                 rllist = ""
                 for j in k:
-                    rllist += (discord.utils.get(message.server.roles,id=i).mention+"\n")
+                    rllist += (discord.utils.get(message.server.roles,id=j).mention+"\n")
                 user = yield from client.get_user_info(i)
                 embd.add_field(name=str(user)+" :",value=rllist,inline=True)
             yield from client.send_message(message.channel,embed=embd)

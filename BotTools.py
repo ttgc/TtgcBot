@@ -127,6 +127,16 @@ class DBServer:
         db.close()
         return ls
 
+    def jdrextension(self):
+        db = Database()
+        cur = db.execute("SELECT id_target FROM JDRextension WHERE id_server = %(idserv)s GROUP BY id_target;",idserv=self.ID)
+        if cur is not None:
+            extended = []
+            for i in cur:
+                extended.append(i[0])
+        db.close()
+        return extended
+
     def blockword(self,string):
         db = Database()
         db.call("blockword",idserv=self.ID,word=string)

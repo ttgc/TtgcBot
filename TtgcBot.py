@@ -202,6 +202,11 @@ def on_message(message):
             jdrchannel = True
             if MJ: chanMJ = (str(message.author.id) == i[3])
             break
+    if not jdrchannel:
+        ext = srv.jdrextension()
+        if str(message.channel.id) in ext:
+            jdrchannel = True
+            if MJ: chanMJ = (str(message.author.id) == srv.getJDR(str(message.channel.id)).mj)
     if message.channel.name.startswith("nsfw-"): nsfw = True
     else:
         head = {'Authorization': "Bot "+TOKEN}
@@ -488,7 +493,7 @@ def on_message(message):
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'resetchar',['resetcharacter']) and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
-        i.resetchar()
+        char.resetchar()
         yield from client.send_message(message.channel,"Character has been reset")
     if command_check(prefix,message,'pay',[]) and jdrchannel:
         val = abs(int((message.content).replace(prefix+'pay ',"")))

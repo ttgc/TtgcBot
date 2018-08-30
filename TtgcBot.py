@@ -963,8 +963,8 @@ def on_message(message):
         for i in charbase:
             gstat = sum_ls(gstat,i.stat)
             rolled.append(i.stat[0])
-            luck.append(100*((2*i.stat[1])+i.stat[2])/i.stat[0])
-            unluck.append(100*((2*i.stat[-1])+i.stat[-2])/i.stat[0])
+            luck.append(100*((2*i.stat[1])+i.stat[2])/max(i.stat[0],1))
+            unluck.append(100*((2*i.stat[-1])+i.stat[-2])/max(i.stat[0],1))
         ct = charbase[luck.index(max(luck))].name
         if charbase[luck.index(max(luck))].linked is not None: ct += (" ("+str(discord.utils.get(message.server.members,id=charbase[luck.index(max(luck))].linked))+")")
         msg += [("Most Lucky PJ :",ct)]

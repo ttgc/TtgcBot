@@ -1383,6 +1383,7 @@ def on_message(message):
 def on_member_join(member):
     srv = DBServer(str(member.server.id))
     if srv.keepingrole:
+        yield from asyncio.sleep(1)
         yield from srv.restorerolemember(client,member.server,member)
 
 @client.event

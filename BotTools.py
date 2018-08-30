@@ -122,7 +122,7 @@ class DBServer:
             for i in cur:
                 extended.append(i[0])
             for i in ls:
-                if i[1] in extended:
+                if i[0] in extended:
                     ls.remove(i)
         db.close()
         return ls
@@ -192,9 +192,10 @@ class DBServer:
         if cur is None:
             db.close(True)
             raise DatabaseException("unable to find warn number for this server and user")
-        result = cur.fetchone()[0]
+        result = cur.fetchone()
         db.close()
-        return result
+        if result is None: return 0
+        return result[0]
 
     def get_warnconfig(self):
         db = Database()
@@ -261,7 +262,6 @@ def srvlist():
 class DBJDR:
     def __init__(self,srvid,channelid):
         self.server = srvid
-        self.channel = channelid
         db = Database()
         cur = db.call("get_jdr",idserv=srvid,idchan=channelid)
         if cur is None:
@@ -272,6 +272,7 @@ class DBJDR:
         self.creation_date = info[2]
         self.pjs = info[3]
         self.mj = info[4]
+        self.channel = info[1]
 
     def delete(self):
         db = Database()
@@ -360,15 +361,25 @@ class DBJDR:
     def get_serverinfo(self):
         return DBServer(self.server)
 
+    def set_finalizer_field(self,title,content):
+        db = Database()
+        db.call("set_finalize_field",idserv=self.server,idchan=self.channel,titl=title,descr=content)
+        db.close()
+
+    def del_finalizer_field(self,title):
+        db = Database()
+        db.call("del_finalize_field",idserv=self.server,idchan=self.channel,titl=title)
+        db.close()
+
     def get_finalizer(self):
         db = Database()
-        cur = db.call("finalize",idserv=self.server,idchan=self.channel)
+        cur = db.call("finalizer",idserv=self.server,idchan=self.channel)
         if cur is None:
             db.close()
             return []
         ls = []
         for i in cur:
-            ls.append((i[0],i[1]))
+            ls.append((i[2],i[3]))
         db.close()
         return ls
 

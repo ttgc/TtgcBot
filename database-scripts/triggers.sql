@@ -159,33 +159,33 @@ BEFORE UPDATE ON items
 FOR EACH ROW
 EXECUTE PROCEDURE item_updater();
 
-CREATE OR REPLACE FUNCTION extendinit () RETURNS TRIGGER AS $extendinit$
-DECLARE
-	nbr INT;
-	mj JDR.id_member%TYPE;
-BEGIN
-	IF TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN
-		PERFORM JDRdelete(old.id_server, old.id_target);
-	END IF;
-	IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
-		SELECT COUNT(*) INTO nbr FROM JDR
-		WHERE (id_server = new.id_server AND id_channel = new.id_target);
-		SELECT id_member INTO mj FROM JDR
-		WHERE (id_server = new.id_server AND id_channel = new.id_src);
-		IF nbr > 0 THEN
-			PERFORM JDRdelete(new.id_server, new.id_target);
-		END IF;
-		PERFORM JDRcreate(new.id_server, new.id_target, mj);
-	END IF;
-	IF TG_OP = 'DELETE' THEN
-		RETURN old;
-	ELSE
-		RETURN new;
-	END IF;
-END;
-$extendinit$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION extendinit () RETURNS TRIGGER AS $extendinit$
+-- DECLARE
+	-- nbr INT;
+	-- mj JDR.id_member%TYPE;
+-- BEGIN
+	-- IF TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN
+		-- PERFORM JDRdelete(old.id_server, old.id_target);
+	-- END IF;
+	-- IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+		-- SELECT COUNT(*) INTO nbr FROM JDR
+		-- WHERE (id_server = new.id_server AND id_channel = new.id_target);
+		-- SELECT id_member INTO mj FROM JDR
+		-- WHERE (id_server = new.id_server AND id_channel = new.id_src);
+		-- IF nbr > 0 THEN
+			-- PERFORM JDRdelete(new.id_server, new.id_target);
+		-- END IF;
+		-- PERFORM JDRcreate(new.id_server, new.id_target, mj);
+	-- END IF;
+	-- IF TG_OP = 'DELETE' THEN
+		-- RETURN old;
+	-- ELSE
+		-- RETURN new;
+	-- END IF;
+-- END;
+-- $extendinit$ LANGUAGE plpgsql;
 
-CREATE TRIGGER extendinit
-BEFORE INSERT OR UPDATE OR DELETE ON JDRextension
-FOR EACH ROW
-EXECUTE PROCEDURE extendinit();
+-- CREATE TRIGGER extendinit
+-- BEFORE INSERT OR UPDATE OR DELETE ON JDRextension
+-- FOR EACH ROW
+-- EXECUTE PROCEDURE extendinit();

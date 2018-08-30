@@ -187,6 +187,7 @@ def on_message(message):
     #special values
     jdrchannel = False
     admin = discord.utils.get(message.server.roles,id=srv.adminrole) in message.author.roles
+    if message.author == message.server.owner: admin = True
     nsfw = False
     musicchannel = False
     chanMJ = False
@@ -254,6 +255,7 @@ def on_message(message):
         final_expression = final_expression[:-3]
         final_expression = final_expression.replace("+ -","- ")
         yield from client.send_message(message.channel,"You rolled : `"+str(final_result)+"` ("+final_expression+")")
+
     #jdr commands
     if command_check(prefix,message,'roll') and jdrchannel:#message.content.startswith(prefix+'roll') and jdrchannel:
         field = (message.content).replace(prefix+'roll ',"")
@@ -521,7 +523,7 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
         embd.add_field(name="PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
-        embd.add_field(name="Mental :",value=str(char.mental),inline=True)
+        embd.add_field(name="Level :",value=str(char.lvl),inline=True)
         embd.add_field(name="Intuition :",value=str(char.intuition),inline=True)
         embd.add_field(name="Force :",value=str(char.force),inline=True)
         embd.add_field(name="Esprit :",value=str(char.esprit),inline=True)
@@ -532,6 +534,7 @@ def on_message(message):
         embd.add_field(name="Light Points :",value=str(char.lp),inline=True)
         embd.add_field(name="Dark Points :",value=str(char.dp),inline=True)
         embd.add_field(name="Mod :",value=modd,inline=True)
+        embd.add_field(name="Mental :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'map',[]) and chanMJ:
         f = open("mapmonde.png","rb")
@@ -566,7 +569,7 @@ def on_message(message):
         embd.add_field(name="Critic Fail :",value=str(ls[5]),inline=True)
         embd.add_field(name="Super Critic Fail :",value=str(ls[6]),inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'use',[]) and jdrchannel:
+    if command_check(prefix,message,'use') and jdrchannel:
         if command_check(prefix,message,'use lightpt',['use lp','use lightpoint']):
             if char.lp <= 0:
                 yield from client.send_message(message.channel,"No more Light Points")
@@ -596,14 +599,11 @@ def on_message(message):
                 elif result == 5: yield from client.send_message(message.channel,"-20%")
                 elif result == 6: yield from client.send_message(message.channel,"No effect")
         else:
-            itname = message.content.split(" ")[1]
-            qte = 1
-            if len(message.content.split(" ")) == 3:
-                qte = abs(int(message.content.split(" ")[2]))
+            itname = get_args(prefix,message,'use')
             for i in char.inventory.items.keys():
                 if i.name == itname:
-                    char.inventory.rmitem(i,qte)
-                    yield from client.send_message(message.channel,char.name+" Has consumed "+str(qte)+" : "+i.name)
+                    char.inventory -= i
+                    yield from client.send_message(message.channel,char.name+" has consumed : "+i.name)
                     return
             yield from client.send_message(message.channel,"Item not found in your inventory !")
     if command_check(prefix,message,'switchmod',['switchmode']) and jdrchannel:
@@ -632,8 +632,90 @@ def on_message(message):
         if "+" in message.content or "-" in message.content: embd.add_field(name="Amount of mental "+got+" :",value=msg,inline=True)
         embd.add_field(name="Current mental :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'lvlup',['levelup']) and jdrchannel and chanMJ:
+        char = jdr.get_character(message.content.split(" ")[1])
+        char.lvlup()
+        embd = discord.Embed(title=char.name,description="Has leveled up !",colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name="Level :",value=str(char.lvl),inline=True)
+        if char.lvl == 2:
+            dice,dice2 = randint(1,10),randint(1,10)
+            embd.add_field(name="Level up bonus :",value="Stat upgrade : +"+str(dice)+" and +"+str(dice2),inline=True)
+            embd.add_field(name="Current force :",value=str(char.force),inline=True)
+            embd.add_field(name="Current esprit :",value=str(char.esprit),inline=True)
+            embd.add_field(name="Current charisme :",value=str(char.charisme),inline=True)
+            embd.add_field(name="Current agilite :",value=str(char.furtivite),inline=True)
+        elif char.lvl == 3:
+            dice = randint(1,10)
+            dic = {"force":char.force,"esprit":char.esprit,"charisme":char.charisme,"agilite":char.furtivite}
+            statmin = ("force",char.force)
+            for i,k in dic.items():
+                if k < statmin[1]: statmin = (i,k)
+            embd.add_field(name="Level up bonus :",value=statmin[0]+" upgrade : +"+str(dice),inline=True)
+            embd.add_field(name="Current "+statmin[0]+" :",value=str(statmin[1]),inline=True)
+            embd.add_field(name="Next "+statmin[0]+" :",value=str(statmin[1]+dice),inline=True)
+        elif char.lvl == 4:
+            dice = randint(1,100)
+            embd.add_field(name="Level up bonus :",value="PV or PM upgrade : +"+str(dice),inline=True)
+            embd.add_field(name="Current PV :",value=str(char.PV),inline=True)
+            embd.add_field(name="Current PM :",value=str(char.PM),inline=True)
+        elif char.lvl == 5:
+            embd.add_field(name="Level up bonus :",value="Move max 10 points of stat",inline=True)
+            embd.add_field(name="Current force :",value=str(char.force),inline=True)
+            embd.add_field(name="Current esprit :",value=str(char.esprit),inline=True)
+            embd.add_field(name="Current charisme :",value=str(char.charisme),inline=True)
+            embd.add_field(name="Current agilite :",value=str(char.furtivite),inline=True)
+        else:
+            embd.add_field(name="Level up bonus :",value="No special bonus, ask to your MJ",inline=True)
+            embd.add_field(name="Current force :",value=str(char.force),inline=True)
+            embd.add_field(name="Current esprit :",value=str(char.esprit),inline=True)
+            embd.add_field(name="Current charisme :",value=str(char.charisme),inline=True)
+            embd.add_field(name="Current agilite :",value=str(char.furtivite),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'inventory',['inv']) and jdrchannel:
+        if command_check(prefix,message,'inventory add',['inv add']) and chanMJ:
+            char = jdr.get_character(message.content.split(" ")[2])
+            qte = 1
+            if len(message.content.split(" ")) > 4: qte = abs(int(message.content.split(" ")[4]))
+            item = Item.find(message.content.split(" ")[3].replace("_"," "))
+            if item is None:
+                yield from client.send_message(message.channel,"unexisting item")
+            elif char.inventory.weight + (item.weight*qte) > char.inventory.maxweight:
+                yield from client.send_message(message.channel,"This inventory is full and cannot take more items")
+            else:
+                char.inventory.additem(item,qte)
+                yield from client.send_message(message.channel,"item added successful")
+        elif command_check(prefix,message,'inventory delete',['inv delete','inventory del','inv del']) and chanMJ:
+            char = jdr.get_character(message.content.split(" ")[2])
+            qte = 1
+            if len(message.content.split(" ")) > 4: qte = abs(int(message.content.split(" ")[4]))
+            item = Item.find(message.content.split(" ")[3].replace("_"," "))
+            keyitem = None
+            for i in char.inventory.items.keys():
+                if i.ID == item.ID:
+                    keyitem = i
+                    break
+            if item is None:
+                yield from client.send_message(message.channel,"unexisting item")
+            elif keyitem is None:
+                yield from client.send_message(message.channel,"This item is not in this inventory")
+            else:
+                qte = min(qte,char.inventory.items[keyitem])
+                char.inventory.rmitem(item,qte)
+                yield from client.send_message(message.channel,"item removed successful")
+        else:
+            embd = discord.Embed(title=char.name,description="Inventory ("+str(char.inventory.weight)+"/"+str(char.inventory.maxweight)+")",colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+            for i,k in char.inventory.items.items():
+                itstr = "quantity : "+str(k)+"\nweight (/item) : "+str(i.weight)
+                embd.add_field(name=i.name,value=itstr,inline=True)
+            yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
-                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll']) and jdrchannel and chanMJ:
+                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv']) and jdrchannel and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo']):
             if char.mod == 0: modd = "Offensiv"
@@ -644,7 +726,7 @@ def on_message(message):
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name="PV :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
             embd.add_field(name="PM :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
-            embd.add_field(name="Mental :",value=str(char.mental),inline=True)
+            embd.add_field(name="Level :",value=str(char.lvl),inline=True)
             embd.add_field(name="Intuition :",value=str(char.intuition),inline=True)
             embd.add_field(name="Force :",value=str(char.force),inline=True)
             embd.add_field(name="Esprit :",value=str(char.esprit),inline=True)
@@ -655,6 +737,16 @@ def on_message(message):
             embd.add_field(name="Light Points :",value=str(char.lp),inline=True)
             embd.add_field(name="Dark Points :",value=str(char.dp),inline=True)
             embd.add_field(name="Mod :",value=modd,inline=True)
+            embd.add_field(name="Mental :",value=str(char.mental),inline=True)
+            yield from client.send_message(message.channel,embed=embd)
+        if command_check(prefix,message,'mjinventory',['MJinventory','mjinv','MJinv']):
+            embd = discord.Embed(title=char.name,description="Inventory ("+str(char.inventory.weight)+"/"+str(char.inventory.maxweight)+")",colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+            for i,k in char.inventory.items.items():
+                itstr = "quantity : "+str(k)+"\nweight (/item) : "+str(i.weight)
+                embd.add_field(name=i.name,value=itstr,inline=True)
             yield from client.send_message(message.channel,embed=embd)
         if command_check(prefix,message,'mjswitchmod',['MJswitchmod','mjswitchmode','MJswitchmode']):
             char = char.switchmod()
@@ -716,7 +808,7 @@ def on_message(message):
         try:
             srv.getJDR(message.channel_mentions[0].id)
             yield from client.send_message(message.channel,"A JDR already exists in "+chan.mention+"\nYou can't create a new one in the same channel")
-        except DatabaseException:
+        except:
             srv.jdrstart(str(chan.id),str(message.author.id))
             yield from client.send_message(message.channel,"New JDR in "+chan.mention+" (MJ : "+message.author.mention+")")
     if command_check(prefix,message,'JDRdelete',['jdrdelete']) and admin:
@@ -759,6 +851,35 @@ def on_message(message):
         dest = message.channel_mentions[1]
         srv.getJDR(str(src.id)).copy(str(dest.id))
         yield from client.send_message(message.channel,"JDR copied successfull")
+    if command_check(prefix,message,'JDRextend',['jdrextend']) and admin:
+        if message.channel_mentions[0].server.id != message.server.id or message.channel_mentions[0].server.id != message.channel_mentions[1].server.id:
+            yield from client.send_message(message.channel,"channels are not located on the same server")
+            return
+        yield from client.send_message(message.channel,"Would you extend jdr from "+message.channel_mentions[0].mention+" to "+message.channel_mentions[1].mention+" ?\nAll data in the destination channel will be deleted, are you sure ?\ntype `confirm` to continue")
+        confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm")
+        if confirm is None:
+            yield from client.send_message(message.channel,"This action has timeout")
+            return
+        src = message.channel_mentions[0]
+        dest = message.channel_mentions[1]
+        try:
+            destjdr = srv.getJDR(str(dest.id))
+            destjdr.delete()
+        except: pass
+        srv.getJDR(str(src.id)).extend(str(dest.id))
+        yield from client.send_message(message.channel,"JDR extended successfull")
+    if command_check(prefix,message,'JDRunextend',['jdrunextend']) and (not command_check(prefix,message,'JDRunextend --all',['jdrunextend --all'])) and admin:
+        if message.channel_mentions[0].server.id != message.server.id or message.channel_mentions[0].server.id != message.channel_mentions[1].server.id:
+            yield from client.send_message(message.channel,"channels are not located on the same server")
+            return
+        src = message.channel_mentions[0]
+        dest = message.channel_mentions[1]
+        srv.getJDR(str(src.id)).unextend(str(dest.id))
+        yield from client.send_message(message.channel,"JDR unextended successfull")
+    if command_check(prefix,message,'JDRunextend --all',['jdrunextend --all']) and admin:
+        src = message.channel_mentions[0]
+        srv.getJDR(str(src.id)).unextend_all()
+        yield from client.send_message(message.channel,"JDR unextended successfull")
     if command_check(prefix,message,'wiki'):
         query = message.content.replace(prefix+'wiki ',"")
         query = query.replace(" ","_")
@@ -789,6 +910,18 @@ def on_message(message):
         if len(info.json()["parse"]["redirects"]) != 0:
             embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'setfinalizer') and jdrchannel and chanMJ:
+        msg = get_args(prefix,message,'setfinalizer')
+        titl = msg.split("|")[0]
+        while titl.endswith(" "): titl = titl[:-1]
+        ct = msg.split("|")[1]
+        while ct.startswith(" "): ct = ct[1:]
+        jdr.set_finalizer_field(titl,ct)
+        yield from client.send_message(message.channel,"Added finalizer field : "+titl+" successful with the following content :\n```"+ct+"```")
+    if command_check(prefix,message,'delfinalizer',['deletefinalizer']) and jdrchannel and chanMJ:
+        msg = get_args(prefix,message,'delfinalizer',['deletefinalizer'])
+        jdr.del_finalizer_field(msg)
+        yield from client.send_message(message.channel,"Deleted finalizer field : "+msg+" successful")
     if command_check(prefix,message,'finalize',['jdrfinalize','jdrend','JDRfinalize','JDRend']) and chanMJ:
         yield from client.send_message(message.channel,"Finalize command has been called !\nPlease be sure of what you are doing, there is no come back !\n**All JDR data will be deleted after the execution of this command and this cannot be undone !**\nEnter `confirm finalize` to start finalize operation (this will timeout in 60s without answer)")
         confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm finalize")
@@ -859,6 +992,17 @@ def on_message(message):
         yield from client.send_message(message.channel,"Finalize is now over, see you soon for a next Party !")
         anoncer_isready = True
         jdr.delete()
+    if command_check(prefix,message,'jdrlist',['JDRlist']) and admin:
+        ls = srv.jdrlist()
+        embd = discord.Embed(title="JDR list",description="List of JDR on your server",colour=discord.Color(int('0000ff',16)))
+        embd.set_footer(text=str(message.timestamp))
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in ls:
+            info = "Game Master (MJ) : "+discord.utils.get(message.server.members,id=i[3]).mention+"\nNumber of players : "+str(i[2])+"\nDate of creation : "+str(i[1])
+            embd.add_field(name="#"+str(discord.utils.get(message.server.channels,id=i[0]))+" :",value=info,inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+
     #Other commands (not JDR)
     if command_check(prefix,message,'tell') and not command_check(prefix,message,'tell --tts',['tell -t']):
         msg = (message.content).replace(prefix+'tell ',"")
@@ -953,6 +1097,10 @@ def on_message(message):
         userid = message.content.replace(prefix+'setpremium ',"")
         grantuser(userid,'P')
         yield from client.send_message(message.channel,"The ID has been set as premium succesful")
+    if command_check(prefix,message,'purgeserver',['purgeservers','purgesrv']) and botmanager:
+        days = int(get_args(prefix,message,'purgeserver',['purgeservers','purgesrv']))
+        purgeservers(days)
+        yield from client.send_message(message.channel,"Purged servers successful")
     if command_check(prefix,message,'contentban') and admin:
         content = get_args(prefix,message,'contentban')
         if len(srv.wordblocklist()) < 20:
@@ -968,6 +1116,7 @@ def on_message(message):
         srv.unblockword(content)
         yield from client.send_message(message.channel,"The following content has now reauthorized on your server : `"+content+"`")
     if command_check(prefix,message,'warn') and admin:
+        if len(message.content.split("|")) < 2: return
         countstr = ""
         targetstr = ""
         for i in message.mentions:
@@ -1026,6 +1175,48 @@ def on_message(message):
             yield from client.send_message(message.channel,"Removing punishment for people with "+str(value)+" warnings")
         else:
             yield from client.send_message(message.channel,"Unknown punishment type for warn command")
+    if command_check(prefix,message,'setadminrole',['adminrole']) and message.author == message.server.owner:
+        srv.setadminrole(message.role_mentions[0].id)
+        yield from client.send_message(message.channel,"The new adminrole for your server is now : "+message.role_mentions[0].mention)
+    if command_check(prefix,message,'unwarn') and admin:
+        countstr = ""
+        targetstr = ""
+        for i in message.mentions:
+            srv.unwarnuser(str(i.id))
+            try: nbr = str(srv.get_warnnbr(DBMember(str(i.id))))
+            except DatabaseException: nbr = "0"
+            countstr += (str(i)+" : "+nbr+"\n")
+            targetstr += (str(i)+", ")
+        embd = discord.Embed(title="UNWARN",description=targetstr[:-2],colour=discord.Color(int('00ff00',16)))
+        embd.set_footer(text=str(message.timestamp))
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="https://cdn1.iconfinder.com/data/icons/interface-elements/32/accept-circle-512.png")
+        embd.add_field(name="Total warnings :",value=countstr,inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'warnlist',['warnls']) and admin:
+        ls = srv.get_warned()
+        embd = discord.Embed(title="Warned list",description="List of people warned on your server",colour=discord.Color(int('ff0000',16)))
+        embd.set_footer(text=str(message.timestamp))
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        for i in ls:
+            user = yield from client.get_user_info(i[0])
+            embd.add_field(name=str(user)+" :",value=str(i[1])+" warning(s)",inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'warnconfiglist',['warnconfigls','warncfgls','warncfglist']) and admin:
+        ls = srv.get_warnconfig()
+        embd = discord.Embed(title="Punishment list",description="List of punishment on your server",colour=discord.Color(int('ff0000',16)))
+        embd.set_footer(text=str(message.timestamp))
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        for i in ls:
+            if i[1] == "kick":
+                sanction = "Kick"
+            elif i[1] == "ban":
+                sanction = "Ban"
+            else:
+                sanction = "Assign role : "+discord.utils.get(message.server.roles,id=i[1]).mention
+            embd.add_field(name=str(i[0])+" warnings :",value=sanction,inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+
     #KeepRole commands
     if command_check(prefix,message,'keeprole',['kr']) and admin:
         info = yield from client.application_info()
@@ -1056,6 +1247,34 @@ def on_message(message):
         if command_check(prefix,message,'keeprole clear',['kr clear']):
             srv.clearkeeprole()
             yield from client.send_message(message.channel,"KeepRole members list purged successful")
+        if command_check(prefix,message,'keeprole roles list',['kr roles list']):
+            ls = srv.keeprolelist()
+            rllist = ""
+            for i in ls:
+                rllist += (discord.utils.get(message.server.roles,id=i).mention+"\n")
+            embd = discord.Embed(title="Keeprole system",description="List of roles to keep for your server",colour=discord.Color(int('ff0000',16)))
+            embd.set_footer(text=str(message.timestamp))
+            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.add_field(name="Roles list :",value=rllist,inline=True)
+            yield from client.send_message(message.channel,embed=embd)
+        if command_check(prefix,message,'keeprole members list',['kr members list']):
+            ls = srv.keeprolememberwithrole()
+            mblist = {}
+            for i in ls:
+                if i[0] not in mblist:
+                    mblist[i[0]] = []
+                mblist[i[0]].append(i[1])
+            embd = discord.Embed(title="Keeprole system",description="List of members that have left with their roles for your server",colour=discord.Color(int('ff0000',16)))
+            embd.set_footer(text=str(message.timestamp))
+            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            for i,k in mblist.items():
+                rllist = ""
+                for j in k:
+                    rllist += (discord.utils.get(message.server.roles,id=j).mention+"\n")
+                user = yield from client.get_user_info(i)
+                embd.add_field(name=str(user)+" :",value=rllist,inline=True)
+            yield from client.send_message(message.channel,embed=embd)
+
     #Vocal commands
     if command_check(prefix,message,'vocal on',['vocal off','music on','music off']) and premium:
         msg = get_args(prefix,message,'vocal',['music'])
@@ -1112,6 +1331,7 @@ def on_message(message):
                         yield from client.server_voice_state(i,mute=False,deafen=False)
                     else:
                         yield from client.server_voice_state(i,mute=True,deafen=True)
+
     #Help commands
     if command_check(prefix,message,'debug',['eval']) and botowner:
         msg = get_args(prefix,message,'debug',['eval'])
@@ -1142,7 +1362,7 @@ def on_message(message):
         embd = discord.Embed(title="TtgcBot",description="Invite TtgcBot to your server !",colour=discord.Color(randint(0,int('ffffff',16))),url=url)
         embd.set_footer(text="TtgcBot version 1.0 developed by Ttgc",icon_url=client.user.avatar_url)
         embd.set_image(url=client.user.avatar_url)
-        embd.set_author(name="Ttgc",icon_url="https://cdn.discordapp.com/avatars/222026592896024576/e1bf51b1158cc87cefcc54afc4849cee.webp?size=1024",url=url)
+        embd.set_author(name="Ttgc",icon_url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/08/avatar-2-perso.png",url=url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name="TtgcBot is currently on :",value=str(len(client.servers))+" servers",inline=True)
         yield from client.send_message(message.channel,embed=embd)
@@ -1163,6 +1383,7 @@ def on_message(message):
 def on_member_join(member):
     srv = DBServer(str(member.server.id))
     if srv.keepingrole:
+        yield from asyncio.sleep(1)
         yield from srv.restorerolemember(client,member.server,member)
 
 @client.event

@@ -910,7 +910,7 @@ def on_message(message):
         if len(info.json()["parse"]["redirects"]) != 0:
             embd.add_field(name="Redirected from :",value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'setfinalizer'):
+    if command_check(prefix,message,'setfinalizer') and jdrchannel and chanMJ:
         msg = get_args(prefix,message,'setfinalizer')
         titl = msg.split("|")[0]
         while titl.endswith(" "): titl = titl[:-1]
@@ -918,7 +918,7 @@ def on_message(message):
         while ct.startswith(" "): ct = ct[1:]
         jdr.set_finalizer_field(titl,ct)
         yield from client.send_message(message.channel,"Added finalizer field : "+titl+" successful with the following content :\n```"+ct+"```")
-    if command_check(prefix,message,'delfinalizer',['deletefinalizer']):
+    if command_check(prefix,message,'delfinalizer',['deletefinalizer']) and jdrchannel and chanMJ:
         msg = get_args(prefix,message,'delfinalizer',['deletefinalizer'])
         jdr.del_finalizer_field(msg)
         yield from client.send_message(message.channel,"Deleted finalizer field : "+msg+" successful")
@@ -992,7 +992,7 @@ def on_message(message):
         yield from client.send_message(message.channel,"Finalize is now over, see you soon for a next Party !")
         anoncer_isready = True
         jdr.delete()
-    if command_check(prefix,message,'jdrlist',['JDRlist']):
+    if command_check(prefix,message,'jdrlist',['JDRlist']) and admin:
         ls = srv.jdrlist()
         embd = discord.Embed(title="JDR list",description="List of JDR on your server",colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text=str(message.timestamp))
@@ -1193,7 +1193,7 @@ def on_message(message):
         embd.set_thumbnail(url="https://cdn1.iconfinder.com/data/icons/interface-elements/32/accept-circle-512.png")
         embd.add_field(name="Total warnings :",value=countstr,inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'warnlist',['warnls']):
+    if command_check(prefix,message,'warnlist',['warnls']) and admin:
         ls = srv.get_warned()
         embd = discord.Embed(title="Warned list",description="List of people warned on your server",colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(message.timestamp))
@@ -1202,7 +1202,7 @@ def on_message(message):
             user = yield from client.get_user_info(i[0])
             embd.add_field(name=str(user)+" :",value=str(i[1])+" warning(s)",inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'warnconfiglist',['warnconfigls','warncfgls','warncfglist']):
+    if command_check(prefix,message,'warnconfiglist',['warnconfigls','warncfgls','warncfglist']) and admin:
         ls = srv.get_warnconfig()
         embd = discord.Embed(title="Punishment list",description="List of punishment on your server",colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(message.timestamp))

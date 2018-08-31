@@ -1425,7 +1425,8 @@ def on_ready():
         srvid.append(str(i.id))
         if str(i.id) not in srvlist():
             addserver(i)
-            logf.append("Initializing","This server has invited the bot during off period, adding it to the database : "+str(i)+" (ID="+str(i.id)+")")
+            try: logf.append("Initializing","This server has invited the bot during off period, adding it to the database : "+str(i)+" (ID="+str(i.id)+")")
+            except: logf.append("Initializing","Server added (ID="+str(i.id)+")")
     logf.append("Initializing","Added new servers to the database successful")
     purgeservers(365)
     logf.append("Initializing","Purge servers who has kicked the bot at least one year ago successful")

@@ -163,7 +163,7 @@ CREATE TABLE public.Role(
 ------------------------------------------------------------
 CREATE TABLE public.Blacklist(
 	id_member        VARCHAR (25) CONSTRAINT blacklist_member_null NOT NULL ,
-	reason           VARCHAR (25)  ,
+	reason           VARCHAR (100)  ,
 	--id_member_Membre VARCHAR (25)  ,
 	CONSTRAINT prk_constraint_Blacklist PRIMARY KEY (id_member)
 )WITHOUT OIDS;

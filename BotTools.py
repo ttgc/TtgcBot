@@ -121,9 +121,12 @@ class DBServer:
             extended = []
             for i in cur:
                 extended.append(i[0])
+            todel = []
             for i in ls:
                 if i[0] in extended:
-                    ls.remove(i)
+                    todel.append(i)#ls.remove(i)
+            for i in todel:
+                ls.remove(i)
         db.close()
         return ls
 

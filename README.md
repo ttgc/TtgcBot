@@ -1,7 +1,7 @@
 # TtgcBot
 TtgcBot for Discord
 
-**Invite link :** https://discordapp.com/oauth2/authorize?client_id=331147011938320396&scope=bot&permissions=385350855
+**[Invite link](https://discordapp.com/oauth2/authorize?client_id=331147011938320396&scope=bot&permissions=385350855)**
 
 *you can invit him from a server with command* `/invite`  
 *Already available on The Tale of Great Cosmos discord*

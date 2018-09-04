@@ -1344,22 +1344,23 @@ def on_message(message):
         logf.append("/debug","running debug instruction : "+msg)
         exec(msg)
     if command_check(prefix,message,'help','?'):
-        f = open("help.txt","r")
-        msg = f.read()
-        ls = msg.split("\n\n")
-        if message.content.startswith(prefix+'help normal'):
-            yield from client.send_message(message.author,"Here's the whole list of normal commands :\n"+ls[0])
-        elif message.content.startswith(prefix+'help vocal'):
-            yield from client.send_message(message.author,"Here's the whole list of vocal commands :\n"+ls[1])
-        elif message.content.startswith(prefix+'help JDR'):
-            yield from client.send_message(message.author,"Here's the whole list of JDR commands :\n"+ls[2])
-            yield from client.send_message(message.author,ls[3])
-        else:
-            yield from client.send_message(message.author,"Here's the whole list of my commands (somes will need some rights) :\n")
-            for i in ls:
-                yield from client.send_message(message.author,i)
-        f.close()
-        yield from client.send_message(message.channel,"I've sent you a private message with the answer")
+        yield from client.send_message(message.channel,"Check all avalaible command here : https://ttgc.github.io/TtgcBot/")
+##        f = open("help.txt","r")
+##        msg = f.read()
+##        ls = msg.split("\n\n")
+##        if message.content.startswith(prefix+'help normal'):
+##            yield from client.send_message(message.author,"Here's the whole list of normal commands :\n"+ls[0])
+##        elif message.content.startswith(prefix+'help vocal'):
+##            yield from client.send_message(message.author,"Here's the whole list of vocal commands :\n"+ls[1])
+##        elif message.content.startswith(prefix+'help JDR'):
+##            yield from client.send_message(message.author,"Here's the whole list of JDR commands :\n"+ls[2])
+##            yield from client.send_message(message.author,ls[3])
+##        else:
+##            yield from client.send_message(message.author,"Here's the whole list of my commands (somes will need some rights) :\n")
+##            for i in ls:
+##                yield from client.send_message(message.author,i)
+##        f.close()
+##        yield from client.send_message(message.channel,"I've sent you a private message with the answer")
     if command_check(prefix,message,'invite',['invit']):
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_server = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False

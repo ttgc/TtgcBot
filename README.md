@@ -230,7 +230,8 @@ Aliases : `switchmode`
 - `/setmental [+/-]<amount>` (PJ only) <br/>
 Set the mental health of your character with the given value, if `+` or `-` is provided in the command, the amount will be added respectivly substracted to your mental health
 - `/mj...` (MJ only and JDR channel only) <br/>
-Use a PJ command when you are MJ, the following commands can be used : <br/>
+Use a PJ command when you are MJ, theese commands works exactly as the same commands without the `mj` prefix with sames arguments, the result will also be the same. For example `/mjcharinfo` will produce same result as `/charinfo` but you will have to precise for wich character this commands must be used for as the following : `/charinfo <charkey>`. Refers to the PJ commands' doc to know result and how arguments works for each commands <br/>
+The following commands can be used : <br/>
 ```
 /mjcharinfo <charkey>
 /mjswitchmod <charkey>

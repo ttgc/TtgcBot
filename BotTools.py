@@ -461,3 +461,15 @@ def blacklist(memberid,reason):
     db.call("switchblacklist",idmemb=memberid,eventual_reason=reason)
     db.close()
     return DBMember(memberid)
+
+def setlang(memberid,lang):
+    db = Database()
+    db.call("setlang",idmemb=memberid,lg=lang.upper())
+    db.close()
+
+def getlang(memberid,lang):
+    db = Database()
+    cur = db.call("getlang",idmemb=memberid)
+    lang = cur.fetchone()[0]
+    db.close()
+    return lang

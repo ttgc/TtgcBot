@@ -30,11 +30,13 @@ from VocalUtilities import *
 from Character import *
 from converter import *
 from BotTools import *
+from Translator import *
 import os
 import zipfile
 import sys
 import requests
 import subprocess as sub
+import traceback
 
 logger = logging.getLogger('discord')
 logging.basicConfig(level=logging.INFO)
@@ -170,6 +172,10 @@ def on_message(message):
     srv = DBServer(message.server.id)
     #get prefix
     prefix = srv.prefix
+    #get language
+    lgcode = getuserlang(message.author.id)
+    if not lang_exist(lgcode): lgcode = "EN"
+    lang = get_lang(lgcode)
     #blacklisting
     blacklisted, reason = is_blacklisted(message.author.id)
     if blacklisted:
@@ -1409,6 +1415,13 @@ def on_server_join(server):
 def on_server_remove(server):
     srv = DBServer(server.id)
     srv.remove()
+
+@client.event
+@asyncio.coroutine
+def on_error(event,*args,**kwargs):
+    message = args[0]
+    logging.warning(traceback.format_exc())
+    yield from client.send_message(message.channel,"Your command throw the following error :\n```python\n"+traceback.format_exc(limit=1000)+"\n```")
 
 @client.event
 @asyncio.coroutine

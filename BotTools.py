@@ -467,7 +467,7 @@ def setuserlang(memberid,lang):
     db.call("setlang",idmemb=memberid,lg=lang.upper())
     db.close()
 
-def getuserlang(memberid,lang):
+def getuserlang(memberid):
     db = Database()
     cur = db.call("getlang",idmemb=memberid)
     lang = cur.fetchone()[0]

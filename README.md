@@ -23,6 +23,8 @@ TtgcBot supports currently only two languages (English and French), if you want 
 4. Wait for validation....
 5. You have successful contributed to bot translation ! Congratulations !
 
+<hr/>
+
 ## Command Help
 
 ### How it works

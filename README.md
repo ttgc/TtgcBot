@@ -28,6 +28,10 @@ Aliases : `prefix`
 - `/setadminrole <role_mention>` (Server owner only) <br/>
 Set the admin role for your server <br/>
 Aliases : `adminrole`
+- `/setlang <language>` <br/>
+Set your language for bot messages, language represents the code of your language and there is currently only two languages supported : `EN` for English and `FR` for French <br/>
+NB : language code is case insensitive so you can precise it in upper or lower case as you wish
+Aliases : `setlanguage`
 - `/rollindep <value>` <br/>
 Roll dices and perform additions or substractions if given in the value field. For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example) <br/>
 Full example : `/rollindep 10+1d100-2d10+5d8` will return the result of the following expression : `10+(1 dice with 100 sides)-(2 dices with 10 sides)+(5 dices with 8 sides)` <br/>

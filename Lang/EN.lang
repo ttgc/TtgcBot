@@ -184,3 +184,4 @@ invite_srv=TtgcBot is currently on :
 invite_author=TtgcBot version 1.0 developed by Ttgc
 ping=ping value is currently : `{} ms`
 error=Your command throw the following error :\n```python\n{}\n```
+setlang=Language updated to {}

@@ -184,3 +184,4 @@ invite_srv=TtgcBot est actuellement sur :
 invite_author=TtgcBot version 1.0 develope par Ttgc
 ping=ping actuel : `{} ms`
 error=Votre commande a provoque l'exception suivante :\n```python\n{}\n```
+setlang=Langue mise a jour vers {}

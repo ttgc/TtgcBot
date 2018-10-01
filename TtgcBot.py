@@ -1235,6 +1235,11 @@ def on_message(message):
                 sanction = lang["warncfglist_assign"].format(discord.utils.get(message.server.roles,id=i[1]).mention)
             embd.add_field(name=str(i[0])+" warnings :",value=sanction,inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'setlang',['setlanguage']):
+        lg = get_args(prefix,message,'setlang',['setlanguage']).upper()
+        if lang_exist(lg):
+            setuserlang(str(message.author.id),lg)
+            yield from client.send_message(message.channel,get_lang(lg)["setlang"].format(lg))
 
     #KeepRole commands
     if command_check(prefix,message,'keeprole',['kr']) and admin:

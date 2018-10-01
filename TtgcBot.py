@@ -1306,7 +1306,7 @@ def on_message(message):
         if msg == "on" and not client.is_voice_connected(message.server):
             vocal = VocalSystem(str(message.server.id),vocalcore)
             yield from vocal.join(message.author.voice.voice_channel,message.channel)
-            yield from client.send_message(vocal.textchan,lang["vocal_on"].format(str(message.author.voice.voice_channel),str(vocal.textchan))
+            yield from client.send_message(vocal.textchan,lang["vocal_on"].format(str(message.author.voice.voice_channel),str(vocal.textchan)))
         elif msg == "off" and client.is_voice_connected(message.server) and (vocal is not None) and ((vocal.textchan == message.channel) or admin):
             chan = vocal.textchan
             yield from vocal.leave()
@@ -1433,6 +1433,9 @@ def on_server_remove(server):
 @asyncio.coroutine
 def on_error(event,*args,**kwargs):
     message = args[0]
+    lgcode = getuserlang(message.author.id)
+    if not lang_exist(lgcode): lgcode = "EN"
+    lang = get_lang(lgcode)
     logging.warning(traceback.format_exc())
     yield from client.send_message(message.channel,lang["error"].format(traceback.format_exc(limit=1000)))
 

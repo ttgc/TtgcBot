@@ -28,7 +28,7 @@ def get_lang(langcode="EN"):
     lang = {}
     for i in lines:
         if i.startswith("#"): continue
-        lang[i.split("=")[0]] = i.split("=")[1]
+        lang[i.split("=")[0]] = (i.split("=")[1]).replace("\n","").replace("\\n","\n")
     return lang
 
 def lang_exist(langcode="EN"):

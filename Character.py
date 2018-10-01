@@ -251,7 +251,7 @@ class Character:
         self.mod = 0
 
     @asyncio.coroutine
-    def roll(self,client,channel,stat,modifier):
+    def roll(self,client,channel,lang,stat,modifier):
         if stat == "force":
             self.stat[0] += 1
             dice = randint(1,100)
@@ -259,12 +259,12 @@ class Character:
             result = dice
             if result == 42:
                 self.stat[1] += 1
-                yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                yield from client.send_message(channel,lang["42"],tts=True)
                 self.charset('kar',-2)
                 self.karma -= 2
             elif result == 66:
                 self.stat[-1] += 1
-                yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                yield from client.send_message(channel,lang["66"],tts=True)
                 self.charset('kar',2)
                 self.karma += 2
             else:
@@ -272,12 +272,12 @@ class Character:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -291,17 +291,17 @@ class Character:
                             self.karma -= 1
                         elif result <= self.force+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (force) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(self.force+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["force"],str(result),str(dice),"-",str(kar),str(self.force+modifier)))
                 elif self.karma <= -5:
                     result += kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -315,7 +315,7 @@ class Character:
                             self.karma -= 1
                         elif result <= self.force+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (force) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(self.force+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["force"],str(result),str(dice),"+",str(kar),str(self.force+modifier)))
                 else:
                     if result == 42: self.stat[1] += 1
                     elif result == 66: self.stat[-1] += 1
@@ -329,7 +329,7 @@ class Character:
                         self.karma -= 1
                     elif result <= self.force+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
-                    yield from client.send_message(channel,"Result of test (force) :"+str(result)+"/"+str(self.force+modifier))
+                    yield from client.send_message(channel,lang["result_test"].format(lang["force"],str(result),str(self.force+modifier)))
     ##            self.regenkarm[0] += self.regenkarm[1]
     ##            if self.regenkarm[0] >= 1:
     ##                if self.karma < 0: self.karma += 1
@@ -345,12 +345,12 @@ class Character:
             result = dice
             if result == 42:
                 self.stat[1] += 1
-                yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                yield from client.send_message(channel,lang["42"],tts=True)
                 self.charset('kar',-2)
                 self.karma -= 2
             elif result == 66:
                 self.stat[-1] += 1
-                yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                yield from client.send_message(channel,lang["66"],tts=True)
                 self.charset('kar',2)
                 self.karma += 2
             else:
@@ -358,12 +358,12 @@ class Character:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -377,17 +377,17 @@ class Character:
                             self.karma -= 1
                         elif result <= self.esprit+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (esprit) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(self.esprit+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["esprit"],str(result),str(dice),"-",str(kar),str(self.esprit+modifier)))
                 elif self.karma <= -5:
                     result += kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -401,7 +401,7 @@ class Character:
                             self.karma -= 1
                         elif result <= self.esprit+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (esprit) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(self.esprit+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["esprit"],str(result),str(dice),"+",str(kar),str(self.esprit+modifier)))
                 else:
                     if result == 42: self.stat[1] += 1
                     elif result == 66: self.stat[-1] += 1
@@ -415,7 +415,7 @@ class Character:
                         self.karma -= 1
                     elif result <= self.esprit+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
-                    yield from client.send_message(channel,"Result of test (esprit) :"+str(result)+"/"+str(self.esprit+modifier))
+                    yield from client.send_message(channel,lang["result_test"].format(lang["esprit"],str(result),str(self.esprit+modifier)))
     ##            if self.regenkarm[0] >= 1:
     ##                if self.karma < 0: self.karma += 1
     ##                elif self.karma > 0: self.karma -= 1
@@ -430,12 +430,12 @@ class Character:
             result = dice
             if result == 42:
                 self.stat[1] += 1
-                yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                yield from client.send_message(channel,lang["42"],tts=True)
                 self.charset('kar',-2)
                 self.karma -= 2
             elif result == 66:
                 self.stat[-1] += 1
-                yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                yield from client.send_message(channel,lang["66"],tts=True)
                 self.charset('kar',2)
                 self.karma += 2
             else:
@@ -443,12 +443,12 @@ class Character:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -462,17 +462,17 @@ class Character:
                             self.karma -= 1
                         elif result <= self.charisme+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (charisme) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(self.charisme+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["charisme"],str(result),str(dice),"-",str(kar),str(self.charisme+modifier)))
                 elif self.karma <= -5:
                     result += kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -486,7 +486,7 @@ class Character:
                             self.karma -= 1
                         elif result <= self.charisme+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (charisme) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(self.charisme+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["charisme"],str(result),str(dice),"+",str(kar),str(self.charisme+modifier)))
                 else:
                     if result == 42: self.stat[1] += 1
                     elif result == 66: self.stat[-1] += 1
@@ -500,7 +500,7 @@ class Character:
                         self.karma -= 1
                     elif result <= self.charisme+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
-                    yield from client.send_message(channel,"Result of test (charisme) :"+str(result)+"/"+str(self.charisme+modifier))
+                    yield from client.send_message(channel,lang["result_test"].format(lang["charisme"],str(result),str(self.charisme+modifier)))
     ##            if self.regenkarm[0] >= 1:
     ##                if self.karma < 0: self.karma += 1
     ##                elif self.karma > 0: self.karma -= 1
@@ -515,12 +515,12 @@ class Character:
             result = dice
             if result == 42:
                 self.stat[1] += 1
-                yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                yield from client.send_message(channel,lang["42"],tts=True)
                 self.charset('kar',-2)
                 self.karma -= 2
             elif result == 66:
                 self.stat[-1] += 1
-                yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                yield from client.send_message(channel,lang["66"],tts=True)
                 self.charset('kar',2)
                 self.karma += 2
             else:
@@ -528,12 +528,12 @@ class Character:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -547,17 +547,17 @@ class Character:
                             self.karma -= 1
                         elif result <= self.furtivite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (agilite) :"+str(result)+" ("+str(dice)+"-"+str(kar)+") /"+str(self.furtivite+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"-",str(kar),str(self.furtivite+modifier)))
                 elif self.karma <= -5:
                     result += kar
                     if result == 42:
                         self.stat[1] += 1
-                        yield from client.send_message(channel,"God damn it ! You scored a 42 !!!",tts=True)
+                        yield from client.send_message(channel,lang["42"],tts=True)
                         self.charset('kar',-2)
                         self.karma -= 2
                     elif result == 66:
                         self.stat[-1] += 1
-                        yield from client.send_message(channel,"Oh Shit ! That's also called a 66",tts=True)
+                        yield from client.send_message(channel,lang["66"],tts=True)
                         self.charset('kar',2)
                         self.karma += 2
                     else:
@@ -571,7 +571,7 @@ class Character:
                             self.karma -= 1
                         elif result <= self.furtivite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,"Result of test (agilite) :"+str(result)+" ("+str(dice)+"+"+str(kar)+") /"+str(self.furtivite+modifier))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"+",str(kar),str(self.furtivite+modifier)))
                 else:
                     if result == 42: self.stat[1] += 1
                     elif result == 66: self.stat[-1] += 1
@@ -585,7 +585,7 @@ class Character:
                         self.karma -= 1
                     elif result <= self.furtivite+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
-                    yield from client.send_message(channel,"Result of test (agilite) :"+str(result)+"/"+str(self.furtivite+modifier))
+                    yield from client.send_message(channel,lang["result_test"].format(lang["agilite"],str(result),str(self.furtivite+modifier)))
     ##            if self.regenkarm[0] >= 1:
     ##                if self.karma < 0: self.karma += 1
     ##                elif self.karma > 0: self.karma -= 1
@@ -595,22 +595,22 @@ class Character:
             db.close()
         elif stat == "chance":
             resultc = randint(1,6)
-            yield from client.send_message(channel,"Result of test (chance) :"+str(resultc))
-            if resultc == 1: yield from client.send_message(channel,"No effect")
-            elif resultc == 2: yield from client.send_message(channel,"Free action")
-            elif resultc == 3: yield from client.send_message(channel,"Positiv effect")
-            elif resultc == 4: yield from client.send_message(channel,"+10%")
-            elif resultc == 5: yield from client.send_message(channel,"+20%")
-            elif resultc == 6: yield from client.send_message(channel,"One more action !")
+            yield from client.send_message(channel,lang["result_test_nomax"].format(lang["chance"],str(resultc)))
+            if resultc == 1: yield from client.send_message(channel,lang["chance_1"])
+            elif resultc == 2: yield from client.send_message(channel,lang["chance_2"])
+            elif resultc == 3: yield from client.send_message(channel,lang["chance_3"])
+            elif resultc == 4: yield from client.send_message(channel,lang["chance_4"])
+            elif resultc == 5: yield from client.send_message(channel,lang["chance_5"])
+            elif resultc == 6: yield from client.send_message(channel,lang["chance_6"])
         #elif stat == "malchance":
             resultm = randint(1,6)
-            yield from client.send_message(channel,"Result of test (malchance) :"+str(resultm))
-            if resultm == 1: yield from client.send_message(channel,"No effect")
-            elif resultm == 2: yield from client.send_message(channel,"hard to act")
-            elif resultm == 3: yield from client.send_message(channel,"Negativ effect")
-            elif resultm == 4: yield from client.send_message(channel,"-10%")
-            elif resultm == 5: yield from client.send_message(channel,"-20%")
-            elif resultm == 6: yield from client.send_message(channel,"Action canceled")
+            yield from client.send_message(channel,lang["result_test_nomax"].format(lang["malchance"],str(resultm)))
+            if resultm == 1: yield from client.send_message(channel,lang["malchance_1"])
+            elif resultm == 2: yield from client.send_message(channel,lang["malchance_2"])
+            elif resultm == 3: yield from client.send_message(channel,lang["malchance_3"])
+            elif resultm == 4: yield from client.send_message(channel,lang["malchance_4"])
+            elif resultm == 5: yield from client.send_message(channel,lang["malchance_5"])
+            elif resultm == 6: yield from client.send_message(channel,lang["malchance_6"])
             if resultc < resultm:
                 self.charset('kar',1)
                 self.karma += 1
@@ -620,15 +620,15 @@ class Character:
                 self.karma -= 1
                 if self.karma < -10: self.karma = -10
             if resultc == resultm:
-                yield from client.send_message(channel,"You have won a chance bonus !")
-                if resultc == 1: yield from client.send_message(channel,"Switch battle mod just for the future action")
-                elif resultc == 2: yield from client.send_message(channel,"Action cannot be avoided")
-                elif resultc == 3: yield from client.send_message(channel,"Instant switch with an ally")
-                elif resultc == 4: yield from client.send_message(channel,"Reroll the dice if it fail (excepted 66)")
-                elif resultc == 5: yield from client.send_message(channel,"Action cant fail excepted critic and super-critic fail")
-                elif resultc == 6: yield from client.send_message(channel,"Choose a chance effect and a double effect")
-        elif stat == "intuition":
+                yield from client.send_message(channel,lang["superchance"])
+                if resultc == 1: yield from client.send_message(channel,lang["superchance_1"])
+                elif resultc == 2: yield from client.send_message(channel,lang["superchance_2"])
+                elif resultc == 3: yield from client.send_message(channel,lang["superchance_3"])
+                elif resultc == 4: yield from client.send_message(channel,lang["superchance_4"])
+                elif resultc == 5: yield from client.send_message(channel,lang["superchance_5"])
+                elif resultc == 6: yield from client.send_message(channel,lang["superchance_6"])
+        elif stat == "intuition" or stat == "instinct":
             result = randint(1,6)
-            yield from client.send_message(channel,"Result of test (intuition) :"+str(result)+"/"+str(self.intuition+modifier))
+            yield from client.send_message(channel,lang["result_test"].format(lang[stat],str(result),str(self.intuition+modifier)))
         if self.karma > 10: self.karma = 10
         if self.karma < -10: self.karma = -10

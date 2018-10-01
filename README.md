@@ -29,7 +29,7 @@ Aliases : `prefix`
 Set the admin role for your server <br/>
 Aliases : `adminrole`
 - `/setlang <language>` <br/>
-Set your language for bot messages, language represents the code of your language and there is currently only two languages supported : `EN` for English and `FR` for French <br/>
+Set your language for bot messages, language represents the code of your language and there are currently only two languages supported : `EN` for English and `FR` for French <br/>
 NB : language code is case insensitive so you can precise it in upper or lower case as you wish
 Aliases : `setlanguage`
 - `/rollindep <value>` <br/>

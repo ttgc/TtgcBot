@@ -8,6 +8,21 @@ TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of G
 
 <hr/>
 
+## Contribute to translation
+TtgcBot supports currently only two languages (English and French), if you want that the bot support more languages you can contribute by creating your own translation in a language file ! Follow the steps and rules given below to contribute to translation :
+1. Create a new file named as following : the language code in uppercasse (`EN` for in English for example) and with the extension `.lang`
+2. Begin to write your file and respect coding rules below :
+    - `#` is used to defined a comment line and must only placed at the beginning of the line to work
+    - A line is equal to a key/value couple corresponding at a single message of the bot
+    - Here is the correct format of a line : `key=value`
+    - Write only translation as value for each key existing in other languages files (use `EN.lang` file as reference for having all the keys)
+    - Use `\n` as new line character and you can also keep discord formatting
+    - Use brackets `{}` to define a missing value that will be replaced by a result during execution of the command. For example : `Who are you ? I'm {}` means that the `{}` will be replaced by the name of a person when the command would be executed.
+    - Put the same number of `{}` for a value as the number of `{}` for the same value in the reference file (`EN.lang`)
+3. Commit and put the language file in the Lang directory
+4. Wait for validation....
+5. You have successful contributed to bot translation ! Congratulations !
+
 ## Command Help
 
 ### How it works

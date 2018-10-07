@@ -320,3 +320,20 @@ BEGIN
 	WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_pets
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF Pet AS $$
+DECLARE
+	line RECORD;
+BEGIN
+	FOR line IN (SELECT charkey,id_server,id_channel FROM get_character(dbkey,idserv,idchan)) LOOP
+		RETURN QUERY
+		SELECT * FROM Pet
+		WHERE (charkey = line.charkey AND id_server = line.id_server AND id_channel = line.id_channel);
+	END LOOP;
+END;
+$$ LANGUAGE plpgsql;

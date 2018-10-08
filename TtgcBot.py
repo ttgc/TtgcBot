@@ -789,12 +789,12 @@ def on_message(message):
                     char = char.pet[pet].switchmod(True)
                 yield from client.send_message(message.channel,lang["petset"].format(lang["default"]+" "+lang["mod"]))
         elif command_check(prefix,message,'petset instinct',['petset int','petsetint']):#message.content.startswith(prefix+'charset intuition'):
-            val = temp[2]
+            val = int(temp[2])
             if val >= 1 and val <= 6:
                 char = char.pet[pet].petset('int',val)
                 yield from client.send_message(message.channel,lang["petset"].format(lang["intuition"]))
         elif command_check(prefix,message,'petset espece',['petset species','petset spe']):
-            ls = get_args(prefix,message'petset espece',['petset species','petset spe']).split(" ")#(message.content).split(" ")
+            ls = get_args(prefix,message,'petset espece',['petset species','petset spe']).split(" ")#(message.content).split(" ")
             del(ls[0])
             del(ls[0])
             nm = ""
@@ -810,7 +810,7 @@ def on_message(message):
         char = char.pet[get_args(prefix,message,'petswitchmod')].switchmod()
         if char.pet[get_args(prefix,message,'petswitchmod')].mod == 0: mod = lang["offensive"]
         else: mod = lang["defensive"]
-        yield from client.send_message(channel.message,lang["switchmod"].format(get_args(prefix,message,'petswitchmod'),mod))
+        yield from client.send_message(message.channel,lang["switchmod"].format(get_args(prefix,message,'petswitchmod'),mod))
     if command_check(prefix,message,'petlvlup') and jdrchannel and chanMJ:
         char = jdr.get_character(get_args(prefix,message,'petlvlup').split(" ")[0])
         if get_args(prefix,message,'petlvlup').split(" ")[1] not in char.pet:
@@ -987,7 +987,7 @@ def on_message(message):
                 modifier = 0
             yield from char.roll(client,message.channel,lang,msg,modifier)
         if command_check(prefix,message,'MJpetroll',['mjpetroll']):
-            field = (message.content).replace(message.content.split(" ")[0]+" "+message.content.split(" ")[1],"")
+            field = (message.content).replace(message.content.split(" ")[0]+" "+message.content.split(" ")[1]+" ","")
             pet = field.split(" ")[0]
             field = field.replace(pet+" ","")
             if pet not in char.pet:
@@ -1030,10 +1030,10 @@ def on_message(message):
             if get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1] not in char.pet:
                 yield from client.send_message(message.channel,lang["petnotfound"].format(get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1]))
                 return
-            char = char.pet[get_args(prefix,message,'petswitchmod').split(" ")[1]].switchmod()
+            char = char.pet[get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1]].switchmod()
             if char.pet[get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1]].mod == 0: mod = lang["offensive"]
             else: mod = lang["defensive"]
-            yield from client.send_message(channel.message,lang["switchmod"].format(get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1],mod))
+            yield from client.send_message(message.channel,lang["switchmod"].format(get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1],mod))
     if command_check(prefix,message,'setMJrole',['setmjrole']) and admin:
         srv.setmjrole(str(message.role_mentions[0].id))
         yield from client.send_message(message.channel,lang["setmjrole"].format(message.role_mentions[0].mention))

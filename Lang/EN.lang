@@ -185,3 +185,11 @@ invite_author=TtgcBot version 1.0 developed by Ttgc
 ping=ping value is currently : `{} ms`
 error=Your command throw the following error :\n```python\n{}\n```
 setlang=Language updated to {}
+#Pet update v1.2
+petadd=The pet `{}` has been added for character `{}`
+petexist=The pet `{}` already exists for this character
+petrm=The pet `{}` has been deleted successful
+petnotfound=The pet `{}` does not exist for this character
+petset=Changing {} of pet successful
+espece=species
+petbelong={} belonging to : {}

@@ -185,3 +185,12 @@ invite_author=TtgcBot version 1.0 develope par Ttgc
 ping=ping actuel : `{} ms`
 error=Votre commande a provoque l'exception suivante :\n```python\n{}\n```
 setlang=Langue mise a jour vers {}
+#Pet update v1.2
+petadd=Le familier `{}` a ete ajoute au personnage `{}`
+petexist=Le familier `{}` existe deja pour ce personnage !
+petrm=Le familier `{}` a ete supprime avec succes
+petnotfound=Le familier `{}` n'existe pas pour ce personnage !
+petset=La valeur `{}` du familier a ete mise a jour
+espece=espece
+petbelong={} appartenant actuellement a : {}
+petstat=Stat du familier

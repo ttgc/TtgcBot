@@ -346,9 +346,25 @@ class DBJDR:
             gmdefault = 1
         inv = ch.Inventory()
         inv.loadfromdb(rawchar[30])
+        pets = {}
+        db = Database()
+        cur = db.call("get_pets",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)
+        if cur is not None:
+            for i in cur:
+                if i[24].upper() == "O":
+                    gmpet = 0
+                else:
+                    gmpet = 1
+                if i[25].upper() == "O":
+                    gmpetdefault = 0
+                else:
+                    gmpetdefault = 1
+                pets[i[0]] = ch.Pet({"petkey":i[0],"charkey":rawchar[0],"name":i[1],"espece":i[2],"PVm":i[5],"PMm":i[7],"force":i[8],"esprit":i[9],"charisme":i[10],"agilite":i[11],"karma":i[12],
+                                     "stat":[i[14],i[19],i[17],i[15],i[16],i[18],i[20]],"mod":gmpet,"PV":i[4],"PM":i[6],"default_mod":gmpetdefault,"instinct":i[13],"lvl":i[3]})
+        db.close()
         char = ch.Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
                           "charisme":rawchar[10],"furtivite":rawchar[11],"karma":rawchar[12],"default_karma":rawchar[13],"money":rawchar[14],"lp":rawchar[15],"dp":rawchar[16],
-                          "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31]})
+                          "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31],"pet":pets})
         char.bind(self)
         return char
 

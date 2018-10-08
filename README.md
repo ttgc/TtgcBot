@@ -250,6 +250,35 @@ Switch your current mod between offensive and defensive mods <br/>
 Aliases : `switchmode`
 - `/setmental [+/-]<amount>` (PJ only) <br/>
 Set the mental health of your character with the given value, if `+` or `-` is provided in the command, the amount will be added respectivly substracted to your mental health
+- `/petadd <charkey> <petkey>` (MJ only and JDR channel only) <br/>
+Pet are linked to a single character and cannot be shared, they allow the owner of the character to execute standard PJ commands for pets. A character can have multiple pet and each of them have an unique identifier the `petkey` such as the `charkey` for characters.<br/>
+This command add a new pet to a character <br/>
+Aliases : `pet+`
+- `/petremove <charkey> <petkey>` (MJ only and JDR channel only) <br/>
+Remove and delete completly a pet, this cannot be undone and have no confirmation message<br/>
+Aliases : `pet-`
+- `/petset <item> <charkey> <petkey> <value>` (MJ only and JDR channel only) <br/>
+Such as `charset` set a value of a pet. The same shortcuts as for `charset` are still avalaible. Only the following attributes are avalaible :<br/>
+```
+name
+species
+PV/PM
+strength/spirit/charisma/agility
+instinct (replace intuition)
+defaultmod
+```
+- `/petswitchmod <petkey>` (PJ only) <br/>
+Switchmod for a pet
+- `/petlvlup <charkey> <petkey>` (MJ only and JDR channel only) <br/>
+Levels are not linked between characters and their pets. So to level up a pet you have to use this commands
+- `/petroll <petkey> <stat> [+bonus/-malus]` (PJ only) <br/>
+Roll the dice for your pet, same rules as for classical `roll` command
+- `/petinfo <petkey>` (PJ only) <br/>
+Show informations about your pet such as `charinfo`
+- `/petsetkarma <charkey> <petkey> <value>` (MJ only and JDR channel only) <br/>
+Equivalent of `setkarma` for pets
+- `/petstat <petkey>` (PJ only) <br/>
+Show all stat of a pet you have (such as `/stat` for characters)
 - `/mj...` (MJ only and JDR channel only) <br/>
 Use a PJ command when you are MJ, theese commands works exactly as the same commands without the `mj` prefix with sames arguments, the result will also be the same. For example `/mjcharinfo` will produce same result as `/charinfo` but you will have to precise for wich character this commands must be used for as the following : `/charinfo <charkey>`. Refers to the PJ commands' doc to know result and how arguments works for each commands <br/>
 The following commands can be used : <br/>
@@ -259,6 +288,9 @@ The following commands can be used : <br/>
 /mjsetmental <charkey> [+/-]<amount>
 /mjroll <charkey> <stat> [+bonus/-malus]
 /mjinventory <charkey>
+/mjpetroll <charkey> <petkey> <stat> [+bonus/-malus]
+/mjpetinfo <charkey> <petkey>
+/mjpetswitchmod <charkey> <petkey>
 ```
 - `/wiki <topic>` <br/>
 Search on the wiki the given topic, if found a summary will be displayed with the link to the page

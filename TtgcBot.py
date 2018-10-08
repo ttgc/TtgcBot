@@ -921,7 +921,7 @@ def on_message(message):
         if pet not in char.pet:
             yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
             return
-        embd = discord.Embed(title=lang["stat"],description=char.pet[pet].name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd = discord.Embed(title=lang["petstat"],description=char.pet[pet].name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")

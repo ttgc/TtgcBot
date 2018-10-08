@@ -193,3 +193,4 @@ petnotfound=Le familier `{}` n'existe pas pour ce personnage !
 petset=La valeur `{}` du familier a ete mise a jour
 espece=espece
 petbelong={} appartenant actuellement a : {}
+petstat=Stat du familier

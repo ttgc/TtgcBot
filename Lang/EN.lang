@@ -193,3 +193,4 @@ petnotfound=The pet `{}` does not exist for this character
 petset=Changing {} of pet successful
 espece=species
 petbelong={} belonging to : {}
+petstat=Stat of Pet

@@ -275,6 +275,10 @@ Levels are not linked between characters and their pets. So to level up a pet yo
 Roll the dice for your pet, same rules as for classical `roll` command
 - `/petinfo <petkey>` (PJ only) <br/>
 Show informations about your pet such as `charinfo`
+- `/petsetkarma <charkey> <petkey> <value>` (MJ only and JDR channel only) <br/>
+Equivalent of `setkarma` for pets
+- `/petstat <petkey>` (PJ only) <br/>
+Show all stat of a pet you have (such as `/stat` for characters)
 - `/mj...` (MJ only and JDR channel only) <br/>
 Use a PJ command when you are MJ, theese commands works exactly as the same commands without the `mj` prefix with sames arguments, the result will also be the same. For example `/mjcharinfo` will produce same result as `/charinfo` but you will have to precise for wich character this commands must be used for as the following : `/charinfo <charkey>`. Refers to the PJ commands' doc to know result and how arguments works for each commands <br/>
 The following commands can be used : <br/>

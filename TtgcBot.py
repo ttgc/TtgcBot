@@ -899,6 +899,40 @@ def on_message(message):
         embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.pet[pet].karma),inline=True)
         embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petsetkarma',['petkarma']) and jdrchannel and chanMJ:
+        char = jdr.get_character(get_args(prefix,message,'petsetkarma',['petkarma']).split(" ")[0])
+        pet = get_args(prefix,message,'petsetkarma',['petkarma']).split(" ")[1]
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        val = int(get_args(prefix,message,'petsetkarma',['petkarma']).split(" ")[2])
+        char = char.pet[pet].petset('kar',val)
+        got = lang["recovered"]
+        if val < 0: got = lang["lost"]
+        embd = discord.Embed(title=char.pet[pet].name,description=lang["get_karma"].format(got),colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["get_karma_amount"].format(got),value=str(val),inline=True)
+        embd.add_field(name=lang["current_karma"],value=str(char.pet[pet].karma),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petstat') and jdrchannel:
+        pet = get_args(prefix,message,'petstat')
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        embd = discord.Embed(title=lang["stat"],description=char.pet[pet].name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["dice_rolled"],value=str(char.pet[pet].stat[0]),inline=True)
+        embd.add_field(name=lang["super_critic_success"],value=str(char.pet[pet].stat[1]),inline=True)
+        embd.add_field(name=lang["critic_success"],value=str(char.pet[pet].stat[2]),inline=True)
+        embd.add_field(name=lang["success"],value=str(char.pet[pet].stat[3]),inline=True)
+        embd.add_field(name=lang["fail"],value=str(char.pet[pet].stat[4]),inline=True)
+        embd.add_field(name=lang["critic_fail"],value=str(char.pet[pet].stat[5]),inline=True)
+        embd.add_field(name=lang["super_critic_fail"],value=str(char.pet[pet].stat[6]),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
                                                   'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv',
                                                   'mjpetroll','MJpetroll','mjpetinfo','MJpetinfo','MJpetswitchmod','mjpetswitchmod']) and jdrchannel and chanMJ:

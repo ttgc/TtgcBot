@@ -637,7 +637,7 @@ class Character:
         if self.karma < -10: self.karma = -10
 
     def pet_add(self,key):
-        if key in self.pet: return
+        if key in self.pet: return False
         db = Database()
         db.call("petcreate",dbkey=key,charact=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
@@ -645,13 +645,15 @@ class Character:
         newpet.key = newpet.name = key
         newpet.charkey = self.key
         self.pet[key] = newpet
+        return True
 
     def pet_delete(self,key):
-        if key not in self.pet: return
+        if key not in self.pet: return False
         db = Database()
         db.call("petdelete",dbkey=key,charact=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
         del(self.pet[key])
+        return True
 
 class Pet:
     def __init__(self,dic={"petkey":"","charkey":"","name":"","espece":"Unknown","PVm":1,"PMm":0,"force":50,"esprit":50,"charisme":50,"agilite":50,"karma":0,"stat":[0,0,0,0,0,0,0],"mod":0,"PV":1,"PM":0,"default_mod":0,"instinct":3,"lvl":1}):
@@ -716,4 +718,349 @@ class Pet:
 
     @asyncio.coroutine
     def roll(self,client,channel,lang,stat,modifier):
-        pass
+        if stat == "force":
+            self.stat[0] += 1
+            dice = randint(1,100)
+            kar = randint(1,10)
+            result = dice
+            if result == 42:
+                self.stat[1] += 1
+                yield from client.send_message(channel,lang["42"],tts=True)
+                self.petset('kar',-2)
+                self.karma -= 2
+            elif result == 66:
+                self.stat[-1] += 1
+                yield from client.send_message(channel,lang["66"],tts=True)
+                self.petset('kar',2)
+                self.karma += 2
+            else:
+                if self.karma >= 5:
+                    result -= kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.force+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["force"],str(result),str(dice),"-",str(kar),str(self.force+modifier)))
+                elif self.karma <= -5:
+                    result += kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.force+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["force"],str(result),str(dice),"+",str(kar),str(self.force+modifier)))
+                else:
+                    if result == 42: self.stat[1] += 1
+                    elif result == 66: self.stat[-1] += 1
+                    elif result >= 91:
+                        self.stat[-2] += 1
+                        self.petset('kar',1)
+                        self.karma += 1
+                    elif result <= 10:
+                        self.stat[2] += 1
+                        self.petset('kar',-1)
+                        self.karma -= 1
+                    elif result <= self.force+modifier: self.stat[3] += 1
+                    else: self.stat[-3] += 1
+                    yield from client.send_message(channel,lang["result_test"].format(lang["force"],str(result),str(self.force+modifier)))
+    ##            self.regenkarm[0] += self.regenkarm[1]
+    ##            if self.regenkarm[0] >= 1:
+    ##                if self.karma < 0: self.karma += 1
+    ##                elif self.karma > 0: self.karma -= 1
+    ##                self.regenkarm[0] -= 1
+            db = Database()
+            db.call("pethasroll",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,valmax=self.force+modifier,val=result)
+            db.close()
+        elif stat == "esprit":
+            self.stat[0] += 1
+            dice = randint(1,100)
+            kar = randint(1,10)
+            result = dice
+            if result == 42:
+                self.stat[1] += 1
+                yield from client.send_message(channel,lang["42"],tts=True)
+                self.petset('kar',-2)
+                self.karma -= 2
+            elif result == 66:
+                self.stat[-1] += 1
+                yield from client.send_message(channel,lang["66"],tts=True)
+                self.petset('kar',2)
+                self.karma += 2
+            else:
+                if self.karma >= 5:
+                    result -= kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.esprit+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["esprit"],str(result),str(dice),"-",str(kar),str(self.esprit+modifier)))
+                elif self.karma <= -5:
+                    result += kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.esprit+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["esprit"],str(result),str(dice),"+",str(kar),str(self.esprit+modifier)))
+                else:
+                    if result == 42: self.stat[1] += 1
+                    elif result == 66: self.stat[-1] += 1
+                    elif result >= 91:
+                        self.stat[-2] += 1
+                        self.petset('kar',1)
+                        self.karma += 1
+                    elif result <= 10:
+                        self.stat[2] += 1
+                        self.petset('kar',-1)
+                        self.karma -= 1
+                    elif result <= self.esprit+modifier: self.stat[3] += 1
+                    else: self.stat[-3] += 1
+                    yield from client.send_message(channel,lang["result_test"].format(lang["esprit"],str(result),str(self.esprit+modifier)))
+    ##            if self.regenkarm[0] >= 1:
+    ##                if self.karma < 0: self.karma += 1
+    ##                elif self.karma > 0: self.karma -= 1
+    ##                self.regenkarm[0] -= 1
+            db = Database()
+            db.call("pethasroll",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,valmax=self.esprit+modifier,val=result)
+            db.close()
+        elif stat == "charisme":
+            self.stat[0] += 1
+            dice = randint(1,100)
+            kar = randint(1,10)
+            result = dice
+            if result == 42:
+                self.stat[1] += 1
+                yield from client.send_message(channel,lang["42"],tts=True)
+                self.petset('kar',-2)
+                self.karma -= 2
+            elif result == 66:
+                self.stat[-1] += 1
+                yield from client.send_message(channel,lang["66"],tts=True)
+                self.petset('kar',2)
+                self.karma += 2
+            else:
+                if self.karma >= 5:
+                    result -= kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.charisme+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["charisme"],str(result),str(dice),"-",str(kar),str(self.charisme+modifier)))
+                elif self.karma <= -5:
+                    result += kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.charisme+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["charisme"],str(result),str(dice),"+",str(kar),str(self.charisme+modifier)))
+                else:
+                    if result == 42: self.stat[1] += 1
+                    elif result == 66: self.stat[-1] += 1
+                    elif result >= 91:
+                        self.stat[-2] += 1
+                        self.petset('kar',1)
+                        self.karma += 1
+                    elif result <= 10:
+                        self.stat[2] += 1
+                        self.petset('kar',-1)
+                        self.karma -= 1
+                    elif result <= self.charisme+modifier: self.stat[3] += 1
+                    else: self.stat[-3] += 1
+                    yield from client.send_message(channel,lang["result_test"].format(lang["charisme"],str(result),str(self.charisme+modifier)))
+    ##            if self.regenkarm[0] >= 1:
+    ##                if self.karma < 0: self.karma += 1
+    ##                elif self.karma > 0: self.karma -= 1
+    ##                self.regenkarm[0] -= 1
+            db = Database()
+            db.call("pethasroll",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,valmax=self.charisme+modifier,val=result)
+            db.close()
+        elif stat == "furtivite" or stat == "agilite":
+            self.stat[0] += 1
+            dice = randint(1,100)
+            kar = randint(1,10)
+            result = dice
+            if result == 42:
+                self.stat[1] += 1
+                yield from client.send_message(channel,lang["42"],tts=True)
+                self.petset('kar',-2)
+                self.karma -= 2
+            elif result == 66:
+                self.stat[-1] += 1
+                yield from client.send_message(channel,lang["66"],tts=True)
+                self.petset('kar',2)
+                self.karma += 2
+            else:
+                if self.karma >= 5:
+                    result -= kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.furtivite+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"-",str(kar),str(self.furtivite+modifier)))
+                elif self.karma <= -5:
+                    result += kar
+                    if result == 42:
+                        self.stat[1] += 1
+                        yield from client.send_message(channel,lang["42"],tts=True)
+                        self.petset('kar',-2)
+                        self.karma -= 2
+                    elif result == 66:
+                        self.stat[-1] += 1
+                        yield from client.send_message(channel,lang["66"],tts=True)
+                        self.petset('kar',2)
+                        self.karma += 2
+                    else:
+                        if result >= 91:
+                            self.stat[-2] += 1
+                            self.petset('kar',1)
+                            self.karma += 1
+                        elif result <= 10:
+                            self.stat[2] += 1
+                            self.petset('kar',-1)
+                            self.karma -= 1
+                        elif result <= self.furtivite+modifier: self.stat[3] += 1
+                        else: self.stat[-3] += 1
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"+",str(kar),str(self.furtivite+modifier)))
+                else:
+                    if result == 42: self.stat[1] += 1
+                    elif result == 66: self.stat[-1] += 1
+                    elif result >= 91:
+                        self.stat[-2] += 1
+                        self.petset('kar',1)
+                        self.karma += 1
+                    elif result <= 10:
+                        self.stat[2] += 1
+                        self.petset('kar',-1)
+                        self.karma -= 1
+                    elif result <= self.furtivite+modifier: self.stat[3] += 1
+                    else: self.stat[-3] += 1
+                    yield from client.send_message(channel,lang["result_test"].format(lang["agilite"],str(result),str(self.furtivite+modifier)))
+    ##            if self.regenkarm[0] >= 1:
+    ##                if self.karma < 0: self.karma += 1
+    ##                elif self.karma > 0: self.karma -= 1
+    ##                self.regenkarm[0] -= 1
+            db = Database()
+            db.call("pethasroll",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,valmax=self.furtivite+modifier,val=result)
+            db.close()
+        elif stat == "intuition" or stat == "instinct":
+            result = randint(1,6)
+            yield from client.send_message(channel,lang["result_test"].format(lang[stat],str(result),str(self.instinct+modifier)))
+        if self.karma > 10: self.karma = 10
+        if self.karma < -10: self.karma = -10

@@ -670,8 +670,8 @@ def on_message(message):
         elif char.lvl == 4:
             dice = randint(1,100)
             embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_4"].format(str(dice)),inline=True)
-            embd.add_field(name=lang["lvlup_current"].format(lang["PV"]),value=str(char.PV),inline=True)
-            embd.add_field(name=lang["lvlup_current"].format(lang["PM"]),value=str(char.PM),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PV"]),value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PM"]),value=str(char.PM)+"/"+str(char.PMmax),inline=True)
         elif char.lvl == 5:
             embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_5"],inline=True)
             embd.add_field(name=lang["lvlup_current"].format(lang["force"]),value=str(char.force),inline=True)
@@ -680,8 +680,8 @@ def on_message(message):
             embd.add_field(name=lang["lvlup_current"].format(lang["agilite"]),value=str(char.furtivite),inline=True)
         else:
             embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_6"],inline=True)
-            embd.add_field(name=lang["lvlup_current"].format(lang["PV"]),value=str(char.PV),inline=True)
-            embd.add_field(name=lang["lvlup_current"].format(lang["PM"]),value=str(char.PM),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PV"]),value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PM"]),value=str(char.PM)+"/"+str(char.PMmax),inline=True)
             embd.add_field(name=lang["lvlup_current"].format(lang["force"]),value=str(char.force),inline=True)
             embd.add_field(name=lang["lvlup_current"].format(lang["esprit"]),value=str(char.esprit),inline=True)
             embd.add_field(name=lang["lvlup_current"].format(lang["charisme"]),value=str(char.charisme),inline=True)
@@ -727,8 +727,181 @@ def on_message(message):
                 itstr = lang["inv_item"].format(str(k),str(i.weight))
                 embd.add_field(name=i.name,value=itstr,inline=True)
             yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petadd',['pet+']) and jdrchannel and chanMJ:
+        char = jdr.get_character(get_args(prefix,message,'petadd',['pet+']).split(" ")[0])
+        if char.pet_add(get_args(prefix,message,'petadd',['pet+']).split(" ")[1]):
+            yield from client.send_message(message.channel,lang["petadd"].format(get_args(prefix,message,'petadd',['pet+']).split(" ")[1],char.name))
+        else:
+            yield from client.send_message(message.channel,lang["petexist"].format(get_args(prefix,message,'petadd',['pet+']).split(" ")[1]))
+    if command_check(prefix,message,'petremove',['pet-']) and jdrchannel and chanMJ:
+        char = jdr.get_character(get_args(prefix,message,'petremove',['pet-']).split(" ")[0])
+        if char.pet_delete(get_args(prefix,message,'petremove',['pet-']).split(" ")[1]):
+            yield from client.send_message(message.channel,lang["petrm"].format(get_args(prefix,message,'petremove',['pet-']).split(" ")[1],char.name))
+        else:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(get_args(prefix,message,'petremove',['pet-']).split(" ")[1]))
+    if command_check(prefix,message,'petset name',['petsetname','petset PV','petsetpv','petsetPV','petset pv','petset PM','petsetpm','petsetPM','petset pm','petset force','petset strength',
+                                                   'petset str','petsetstr','petset esprit','petset spirit','petset spr','petsetspr','petset charisme','petset charisma','petset cha','petsetcha',
+                                                   'petset agilite','petset furtivite','petset agi','petset agility','petsetagi','petset defaultmod','petsetdmod','petset dmod','petset intuition',
+                                                   'petset int','petsetint','petset espece','petset species','petset spe']) and jdrchannel and chanMJ:
+        temp = get_args(prefix,message,'petset name',['petsetname','petset PV','petsetpv','petsetPV','petset pv','petset PM','petsetpm','petsetPM','petset pm','petset force','petset strength',
+                                                   'petset str','petsetstr','petset esprit','petset spirit','petset spr','petsetspr','petset charisme','petset charisma','petset cha','petsetcha',
+                                                   'petset agilite','petset furtivite','petset agi','petset agility','petsetagi','petset defaultmod','petsetdmod','petset dmod','petset intuition',
+                                                   'petset int','petsetint','petset espece','petset species','petset spe']).split(" ")
+        char = jdr.get_character(temp[0])
+        pet = temp[1]
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        if command_check(prefix,message,'petset name',['petsetname']):#message.content.startswith(prefix+'charset name'):
+            ls = get_args(prefix,message,'petset name',['petsetname']).split(" ")#(message.content).split(" ")
+            del(ls[0])
+            del(ls[0])
+            nm = ""
+            for i in ls:
+                nm += i
+                nm += " "
+            char.pet[pet].setname(nm[:-1])
+            yield from client.send_message(message.channel,lang["petset"].format(lang["name"]))
+        elif command_check(prefix,message,'petset PV',['petsetpv','petsetPV','petset pv']):#message.content.startswith(prefix+'charset PV'):
+            char = char.pet[pet].petset('pvmax',int(temp[2]))
+            yield from client.send_message(message.channel,lang["petset"].format(lang["PV"]+" max"))
+        elif command_check(prefix,message,'petset PM',['petsetpm','petsetPM','petset pm']):#message.content.startswith(prefix+'charset PM'):
+            char = char.pet[pet].petset('pmmax',int(temp[2]))
+            yield from client.send_message(message.channel,lang["petset"].format(lang["PM"]+" max"))
+        elif command_check(prefix,message,'petset force',['petset strength','petset str','petsetstr']):#message.content.startswith(prefix+'charset force'):
+            char = char.pet[pet].petset('str',int(temp[2]))
+            yield from client.send_message(message.channel,lang["petset"].format(lang["force"]))
+        elif command_check(prefix,message,'petset esprit',['petset spirit','petset spr','petsetspr']):#message.content.startswith(prefix+'charset esprit'):
+            char = char.pet[pet].petset('spr',int(temp[2]))
+            yield from client.send_message(message.channel,lang["petset"].format(lang["esprit"]))
+        elif command_check(prefix,message,'petset charisme',['petset charisma','petset cha','petsetcha']):#message.content.startswith(prefix+'charset charisme'):
+            char = char.pet[pet].petset('cha',int(temp[2]))
+            yield from client.send_message(message.channel,lang["petset"].format(lang["charisme"]))
+        elif command_check(prefix,message,'petset agilite',['petset furtivite','petset agi','petset agility','petsetagi']):#message.content.startswith(prefix+'charset furtivite') or message.content.startswith(prefix+'charset agilite'):
+            char = char.pet[pet].petset('agi',int(temp[2]))
+            yield from client.send_message(message.channel,lang["petset"].format(lang["agilite"]))
+        elif command_check(prefix,message,'petset defaultmod',['petsetdmod','petset dmod']):#message.content.startswith(prefix+'charset defaultmod'):
+            ndm = temp[2]
+            if ndm == "offensive" or ndm == "defensive":
+                if ndm == "offensive": ndm = 0
+                else: ndm = 1
+                if ndm != char.pet[pet].default_mod:
+                    char = char.pet[pet].switchmod(True)
+                yield from client.send_message(message.channel,lang["petset"].format(lang["default"]+" "+lang["mod"]))
+        elif command_check(prefix,message,'petset instinct',['petset int','petsetint']):#message.content.startswith(prefix+'charset intuition'):
+            val = temp[2]
+            if val >= 1 and val <= 6:
+                char = char.pet[pet].petset('int',val)
+                yield from client.send_message(message.channel,lang["petset"].format(lang["intuition"]))
+        elif command_check(prefix,message,'petset espece',['petset species','petset spe']):
+            ls = get_args(prefix,message'petset espece',['petset species','petset spe']).split(" ")#(message.content).split(" ")
+            del(ls[0])
+            del(ls[0])
+            nm = ""
+            for i in ls:
+                nm += i
+                nm += " "
+            char.pet[pet].setespece(nm[:-1])
+            yield from client.send_message(message.channel,lang["petset"].format(lang["espece"]))
+    if command_check(prefix,message,'petswitchmod') and jdrchannel:
+        if get_args(prefix,message,'petswitchmod') not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(get_args(prefix,message,'petswitchmod')))
+            return
+        char = char.pet[get_args(prefix,message,'petswitchmod')].switchmod()
+        if char.pet[get_args(prefix,message,'petswitchmod')].mod == 0: mod = lang["offensive"]
+        else: mod = lang["defensive"]
+        yield from client.send_message(channel.message,lang["switchmod"].format(get_args(prefix,message,'petswitchmod'),mod))
+    if command_check(prefix,message,'petlvlup') and jdrchannel and chanMJ:
+        char = jdr.get_character(get_args(prefix,message,'petlvlup').split(" ")[0])
+        if get_args(prefix,message,'petlvlup').split(" ")[1] not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(get_args(prefix,message,'petlvlup').split(" ")[1]))
+            return
+        char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].lvlup()
+        embd = discord.Embed(title=char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].name,description=lang["lvlup"],colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].lvl),inline=True)
+        if char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].lvl == 2:
+            dice,dice2 = randint(1,10),randint(1,10)
+            embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_2"].format(str(dice),str(dice2)),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["force"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].force),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["esprit"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].esprit),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["charisme"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].charisme),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["agilite"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].agilite),inline=True)
+        elif char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].lvl == 3:
+            dice = randint(1,10)
+            dic = {"force":char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].force,"esprit":char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].esprit,
+                   "charisme":char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].charisme,"agilite":char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].agilite}
+            statmin = ("force",char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].force)
+            for i,k in dic.items():
+                if k < statmin[1]: statmin = (i,k)
+            embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_3"].format(statmin[0],str(dice)),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang[statmin[0]]),value=str(statmin[1]),inline=True)
+            embd.add_field(name=lang["lvlup_next"].format(lang[statmin[0]]),value=str(statmin[1]+dice),inline=True)
+        elif char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].lvl == 4:
+            dice = randint(1,100)
+            embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_4"].format(str(dice)),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PV"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PV)+"/"+str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PVmax),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PM"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PM)+"/"+str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PMmax),inline=True)
+        elif char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].lvl == 5:
+            embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_5"],inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["force"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].force),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["esprit"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].esprit),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["charisme"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].charisme),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["agilite"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].agilite),inline=True)
+        else:
+            embd.add_field(name=lang["lvlup_bonus"],value=lang["lvlup_6"],inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PV"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PV)+"/"+str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PVmax),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["PM"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PM)+"/"+str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].PMmax),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["force"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].force),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["esprit"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].esprit),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["charisme"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].charisme),inline=True)
+            embd.add_field(name=lang["lvlup_current"].format(lang["agilite"]),value=str(char.pet[get_args(prefix,message,'petlvlup').split(" ")[1]].agilite),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petroll') and jdrchannel:#message.content.startswith(prefix+'roll') and jdrchannel:
+        field = (message.content).replace(prefix+'petroll ',"")
+        pet = field.split(" ")[0]
+        field = field.replace(pet+" ","")
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        while " " in field: field = field.replace(" ","")
+        if "-" in field:
+            msg = field.split("-")[0]
+            modifier = -int(field.split("-")[1])
+        elif "+" in field:
+            msg = field.split("+")[0]
+            modifier = int(field.split("+")[1])
+        else:
+            msg = field
+            modifier = 0
+        yield from char.pet[pet].roll(client,message.channel,lang,msg,modifier)
+    if command_check(prefix,message,'petinfo') and jdrchannel:
+        pet = get_args(prefix,message,'petinfo')
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        if char.pet[pet].mod == 0: modd = lang["offensive"]
+        else: modd = lang["defensive"]
+        embd = discord.Embed(title=char.pet[pet].name,description=lang["petbelong"].format(char.pet[pet].espece,char.name),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["PV"]+" :",value=str(char.pet[pet].PV)+"/"+str(char.pet[pet].PVmax),inline=True)
+        embd.add_field(name=lang["PM"]+" :",value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
+        embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.pet[pet].lvl),inline=True)
+        embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.pet[pet].instinct),inline=True)
+        embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.pet[pet].force),inline=True)
+        embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.pet[pet].esprit),inline=True)
+        embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.pet[pet].charisme),inline=True)
+        embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.pet[pet].agilite),inline=True)
+        embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.pet[pet].karma),inline=True)
+        embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
-                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv']) and jdrchannel and chanMJ:
+                                                  'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv',
+                                                  'mjpetroll','MJpetroll','mjpetinfo','MJpetinfo','MJpetswitchmod','mjpetswitchmod']) and jdrchannel and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo']):
             if char.mod == 0: modd = lang["offensive"]
@@ -813,6 +986,54 @@ def on_message(message):
                 msg = field
                 modifier = 0
             yield from char.roll(client,message.channel,lang,msg,modifier)
+        if command_check(prefix,message,'MJpetroll',['mjpetroll']):
+            field = (message.content).replace(message.content.split(" ")[0]+" "+message.content.split(" ")[1],"")
+            pet = field.split(" ")[0]
+            field = field.replace(pet+" ","")
+            if pet not in char.pet:
+                yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+                return
+            while " " in field: field = field.replace(" ","")
+            if "-" in field:
+                msg = field.split("-")[0]
+                modifier = -int(field.split("-")[1])
+            elif "+" in field:
+                msg = field.split("+")[0]
+                modifier = int(field.split("+")[1])
+            else:
+                msg = field
+                modifier = 0
+            yield from char.pet[pet].roll(client,message.channel,lang,msg,modifier)
+        if command_check(prefix,message,'MJpetinfo',['mjpetinfo']):
+            pet = get_args(prefix,message,'mjpetinfo',['mjpetinfo']).split(" ")[1]
+            if pet not in char.pet:
+                yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+                return
+            if char.pet[pet].mod == 0: modd = lang["offensive"]
+            else: modd = lang["defensive"]
+            embd = discord.Embed(title=char.pet[pet].name,description=lang["petbelong"].format(char.pet[pet].espece,char.name),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+            embd.add_field(name=lang["PV"]+" :",value=str(char.pet[pet].PV)+"/"+str(char.pet[pet].PVmax),inline=True)
+            embd.add_field(name=lang["PM"]+" :",value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
+            embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.pet[pet].lvl),inline=True)
+            embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.pet[pet].instinct),inline=True)
+            embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.pet[pet].force),inline=True)
+            embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.pet[pet].esprit),inline=True)
+            embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.pet[pet].charisme),inline=True)
+            embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.pet[pet].agilite),inline=True)
+            embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.pet[pet].karma),inline=True)
+            embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
+            yield from client.send_message(message.channel,embed=embd)
+        if command_check(prefix,message,'MJpetswitchmod',['mjpetswitchmod']):
+            if get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1] not in char.pet:
+                yield from client.send_message(message.channel,lang["petnotfound"].format(get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1]))
+                return
+            char = char.pet[get_args(prefix,message,'petswitchmod').split(" ")[1]].switchmod()
+            if char.pet[get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1]].mod == 0: mod = lang["offensive"]
+            else: mod = lang["defensive"]
+            yield from client.send_message(channel.message,lang["switchmod"].format(get_args(prefix,message,'MJpetswitchmod',['mjpetswitchmod']).split(" ")[1],mod))
     if command_check(prefix,message,'setMJrole',['setmjrole']) and admin:
         srv.setmjrole(str(message.role_mentions[0].id))
         yield from client.send_message(message.channel,lang["setmjrole"].format(message.role_mentions[0].mention))

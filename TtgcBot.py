@@ -792,7 +792,7 @@ def on_message(message):
             val = int(temp[2])
             if val >= 1 and val <= 6:
                 char = char.pet[pet].petset('int',val)
-                yield from client.send_message(message.channel,lang["petset"].format(lang["intuition"]))
+                yield from client.send_message(message.channel,lang["petset"].format(lang["instinct"]))
         elif command_check(prefix,message,'petset espece',['petset species','petset spe']):
             ls = get_args(prefix,message,'petset espece',['petset species','petset spe']).split(" ")#(message.content).split(" ")
             del(ls[0])
@@ -891,7 +891,7 @@ def on_message(message):
         embd.add_field(name=lang["PV"]+" :",value=str(char.pet[pet].PV)+"/"+str(char.pet[pet].PVmax),inline=True)
         embd.add_field(name=lang["PM"]+" :",value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
         embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.pet[pet].lvl),inline=True)
-        embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.pet[pet].instinct),inline=True)
+        embd.add_field(name=lang["instinct"].capitalize()+" :",value=str(char.pet[pet].instinct),inline=True)
         embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.pet[pet].force),inline=True)
         embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.pet[pet].esprit),inline=True)
         embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.pet[pet].charisme),inline=True)
@@ -932,6 +932,59 @@ def on_message(message):
         embd.add_field(name=lang["fail"],value=str(char.pet[pet].stat[4]),inline=True)
         embd.add_field(name=lang["critic_fail"],value=str(char.pet[pet].stat[5]),inline=True)
         embd.add_field(name=lang["super_critic_fail"],value=str(char.pet[pet].stat[6]),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petdmg',['petdamage']) and jdrchannel and chanMJ:
+        char = jdr.get_character(message.content.split(" ")[1])
+        pet = message.content.split(" ")[2]
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        val = abs(int((message.content).split(" ")[3]))
+        char = char.pet[pet].petset('pv',-val)
+        embd = discord.Embed(title=char.pet[pet].name,description=lang["damaged"],colour=discord.Color(int('ff0000',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["damage_taken"],value=str(val),inline=True)
+        embd.add_field(name=lang["remaining_pv"],value=str(char.pet[pet].PV)+"/"+str(char.pet[pet].PVmax),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petheal',['petcure']) and jdrchannel and chanMJ:
+        char = jdr.get_character(message.content.split(" ")[1])
+        pet = message.content.split(" ")[2]
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        val = abs(int((message.content).split(" ")[3]))#replace(prefix+'charheal ',""))
+        if char.pet[pet].PV+val > char.pet[pet].PVmax: val=char.pet[pet].PVmax-char.pet[pet].PV#char.PV = char.PVmax
+        char = char.pet[pet].petset('pv',val)
+        embd = discord.Embed(title=char.pet[pet].name,description=lang["healed"],colour=discord.Color(int('00ff00',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["heal_amount"],value=str(val),inline=True)
+        embd.add_field(name=lang["remaining_pv"],value=str(char.pet[pet].PV)+"/"+str(char.pet[pet].PVmax),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'petgetPM',['petgetpm','petgetMP','petgetmp','petpm','petPM','petmp','petMP']) and chanMJ:
+        char = jdr.get_character(message.content.split(" ")[1])
+        pet = message.content.split(" ")[2]
+        if pet not in char.pet:
+            yield from client.send_message(message.channel,lang["petnotfound"].format(pet))
+            return
+        val = int((message.content).split(" ")[3])#replace(prefix+'getPM ',""))
+        if char.pet[pet].PM + val < 0:
+            yield from client.send_message(message.channel,lang["no_more_pm"].format(str(char.pet[pet].pm)))
+            return
+        else:
+            if char.pet[pet].PM+val > char.pet[pet].PMmax: val=char.pet[pet].PMmax-char.pet[pet].PM#char.PM = char.PMmax
+            char = char.pet[pet].petset('pm',val)
+        got = lang["recovered"]
+        if val < 0: got = lang["lost"]
+        embd = discord.Embed(title=char.pet[pet].name,description=lang["get_pm"].format(got),colour=discord.Color(int('0000ff',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
+        embd.add_field(name=lang["remaining_pm"],value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
                                                   'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv',
@@ -979,7 +1032,7 @@ def on_message(message):
             if char.money-val < 0:
                 yield from client.send_message(message.channel,lang["no_more_money"].format(char.money))
             else:
-                i = i.charset('po',-val)
+                char = char.charset('po',-val)
                 embd = discord.Embed(title=char.name,description=lang["paid"],colour=discord.Color(int('ffff00',16)))
                 embd.set_footer(text="The Tale of Great Cosmos")
                 embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
@@ -1052,7 +1105,7 @@ def on_message(message):
             embd.add_field(name=lang["PV"]+" :",value=str(char.pet[pet].PV)+"/"+str(char.pet[pet].PVmax),inline=True)
             embd.add_field(name=lang["PM"]+" :",value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
             embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.pet[pet].lvl),inline=True)
-            embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.pet[pet].instinct),inline=True)
+            embd.add_field(name=lang["instinct"].capitalize()+" :",value=str(char.pet[pet].instinct),inline=True)
             embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.pet[pet].force),inline=True)
             embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.pet[pet].esprit),inline=True)
             embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.pet[pet].charisme),inline=True)

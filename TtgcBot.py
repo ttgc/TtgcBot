@@ -1548,6 +1548,16 @@ def on_message(message):
         if lang_exist(lg):
             setuserlang(str(message.author.id),lg)
             yield from client.send_message(message.channel,get_lang(lg)["setlang"].format(lg))
+    if command_check(prefix,message,'userblock'):
+        usr = get_args(prefix,message,'userblock')
+        srv.blockusername(usr)
+        yield from client.send_message(message.channel,lang["userblock"].format(usr))
+    if command_check(prefix,message,'userunblock'):
+        usr = get_args(prefix,message,'userunblock')
+        if not srv.unblockusername(usr):
+            yield from client.send_message(message.channel,lang["userunblock_notexist"].format(usr))
+        else:
+            yield from client.send_message(message.channel,lang["userunblock"].format(usr))
 
     #KeepRole commands
     if command_check(prefix,message,'keeprole',['kr']) and admin:
@@ -1715,6 +1725,12 @@ def on_message(message):
 @asyncio.coroutine
 def on_member_join(member):
     srv = DBServer(str(member.server.id))
+    userblocked = srv.blockuserlist()
+    for i in userblocked:
+        if i in str(member).split("#")[0]:
+            yield from asyncio.sleep(1)
+            yield from client.ban(member,1)
+            return
     if srv.keepingrole:
         yield from asyncio.sleep(1)
         yield from srv.restorerolemember(client,member.server,member)

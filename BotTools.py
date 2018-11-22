@@ -150,6 +150,43 @@ class DBServer:
         db.call("unblockword",idserv=self.ID,word=string)
         db.close()
 
+    def blockusername(self,user):
+        db = Database()
+        cur = db.call("userblock",usr=user,idserv=self.ID)
+        newid = None
+        if cur is not None:
+            newid = cur.fetchone()
+        db.close()
+        return newid
+
+    def unblockusername(self,user):
+        db = Database()
+        cur = db.call("find_userblocked",usr=user,idserv=self.ID)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("Unable to unblock username")
+        usrid = cur.fetchone()
+        if usrid is None:
+            db.close(True)
+            return False
+        db.close()
+        db = Database()
+        db.call("userunblock",id=userid)
+        db.close()
+        return True
+
+    def blockuserlist(self):
+        db = Database()
+        cur = db.call("userblock_list",idserv=self.ID)
+        if cur is None:
+            db.close(True)
+            return []
+        ls = []
+        for i in cur:
+            ls.append(i)
+        db.close()
+        return ls
+
     def backuprolemember(self,member):
         db = Database()
         ls = self.keeprolelist()

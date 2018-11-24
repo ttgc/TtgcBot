@@ -95,7 +95,7 @@ CREATE TABLE public.Gamemods(
 ------------------------------------------------------------
 CREATE TABLE public.Items(
 	id_item     SERIAL CONSTRAINT items_id_null NOT NULL ,
-	nom         VARCHAR (25) CONSTRAINT items_name_null NOT NULL ,
+	nom         VARCHAR (50) CONSTRAINT items_name_null NOT NULL ,
 	description VARCHAR (100)  ,
 	weight      FLOAT CONSTRAINT items_weight_null NOT NULL ,
 	CONSTRAINT prk_constraint_Items PRIMARY KEY (id_item)

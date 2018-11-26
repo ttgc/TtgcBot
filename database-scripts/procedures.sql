@@ -145,6 +145,8 @@ CREATE OR REPLACE FUNCTION charset
 ) RETURNS void AS $$
 DECLARE
 	curp INT;
+	idinv INT;
+	cpymoney INT;
 BEGIN
 	IF LOWER(stat) = 'str' THEN
 		UPDATE Characterr
@@ -221,9 +223,31 @@ BEGIN
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
 	IF LOWER(stat) = 'po' THEN
+		SELECT id_inventory INTO idinv FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		SELECT argent INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		cpymoney := curp;
+		curp := curp / 5000;
+		IF cpymoney > 0 THEN
+			curp := curp + 1;
+		END IF;
+		UPDATE inventaire
+		SET size_ = size_ - curp
+		WHERE id_inventory = idinv;
 		UPDATE Characterr
 		SET argent = argent + val
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		SELECT argent INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		cpymoney := curp;
+		curp := curp / 5000;
+		IF cpymoney > 0 THEN
+			curp := curp + 1;
+		END IF;
+		UPDATE inventaire
+		SET size_ = size_ + curp
+		WHERE id_inventory = idinv;
 	END IF;
 	IF LOWER(stat) = 'int' THEN
 		UPDATE Characterr

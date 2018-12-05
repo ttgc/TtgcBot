@@ -474,7 +474,7 @@ BEGIN
 		WHERE (id_item = item AND id_inventory = inv);
 	ELSE
 		UPDATE contient
-		SET qte = qte - quantite
+		SET qte = nbr
 		WHERE (id_item = item AND id_inventory = inv);
 	END IF;
 END;
@@ -1049,5 +1049,27 @@ CREATE OR REPLACE FUNCTION del_finalize_field
 BEGIN
 	DELETE FROM finalize
 	WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION forceinvcalc () RETURNS void AS $$
+DECLARE
+	poids INVENTAIRE.SIZE_%TYPE;
+	inv RECORD;
+	item RECORD;
+	po Characterr.argent%TYPE;
+	it_poids Items.weight%TYPE;
+BEGIN
+	FOR inv IN (SELECT id_inventory FROM inventaire) LOOP
+		SELECT argent INTO po FROM characterr WHERE id_inventory = inv.id_inventory;
+		poids := CEIL(po/5000);
+		FOR item IN (SELECT id_item,qte FROM contient WHERE id_inventory = inv.id_inventory) LOOP
+			SELECT weight INTO it_poids FROM items WHERE id_item = item.id_item;
+			poids := poids + (item.qte * it_poids);
+		END LOOP;
+		UPDATE inventaire
+		SET size_ = poids
+		WHERE id_inventory = inv.id_inventory;
+	END LOOP;
 END;
 $$ LANGUAGE plpgsql;

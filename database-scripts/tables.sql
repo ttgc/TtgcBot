@@ -107,7 +107,7 @@ CREATE TABLE public.Items(
 ------------------------------------------------------------
 CREATE TABLE public.Inventaire(
 	id_inventory SERIAL CONSTRAINT inventaire_id_null NOT NULL ,
-	size_        INT CONSTRAINT inventaire_size_null NOT NULL ,
+	size_        FLOAT CONSTRAINT inventaire_size_null NOT NULL ,
 	size_max     INT CONSTRAINT inventaire_sizemax_null NOT NULL ,
 	charkey      VARCHAR (25)  ,
 	CONSTRAINT prk_constraint_Inventaire PRIMARY KEY (id_inventory)

@@ -23,6 +23,7 @@ from random import randint,choice
 from threading import Thread
 from INIfiles import *
 from logfile import *
+from parsingdice import *
 import logging
 import time
 from EventManager import *
@@ -232,7 +233,7 @@ def on_message(message):
                 break
     #get vocal
     vocal = vocalcore.getvocal(str(message.server.id))
-    
+
     #commands
     if command_check(prefix,message,'setprefix',['prefix']) and admin:#message.content.startswith(prefix+'setprefix') and admin:
         prefix = get_args(prefix,message,'setprefix',['prefix'])#(message.content).replace(prefix+'setprefix ',"")
@@ -241,30 +242,32 @@ def on_message(message):
         yield from client.send_message(message.channel,lang["setprefix"].format(prefix))
     if command_check(prefix,message,'rollindep',['rolldice','r']):#message.content.startswith(prefix+'rollindep'):
         expression = get_args(prefix,message,'rollindep',['rolldice','r'])#message.content.replace(prefix+"rollindep ","")
-        expression = expression.replace(" ","")
-        expression = expression.replace("-","+-")
-        operations = expression.split("+")
-        result = []
-        for i in operations:
-            if "d" in i:
-                rdmgen = i.split("d")
-                val = int(rdmgen[1])
-                repeat_sign = int(rdmgen[0])
-                repeat = abs(repeat_sign)
-                for k in range(repeat):
-                    if repeat_sign < 0:
-                        result.append(-randint(1,val))
-                    else:
-                        result.append(randint(1,val))
-            else:
-                result.append(int(i))
-        final_result = 0
-        final_expression = ""
-        for i in result:
-            final_result += i
-            final_expression += str(i)+" + "
-        final_expression = final_expression[:-3]
-        final_expression = final_expression.replace("+ -","- ")
+        parser = ParseRoll(expression)
+        final_result,final_expression = pareser.resolv()
+        # expression = expression.replace(" ","")
+        # expression = expression.replace("-","+-")
+        # operations = expression.split("+")
+        # result = []
+        # for i in operations:
+        #     if "d" in i:
+        #         rdmgen = i.split("d")
+        #         val = int(rdmgen[1])
+        #         repeat_sign = int(rdmgen[0])
+        #         repeat = abs(repeat_sign)
+        #         for k in range(repeat):
+        #             if repeat_sign < 0:
+        #                 result.append(-randint(1,val))
+        #             else:
+        #                 result.append(randint(1,val))
+        #     else:
+        #         result.append(int(i))
+        # final_result = 0
+        # final_expression = ""
+        # for i in result:
+        #     final_result += i
+        #     final_expression += str(i)+" + "
+        # final_expression = final_expression[:-3]
+        # final_expression = final_expression.replace("+ -","- ")
         yield from client.send_message(message.channel,lang["rollindep"].format(final_result,final_expression))
 
     #jdr commands
@@ -306,7 +309,7 @@ def on_message(message):
     if command_check(prefix,message,'unlink',['charunlink']) and chanMJ:#message.content.startswith(prefix+'unlink') and chanMJ:
         if get_args(prefix,message,'unlink',['charunlink']) == "":
             char.unlink()
-            yield from client.send_message(message.channel,lang["charunlink"].format(char.name))  
+            yield from client.send_message(message.channel,lang["charunlink"].format(char.name))
         else:
             character = jdr.get_character(get_args(prefix,message,'unlink',['charunlink']))
             character.unlink()
@@ -1221,7 +1224,7 @@ def on_message(message):
             temp = temp[pos+1:]
             temp = temp[:temp.find("/>")]
             temp = temp[temp.find("src=")+5:]
-            img = "http://thetaleofgreatcosmos.fr"+temp.split('"')[0]        
+            img = "http://thetaleofgreatcosmos.fr"+temp.split('"')[0]
         embd = discord.Embed(title=info.json()["parse"]["title"],description=descrip,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query,colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos - Wiki")
         if img is not None:
@@ -1475,7 +1478,7 @@ def on_message(message):
                         else:
                             rl = None
                             for j in message.server.roles:
-                                if str(j.id) == k[1]: 
+                                if str(j.id) == k[1]:
                                     rl = j
                                     break
                             if rl is not None:
@@ -1741,7 +1744,7 @@ def on_member_remove(member):
     srv = DBServer(str(member.server.id))
     if srv.keepingrole:
         srv.backuprolemember(member)
-                
+
 @client.event
 @asyncio.coroutine
 def on_server_join(server):
@@ -1820,4 +1823,3 @@ except:
     loop.run_until_complete(client.logout())
 finally:
     loop.close()
-

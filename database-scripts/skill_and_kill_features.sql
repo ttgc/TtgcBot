@@ -350,7 +350,7 @@ CREATE OR REPLACE FUNCTION skillsearch
 BEGIN
 	RETURN QUERY
 	SELECT * FROM skills
-	WHERE (nom = name);
+	WHERE (lower(nom) = lower(name));
 END;
 $$ LANGUAGE plpgsql;
 

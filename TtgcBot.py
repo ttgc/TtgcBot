@@ -1008,9 +1008,8 @@ def on_message(message):
         embd.add_field(name=lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
         embd.add_field(name=lang["remaining_pm"],value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'kill',['characterkill','charkill']):
+    if command_check(prefix,message,'kill',['characterkill','charkill']) and chanMJ:
         char = jdr.get_character(get_args(prefix,message,'kill',['characterkill','charkill']))
-        #azerty
         yield from client.send_message(message.channel,lang["kill_confirm"].format(char.name))
         confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm")
         if confirm is None:
@@ -1021,7 +1020,7 @@ def on_message(message):
         f = open("you are dead.png","rb")
         yield from client.send_file(message.channel,f,content=lang["killed"].format(char.name))
         f.close()
-    if command_check(prefix,message,'skillinfo',['skinfo']):
+    if command_check(prefix,message,'skillinfo',['skinfo']) and jdrchannel:
         sklist = get_args(prefix,message,'skillinfo',['skinfo']).split("|")
         ls = []
         for i in sklist:
@@ -1036,7 +1035,7 @@ def on_message(message):
         for i in ls:
             embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description,inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'skillassign',['skassign']):
+    if command_check(prefix,message,'skillassign',['skassign']) and chanMJ:
         args = get_args(prefix,message,'skillassign',['skassign']).split(" ")
         char = jdr.get_character(args[0])
         sk = Skill(int(args[1]))

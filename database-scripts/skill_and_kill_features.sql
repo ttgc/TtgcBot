@@ -373,6 +373,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION charcreate
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	cl Classe.id_classe%TYPE
+) RETURNS void AS $$
+DECLARE
+	inv inventaire.id_inventory%TYPE;
+BEGIN
+	INSERT INTO inventaire (charkey)
+	VALUES (dbkey);
+	SELECT MAX(id_inventory) INTO inv FROM inventaire
+	WHERE charkey = dbkey;
+	--update here
+	INSERT INTO Characterr
+	VALUES (dbkey, dbkey, '', 1, 1, 1, 1, 1, 50, 50, 50, 50, 0, 0, 0, 1, 1, 3, 100, 0, 0, 0, 0, 0, 0, 0, idserv, idchan, 'O', 'O', inv, 'NULL',false,cl);
+	--end of update
+END;
+$$ LANGUAGE plpgsql;
+
 -- CREATE OR REPLACE FUNCTION jdrdelete
 -- (
 -- 	idserv JDR.id_server%TYPE,

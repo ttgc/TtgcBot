@@ -243,7 +243,7 @@ def on_message(message):
     if command_check(prefix,message,'rollindep',['rolldice','r']):#message.content.startswith(prefix+'rollindep'):
         expression = get_args(prefix,message,'rollindep',['rolldice','r'])#message.content.replace(prefix+"rollindep ","")
         parser = ParseRoll(expression)
-        final_result,final_expression = pareser.resolv()
+        final_result,final_expression = parser.resolv()
         # expression = expression.replace(" ","")
         # expression = expression.replace("-","+-")
         # operations = expression.split("+")

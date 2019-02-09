@@ -545,6 +545,21 @@ class Character:
         del(self.pet[key])
         return True
 
+    def assign_skill(self,sk):
+        for i in self.skills:
+            if sk.ID == i.ID: return False
+        db = Database()
+        db.call("assign_skill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idskill=sk.ID)
+        db.close()
+        self.skills.append(sk)
+        return True
+
+    def kill(self):
+        self.dead = True
+        db = Database()
+        db.call("kill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
+        db.close()
+
 class Pet:
     def __init__(self,dic={"petkey":"","charkey":"","name":"","espece":"Unknown","PVm":1,"PMm":0,"force":50,"esprit":50,"charisme":50,"agilite":50,"karma":0,"stat":[0,0,0,0,0,0,0],"mod":0,"PV":1,"PM":0,"default_mod":0,"instinct":3,"lvl":1}):
         self.key = dic["petkey"]

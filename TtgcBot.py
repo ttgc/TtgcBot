@@ -291,7 +291,7 @@ def on_message(message):
     if command_check(prefix,message,'charcreate',['createchar']) and chanMJ:#message.content.startswith(prefix+'charcreate') and chanMJ:
         args = get_args(prefix,message,'charcreate',['createchar']).split(" ")#(message.content).replace(prefix+'charcreate ',"")
         name = args[1]
-        classe = retrieveClassID(args[0])
+        classe = retrieveClassID(args[0].replace("_"," "))
         if name in charbase:
             yield from client.send_message(message.channel,lang["charcreate_existing"])
             return
@@ -1607,11 +1607,11 @@ def on_message(message):
         if lang_exist(lg):
             setuserlang(str(message.author.id),lg)
             yield from client.send_message(message.channel,get_lang(lg)["setlang"].format(lg))
-    if command_check(prefix,message,'userblock'):
+    if command_check(prefix,message,'userblock') and admin:
         usr = get_args(prefix,message,'userblock')
         srv.blockusername(usr)
         yield from client.send_message(message.channel,lang["userblock"].format(usr))
-    if command_check(prefix,message,'userunblock'):
+    if command_check(prefix,message,'userunblock') and admin:
         usr = get_args(prefix,message,'userunblock')
         if not srv.unblockusername(usr):
             yield from client.send_message(message.channel,lang["userunblock_notexist"].format(usr))

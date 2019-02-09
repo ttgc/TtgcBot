@@ -35,7 +35,7 @@ damaged=A subit des degats
 damage_taken=Degats recus :
 remaining_pv=PV restants :
 global_damage=Degats globaux
-dead_players=Le(s) personnage(s) suivant est(sont) mort(s) :
+#dead_players=Le(s) personnage(s) suivant est(sont) mort(s) :
 global_heal=Soin global
 heal_amount=PV soignes :
 global_pm=Gain de PM global
@@ -196,3 +196,8 @@ petbelong={} appartenant actuellement a : {}
 petstat=Stat du familier
 #(S)kill upate v1.3
 is_dead=Cette action ne peut avoir lieu car {} est mort
+kill_confirm=Voulez vous vraiment tuer le personnage `{}` ? Cela ne pourra plus etre annule !\nTappez `confirm` pour tuer ce personnage
+killed=Le personnage `{}` est definitivement mort !
+dead_players=Le(s) personnage(s) suivant sont en danger de mort :
+skillsearch=Resultat de votre recherche :
+assign_skill=La competence `{}` a ete assignee a `{}` avec succes

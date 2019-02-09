@@ -406,8 +406,8 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=lang["damage_taken"],value=str(val),inline=True)
         embd.add_field(name=lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
-        if not char.check_life():
-            embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+        # if not char.check_life():
+        #     embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'globaldmg',['globaldamage','gdmg','gdamage']) and chanMJ:#message.content.startswith(prefix+'globaldmg') and chanMJ:
         val = abs(int((message.content).split(" ")[1]))#replace(prefix+'globaldmg ',"")))
@@ -426,8 +426,8 @@ def on_message(message):
                 dead_ls += (i.name+"\n")
         if deads > 0:
             embd.add_field(name=lang["dead_players"],value=dead_ls,inline=False)
-        if deads == len(charbase):
-            embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+        # if deads == len(charbase):
+        #     embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'globalheal',['gheal']) and chanMJ:#message.content.startswith(prefix+'globalheal') and chanMJ:
         val = abs(int((message.content).split(" ")[1]))#replace(prefix+'globalheal ',"")))
@@ -1008,6 +1008,40 @@ def on_message(message):
         embd.add_field(name=lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
         embd.add_field(name=lang["remaining_pm"],value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'kill',['characterkill','charkill']):
+        char = jdr.get_character(get_args(prefix,message,'kill',['characterkill','charkill']))
+        #azerty
+        yield from client.send_message(message.channel,lang["kill_confirm"].format(char.name))
+        confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm")
+        if confirm is None:
+            yield from client.send_message(message.channel,lang["timeout"])
+            return
+        char.kill()
+        char.unlink()
+        f = open("you are dead.png","rb")
+        yield from client.send_file(message.channel,f,content=lang["killed"].format(char.name))
+        f.close()
+    if command_check(prefix,message,'skillinfo',['skinfo']):
+        sklist = get_args(prefix,message,'skillinfo',['skinfo']).split("|")
+        ls = []
+        for i in sklist:
+            ls += Skill.skillsearch(i)
+        descr = str(sklist)
+        descr = descr.replace("[","")
+        descr = descr.replace("]","")
+        embd = discord.Embed(title=lang["skillsearch"],description=descr,colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in ls:
+            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description,inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'skillassign',['skassign']):
+        args = get_args(prefix,message,'skillassign',['skassign']).split(" ")
+        char = jdr.get_character(args[0])
+        sk = Skill(int(args[1]))
+        char.assign_skill(sk)
+        yield from client.send_message(message.channel,lang["assign_skill"].format(sk.name,char.name))
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
                                                   'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv',
                                                   'mjpetroll','MJpetroll','mjpetinfo','MJpetinfo','MJpetswitchmod','mjpetswitchmod']) and jdrchannel and chanMJ:
@@ -1295,7 +1329,7 @@ def on_message(message):
         msg += [("Players (PC) :",ct)]
         ct = ""
         for i in charbase:
-            if not i.check_life(): ct += (i.name+"\n")
+            if i.dead: ct += (i.name+"\n")
         if ct == "": ct = "No player dead"
         msg += [("Deads Players during the adventure :",ct)]
         luck = []

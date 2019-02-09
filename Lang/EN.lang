@@ -194,3 +194,5 @@ petset=Changing {} of pet successful
 espece=species
 petbelong={} belonging to : {}
 petstat=Stat of Pet
+#(S)kill upate v1.3
+is_dead=This action cannot be performed because {} is dead

@@ -170,3 +170,13 @@ def retrieveCharacterOrigins(cl):
     row = cur.fetchone()
     db.close()
     return row[1],row[0]
+
+def retrieveClassID(clname):
+    db = Database()
+    cur = db.execute("SELECT id_classe FROM classe WHERE nom = %(name)s",name=clname)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Class Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row

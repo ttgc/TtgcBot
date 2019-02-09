@@ -194,3 +194,5 @@ petset=La valeur `{}` du familier a ete mise a jour
 espece=espece
 petbelong={} appartenant actuellement a : {}
 petstat=Stat du familier
+#(S)kill upate v1.3
+is_dead=Cette action ne peut avoir lieu car {} est mort

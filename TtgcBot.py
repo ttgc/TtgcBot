@@ -29,6 +29,7 @@ import time
 from EventManager import *
 from VocalUtilities import *
 from Character import *
+from CharacterUtils import *
 from converter import *
 from BotTools import *
 from Translator import *
@@ -283,13 +284,18 @@ def on_message(message):
         else:
             msg = field
             modifier = 0
-        yield from char.roll(client,message.channel,lang,msg,modifier)
+        if not char.dead:
+            yield from char.roll(client,message.channel,lang,msg,modifier)
+        else:
+            yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
     if command_check(prefix,message,'charcreate',['createchar']) and chanMJ:#message.content.startswith(prefix+'charcreate') and chanMJ:
-        name = get_args(prefix,message,'charcreate',['createchar'])#(message.content).replace(prefix+'charcreate ',"")
+        args = get_args(prefix,message,'charcreate',['createchar']).split(" ")#(message.content).replace(prefix+'charcreate ',"")
+        name = args[1]
+        classe = retrieveClassID(args[0])
         if name in charbase:
             yield from client.send_message(message.channel,lang["charcreate_existing"])
             return
-        jdr.charcreate(name)
+        jdr.charcreate(name,classe)
         yield from client.send_message(message.channel,lang["charcreate"].format(name))
     if command_check(prefix,message,'chardelete',['deletechar','delchar','chardel']) and chanMJ:#message.content.startswith(prefix+'chardelete') and chanMJ:
         name = get_args(prefix,message,'chardelete',['deletechar','delchar','chardel'])#(message.content).replace(prefix+'chardelete ',"")
@@ -412,6 +418,7 @@ def on_message(message):
         deads = 0
         dead_ls = ""
         for i in charbase:
+            if i.dead: continue
             i = i.charset('pv',-val)
             embd.add_field(name=i.name,value=str(i.PV)+" (-"+str(val)+")",inline=True)
             if not i.check_life():
@@ -430,6 +437,7 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         val2 = val
         for i in charbase:
+            if i.dead: continue
             val = val2
             if i.PV+val2 > i.PVmax:
                 val = i.PVmax-i.PV
@@ -444,6 +452,7 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         val2 = val
         for i in charbase:
+            if i.dead: continue
             val = val2
             if i.PM+val2 > i.PMmax:
                 val = i.PMmax-i.PV
@@ -532,22 +541,26 @@ def on_message(message):
         if char.mod == 0: modd = lang["offensive"]
         else: modd = lang["defensive"]
         embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-        embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
-        embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        if char.dead:
+            embd.add_field(name=lang["PV"]+" :",value="DEAD",inline=True)
+        else:
+            embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+        if not char.dead: embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
         embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
-        embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
-        embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
-        embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
-        embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
-        embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
-        embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
+        if not char.dead: embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
+        if not char.dead: embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
+        if not char.dead: embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
+        if not char.dead: embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
+        if not char.dead: embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
+        if not char.dead: embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
         embd.add_field(name=lang["money"].capitalize()+" :",value=str(char.money),inline=True)
-        embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
-        embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
-        embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
+        if not char.dead: embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
+        if not char.dead: embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
+        if not char.dead: embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
         embd.add_field(name=lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'map',[]) and chanMJ:
@@ -584,6 +597,9 @@ def on_message(message):
         embd.add_field(name=lang["super_critic_fail"],value=str(ls[6]),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'use') and jdrchannel:
+        if char.dead:
+            yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
+            return
         if command_check(prefix,message,'use lightpt',['use lp','use lightpoint']):
             if char.lp <= 0:
                 yield from client.send_message(message.channel,lang["no_more_lp"])
@@ -627,6 +643,9 @@ def on_message(message):
         else:
             yield from client.send_message(message.channel,lang["switchmod"].format(char.name,lang["offensive"]))
     if command_check(prefix,message,'setmental',[]) and jdrchannel:
+        if char.dead:
+            yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
+            return
         msg = message.content.replace(prefix+'setmental ',"")
         if "+" in message.content:
             msg = msg.replace("+","")
@@ -1000,19 +1019,23 @@ def on_message(message):
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-            embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
-            embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+            if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+            if char.dead:
+                embd.add_field(name=lang["PV"]+" :",value="DEAD",inline=True)
+            else:
+                embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            if not char.dead: embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
             embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
-            embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
-            embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
-            embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
-            embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
-            embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
-            embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
+            if not char.dead: embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
+            if not char.dead: embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
+            if not char.dead: embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
+            if not char.dead: embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
+            if not char.dead: embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
+            if not char.dead: embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
             embd.add_field(name=lang["money"].capitalize()+" :",value=str(char.money),inline=True)
-            embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
-            embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
-            embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
+            if not char.dead: embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
+            if not char.dead: embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
+            if not char.dead: embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
             embd.add_field(name=lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
             yield from client.send_message(message.channel,embed=embd)
         if command_check(prefix,message,'mjinventory',['MJinventory','mjinv','MJinv']):

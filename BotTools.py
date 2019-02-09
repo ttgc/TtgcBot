@@ -340,9 +340,9 @@ class DBJDR:
         db.call("jdrcopy",idserv=self.server,src=self.channel,dest=channel_id)
         db.close()
 
-    def charcreate(self,chardbkey):
+    def charcreate(self,chardbkey,idclass):
         db = Database()
-        db.call("charcreate",dbkey=chardbkey,idserv=self.server,idchan=self.channel)
+        db.call("charcreate",dbkey=chardbkey,idserv=self.server,idchan=self.channel,cl=idclass)
         db.close()
 
     def chardelete(self,chardbkey):

@@ -79,6 +79,16 @@ DECLARE
 	poids ITEMS.WEIGHT%TYPE;
 	it_poids ITEMS.WEIGHT%TYPE;
 BEGIN
+	IF TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN
+		SELECT size_ INTO poids FROM inventaire
+		WHERE id_inventory = old.id_inventory;
+		SELECT weight INTO it_poids FROM items
+		WHERE id_item = old.id_item;
+		poids := poids - (old.qte * it_poids);
+		UPDATE inventaire
+		SET size_ = poids
+		WHERE id_inventory = old.id_inventory;
+	END IF;
 	IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
 		SELECT size_ INTO poids FROM inventaire
 		WHERE id_inventory = new.id_inventory;
@@ -87,23 +97,13 @@ BEGIN
 		poids := poids + (new.qte * it_poids);
 		SELECT size_max INTO it_poids FROM inventaire
 		WHERE id_inventory = new.id_inventory;
-		IF CEIL(poids) > it_poids THEN
+		IF poids > it_poids THEN
 			RAISE EXCEPTION 'Inventory size exceeded';
 		ELSE
 			UPDATE inventaire
-			SET size_ = CEIL(poids)
+			SET size_ = poids
 			WHERE id_inventory = new.id_inventory;
 		END IF;
-	END IF;
-	IF TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN
-		SELECT size_ INTO poids FROM inventaire
-		WHERE id_inventory = old.id_inventory;
-		SELECT weight INTO it_poids FROM items
-		WHERE id_item = old.id_item;
-		poids := poids - (old.qte * it_poids);
-		UPDATE inventaire
-		SET size_ = CEIL(poids)
-		WHERE id_inventory = old.id_inventory;
 	END IF;
 	IF TG_OP = 'DELETE' THEN
 		RETURN old;

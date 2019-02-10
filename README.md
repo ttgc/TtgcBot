@@ -49,9 +49,10 @@ Aliases : `adminrole`
 Set your language for bot messages, language represents the code of your language and there are currently only two languages supported : `EN` for English and `FR` for French <br/>
 NB : language code is case insensitive so you can precise it in upper or lower case as you wish
 Aliases : `setlanguage`
-- `/rollindep <value>` <br/>
-Roll dices and perform additions or substractions if given in the value field. For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example) <br/>
-Full example : `/rollindep 10+1d100-2d10+5d8` will return the result of the following expression : `10+(1 dice with 100 sides)-(2 dices with 10 sides)+(5 dices with 8 sides)` <br/>
+- `/rollindep <expression>` <br/>
+Roll dices and perform operations (supported symbols and operations : `*,+,-,/,()`) if given in the expression field. For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example). You can also roll special dices with your own values by writing them between brackets as following : `1d{red,blue,yellow,green}`. <br/>
+Full example : `/rollindep (10+1d100)*(2d10-5d8)` will return the result of the following expression : `(10+(1 dice with 100 sides))*((2 dices with 10 sides)-(5 dices with 8 sides))` <br/>
+Special dice example : `/rollindep 1d{1,2,3,4,5,6,7,8,9,10,Jack,Queen,King}+1d{Clubs,Diamonds,Hearts,Spades}` will return a single card with its value and its color (example : Queen of Spades) <br/>
 Aliases : `rolldice`, `r`
 - `/tell <msg>` <br/>
 The bot will tell your message and erase the command input (all tell commands are saved in logs)
@@ -94,6 +95,10 @@ Blacklist a user, he won't be able to use any commands of this bot by blacklisti
 Unblacklist someone
 - `/purgeserver <days>` (Bot manager only) <br/>
 Delete servers from the database that have kicked the bot at least number of days given ago
+- `/userblock <username>` (Admin only) <br/>
+Block users wich have a username matching the username mask parameter given and avoid them to join your server. If someone matching the template try to join, it will be banned instantly
+- `/userunblock <username>` (Admin only) <br/>
+Delete a template of usernames blocked on your server
 
 ### Keeprole commands (Administrator only)
 - The basic syntax for this commands is : `/keeprole <subcommand> ...`. Instead of `keeprole` you can just write `kr`. Aliases will be given just for the subcommand but you still have to precised `keeprole` or `kr` before the alias. Keeprole system allow you to set roles that will be automatically reassigned to member when they leave with theese roles and join again your server
@@ -157,8 +162,8 @@ Delete the finalize field given <br/>
 Aliases : `deletefinalizer`
 - `/finalize` (MJ only and JDR channel only) <br/>
 This command will start the finalizing operation displaying credits with some random informations of your game and also your own finalize fields. After that, the JDR will be fully deleted from the database.
-- `/charcreate <namekey>` (MJ only and JDR channel only) <br/>
-Create a new character referenced by the namekey given. The namekey is not the same things as the name of the character, the namekey is just the unique identifier of the character and will be needed each time you will want to perform commands on this character <br/>
+- `/charcreate <class> <namekey>` (MJ only and JDR channel only) <br/>
+Create a new character with the given class and referenced by the namekey given. The class is the exact name of the class (french names), go to the website to know all existing classes. Use `_` instead of space character for class name. The namekey is not the same things as the name of the character, the namekey is just the unique identifier of the character and will be needed each time you will want to perform commands on this character <br/>
 Aliases : `createchar`
 - `/chardelete <namekey>` (MJ only and JDR channel only) <br/>
 Delete a character (this cannot be undone once performed) <br/>
@@ -288,6 +293,15 @@ Aliases : `petcure`
 - `/petgetPM <charkey> <petkey> <amount>` (MJ only and JDR channel only) <br/>
 Manage MP for a pet such as `getPM` for a character <br/>
 Aliases : `petgetpm`, `petgetMP`, `petgetmp`, `petPM`, `petpm`, `petMP`, `petmp`
+- `/kill <player>` (MJ only and JDR channel only) <br/>
+Kill definitively a character, this will unlink it from its owner and the character wont be playable anymore <br/>
+Aliases : `characterkill`, `charkill`
+- `/skillinfo <query>` (JDR channel only) <br/>
+Search skills in the database with their names. To give many skill name in the query parameter, give them separated with `|` <br/>
+Aliases : `skinfo`
+- `/skillassign <charkey> <skillID>` (MJ only and JDR channel only) <br/>
+Assign a skill to a character, if you dont know the ID of the skill, use `skillinfo` command to search your skill by name <br/>
+Aliases : `skassign`
 - `/mj...` (MJ only and JDR channel only) <br/>
 Use a PJ command when you are MJ, theese commands works exactly as the same commands without the `mj` prefix with sames arguments, the result will also be the same. For example `/mjcharinfo` will produce same result as `/charinfo` but you will have to precise for wich character this commands must be used for as the following : `/charinfo <charkey>`. Refers to the PJ commands' doc to know result and how arguments works for each commands <br/>
 The following commands can be used : <br/>

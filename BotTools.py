@@ -21,6 +21,7 @@ import discord
 import asyncio
 from DatabaseManager import *
 import Character as ch
+import CharacterUtils as chutil
 
 class DBServer:
     def __init__(self,ID):
@@ -149,6 +150,43 @@ class DBServer:
         db = Database()
         db.call("unblockword",idserv=self.ID,word=string)
         db.close()
+
+    def blockusername(self,user):
+        db = Database()
+        cur = db.call("userblock",usr=user,idserv=self.ID)
+        newid = None
+        if cur is not None:
+            newid = cur.fetchone()
+        db.close()
+        return newid
+
+    def unblockusername(self,user):
+        db = Database()
+        cur = db.call("find_userblocked",usr=user,idserv=self.ID)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("Unable to unblock username")
+        usrid = cur.fetchone()[0]
+        if usrid is None:
+            db.close(True)
+            return False
+        db.close()
+        db = Database()
+        db.call("userunblock",id=usrid)
+        db.close()
+        return True
+
+    def blockuserlist(self):
+        db = Database()
+        cur = db.call("userblock_list",idserv=self.ID)
+        if cur is None:
+            db.close(True)
+            return []
+        ls = []
+        for i in cur:
+            ls.append(i)
+        db.close()
+        return ls
 
     def backuprolemember(self,member):
         db = Database()
@@ -302,9 +340,9 @@ class DBJDR:
         db.call("jdrcopy",idserv=self.server,src=self.channel,dest=channel_id)
         db.close()
 
-    def charcreate(self,chardbkey):
+    def charcreate(self,chardbkey,idclass):
         db = Database()
-        db.call("charcreate",dbkey=chardbkey,idserv=self.server,idchan=self.channel)
+        db.call("charcreate",dbkey=chardbkey,idserv=self.server,idchan=self.channel,cl=idclass)
         db.close()
 
     def chardelete(self,chardbkey):
@@ -344,7 +382,7 @@ class DBJDR:
             gmdefault = 0
         else:
             gmdefault = 1
-        inv = ch.Inventory()
+        inv = chutil.Inventory()
         inv.loadfromdb(rawchar[30])
         pets = {}
         db = Database()
@@ -362,9 +400,16 @@ class DBJDR:
                 pets[i[0]] = ch.Pet({"petkey":i[0],"charkey":rawchar[0],"name":i[1],"espece":i[2],"PVm":i[5],"PMm":i[7],"force":i[8],"esprit":i[9],"charisme":i[10],"agilite":i[11],"karma":i[12],
                                      "stat":[i[14],i[19],i[17],i[15],i[16],i[18],i[20]],"mod":gmpet,"PV":i[4],"PM":i[6],"default_mod":gmpetdefault,"instinct":i[13],"lvl":i[3]})
         db.close()
+        db = Database()
+        cur = db.call("get_skill",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)
+        skls = []
+        if cur is not None:
+            for i in cur:
+                skls.append(chutil.Skill(i[0]))
+        db.close()
         char = ch.Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
                           "charisme":rawchar[10],"furtivite":rawchar[11],"karma":rawchar[12],"default_karma":rawchar[13],"money":rawchar[14],"lp":rawchar[15],"dp":rawchar[16],
-                          "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31],"pet":pets})
+                          "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31],"pet":pets,"skills":skls,"dead":rawchar[32],"classe":rawchar[33]})
         char.bind(self)
         return char
 

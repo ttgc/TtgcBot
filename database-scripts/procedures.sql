@@ -145,6 +145,8 @@ CREATE OR REPLACE FUNCTION charset
 ) RETURNS void AS $$
 DECLARE
 	curp INT;
+	idinv INT;
+	cpymoney INT;
 BEGIN
 	IF LOWER(stat) = 'str' THEN
 		UPDATE Characterr
@@ -221,9 +223,31 @@ BEGIN
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
 	IF LOWER(stat) = 'po' THEN
+		SELECT id_inventory INTO idinv FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		SELECT argent INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		cpymoney := curp;
+		curp := curp / 5000;
+		IF cpymoney > 0 THEN
+			curp := curp + 1;
+		END IF;
+		UPDATE inventaire
+		SET size_ = size_ - curp
+		WHERE id_inventory = idinv;
 		UPDATE Characterr
 		SET argent = argent + val
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		SELECT argent INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		cpymoney := curp;
+		curp := curp / 5000;
+		IF cpymoney > 0 THEN
+			curp := curp + 1;
+		END IF;
+		UPDATE inventaire
+		SET size_ = size_ + curp
+		WHERE id_inventory = idinv;
 	END IF;
 	IF LOWER(stat) = 'int' THEN
 		UPDATE Characterr
@@ -450,7 +474,7 @@ BEGIN
 		WHERE (id_item = item AND id_inventory = inv);
 	ELSE
 		UPDATE contient
-		SET qte = qte - quantite
+		SET qte = nbr
 		WHERE (id_item = item AND id_inventory = inv);
 	END IF;
 END;
@@ -1025,5 +1049,27 @@ CREATE OR REPLACE FUNCTION del_finalize_field
 BEGIN
 	DELETE FROM finalize
 	WHERE (id_server = idserv AND id_channel = idchan AND title = titl);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION forceinvcalc () RETURNS void AS $$
+DECLARE
+	poids INVENTAIRE.SIZE_%TYPE;
+	inv RECORD;
+	item RECORD;
+	po Characterr.argent%TYPE;
+	it_poids Items.weight%TYPE;
+BEGIN
+	FOR inv IN (SELECT id_inventory FROM inventaire) LOOP
+		SELECT argent INTO po FROM characterr WHERE id_inventory = inv.id_inventory;
+		poids := CEIL(po/5000);
+		FOR item IN (SELECT id_item,qte FROM contient WHERE id_inventory = inv.id_inventory) LOOP
+			SELECT weight INTO it_poids FROM items WHERE id_item = item.id_item;
+			poids := poids + (item.qte * it_poids);
+		END LOOP;
+		UPDATE inventaire
+		SET size_ = poids
+		WHERE id_inventory = inv.id_inventory;
+	END LOOP;
 END;
 $$ LANGUAGE plpgsql;

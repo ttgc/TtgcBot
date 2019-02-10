@@ -23,11 +23,13 @@ from random import randint,choice
 from threading import Thread
 from INIfiles import *
 from logfile import *
+from parsingdice import *
 import logging
 import time
-from EventManager import *
+#from EventManager import *
 from VocalUtilities import *
 from Character import *
+from CharacterUtils import *
 from converter import *
 from BotTools import *
 from Translator import *
@@ -232,7 +234,7 @@ def on_message(message):
                 break
     #get vocal
     vocal = vocalcore.getvocal(str(message.server.id))
-    
+
     #commands
     if command_check(prefix,message,'setprefix',['prefix']) and admin:#message.content.startswith(prefix+'setprefix') and admin:
         prefix = get_args(prefix,message,'setprefix',['prefix'])#(message.content).replace(prefix+'setprefix ',"")
@@ -241,30 +243,32 @@ def on_message(message):
         yield from client.send_message(message.channel,lang["setprefix"].format(prefix))
     if command_check(prefix,message,'rollindep',['rolldice','r']):#message.content.startswith(prefix+'rollindep'):
         expression = get_args(prefix,message,'rollindep',['rolldice','r'])#message.content.replace(prefix+"rollindep ","")
-        expression = expression.replace(" ","")
-        expression = expression.replace("-","+-")
-        operations = expression.split("+")
-        result = []
-        for i in operations:
-            if "d" in i:
-                rdmgen = i.split("d")
-                val = int(rdmgen[1])
-                repeat_sign = int(rdmgen[0])
-                repeat = abs(repeat_sign)
-                for k in range(repeat):
-                    if repeat_sign < 0:
-                        result.append(-randint(1,val))
-                    else:
-                        result.append(randint(1,val))
-            else:
-                result.append(int(i))
-        final_result = 0
-        final_expression = ""
-        for i in result:
-            final_result += i
-            final_expression += str(i)+" + "
-        final_expression = final_expression[:-3]
-        final_expression = final_expression.replace("+ -","- ")
+        parser = ParseRoll(expression)
+        final_result,final_expression = parser.resolv()
+        # expression = expression.replace(" ","")
+        # expression = expression.replace("-","+-")
+        # operations = expression.split("+")
+        # result = []
+        # for i in operations:
+        #     if "d" in i:
+        #         rdmgen = i.split("d")
+        #         val = int(rdmgen[1])
+        #         repeat_sign = int(rdmgen[0])
+        #         repeat = abs(repeat_sign)
+        #         for k in range(repeat):
+        #             if repeat_sign < 0:
+        #                 result.append(-randint(1,val))
+        #             else:
+        #                 result.append(randint(1,val))
+        #     else:
+        #         result.append(int(i))
+        # final_result = 0
+        # final_expression = ""
+        # for i in result:
+        #     final_result += i
+        #     final_expression += str(i)+" + "
+        # final_expression = final_expression[:-3]
+        # final_expression = final_expression.replace("+ -","- ")
         yield from client.send_message(message.channel,lang["rollindep"].format(final_result,final_expression))
 
     #jdr commands
@@ -280,13 +284,18 @@ def on_message(message):
         else:
             msg = field
             modifier = 0
-        yield from char.roll(client,message.channel,lang,msg,modifier)
+        if not char.dead:
+            yield from char.roll(client,message.channel,lang,msg,modifier)
+        else:
+            yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
     if command_check(prefix,message,'charcreate',['createchar']) and chanMJ:#message.content.startswith(prefix+'charcreate') and chanMJ:
-        name = get_args(prefix,message,'charcreate',['createchar'])#(message.content).replace(prefix+'charcreate ',"")
+        args = get_args(prefix,message,'charcreate',['createchar']).split(" ")#(message.content).replace(prefix+'charcreate ',"")
+        name = args[1]
+        classe = retrieveClassID(args[0].replace("_"," "))
         if name in charbase:
             yield from client.send_message(message.channel,lang["charcreate_existing"])
             return
-        jdr.charcreate(name)
+        jdr.charcreate(name,classe)
         yield from client.send_message(message.channel,lang["charcreate"].format(name))
     if command_check(prefix,message,'chardelete',['deletechar','delchar','chardel']) and chanMJ:#message.content.startswith(prefix+'chardelete') and chanMJ:
         name = get_args(prefix,message,'chardelete',['deletechar','delchar','chardel'])#(message.content).replace(prefix+'chardelete ',"")
@@ -306,7 +315,7 @@ def on_message(message):
     if command_check(prefix,message,'unlink',['charunlink']) and chanMJ:#message.content.startswith(prefix+'unlink') and chanMJ:
         if get_args(prefix,message,'unlink',['charunlink']) == "":
             char.unlink()
-            yield from client.send_message(message.channel,lang["charunlink"].format(char.name))  
+            yield from client.send_message(message.channel,lang["charunlink"].format(char.name))
         else:
             character = jdr.get_character(get_args(prefix,message,'unlink',['charunlink']))
             character.unlink()
@@ -397,8 +406,8 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=lang["damage_taken"],value=str(val),inline=True)
         embd.add_field(name=lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
-        if not char.check_life():
-            embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+        # if not char.check_life():
+        #     embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'globaldmg',['globaldamage','gdmg','gdamage']) and chanMJ:#message.content.startswith(prefix+'globaldmg') and chanMJ:
         val = abs(int((message.content).split(" ")[1]))#replace(prefix+'globaldmg ',"")))
@@ -409,6 +418,7 @@ def on_message(message):
         deads = 0
         dead_ls = ""
         for i in charbase:
+            if i.dead: continue
             i = i.charset('pv',-val)
             embd.add_field(name=i.name,value=str(i.PV)+" (-"+str(val)+")",inline=True)
             if not i.check_life():
@@ -416,8 +426,8 @@ def on_message(message):
                 dead_ls += (i.name+"\n")
         if deads > 0:
             embd.add_field(name=lang["dead_players"],value=dead_ls,inline=False)
-        if deads == len(charbase):
-            embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+        # if deads == len(charbase):
+        #     embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'globalheal',['gheal']) and chanMJ:#message.content.startswith(prefix+'globalheal') and chanMJ:
         val = abs(int((message.content).split(" ")[1]))#replace(prefix+'globalheal ',"")))
@@ -427,6 +437,7 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         val2 = val
         for i in charbase:
+            if i.dead: continue
             val = val2
             if i.PV+val2 > i.PVmax:
                 val = i.PVmax-i.PV
@@ -441,6 +452,7 @@ def on_message(message):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         val2 = val
         for i in charbase:
+            if i.dead: continue
             val = val2
             if i.PM+val2 > i.PMmax:
                 val = i.PMmax-i.PV
@@ -485,6 +497,12 @@ def on_message(message):
     if command_check(prefix,message,'setkarma',['addkarma','getkarma']) and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         val = int((message.content).split(" ")[2])#replace(prefix+'setkarma ',""))
+        if Skill.isskillin(char.skills,7): val *= 2 #chanceux
+        if Skill.isskillin(char.skills,84): #creature harmonieuse
+            if char.karma == 0 and val < 0: val -= 5
+            elif char.karma == 0 and val > 0: val +=5
+            elif char.karma+val > -5 and char.karma+val < 5 and val < 0: val -= 9
+            elif char.karma+val > -5 and char.karma+val < 5 and val > 0: val += 9
         if char.karma+val < -10: val=-10-char.karma#char.karma = -10
         if char.karma+val > 10: val=10-char.karma#char.karma = 10
         char = char.charset('kar',val)
@@ -528,23 +546,27 @@ def on_message(message):
     if command_check(prefix,message,'charinfo',['characterinfo']) and jdrchannel:
         if char.mod == 0: modd = lang["offensive"]
         else: modd = lang["defensive"]
-        embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd = discord.Embed(title=char.name,description="{} {}".format(char.race,char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-        embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
-        embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        if char.dead:
+            embd.add_field(name=lang["PV"]+" :",value="DEAD",inline=True)
+        else:
+            embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+        if not char.dead: embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
         embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
-        embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
-        embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
-        embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
-        embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
-        embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
-        embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
+        if not char.dead: embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
+        if not char.dead: embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
+        if not char.dead: embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
+        if not char.dead: embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
+        if not char.dead: embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
+        if not char.dead: embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
         embd.add_field(name=lang["money"].capitalize()+" :",value=str(char.money),inline=True)
-        embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
-        embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
-        embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
+        if not char.dead: embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
+        if not char.dead: embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
+        if not char.dead: embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
         embd.add_field(name=lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'map',[]) and chanMJ:
@@ -581,6 +603,9 @@ def on_message(message):
         embd.add_field(name=lang["super_critic_fail"],value=str(ls[6]),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'use') and jdrchannel:
+        if char.dead:
+            yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
+            return
         if command_check(prefix,message,'use lightpt',['use lp','use lightpoint']):
             if char.lp <= 0:
                 yield from client.send_message(message.channel,lang["no_more_lp"])
@@ -624,6 +649,9 @@ def on_message(message):
         else:
             yield from client.send_message(message.channel,lang["switchmod"].format(char.name,lang["offensive"]))
     if command_check(prefix,message,'setmental',[]) and jdrchannel:
+        if char.dead:
+            yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
+            return
         msg = message.content.replace(prefix+'setmental ',"")
         if "+" in message.content:
             msg = msg.replace("+","")
@@ -986,6 +1014,39 @@ def on_message(message):
         embd.add_field(name=lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
         embd.add_field(name=lang["remaining_pm"],value=str(char.pet[pet].PM)+"/"+str(char.pet[pet].PMmax),inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'kill',['characterkill','charkill']) and chanMJ:
+        char = jdr.get_character(get_args(prefix,message,'kill',['characterkill','charkill']))
+        yield from client.send_message(message.channel,lang["kill_confirm"].format(char.name))
+        confirm = yield from client.wait_for_message(timeout=60,author=message.author,channel=message.channel,content="confirm")
+        if confirm is None:
+            yield from client.send_message(message.channel,lang["timeout"])
+            return
+        char.kill()
+        char.unlink()
+        f = open("you are dead.png","rb")
+        yield from client.send_file(message.channel,f,content=lang["killed"].format(char.name))
+        f.close()
+    if command_check(prefix,message,'skillinfo',['skinfo']) and jdrchannel:
+        sklist = get_args(prefix,message,'skillinfo',['skinfo']).split("|")
+        ls = []
+        for i in sklist:
+            ls += Skill.skillsearch(i)
+        descr = str(sklist)
+        descr = descr.replace("[","")
+        descr = descr.replace("]","")
+        embd = discord.Embed(title=lang["skillsearch"],description=descr,colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in ls:
+            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'skillassign',['skassign']) and chanMJ:
+        args = get_args(prefix,message,'skillassign',['skassign']).split(" ")
+        char = jdr.get_character(args[0])
+        sk = Skill(int(args[1]))
+        char.assign_skill(sk)
+        yield from client.send_message(message.channel,lang["assign_skill"].format(sk.name,char.name))
     if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo','mjswitchmod','MJswitchmod','mjswitchmode','MJswitchmode',
                                                   'mjpay','MJpay','mjsetmental','MJsetmental','mjroll','MJroll','mjinventory','MJinventory','mjinv','MJinv',
                                                   'mjpetroll','MJpetroll','mjpetinfo','MJpetinfo','MJpetswitchmod','mjpetswitchmod']) and jdrchannel and chanMJ:
@@ -993,23 +1054,27 @@ def on_message(message):
         if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo']):
             if char.mod == 0: modd = lang["offensive"]
             else: modd = lang["defensive"]
-            embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd = discord.Embed(title=char.name,description="{} {}".format(char.race,char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-            embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
-            embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+            if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+            if char.dead:
+                embd.add_field(name=lang["PV"]+" :",value="DEAD",inline=True)
+            else:
+                embd.add_field(name=lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            if not char.dead: embd.add_field(name=lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
             embd.add_field(name=lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
-            embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
-            embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
-            embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
-            embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
-            embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
-            embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
+            if not char.dead: embd.add_field(name=lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
+            if not char.dead: embd.add_field(name=lang["force"].capitalize()+" :",value=str(char.force),inline=True)
+            if not char.dead: embd.add_field(name=lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
+            if not char.dead: embd.add_field(name=lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
+            if not char.dead: embd.add_field(name=lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
+            if not char.dead: embd.add_field(name=lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
             embd.add_field(name=lang["money"].capitalize()+" :",value=str(char.money),inline=True)
-            embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
-            embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
-            embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
+            if not char.dead: embd.add_field(name=lang["lp"]+" :",value=str(char.lp),inline=True)
+            if not char.dead: embd.add_field(name=lang["dp"]+" :",value=str(char.dp),inline=True)
+            if not char.dead: embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
             embd.add_field(name=lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
             yield from client.send_message(message.channel,embed=embd)
         if command_check(prefix,message,'mjinventory',['MJinventory','mjinv','MJinv']):
@@ -1221,7 +1286,7 @@ def on_message(message):
             temp = temp[pos+1:]
             temp = temp[:temp.find("/>")]
             temp = temp[temp.find("src=")+5:]
-            img = "http://thetaleofgreatcosmos.fr"+temp.split('"')[0]        
+            img = "http://thetaleofgreatcosmos.fr"+temp.split('"')[0]
         embd = discord.Embed(title=info.json()["parse"]["title"],description=descrip,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query,colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos - Wiki")
         if img is not None:
@@ -1269,7 +1334,7 @@ def on_message(message):
         msg += [("Players (PC) :",ct)]
         ct = ""
         for i in charbase:
-            if not i.check_life(): ct += (i.name+"\n")
+            if i.dead: ct += (i.name+"\n")
         if ct == "": ct = "No player dead"
         msg += [("Deads Players during the adventure :",ct)]
         luck = []
@@ -1475,7 +1540,7 @@ def on_message(message):
                         else:
                             rl = None
                             for j in message.server.roles:
-                                if str(j.id) == k[1]: 
+                                if str(j.id) == k[1]:
                                     rl = j
                                     break
                             if rl is not None:
@@ -1548,6 +1613,16 @@ def on_message(message):
         if lang_exist(lg):
             setuserlang(str(message.author.id),lg)
             yield from client.send_message(message.channel,get_lang(lg)["setlang"].format(lg))
+    if command_check(prefix,message,'userblock') and admin:
+        usr = get_args(prefix,message,'userblock')
+        srv.blockusername(usr)
+        yield from client.send_message(message.channel,lang["userblock"].format(usr))
+    if command_check(prefix,message,'userunblock') and admin:
+        usr = get_args(prefix,message,'userunblock')
+        if not srv.unblockusername(usr):
+            yield from client.send_message(message.channel,lang["userunblock_notexist"].format(usr))
+        else:
+            yield from client.send_message(message.channel,lang["userunblock"].format(usr))
 
     #KeepRole commands
     if command_check(prefix,message,'keeprole',['kr']) and admin:
@@ -1715,6 +1790,12 @@ def on_message(message):
 @asyncio.coroutine
 def on_member_join(member):
     srv = DBServer(str(member.server.id))
+    userblocked = srv.blockuserlist()
+    for i in userblocked:
+        if i in str(member).split("#")[0]:
+            yield from asyncio.sleep(1)
+            yield from client.ban(member,1)
+            return
     if srv.keepingrole:
         yield from asyncio.sleep(1)
         yield from srv.restorerolemember(client,member.server,member)
@@ -1725,7 +1806,7 @@ def on_member_remove(member):
     srv = DBServer(str(member.server.id))
     if srv.keepingrole:
         srv.backuprolemember(member)
-                
+
 @client.event
 @asyncio.coroutine
 def on_server_join(server):
@@ -1804,4 +1885,3 @@ except:
     loop.run_until_complete(client.logout())
 finally:
     loop.close()
-

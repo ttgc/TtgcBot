@@ -22,125 +22,13 @@ import asyncio
 from random import randint,choice
 from converter import *
 from DatabaseManager import *
-from BotTools import DBJDR
-
-class Item:
-    def __init__(self,name,descr,weight):
-        self.name = name
-        self.description = descr
-        self.weight = weight
-        self.ID = None
-
-    def __str__(self):
-        return self.name+" ("+self.weight+") : "+self.description
-
-    def create(self):
-        db = Database()
-        cur = db.call("createitem",name=self.name,descr=self.description,poids=self.weight)
-        if cur is None:
-            db.close(True)
-            raise DatabaseError("unable to create the item")
-        self.ID = cur.fetchone()[0]
-        db.close()
-
-    def load(self):
-        db = Database()
-        cur = db.execute("SELECT id_item FROM Items WHERE nom = %(nom)s AND description = %(descr)s AND weight = %(poids)s;",nom=self.name,descr=self.description,poids=self.weight)
-        if cur is None:
-            db.close(True)
-            raise DatabaseErrror("unable to load the item")
-        self.ID = cur.fetchone()[0]
-        db.close()
-
-    def delete(self):
-        if self.ID is None:
-            raise AttributeError("self.ID is not defined for this item, maybe it has not be loaded or created before")
-        db = Database()
-        db.call("deleteitem",item=self.ID)
-        db.close()
-
-    def find(name):
-        db = Database()
-        cur = db.execute("SELECT id_item,description,weight FROM Items WHERE nom = %(nom)s;",nom=name)
-        if cur is None:
-            db.close(True)
-            raise DatabaseError("unable to find the item")
-        it = cur.fetchone()
-        if it is None:
-            db.close(True)
-            return None
-        db.close()
-        item = Item(name,it[1],it[2])
-        item.ID = it[0]
-        return item
-    find = staticmethod(find)
-
-class Inventory:
-    def __init__(self,maxw=20):
-        self.items = {}
-        self.maxweight = 20
-        self.weight = 0
-        self.character = None
-        self.jdr = None
-        self.ID = None
-
-    def bind(self,char,jdr):
-        self.character = char
-        self.jdr = jdr
-
-    def loadfromdb(self,inventory_id):
-        db = Database()
-        cur = db.execute("SELECT nom,qte,description,weight FROM contient INNER JOIN items ON (contient.id_item = items.id_item) WHERE id_inventory = %(idinv)s;",idinv=inventory_id)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the inventory")
-        self.items = {}
-        for i in cur:
-            it = Item(i[0],i[2],i[3])
-            it.load()
-            self.items[it] = i[1]
-        db.close()
-        self.ID = inventory_id
-        self._reload()
-
-    def _reload(self):
-        db = Database()
-        cur = db.execute("SELECT size_,size_max FROM inventaire WHERE id_inventory = %(idinv)s;",idinv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseErrror("unable to reload the inventory")
-        info = cur.fetchone()
-        db.close()
-        self.weight = info[0]
-        self.maxweight = info[1]
-
-    def __add__(self,it):
-        return self.additem(it,1)
-
-    def __iadd__(self,it):
-        return self.additem(it,1)
-
-    def __sub__(self,it):
-        return self.rmitem(it,1)
-
-    def __isub__(self,it):
-        return self.rmitem(it,1)
-
-    def additem(self,it,qte):
-        db = Database()
-        db.call("additem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
-        db.close()
-        self.loadfromdb(self.ID)
-        
-    def rmitem(self,it,qte):
-        db = Database()
-        db.call("removeitem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
-        db.close()
-        self.loadfromdb(self.ID)
+#from BotTools import DBJDR
+#import BotTools as bt
+from CharacterUtils import *
 
 class Character:
     """Character class"""
-    def __init__(self,dic={"charkey":"","name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100,"lvl":1,"linked":None,"inventory":Inventory(),"pet":{}}):
+    def __init__(self,dic={"charkey":"","name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100,"lvl":1,"linked":None,"inventory":Inventory(),"pet":{},"skills":[],"dead":False,"classe":1}):
         self.key = dic["charkey"]
         self.name = dic["name"]
         self.lore = dic["lore"]
@@ -168,6 +56,9 @@ class Character:
         if self.linked.upper() == "NULL": self.linked = None
         self.inventory = dic["inventory"]
         self.pet = dic["pet"]
+        self.skills = dic["skills"]
+        self.dead = dic["dead"]
+        self.race,self.classe = retrieveCharacterOrigins(dic["classe"])
         self.jdr = None
         #mod 0 = offensiv / mod 1 = defensiv
 
@@ -263,35 +154,89 @@ class Character:
             if result == 42:
                 self.stat[1] += 1
                 yield from client.send_message(channel,lang["42"],tts=True)
-                self.charset('kar',-2)
-                self.karma -= 2
+                val = -2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma -= abs(val)
             elif result == 66:
                 self.stat[-1] += 1
                 yield from client.send_message(channel,lang["66"],tts=True)
-                self.charset('kar',2)
-                self.karma += 2
+                val = 2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma += val
             else:
                 if self.karma >= 5:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.force+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["force"],str(result),str(dice),"-",str(kar),str(self.force+modifier)))
@@ -300,22 +245,58 @@ class Character:
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.force+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["force"],str(result),str(dice),"+",str(kar),str(self.force+modifier)))
@@ -324,12 +305,30 @@ class Character:
                     elif result == 66: self.stat[-1] += 1
                     elif result >= 91:
                         self.stat[-2] += 1
-                        self.charset('kar',1)
-                        self.karma += 1
+                        val = 1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     elif result <= 10:
                         self.stat[2] += 1
-                        self.charset('kar',-1)
-                        self.karma -= 1
+                        val = -1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result <= self.force+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
                     yield from client.send_message(channel,lang["result_test"].format(lang["force"],str(result),str(self.force+modifier)))
@@ -349,35 +348,89 @@ class Character:
             if result == 42:
                 self.stat[1] += 1
                 yield from client.send_message(channel,lang["42"],tts=True)
-                self.charset('kar',-2)
-                self.karma -= 2
+                val = -2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma -= abs(val)
             elif result == 66:
                 self.stat[-1] += 1
                 yield from client.send_message(channel,lang["66"],tts=True)
-                self.charset('kar',2)
-                self.karma += 2
+                val = 2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma += val
             else:
                 if self.karma >= 5:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.esprit+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["esprit"],str(result),str(dice),"-",str(kar),str(self.esprit+modifier)))
@@ -386,22 +439,58 @@ class Character:
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.esprit+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["esprit"],str(result),str(dice),"+",str(kar),str(self.esprit+modifier)))
@@ -410,12 +499,30 @@ class Character:
                     elif result == 66: self.stat[-1] += 1
                     elif result >= 91:
                         self.stat[-2] += 1
-                        self.charset('kar',1)
-                        self.karma += 1
+                        val = 1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     elif result <= 10:
                         self.stat[2] += 1
-                        self.charset('kar',-1)
-                        self.karma -= 1
+                        val = -1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result <= self.esprit+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
                     yield from client.send_message(channel,lang["result_test"].format(lang["esprit"],str(result),str(self.esprit+modifier)))
@@ -434,35 +541,89 @@ class Character:
             if result == 42:
                 self.stat[1] += 1
                 yield from client.send_message(channel,lang["42"],tts=True)
-                self.charset('kar',-2)
-                self.karma -= 2
+                val = -2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma -= abs(val)
             elif result == 66:
                 self.stat[-1] += 1
                 yield from client.send_message(channel,lang["66"],tts=True)
-                self.charset('kar',2)
-                self.karma += 2
+                val = 2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma += val
             else:
                 if self.karma >= 5:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.charisme+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["charisme"],str(result),str(dice),"-",str(kar),str(self.charisme+modifier)))
@@ -471,22 +632,58 @@ class Character:
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.charisme+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["charisme"],str(result),str(dice),"+",str(kar),str(self.charisme+modifier)))
@@ -495,12 +692,30 @@ class Character:
                     elif result == 66: self.stat[-1] += 1
                     elif result >= 91:
                         self.stat[-2] += 1
-                        self.charset('kar',1)
-                        self.karma += 1
+                        val = 1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     elif result <= 10:
                         self.stat[2] += 1
-                        self.charset('kar',-1)
-                        self.karma -= 1
+                        val = -1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result <= self.charisme+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
                     yield from client.send_message(channel,lang["result_test"].format(lang["charisme"],str(result),str(self.charisme+modifier)))
@@ -519,35 +734,89 @@ class Character:
             if result == 42:
                 self.stat[1] += 1
                 yield from client.send_message(channel,lang["42"],tts=True)
-                self.charset('kar',-2)
-                self.karma -= 2
+                val = -2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma -= abs(val)
             elif result == 66:
                 self.stat[-1] += 1
                 yield from client.send_message(channel,lang["66"],tts=True)
-                self.charset('kar',2)
-                self.karma += 2
+                val = 2
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma += val
             else:
                 if self.karma >= 5:
                     result -= kar
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.furtivite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"-",str(kar),str(self.furtivite+modifier)))
@@ -556,22 +825,58 @@ class Character:
                     if result == 42:
                         self.stat[1] += 1
                         yield from client.send_message(channel,lang["42"],tts=True)
-                        self.charset('kar',-2)
-                        self.karma -= 2
+                        val = -2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result == 66:
                         self.stat[-1] += 1
                         yield from client.send_message(channel,lang["66"],tts=True)
-                        self.charset('kar',2)
-                        self.karma += 2
+                        val = 2
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     else:
                         if result >= 91:
                             self.stat[-2] += 1
-                            self.charset('kar',1)
-                            self.karma += 1
+                            val = 1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma += val
                         elif result <= 10:
                             self.stat[2] += 1
-                            self.charset('kar',-1)
-                            self.karma -= 1
+                            val = -1
+                            if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                            if Skill.isskillin(self.skills,84): #creature harmonieuse
+                                if self.karma == 0 and val < 0: val -= 5
+                                elif self.karma == 0 and val > 0: val +=5
+                                elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                                elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                            if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                            if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                            self.charset('kar',val)
+                            self.karma -= abs(val)
                         elif result <= self.furtivite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"+",str(kar),str(self.furtivite+modifier)))
@@ -580,12 +885,30 @@ class Character:
                     elif result == 66: self.stat[-1] += 1
                     elif result >= 91:
                         self.stat[-2] += 1
-                        self.charset('kar',1)
-                        self.karma += 1
+                        val = 1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma += val
                     elif result <= 10:
                         self.stat[2] += 1
-                        self.charset('kar',-1)
-                        self.karma -= 1
+                        val = -1
+                        if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                        if Skill.isskillin(self.skills,84): #creature harmonieuse
+                            if self.karma == 0 and val < 0: val -= 5
+                            elif self.karma == 0 and val > 0: val +=5
+                            elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                            elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                        if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                        if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                        self.charset('kar',val)
+                        self.karma -= abs(val)
                     elif result <= self.furtivite+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
                     yield from client.send_message(channel,lang["result_test"].format(lang["agilite"],str(result),str(self.furtivite+modifier)))
@@ -615,12 +938,30 @@ class Character:
             elif resultm == 5: yield from client.send_message(channel,lang["malchance_5"])
             elif resultm == 6: yield from client.send_message(channel,lang["malchance_6"])
             if resultc < resultm:
-                self.charset('kar',1)
-                self.karma += 1
+                val = 1
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma += val
                 if self.karma > 10: self.karma = 10
             else:
-                self.charset('kar',-1)
-                self.karma -= 1
+                val = -1
+                if Skill.isskillin(self.skills,7): val *= 2 #chanceux
+                if Skill.isskillin(self.skills,84): #creature harmonieuse
+                    if self.karma == 0 and val < 0: val -= 5
+                    elif self.karma == 0 and val > 0: val +=5
+                    elif self.karma+val > -5 and self.karma+val < 5 and val < 0: val -= 9
+                    elif self.karma+val > -5 and self.karma+val < 5 and val > 0: val += 9
+                if self.karma+val < -10: val=-10-self.karma#char.karma = -10
+                if self.karma+val > 10: val=10-self.karma#char.karma = 10
+                self.charset('kar',val)
+                self.karma -= abs(val)
                 if self.karma < -10: self.karma = -10
             if resultc == resultm:
                 yield from client.send_message(channel,lang["superchance"])
@@ -654,6 +995,21 @@ class Character:
         db.close()
         del(self.pet[key])
         return True
+
+    def assign_skill(self,sk):
+        for i in self.skills:
+            if sk.ID == i.ID: return False
+        db = Database()
+        db.call("assign_skill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idskill=sk.ID)
+        db.close()
+        self.skills.append(sk)
+        return True
+
+    def kill(self):
+        self.dead = True
+        db = Database()
+        db.call("kill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
+        db.close()
 
 class Pet:
     def __init__(self,dic={"petkey":"","charkey":"","name":"","espece":"Unknown","PVm":1,"PMm":0,"force":50,"esprit":50,"charisme":50,"agilite":50,"karma":0,"stat":[0,0,0,0,0,0,0],"mod":0,"PV":1,"PM":0,"default_mod":0,"instinct":3,"lvl":1}):

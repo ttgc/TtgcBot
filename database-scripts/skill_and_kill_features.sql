@@ -23,32 +23,32 @@
 -- ALTER TABLE public.Deadcharacterr ADD CONSTRAINT FK_deadchar_id_inventory FOREIGN KEY (id_inventory) REFERENCES public.Inventaire(id_inventory);
 
 CREATE TABLE public.Skills(
-	id_skill							SERIAL	,
-	nom 									VARCHAR (30) CONSTRAINT skills_nom_null NOT NULL	,
-	description						VARCHAR (200) CONSTRAINT skills_descr_null NOT NULL	,
-	origine								VARCHAR (50) CONSTRAINT skills_origin_null NOT NULL	,
-	webclass							VARCHAR (50)	,
+	id_skill							 SERIAL	,
+	nom 									 VARCHAR (30) CONSTRAINT skills_nom_null NOT NULL	,
+	description						 VARCHAR (200) CONSTRAINT skills_descr_null NOT NULL	,
+	origine								 VARCHAR (50) CONSTRAINT skills_origin_null NOT NULL	,
+	webclass							 VARCHAR (50)	,
 	CONSTRAINT prk_constraint_skills PRIMARY KEY (id_skill)
 )WITHOUT OIDS;
 
 CREATE TABLE public.Race(
-	id_race								SERIAL	,
-	nom 									VARCHAR (25) CONSTRAINT race_nom_null NOT NULL	,
+	id_race								 SERIAL	,
+	nom 									 VARCHAR (25) CONSTRAINT race_nom_null NOT NULL	,
 	CONSTRAINT prk_constraint_race PRIMARY KEY (id_race)
 )WITHOUT OIDS;
 
 CREATE TABLE public.Classe(
-	id_classe							SERIAL	,
-	id_race								INT CONSTRAINT classe_race_null NOT NULL	,
-	nom 									VARCHAR (25) CONSTRAINT classe_nom_null NOT NULL	,
+	id_classe							 SERIAL	,
+	id_race								 INT CONSTRAINT classe_race_null NOT NULL	,
+	nom 									 VARCHAR (25) CONSTRAINT classe_nom_null NOT NULL	,
 	CONSTRAINT prk_constraint_classe PRIMARY KEY (id_classe)
 )WITHOUT OIDS;
 
 CREATE TABLE public.havingskill(
-	charkey              VARCHAR (25) CONSTRAINT character_charkey_null NOT NULL ,
-	id_server            VARCHAR (25)  ,
-	id_channel           VARCHAR (25)  ,
-	id_skill						 INT	,
+	charkey               VARCHAR (25) CONSTRAINT character_charkey_null NOT NULL ,
+	id_server             VARCHAR (25)  ,
+	id_channel            VARCHAR (25)  ,
+	id_skill				 		 INT	,
 	CONSTRAINT prk_constraint_havingskill PRIMARY KEY (charkey,id_server,id_channel,id_skill)
 )WITHOUT OIDS;
 
@@ -64,7 +64,7 @@ INSERT INTO Classe(id_race,nom) VALUES
 (1,'Soldat'), (1,'Voleur'), (1, 'Mage'),
 (2,'Elementaire'), (2,'Haut elementaire'),
 (3,'Senshi'),(3,'Mahoutsukai'),
-(4,'Mage'),(4,'Executrice'),(4,'Succube libre'),
+(4,'Succube Mage'),(4,'Executrice'),(4,'Succube libre'),
 (5,'Magical enchanteresse'),(5,'Magical guerriere'),
 (6,'Gardien'),
 (7,'Nekonya'),(7,'Inuwan'),(7,'Okamiuooon'),(7,'Kitsunekon'),(7,'Toripi'),(7,'Umahin'),(7,'Hebishuru'),(7,'Sakanakari'),(7,'Usagipyon'),(7,'Doragondraa'),

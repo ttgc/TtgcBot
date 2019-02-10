@@ -497,6 +497,12 @@ def on_message(message):
     if command_check(prefix,message,'setkarma',['addkarma','getkarma']) and chanMJ:
         char = jdr.get_character(message.content.split(" ")[1])
         val = int((message.content).split(" ")[2])#replace(prefix+'setkarma ',""))
+        if Skill.isskillin(char.skills,7): val *= 2 #chanceux
+        if Skill.isskillin(char.skills,84): #creature harmonieuse
+            if char.karma == 0 and val < 0: val -= 5
+            elif char.karma == 0 and val > 0: val +=5
+            elif char.karma+val > -5 and char.karma+val < 5 and val < 0: val -= 9
+            elif char.karma+val > -5 and char.karma+val < 5 and val > 0: val += 9
         if char.karma+val < -10: val=-10-char.karma#char.karma = -10
         if char.karma+val > 10: val=10-char.karma#char.karma = 10
         char = char.charset('kar',val)

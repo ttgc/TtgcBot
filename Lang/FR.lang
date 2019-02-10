@@ -2,7 +2,7 @@
 blacklisted=Je suis desole mais {} est actuellement blackliste pour la raison suivante :\n```\n{}\n```
 contentbanned=Votre message contenait des mots-cle interdit et a donc ete supprime
 setprefix=Changement du prefixe en : {}
-rollindep=Vous avez obtenu : `{}` ({})
+rollindep=Vous avez obtenu : `{} -> {}`
 charcreate_existing=Ce personnage existe deja !
 charcreate=Creation d'un nouveau personnage appele : {}
 chardelete_confirm=Veuillez confirmer la suppression du personnage `{}` en tappant `confirm`\nCeci ne pourra pas etre annule

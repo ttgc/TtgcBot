@@ -326,7 +326,7 @@ CREATE OR REPLACE FUNCTION get_skill
 ) RETURNS SETOF skills AS $$
 BEGIN
 	RETURN QUERY
-	SELECT id_skill,nom,description,origine,webclass FROM skills
+	SELECT skills.id_skill,nom,description,origine,webclass FROM skills
 	INNER JOIN havingskill ON (skills.id_skill = havingskill.id_skill)
 	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 END;

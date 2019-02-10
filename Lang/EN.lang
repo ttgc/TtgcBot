@@ -2,7 +2,7 @@
 blacklisted=I'm sorry but {} is currently blacklisted for :\n```\n{}\n```
 contentbanned=Your message contain some banned content on this server, so it was deleted
 setprefix=Changing command prefix into : {}
-rollindep=You rolled : `{}` ({})
+rollindep=You rolled : `{} -> {}`
 charcreate_existing=This character already exists !
 charcreate=Creating new character called : {}
 chardelete_confirm=Please confirm that you want to delete `{}` by typing `confirm`\nthis cannot be undone !

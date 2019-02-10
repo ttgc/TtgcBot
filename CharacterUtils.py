@@ -161,6 +161,12 @@ class Skill:
         return ls
     skillsearch = staticmethod(skillsearch)
 
+    def isskillin(ls,skid):
+        for i in ls:
+            if i.ID == skid: return True
+        return False
+    isskillin = staticmethod(isskillin)
+
 def retrieveCharacterOrigins(cl):
     db = Database()
     cur = db.execute("SELECT classe.nom,race.nom FROM classe INNER JOIN race ON classe.id_race = race.id_race WHERE id_classe = %(ID)s",ID=cl)

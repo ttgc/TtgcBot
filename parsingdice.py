@@ -80,5 +80,4 @@ class ParseRoll:
                     exec("nbr[k]=nbr[k]{}nbr[k+1]".format(i))
                     nbr.pop(k+1)
                     operation.pop(k)
-        print(nbr)
         return str(nbr[0])

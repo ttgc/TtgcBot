@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from DatabaseManager import *
-from BotTools import DBJDR
+#from BotTools import DBJDR
 
 class Item:
     def __init__(self,name,descr,weight):
@@ -154,16 +154,16 @@ class Skill:
         if rows is None:
             db.close(True)
             return []
-        db.close()
         ls = []
         for i in rows:
             ls.append(Skill(i[0]))
+        db.close()
         return ls
     skillsearch = staticmethod(skillsearch)
 
 def retrieveCharacterOrigins(cl):
     db = Database()
-    cur = db.execute("SELECT classe.nom,race.nom FROM classe INNER JOIN classe.id_race = race.id_race WHERE id_classe = %(ID)d",ID=cl)
+    cur = db.execute("SELECT classe.nom,race.nom FROM classe INNER JOIN race ON classe.id_race = race.id_race WHERE id_classe = %(ID)s",ID=cl)
     if cur is None:
         db.close(True)
         raise DatabaseException("Class ID not found")

@@ -36,6 +36,7 @@ class LogSystem:
         self.directory = ""
 
     def clean(self):
+        if not os.access(self.directory,os.F_OK): os.mkdir(self.directory)
         if len(os.listdir(self.directory)) >= self.limit:
             ls = os.listdir(self.directory)
             fdel = ls[0]

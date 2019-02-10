@@ -201,3 +201,6 @@ killed=Le personnage `{}` est definitivement mort !
 dead_players=Le(s) personnage(s) suivant sont en danger de mort :
 skillsearch=Resultat de votre recherche :
 assign_skill=La competence `{}` a ete assignee a `{}` avec succes
+userblock=Les utilisateurs ayant le modele suivant dans leur pseudo seront bannis automatiquement en rejoignant votre serveur : `{}`
+userunblock=Les utilisateurs ayant le modele suivant dans leur pseudo ne seront plus bannis en rejoignant votre serveur : `{}`
+userunblock_notexist=Le modele d'utilisateur suivant n'existe pas : `{}`

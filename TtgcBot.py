@@ -26,7 +26,7 @@ from logfile import *
 from parsingdice import *
 import logging
 import time
-from EventManager import *
+#from EventManager import *
 from VocalUtilities import *
 from Character import *
 from CharacterUtils import *
@@ -540,7 +540,7 @@ def on_message(message):
     if command_check(prefix,message,'charinfo',['characterinfo']) and jdrchannel:
         if char.mod == 0: modd = lang["offensive"]
         else: modd = lang["defensive"]
-        embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        embd = discord.Embed(title=char.name,description="{} {}".format(char.race,char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
@@ -1033,7 +1033,7 @@ def on_message(message):
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         for i in ls:
-            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description,inline=True)
+            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'skillassign',['skassign']) and chanMJ:
         args = get_args(prefix,message,'skillassign',['skassign']).split(" ")
@@ -1048,7 +1048,7 @@ def on_message(message):
         if command_check(prefix,message,'mjcharinfo',['MJcharinfo','mjcharacterinfo','MJcharacterinfo']):
             if char.mod == 0: modd = lang["offensive"]
             else: modd = lang["defensive"]
-            embd = discord.Embed(title=char.name,description=char.lore,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+            embd = discord.Embed(title=char.name,description="{} {}".format(char.race,char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")

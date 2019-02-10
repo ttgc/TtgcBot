@@ -166,13 +166,13 @@ class DBServer:
         if cur is None:
             db.close(True)
             raise DatabaseException("Unable to unblock username")
-        usrid = cur.fetchone()
+        usrid = cur.fetchone()[0]
         if usrid is None:
             db.close(True)
             return False
         db.close()
         db = Database()
-        db.call("userunblock",id=userid)
+        db.call("userunblock",id=usrid)
         db.close()
         return True
 

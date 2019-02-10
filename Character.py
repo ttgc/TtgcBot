@@ -22,7 +22,8 @@ import asyncio
 from random import randint,choice
 from converter import *
 from DatabaseManager import *
-from BotTools import DBJDR
+#from BotTools import DBJDR
+#import BotTools as bt
 from CharacterUtils import *
 
 class Character:

@@ -290,8 +290,9 @@ def on_message(message):
             yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
     if command_check(prefix,message,'charcreate',['createchar']) and chanMJ:#message.content.startswith(prefix+'charcreate') and chanMJ:
         args = get_args(prefix,message,'charcreate',['createchar']).split(" ")#(message.content).replace(prefix+'charcreate ',"")
-        name = args[1]
-        classe = retrieveClassID(args[0].replace("_"," "))
+        name = args[2]
+        race = retrieveRaceID(args[0].replace("_"," "))
+        classe = retrieveClassID(race,args[1].replace("_"," "))
         if name in charbase:
             yield from client.send_message(message.channel,lang["charcreate_existing"])
             return

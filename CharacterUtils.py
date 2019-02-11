@@ -177,12 +177,22 @@ def retrieveCharacterOrigins(cl):
     db.close()
     return row[1],row[0]
 
-def retrieveClassID(clname):
+def retrieveClassID(rcid,clname):
     db = Database()
-    cur = db.execute("SELECT id_classe FROM classe WHERE lower(nom) = %(name)s",name=clname.lower())
+    cur = db.execute("SELECT id_classe FROM classe WHERE lower(nom) = %(name)s AND id_race = %(rc)s",name=clname.lower(),rc=rcid)
     if cur is None:
         db.close(True)
         raise DatabaseException("Class Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row
+
+def retrieveRaceID(rcname):
+    db = Database()
+    cur = db.execute("SELECT id_race FROM race WHERE lower(nom) = %(name)s",name=rcname.lower())
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Race Name not found")
     row = cur.fetchone()
     db.close()
     return row

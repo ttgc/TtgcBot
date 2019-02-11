@@ -296,6 +296,9 @@ Aliases : `petgetpm`, `petgetMP`, `petgetmp`, `petPM`, `petpm`, `petMP`, `petmp`
 - `/kill <player>` (MJ only and JDR channel only) <br/>
 Kill definitively a character, this will unlink it from its owner and the character wont be playable anymore <br/>
 Aliases : `characterkill`, `charkill`
+- `/skill` (PJ only) <br/>
+Show the list of skills of your character <br/>
+Aliases : `sk`, `charskill`, `charsk`
 - `/skillinfo <query>` (JDR channel only) <br/>
 Search skills in the database with their names. To give many skill name in the query parameter, give them separated with `|` <br/>
 Aliases : `skinfo`

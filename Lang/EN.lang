@@ -204,3 +204,4 @@ assign_skill=The skill `{}` has been assigned to the character `{}` successfuly
 userblock=The following template of user will now be banned automaticaly on joining your server : `{}`
 userunblock=The following template of user wont be banned anymore on joining your server : `{}`
 userunblock_notexist=The template `{}` does not exist
+sklist=Skill list

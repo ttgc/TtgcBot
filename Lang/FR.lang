@@ -204,3 +204,4 @@ assign_skill=La competence `{}` a ete assignee a `{}` avec succes
 userblock=Les utilisateurs ayant le modele suivant dans leur pseudo seront bannis automatiquement en rejoignant votre serveur : `{}`
 userunblock=Les utilisateurs ayant le modele suivant dans leur pseudo ne seront plus bannis en rejoignant votre serveur : `{}`
 userunblock_notexist=Le modele d'utilisateur suivant n'existe pas : `{}`
+sklist=Liste des competences de bases

@@ -1042,6 +1042,14 @@ def on_message(message):
         for i in ls:
             embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
         yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'skill',['sk','charskill','charsk']) and jdrchannel:
+        embd = discord.Embed(title=char.name,description=lang["sklist"],colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in char.skills:
+            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'skillassign',['skassign']) and chanMJ:
         args = get_args(prefix,message,'skillassign',['skassign']).split(" ")
         char = jdr.get_character(args[0])

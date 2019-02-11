@@ -162,8 +162,8 @@ Delete the finalize field given <br/>
 Aliases : `deletefinalizer`
 - `/finalize` (MJ only and JDR channel only) <br/>
 This command will start the finalizing operation displaying credits with some random informations of your game and also your own finalize fields. After that, the JDR will be fully deleted from the database.
-- `/charcreate <class> <namekey>` (MJ only and JDR channel only) <br/>
-Create a new character with the given class and referenced by the namekey given. The class is the exact name of the class (french names), go to the website to know all existing classes. Use `_` instead of space character for class name. The namekey is not the same things as the name of the character, the namekey is just the unique identifier of the character and will be needed each time you will want to perform commands on this character <br/>
+- `/charcreate <race> <class> <namekey>` (MJ only and JDR channel only) <br/>
+Create a new character with the given race and class and referenced by the namekey given. The race and class is the exact name of the race and class (french names), go to the website to know all existing classes. Use `_` instead of space character for race and class name. The namekey is not the same things as the name of the character, the namekey is just the unique identifier of the character and will be needed each time you will want to perform commands on this character <br/>
 Aliases : `createchar`
 - `/chardelete <namekey>` (MJ only and JDR channel only) <br/>
 Delete a character (this cannot be undone once performed) <br/>

@@ -205,3 +205,4 @@ userblock=The following template of user will now be banned automaticaly on join
 userunblock=The following template of user wont be banned anymore on joining your server : `{}`
 userunblock_notexist=The template `{}` does not exist
 sklist=Skill list
+unknown_class=This Race or Class does not exist

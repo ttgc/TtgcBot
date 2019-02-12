@@ -205,3 +205,4 @@ userblock=Les utilisateurs ayant le modele suivant dans leur pseudo seront banni
 userunblock=Les utilisateurs ayant le modele suivant dans leur pseudo ne seront plus bannis en rejoignant votre serveur : `{}`
 userunblock_notexist=Le modele d'utilisateur suivant n'existe pas : `{}`
 sklist=Liste des competences de bases
+unknown_class=La race ou la classe saisie n'existe pas

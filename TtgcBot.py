@@ -293,6 +293,9 @@ def on_message(message):
         name = args[2]
         race = retrieveRaceID(args[0].replace("_"," "))
         classe = retrieveClassID(race,args[1].replace("_"," "))
+        if (race is None or classe is None):
+            yield from client.send_message(message.channel,lang["unknown_class"])
+            return
         if name in charbase:
             yield from client.send_message(message.channel,lang["charcreate_existing"])
             return

@@ -64,7 +64,7 @@ INSERT INTO Classe(id_race,nom) VALUES
 (1,'Soldat'), (1,'Voleur'), (1, 'Mage'),
 (2,'Elementaire'), (2,'Haut elementaire'),
 (3,'Senshi'),(3,'Mahoutsukai'),
-(4,'Succube Mage'),(4,'Executrice'),(4,'Succube libre'),
+(4,'Mage'),(4,'Executrice'),(4,'Succube libre'),
 (5,'Magical enchanteresse'),(5,'Magical guerriere'),
 (6,'Gardien'),
 (7,'Nekonya'),(7,'Inuwan'),(7,'Okamiuooon'),(7,'Kitsunekon'),(7,'Toripi'),(7,'Umahin'),(7,'Hebishuru'),(7,'Sakanakari'),(7,'Usagipyon'),(7,'Doragondraa'),

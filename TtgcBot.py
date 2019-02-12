@@ -290,8 +290,12 @@ def on_message(message):
             yield from client.send_message(message.channel,lang["is_dead"].format(char.name))
     if command_check(prefix,message,'charcreate',['createchar']) and chanMJ:#message.content.startswith(prefix+'charcreate') and chanMJ:
         args = get_args(prefix,message,'charcreate',['createchar']).split(" ")#(message.content).replace(prefix+'charcreate ',"")
-        name = args[1]
-        classe = retrieveClassID(args[0].replace("_"," "))
+        name = args[2]
+        race = retrieveRaceID(args[0].replace("_"," "))
+        classe = retrieveClassID(race,args[1].replace("_"," "))
+        if (race is None or classe is None):
+            yield from client.send_message(message.channel,lang["unknown_class"])
+            return
         if name in charbase:
             yield from client.send_message(message.channel,lang["charcreate_existing"])
             return
@@ -1039,6 +1043,14 @@ def on_message(message):
         embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         for i in ls:
+            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+        yield from client.send_message(message.channel,embed=embd)
+    if command_check(prefix,message,'skill',['sk','charskill','charsk']) and jdrchannel:
+        embd = discord.Embed(title=char.name,description=lang["sklist"],colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in char.skills:
             embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
         yield from client.send_message(message.channel,embed=embd)
     if command_check(prefix,message,'skillassign',['skassign']) and chanMJ:

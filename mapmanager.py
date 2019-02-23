@@ -54,7 +54,7 @@ class Token:
         self.z += dz
         return abs(dx)+abs(dy)+abs(dz)
 
-    def spawnAreaEffect(self,dx,dy,dz,shape,**shapeParameter):
+    def spawnAreaEffect(self,dx,dy,dz,shape,shapeParameter):
         initpoint = (self.x+dx,self.y+dy,self.z+dz)
         area = []
         if shape == Shape.CIRCLE or shape == Shape.SPHERE:

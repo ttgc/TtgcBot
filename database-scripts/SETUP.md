@@ -6,3 +6,5 @@ First Create the Database, then Run the SQL script in the following order :
 4. lang_features.sql
 5. userblock_features.sql
 6. skill_and_kill_features.sql
+7. map.sql
+8. swap.sql

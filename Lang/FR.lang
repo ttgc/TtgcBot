@@ -206,3 +206,5 @@ userunblock=Les utilisateurs ayant le modele suivant dans leur pseudo ne seront 
 userunblock_notexist=Le modele d'utilisateur suivant n'existe pas : `{}`
 sklist=Liste des competences de bases
 unknown_class=La race ou la classe saisie n'existe pas
+charselect=Changement de personnage : `{}` :arrow_right: `{}`
+charnotexist=Le personnage `{}` n'existe pas

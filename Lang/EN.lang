@@ -206,3 +206,5 @@ userunblock=The following template of user wont be banned anymore on joining you
 userunblock_notexist=The template `{}` does not exist
 sklist=Skill list
 unknown_class=This Race or Class does not exist
+charselect=Switched character : `{}` :arrow_right: `{}`
+charnotexist=The character `{}` does not exist

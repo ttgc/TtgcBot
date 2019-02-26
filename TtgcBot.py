@@ -228,10 +228,11 @@ def on_message(message):
         jdr = srv.getJDR(message.channel.id)
         charbase_exist = True
         charbase = jdr.get_charbase()
+        member_charbase = []
         for i in charbase:
             if i.linked == str(message.author.id):
-                char = i
-                break
+                member_charbase.append(i)
+                if i.selected: char = i
     #get vocal
     vocal = vocalcore.getvocal(str(message.server.id))
 
@@ -324,6 +325,8 @@ def on_message(message):
             character = jdr.get_character(get_args(prefix,message,'unlink',['charunlink']))
             character.unlink()
             yield from client.send_message(message.channel,lang["charunlink"].format(character.name))
+    if command_check(prefix,message,'charselect'):
+        char.select()
     if command_check(prefix,message,'charset name',['charsetname','charset PV','charsetpv','charsetPV','charset pv','charset PM','charsetpm','charsetPM','charset pm',
                                                                          'charset force','charset strength','charset str','charsetstr','charset esprit','charset spirit','charset spr','charsetspr',
                                                                          'charset charisme','charset charisma','charset cha','charsetcha','charset agilite','charset furtivite','charset agi',

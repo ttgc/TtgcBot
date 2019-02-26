@@ -28,7 +28,7 @@ from CharacterUtils import *
 
 class Character:
     """Character class"""
-    def __init__(self,dic={"charkey":"","name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100,"lvl":1,"linked":None,"inventory":Inventory(),"pet":{},"skills":[],"dead":False,"classe":1}):
+    def __init__(self,dic={"charkey":"","name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100,"lvl":1,"linked":None,"selected":False,"inventory":Inventory(),"pet":{},"skills":[],"dead":False,"classe":1}):
         self.key = dic["charkey"]
         self.name = dic["name"]
         self.lore = dic["lore"]
@@ -54,6 +54,7 @@ class Character:
         self.lvl = dic["lvl"]
         self.linked = dic["linked"]
         if self.linked.upper() == "NULL": self.linked = None
+        self.selected = dic["selected"]
         self.inventory = dic["inventory"]
         self.pet = dic["pet"]
         self.skills = dic["skills"]
@@ -121,6 +122,13 @@ class Character:
         db.call("charunlink",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
         self.linked = None
+
+    def select(self):
+        if self.linked is None: return
+        db = Database()
+        db.call("charselect",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idmemb=self.linked)
+        db.close()
+        self.selected = True
 
     def lvlup(self):
         db = Database()

@@ -18,6 +18,9 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from enum import Enum
+from PIL import Image,ImageDraw
+from DatabaseManager import *
+import io,asyncio
 
 class Shape(Enum):
     """
@@ -144,3 +147,81 @@ class Token:
                         area.append((x,y,z))
                         curline += 1
         return area
+
+class Map:
+    colorscale = [(255,0,0,128)
+        ]
+
+    def __init__(self,cols,rows):
+        self.cols = cols
+        self.rows = rows
+        self.scale = 32
+        self.width = cols*self.scale
+        self.height= rows*self.scale
+        self.img = Image.new('RGBA',(self.width,self.height))
+
+    @asyncio.coroutine
+    def send(self,cli,chan):
+        db = Database()
+        cur = db.call("getmap",idserv=str(chan.server.id),idchan=str(chan.id))
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("There is no JDR in this channel")
+        token = []
+        for i in cur:
+            token.append(Token(i[2],i[3],i[4],i[5]))
+        db.close()
+        db = Database()
+        cur = db.call("getmapeffect",idserv=str(chan.server.id),idchan=str(chan.id))
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("There is no JDR in this channel")
+        effect = []
+        for i in cur:
+            effect.append(i)
+        db.close()
+
+        drawer = ImageDraw.Draw(self.img)
+        colorindex = 0
+        for i in effect:
+            tk = None
+            for k in token:
+                if k.name == i[3]:
+                    tk = k
+                    break
+            color = Map.colorscale[colorindex]
+            colorindex += 1
+            for k in tk.spawnAreaEffect(i[5],i[6],i[7],i[4],reformatAreaParameters(i[8])):
+                drawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1])*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
+        for i in token:
+            drawer.text([(i.x*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[0]//2),(i.y*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[1]//2),i.name[:3],fill="#000000")
+        for x in range(0,(self.cols+1)*self.scale,self.scale):
+            for y in range(0,(self.rows+1)*self.scale,self.scale):
+                drawer.line([x,0,x,self.rows*self.scale],fill="#000000")
+                drawer.line([0,y,self.cols*self.scale,y],fill="#000000")
+        bytes = io.BytesIO()
+        self.img.save(bytes,'PNG')
+        bytes.seek(0)
+        yield from cli.send_file(chan,bytes)
+        bytes.close()
+
+def reformatAreaParameters(src):
+    dic = {}
+    src = src.replace("{","")
+    src = src.replace("}","")
+    src = src.replace(" ","")
+    if "lengths" in src:
+        tmp = src[src.find("[")+1:src.find("]")]
+        tmp = tmp.replace(",",";")
+        src = src.replace(src[src.find("["):src.find("]")+1],tmp)
+    ls = src.split(",")
+    for i in ls:
+        tags = i.split(":","")
+        if tags[0] == "lengths":
+            interntags = tags[1].split(";")
+            internls = []
+            for k in interntags: internls.append(int(k))
+            dic[tags[0]] = internls
+        else:
+            dic[tags[0]] = int(tags[1])
+    return dic

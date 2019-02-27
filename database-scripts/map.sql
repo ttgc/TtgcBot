@@ -171,10 +171,10 @@ CREATE OR REPLACE FUNCTION getmapeffect
 (
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE
-) RETURNS SETOF Maptoken AS $$
+) RETURNS SETOF Tokenarea AS $$
 BEGIN
   RETURN QUERY
-  SELECT * FROM Maptoken
+  SELECT * FROM Tokenarea
   WHERE id_server = idserv AND id_channel = idchan;
 END;
 $$ LANGUAGE plpgsql;

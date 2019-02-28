@@ -45,17 +45,63 @@ class Shape(Enum):
     CONIC = 5
 
 class Token:
-    def __init__(self,name,x=0,y=0,z=0):
+    def __init__(self,name,servid,chanid,x=0,y=0,z=0):
         self.name = name
+        self.server = servid
+        self.channel = chanid
         self.x = x
         self.y = y
         self.z = z
 
-    def move(self,dx,dy,dz=0):
-        self.x += dx
-        self.y += dy
-        self.z += dz
-        return abs(dx)+abs(dy)+abs(dz)
+    def load(name,servid,chanid):
+        db = Database()
+        db.call("getmaptoken",idserv=servid,idchan=chanid,tkname=name)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("This token does not exist !")
+        tk = cur.fetchone()
+        db.close()
+        return Token(i[2],i[0],i[1],i[3],i[4],i[5])
+    load = staticmethod(load)
+
+    def save(self):
+        result = False
+        try: Token.load(self.name)
+        except:
+            db = Database()
+            db.call("addtoken",idserv=self.server,idchan=self.channel,tkname=self.name,tkx=self.x,tky=self.y,tkz=self.z)
+            db.close()
+            result = True
+        return result
+
+    def remove(self):
+        db = Database()
+        db.call("rmtoken",idserv=self.server,idchan=self.channel,tkname=self.name)
+        db.close()
+
+    def move(self,dx_,dy_,dz_=0):
+        self.x += dx_
+        self.y += dy_
+        self.z += dz_
+        db = Database()
+        db.call("movetoken",idserv=self.server,idchan=self.channel,tkname=self.name,dx=dx_,dy=dy_,dz=dz_)
+        db.close()
+        return abs(dx_)+abs(dy_)+abs(dz_)
+
+    def registerEffect(self,dx,dy,dz,shape,shapeParameter):
+        db = Database()
+        cur = db.call("addeffect",idserv=self.server,idchan=self.channel,tkname=self.name,effshape=shape,effdx=dx,effdy=dy,effdz=dz,effparameters=str(shapeParameter))
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("Cannot register the effect")
+        result = cur.fetchone()
+        db.close()
+        return result
+
+    def cleareffect(self):
+        db = Database()
+        db.call("cleareffect",idserv=self.server,idchan=self.channel,tkname=self.name)
+        db.close()
 
     def spawnAreaEffect(self,dx,dy,dz,shape,shapeParameter):
         initpoint = (self.x+dx,self.y+dy,self.z+dz)
@@ -109,7 +155,6 @@ class Token:
                         for z in range(initpoint[2],initpoint[2]+height):
                             area.append((x,y,z))
         elif shape == Shape.CONIC:
-            #not finished
             ori = shapeParameter.get('orientation',0)
             length = len(shapeParameter['lengths'])
             lines = shapeParameter['lengths']
@@ -152,27 +197,35 @@ class Map:
     colorscale = [(255,0,0,128)
         ]
 
-    def __init__(self,cols,rows):
+    def __init__(self,cols,rows,servid,chanid):
         self.cols = cols
         self.rows = rows
         self.scale = 32
         self.width = cols*self.scale
         self.height= rows*self.scale
         self.img = Image.new('RGBA',(self.width,self.height))
+        self.server = servid
+        self.channel = chanid
+
+    def clear(servid,chanid):
+        db = Database()
+        db.call("clearmap",idserv=servid,idchan=chanid)
+        db.close()
+    clear = staticmethod(clear)
 
     @asyncio.coroutine
     def send(self,cli,chan):
         db = Database()
-        cur = db.call("getmap",idserv=str(chan.server.id),idchan=str(chan.id))
+        cur = db.call("getmap",idserv=self.server,idchan=self.channel)
         if cur is None:
             db.close(True)
             raise DatabaseException("There is no JDR in this channel")
         token = []
         for i in cur:
-            token.append(Token(i[2],i[3],i[4],i[5]))
+            token.append(Token(i[2],i[0],i[1],i[3],i[4],i[5]))
         db.close()
         db = Database()
-        cur = db.call("getmapeffect",idserv=str(chan.server.id),idchan=str(chan.id))
+        cur = db.call("getmapeffect",idserv=self.server,idchan=self.channel)
         if cur is None:
             db.close(True)
             raise DatabaseException("There is no JDR in this channel")

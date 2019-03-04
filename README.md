@@ -174,6 +174,8 @@ Aliases : `charlink`
 - `/unlink [mention]` (MJ only and JDR channel only) <br/>
 Unlink a discord account from a character, if not provided, unlink the author of the command <br/>
 Aliases : `charunlink`
+- `/charselect <charkey>` (PJ only) <br/>
+Select an other character. For selecting a character, you'll need to be linked first to this character with the `link` command. `charselect` allow you to switch from a character to an other.
 - `/charset <item> <charkey> <value>` (MJ only and JDR channel only) <br/>
 Set a property of a character to the given value. The following properties can be set with this command : <br/>
 Aliases : you can write in one word charset+item (example : `/charsetpv`)

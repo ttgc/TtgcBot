@@ -328,7 +328,7 @@ def on_message(message):
     if command_check(prefix,message,'charselect') and jdrchannel:
         key = get_args(prefix,message,'charselect')
         for i in member_charbase:
-            if i.key == key:
+            if i.key == key and i.link == str(message.author.id):
                 i.select()
                 yield from client.send_message(message.channel,lang["charselect"].format(char.key,i.key))
             else:

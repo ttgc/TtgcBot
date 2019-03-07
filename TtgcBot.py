@@ -219,7 +219,8 @@ def on_message(message):
     else:
         head = {'Authorization': "Bot "+TOKEN}
         r = requests.get("https://discordapp.com/api/v7/channels/"+str(message.channel.id),headers=head)
-        nsfw = r.json()['nsfw']
+        try: nsfw = r.json()['nsfw']
+        except: nsfw = False
     if message.channel.id == "237668457963847681": musicchannel = True
     #get charbase
     jdr = None

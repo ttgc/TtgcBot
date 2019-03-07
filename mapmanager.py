@@ -200,7 +200,7 @@ class Map:
     def __init__(self,cols,rows,servid,chanid):
         self.cols = cols
         self.rows = rows
-        self.scale = 32
+        self.scale = 64
         self.width = cols*self.scale
         self.height= rows*self.scale
         self.img = Image.new('RGBA',(self.width,self.height))

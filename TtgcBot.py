@@ -33,6 +33,7 @@ from CharacterUtils import *
 from converter import *
 from BotTools import *
 from Translator import *
+from mapmanager import *
 import os
 import zipfile
 import sys
@@ -583,10 +584,31 @@ def on_message(message):
         if not char.dead: embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
         embd.add_field(name=lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'map',[]) and chanMJ:
-        f = open("mapmonde.png","rb")
-        yield from client.send_file(message.channel,f)
-        f.close()
+    if command_check(prefix,message,'map') and chanMJ:
+        if command_check(prefix,message,'map clearall',['map clrall','map reset']):
+            Map.clear(jdr.server,jdr.channel)
+            yield from client.send_message(message.channel,lang["mapreset"])
+        elif command_check(prefix,message,'map show'):
+            dims = get_args(prefix,message,'map show')
+            mp = Map(int(dim.split(" ")[0]),int(dim.split(" ")[1]),jdr.server,jdr.channel)
+            yield from mp.send(client,message.channel)
+        elif command_check(prefix,message,'map token',['map tk']):
+            if command_check(prefix,message,'map token add',['map tk add','map token +','map tk +']):
+                tk = Token(get_args(prefix,message,'map token add',['map tk add','map token +','map tk +']),jdr.server,jdr.channel)
+                tk.save()
+                yield from client.send_message(message.channel,lang["tokenadd"].format(tk.name))
+            elif command_check(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove']):
+                tkname = get_args(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove'])
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                tk.remove()
+                yield from client.send_message(message.channel,lang["tokenrm"].format(tkname))
+        else:
+            f = open("mapmonde.png","rb")
+            yield from client.send_file(message.channel,f)
+            f.close()
     if command_check(prefix,message,'stat',['charstat','characterstat']) and jdrchannel:
         embd = discord.Embed(title=lang["stat"],description=char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")

@@ -208,3 +208,8 @@ sklist=Liste des competences de bases
 unknown_class=La race ou la classe saisie n'existe pas
 charselect=Changement de personnage : `{}` :arrow_right: `{}`
 charnotexist=Le personnage `{}` n'existe pas
+#Movement update v1.4
+mapreset=La map a ete reinitialise
+tokenadd=Le token suivant a ete ajoute a votre carte : `{}`
+token_notexist=Le token `{}` n'existe pas
+tokenrm=Le token suivant a ete supprime de votre carte : `{}`

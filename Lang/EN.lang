@@ -208,3 +208,8 @@ sklist=Skill list
 unknown_class=This Race or Class does not exist
 charselect=Switched character : `{}` :arrow_right: `{}`
 charnotexist=The character `{}` does not exist
+#Movement update v1.4
+mapreset=The map has been reset
+tokenadd=The token `{}` has been added to your map
+token_notexist=The token `{}` does not exist !
+tokenrm=The token `{}` has been removed from your map

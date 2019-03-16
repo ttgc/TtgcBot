@@ -1036,7 +1036,7 @@ def on_message(message):
             return
         val = int((message.content).split(" ")[3])#replace(prefix+'getPM ',""))
         if char.pet[pet].PM + val < 0:
-            yield from client.send_message(message.channel,lang["no_more_pm"].format(str(char.pet[pet].pm)))
+            yield from client.send_message(message.channel,lang["no_more_pm"].format(str(char.pet[pet].PM)))
             return
         else:
             if char.pet[pet].PM+val > char.pet[pet].PMmax: val=char.pet[pet].PMmax-char.pet[pet].PM#char.PM = char.PMmax

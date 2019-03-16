@@ -1375,7 +1375,7 @@ class Pet:
                             self.stat[2] += 1
                             self.petset('kar',-1)
                             self.karma -= 1
-                        elif result <= self.furtivite+modifier: self.stat[3] += 1
+                        elif result <= self.agilite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"-",str(kar),str(self.furtivite+modifier)))
                 elif self.karma <= -5:
@@ -1399,7 +1399,7 @@ class Pet:
                             self.stat[2] += 1
                             self.petset('kar',-1)
                             self.karma -= 1
-                        elif result <= self.furtivite+modifier: self.stat[3] += 1
+                        elif result <= self.agilite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
                         yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"+",str(kar),str(self.furtivite+modifier)))
                 else:
@@ -1413,7 +1413,7 @@ class Pet:
                         self.stat[2] += 1
                         self.petset('kar',-1)
                         self.karma -= 1
-                    elif result <= self.furtivite+modifier: self.stat[3] += 1
+                    elif result <= self.agilite+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
                     yield from client.send_message(channel,lang["result_test"].format(lang["agilite"],str(result),str(self.furtivite+modifier)))
     ##            if self.regenkarm[0] >= 1:

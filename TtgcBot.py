@@ -622,7 +622,7 @@ def on_message(message):
                 args = get_args(prefix,message,'map effect add',['map effect +'])
                 parameters = {}
                 if "{" in args and "}" in args:
-                    parameters = convert_str_into_dic(args[args.find("{"):args.find("}")+1])
+                    parameters = reformatAreaParameters(args[args.find("{"):args.find("}")+1])
                 args = args.split(" ")
                 while "" in args: args.remove("")
                 tkname = args[0]
@@ -630,11 +630,23 @@ def on_message(message):
                 except:
                     yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
                     return
-                try: tk.spawnAreaEffect(int(args[1]),int(args[2]),int(args[3]),"",parameters)
+                if args[4].lower() == "sphere":
+                    shape = Shape.SPHERE
+                elif args[4].lower() == "line":
+                    shape = Shape.LINE
+                elif args[4].lower() == "rect":
+                    shape = Shape.RECT
+                elif args[4].lower() == "cube":
+                    shape = Shape.CUBE
+                elif args[4].lower() == "conic":
+                    shape = Shape.CONIC
+                else:
+                    shape = Shape.CIRCLE
+                try: tk.spawnAreaEffect(int(args[1]),int(args[2]),int(args[3]),shape,parameters)
                 except:
                     yield from client.send_message(message.channel,lang["effet_parse_error"])
                     return
-                tk.registerEffect(int(args[1]),int(args[2]),int(args[3]),"",parameters)
+                tk.registerEffect(int(args[1]),int(args[2]),int(args[3]),shape,parameters)
                 yield from client.send_message(message.channel,lang["effect_register"].format(tkname))
             if command_check(prefix,message,'map effect clear'):
                 tkname = get_args(prefix,message,'map effect clear')

@@ -223,6 +223,37 @@ Give to the character the amount of money provided <br/>
 Aliases : `earnpo`, `earnPO`
 - `/map` (MJ only and JDR channel only) <br/>
 Display the world map of Terae
+- `/map show <width> <height>` (MJ only and JDR channel only) <br/>
+Show the local fight map displaying all tokens and effects registered for the current game
+- `/map clearall` (MJ only and JDR channel only) <br/>
+Clear all tokens and effects on your local fight map <br/>
+Aliases : `map clrall`, `map reset`
+- `/map token add <name>` (MJ only and JDR channel only) <br/>
+Add a token on your local fight map, a token represents an entity that can be moved and can generate area of effects (AOE). When created, the token will automatically put on the origin (0;0;0) of the map. Use token move command to move it. <br/>
+Aliases : `map tk add`, `map token +`, `map tk +`
+- `/map token remove <name>` (MJ only and JDR channel only) <br/>
+Remove a token from your local fight map <br/>
+Aliases : `map tk rm`, `map token rm`, `map tk remove`, `map token -`, `map tk -`
+- `/map token move <name> <dx> <dy> [dz]` (MJ only and JDR channel only) <br/>
+Move a token in the direction given by the vector (dx;dy;dz). If not given dz is equal to 0 <br/>
+Aliases : `map tk move`
+- `/map effect add <tkname> <dx> <dy> <dz> <shape> [parameters]` (MJ only and JDR channel only) <br/>
+Register an area of effect for a given token. shape must be one of the following : `circle`,`sphere`,`line`,`rect`,`cube`,`conic`. Each of theese shape have their own parameters, some of them have to be given for the generation. the `parameters` argument have to be put into brackets using the following format : `{rx:5,ry:3,rz:0}`. Split parameters with a `,` between them, and each parameter follow this rule : `name:value`. <br/>
+Aliases : `map effect +`<br/>
+```
+List of parameters avalaible :
+circle : r
+sphere : r
+line : length, orientation (default=0), height (default=1), thickness (default=0)
+    orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
+rect : rx, ry
+cube : rx, ry, rz
+conic : lengths, orientation (default=0)
+    lengths -> list of lengths separated with comma and put into [], the first value is the closest line from the origin and the last the farthest line from the origin (example : [1,3,5])
+    orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
+```
+- `/map effect clear <tkname>` (MJ only and JDR channel only) <br/>
+Clear all effects for the given token
 - `/apart [mention(s)]` (MJ only and JDR channel only) <br/>
 Mute and deafen all the players that are not mentionned by the command. If there is no single mention, the bot will unmute and undeafen all the players. (Spectators and MJ will not be affected by this)
 - `/lvlup <charkey>` (MJ only and JDR channel only) <br/>

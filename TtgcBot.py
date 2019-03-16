@@ -589,7 +589,7 @@ def on_message(message):
             Map.clear(jdr.server,jdr.channel)
             yield from client.send_message(message.channel,lang["mapreset"])
         elif command_check(prefix,message,'map show'):
-            dims = get_args(prefix,message,'map show')
+            dim = get_args(prefix,message,'map show')
             mp = Map(int(dim.split(" ")[0]),int(dim.split(" ")[1]),jdr.server,jdr.channel)
             yield from mp.send(client,message.channel)
         elif command_check(prefix,message,'map token',['map tk']):
@@ -597,14 +597,53 @@ def on_message(message):
                 tk = Token(get_args(prefix,message,'map token add',['map tk add','map token +','map tk +']),jdr.server,jdr.channel)
                 tk.save()
                 yield from client.send_message(message.channel,lang["tokenadd"].format(tk.name))
-            elif command_check(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove']):
-                tkname = get_args(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove'])
+            elif command_check(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove','map token -','map tk -']):
+                tkname = get_args(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove','map token -','map tk -'])
                 try: tk = Token.load(tkname,jdr.server,jdr.channel)
                 except:
                     yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
                     return
                 tk.remove()
                 yield from client.send_message(message.channel,lang["tokenrm"].format(tkname))
+            elif command_check(prefix,message,'map token move',['map tk move']):
+                args = get_args(prefix,message,'map token move',['map tk move']).split(" ")
+                while "" in args: args.remove("")
+                tkname = args[0]
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                dz = 0
+                if len(args) > 3: dz = int(args[3])
+                tk.move(int(args[1]),int(args[2]),dz)
+                yield from client.send_message(message.channel,lang["tokenmove"].format(tkname,tk.x,tk.y,tk.z))
+        elif command_check(prefix,message,'map effect'):
+            if command_check(prefix,message,'map effect add',['map effect +']):
+                args = get_args(prefix,message,'map effect add',['map effect +'])
+                parameters = {}
+                if "{" in args and "}" in args:
+                    parameters = convert_str_into_dic(args[args.find("{"):args.find("}")+1])
+                args = args.split(" ")
+                while "" in args: args.remove("")
+                tkname = args[0]
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                try: tk.spawnAreaEffect(int(args[1]),int(args[2]),int(args[3]),"",parameters)
+                except:
+                    yield from client.send_message(message.channel,lang["effet_parse_error"])
+                    return
+                tk.registerEffect(int(args[1]),int(args[2]),int(args[3]),"",parameters)
+                yield from client.send_message(message.channel,lang["effect_register"].format(tkname))
+            if command_check(prefix,message,'map effect clear'):
+                tkname = get_args(prefix,message,'map effect clear')
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                tk.cleareffect()
+                yield from client.send_message(message.channel,lang["token_clear"].format(tkname))
         else:
             f = open("mapmonde.png","rb")
             yield from client.send_file(message.channel,f)

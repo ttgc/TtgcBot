@@ -203,7 +203,7 @@ class Map:
         self.scale = 64
         self.width = cols*self.scale
         self.height= rows*self.scale
-        self.img = Image.new('RGBA',(self.width,self.height))
+        self.img = Image.new('RGBA',(self.width+1,self.height+1))
         self.server = servid
         self.channel = chanid
 
@@ -245,9 +245,9 @@ class Map:
             color = Map.colorscale[colorindex]
             colorindex += 1
             for k in tk.spawnAreaEffect(i[5],i[6],i[7],i[4],reformatAreaParameters(i[8])):
-                drawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1])*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
+                drawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
         for i in token:
-            drawer.text([(i.x*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[0]//2),(i.y*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[1]//2),i.name[:3],fill="#000000")
+            drawer.text([(i.x*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[0]//2),(i.y*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[1]//2)],i.name[:3],fill="#000000")
         for x in range(0,(self.cols+1)*self.scale,self.scale):
             for y in range(0,(self.rows+1)*self.scale,self.scale):
                 drawer.line([x,0,x,self.rows*self.scale],fill="#000000")

@@ -330,11 +330,11 @@ def on_message(message):
     if command_check(prefix,message,'charselect') and jdrchannel:
         key = get_args(prefix,message,'charselect')
         for i in member_charbase:
-            if i.key == key and i.link == str(message.author.id):
+            if i.key == key and i.linked == str(message.author.id):
                 i.select()
                 yield from client.send_message(message.channel,lang["charselect"].format(char.key,i.key))
-            else:
-                yield from client.send_message(message.channel,lang["charnotexist"].format(i.key))
+                return
+        yield from client.send_message(message.channel,lang["charnotexist"].format(key))
     if command_check(prefix,message,'charset name',['charsetname','charset PV','charsetpv','charsetPV','charset pv','charset PM','charsetpm','charsetPM','charset pm',
                                                                          'charset force','charset strength','charset str','charsetstr','charset esprit','charset spirit','charset spr','charsetspr',
                                                                          'charset charisme','charset charisma','charset cha','charsetcha','charset agilite','charset furtivite','charset agi',

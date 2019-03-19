@@ -44,6 +44,12 @@ class Shape(Enum):
     CUBE = 4
     CONIC = 5
 
+    def retrieveByID(cls,ID):
+        for i in cls:
+            if i.value == ID: return i
+        return None
+    retrieveByID=classmethod(retrieveByID)
+
 class Token:
     def __init__(self,name,servid,chanid,x=0,y=0,z=0):
         self.name = name
@@ -90,7 +96,7 @@ class Token:
 
     def registerEffect(self,dx,dy,dz,shape,shapeParameter):
         db = Database()
-        cur = db.call("addeffect",idserv=self.server,idchan=self.channel,tkname=self.name,effshape=shape,effdx=dx,effdy=dy,effdz=dz,effparameters=str(shapeParameter))
+        cur = db.call("addeffect",idserv=self.server,idchan=self.channel,tkname=self.name,effshape=shape.value,effdx=dx,effdy=dy,effdz=dz,effparameters=str(shapeParameter))
         if cur is None:
             db.close(True)
             raise DatabaseException("Cannot register the effect")
@@ -104,6 +110,7 @@ class Token:
         db.close()
 
     def spawnAreaEffect(self,dx,dy,dz,shape,shapeParameter):
+        print(dx,dy,dz,shape,shapeParameter)
         initpoint = (self.x+dx,self.y+dy,self.z+dz)
         area = []
         if shape == Shape.CIRCLE or shape == Shape.SPHERE:
@@ -122,8 +129,8 @@ class Token:
             rx = shapeParameter['rx']
             ry = shapeParameter['ry']
             rz = shapeParameter.get('rz',0)
-            cornerLD = (initpoint[0]-rxy,initpoint[1]-rxy,initpoint[2]-rz)
-            cornerRU = (initpoint[0]+rxy,initpoint[1]+rxy,initpoint[2]+rz)
+            cornerLD = (initpoint[0]-rx,initpoint[1]-ry,initpoint[2]-rz)
+            cornerRU = (initpoint[0]+rx,initpoint[1]+ry,initpoint[2]+rz)
             for x in range(cornerLD[0],cornerRU[0]+1):
                 for y in range(cornerLD[1],cornerRU[1]+1):
                     for z in range(cornerLD[2],cornerRU[2]+1):
@@ -166,7 +173,7 @@ class Token:
                     for y in range(initpoint[1]-r,initpoint[1]+r+1):
                         z = initpoint[2]
                         area.append((x,y,z))
-                        curline += 1
+                    curline += 1
             elif ori == 90:
                 curline = length-1
                 for y in range(initpoint[1]-length+1,initpoint[1]+1):
@@ -174,7 +181,7 @@ class Token:
                     for x in range(initpoint[0]-r,initpoint[0]+r+1):
                         z = initpoint[2]
                         area.append((x,y,z))
-                        curline -= 1
+                    curline -= 1
             elif ori == 180:
                 curline = length-1
                 for x in range(initpoint[0]-length+1,initpoint[0]+1):
@@ -182,7 +189,7 @@ class Token:
                     for y in range(initpoint[1]-r,initpoint[1]+r+1):
                         z = initpoint[2]
                         area.append((x,y,z))
-                        curline -= 1
+                    curline -= 1
             else:
                 curline = 0
                 for y in range(initpoint[1],initpoint[1]+length):
@@ -190,7 +197,7 @@ class Token:
                     for x in range(initpoint[0]-r,initpoint[0]+r+1):
                         z = initpoint[2]
                         area.append((x,y,z))
-                        curline += 1
+                    curline += 1
         return area
 
 class Map:
@@ -245,7 +252,7 @@ class Map:
                     break
             color = Map.colorscale[colorindex]
             colorindex += 1
-            for k in tk.spawnAreaEffect(i[5],i[6],i[7],i[4],reformatAreaParameters(i[8])):
+            for k in tk.spawnAreaEffect(i[5],i[6],i[7],Shape.retrieveByID(i[4]),reformatAreaParameters(i[8])):
                 drawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
         for i in token:
             txt = i.name[:3]
@@ -275,7 +282,7 @@ def reformatAreaParameters(src):
         src = src.replace(src[src.find("["):src.find("]")+1],tmp)
     ls = src.split(",")
     for i in ls:
-        tags = i.split(":","")
+        tags = i.replace("'","").split(":")
         if tags[0] == "lengths":
             interntags = tags[1].split(";")
             internls = []

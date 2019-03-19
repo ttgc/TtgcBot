@@ -620,9 +620,9 @@ def on_message(message):
         elif command_check(prefix,message,'map effect'):
             if command_check(prefix,message,'map effect add',['map effect +']):
                 args = get_args(prefix,message,'map effect add',['map effect +'])
-                parameters = {}
-                if "{" in args and "}" in args:
-                    parameters = reformatAreaParameters(args[args.find("{"):args.find("}")+1])
+                # parameters = {}
+                # if "{" in args and "}" in args:
+                #     parameters = reformatAreaParameters(args[args.find("{"):args.find("}")+1])
                 args = args.split(" ")
                 while "" in args: args.remove("")
                 tkname = args[0]
@@ -632,19 +632,33 @@ def on_message(message):
                     return
                 if args[4].lower() == "sphere":
                     shape = Shape.SPHERE
+                    parameters = {"r":int(args[5])}
                 elif args[4].lower() == "line":
                     shape = Shape.LINE
+                    parameters = {"length":int(args[5])}
+                    if len(args) > 6:
+                        parameters["orientation"] = int(args[6])
+                        parameters["height"] = int(args[7])
+                        parameters["thickness"] = int(args[8])
                 elif args[4].lower() == "rect":
                     shape = Shape.RECT
+                    parameters = {"rx":int(args[5]),"ry":int(args[6])}
                 elif args[4].lower() == "cube":
                     shape = Shape.CUBE
+                    parameters = {"rx":int(args[5]),"ry":int(args[6]),"rz":int(args[7])}
                 elif args[4].lower() == "conic":
                     shape = Shape.CONIC
+                    lenls = args[5].split("-")
+                    for i in range(len(lenls)): lenls[i] = int(lenls[i])
+                    parameters = {"lengths":lenls}
+                    if len(args) > 6:
+                        parameters["orientation"] = int(args[6])
                 else:
                     shape = Shape.CIRCLE
+                    parameters = {"r":int(args[5])}
                 try: tk.spawnAreaEffect(int(args[1]),int(args[2]),int(args[3]),shape,parameters)
                 except:
-                    yield from client.send_message(message.channel,lang["effet_parse_error"])
+                    yield from client.send_message(message.channel,lang["effect_parse_error"])
                     return
                 tk.registerEffect(int(args[1]),int(args[2]),int(args[3]),shape,parameters)
                 yield from client.send_message(message.channel,lang["effect_register"].format(tkname))

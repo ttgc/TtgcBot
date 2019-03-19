@@ -221,7 +221,7 @@ class Map:
     clear = staticmethod(clear)
 
     @asyncio.coroutine
-    def send(self,cli,chan):
+    def send(self,cli,chan,depth=0):
         db = Database()
         cur = db.call("getmap",idserv=self.server,idchan=self.channel)
         if cur is None:
@@ -254,14 +254,15 @@ class Map:
             mask = Image.new('RGBA',(self.width+1,self.height+1))
             maskdrawer = ImageDraw.Draw(mask)
             for k in tk.spawnAreaEffect(i[5],i[6],i[7],Shape.retrieveByID(i[4]),reformatAreaParameters(i[8])):
-                maskdrawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
+                if k[2] == depth:
+                    maskdrawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
             self.img.paste(mask,(0,0),mask)
         for i in token:
             txt = i.name[:3]
-            if i.z > 0: txt += "+{}".format(int(i.z))
-            elif i.z < 0: txt += str(i.z)
+            if i.z-depth > 0: txt += "+{}".format(int(i.z-depth))
+            elif i.z-depth < 0: txt += str(i.z-depth)
             corrector = 0
-            if i.z != 0: corrector = 5
+            if i.z-depth != 0: corrector = 5
             drawer.text([(i.x*self.scale)+((self.scale-drawer.textsize(txt)[0])//2)-corrector,(i.y*self.scale)+((self.scale-drawer.textsize(txt)[1])//2)],txt,fill="#000000",font=Map.font)
         for x in range(0,(self.cols+1)*self.scale,self.scale):
             for y in range(0,(self.rows+1)*self.scale,self.scale):

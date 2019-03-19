@@ -589,9 +589,11 @@ def on_message(message):
             Map.clear(jdr.server,jdr.channel)
             yield from client.send_message(message.channel,lang["mapreset"])
         elif command_check(prefix,message,'map show'):
-            dim = get_args(prefix,message,'map show')
-            mp = Map(int(dim.split(" ")[0]),int(dim.split(" ")[1]),jdr.server,jdr.channel)
-            yield from mp.send(client,message.channel)
+            dim = get_args(prefix,message,'map show').split(" ")
+            mp = Map(int(dim[0]),int(dim[1]),jdr.server,jdr.channel)
+            depth = 0
+            if len(dim) > 2: depth = int(dim[2])
+            yield from mp.send(client,message.channel,depth)
         elif command_check(prefix,message,'map token',['map tk']):
             if command_check(prefix,message,'map token add',['map tk add','map token +','map tk +']):
                 tk = Token(get_args(prefix,message,'map token add',['map tk add','map token +','map tk +']),jdr.server,jdr.channel)

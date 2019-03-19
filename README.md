@@ -223,8 +223,8 @@ Give to the character the amount of money provided <br/>
 Aliases : `earnpo`, `earnPO`
 - `/map` (MJ only and JDR channel only) <br/>
 Display the world map of Terae
-- `/map show <width> <height>` (MJ only and JDR channel only) <br/>
-Show the local fight map displaying all tokens and effects registered for the current game
+- `/map show <width> <height> [depth]` (MJ only and JDR channel only) <br/>
+Show the local fight map displaying all tokens and effects registered for the current game. Only effects affecting this depth (Z axis) given will be displayed, if not given, depth is considered equal to 0.
 - `/map clearall` (MJ only and JDR channel only) <br/>
 Clear all tokens and effects on your local fight map <br/>
 Aliases : `map clrall`, `map reset`

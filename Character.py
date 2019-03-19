@@ -1377,7 +1377,7 @@ class Pet:
                             self.karma -= 1
                         elif result <= self.agilite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"-",str(kar),str(self.furtivite+modifier)))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"-",str(kar),str(self.agilite+modifier)))
                 elif self.karma <= -5:
                     result += kar
                     if result == 42:
@@ -1401,7 +1401,7 @@ class Pet:
                             self.karma -= 1
                         elif result <= self.agilite+modifier: self.stat[3] += 1
                         else: self.stat[-3] += 1
-                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"+",str(kar),str(self.furtivite+modifier)))
+                        yield from client.send_message(channel,lang["result_test_karma"].format(lang["agilite"],str(result),str(dice),"+",str(kar),str(self.agilite+modifier)))
                 else:
                     if result == 42: self.stat[1] += 1
                     elif result == 66: self.stat[-1] += 1
@@ -1415,13 +1415,13 @@ class Pet:
                         self.karma -= 1
                     elif result <= self.agilite+modifier: self.stat[3] += 1
                     else: self.stat[-3] += 1
-                    yield from client.send_message(channel,lang["result_test"].format(lang["agilite"],str(result),str(self.furtivite+modifier)))
+                    yield from client.send_message(channel,lang["result_test"].format(lang["agilite"],str(result),str(self.agilite+modifier)))
     ##            if self.regenkarm[0] >= 1:
     ##                if self.karma < 0: self.karma += 1
     ##                elif self.karma > 0: self.karma -= 1
     ##                self.regenkarm[0] -= 1
             db = Database()
-            db.call("pethasroll",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,valmax=self.furtivite+modifier,val=result)
+            db.call("pethasroll",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,valmax=self.agilite+modifier,val=result)
             db.close()
         elif stat == "intuition" or stat == "instinct":
             result = randint(1,6)

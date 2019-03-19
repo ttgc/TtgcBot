@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from enum import Enum
-from PIL import Image,ImageDraw
+from PIL import Image,ImageDraw,ImageFont
 from DatabaseManager import *
 import io,asyncio
 
@@ -55,13 +55,13 @@ class Token:
 
     def load(name,servid,chanid):
         db = Database()
-        db.call("getmaptoken",idserv=servid,idchan=chanid,tkname=name)
+        cur = db.call("getmaptoken",idserv=servid,idchan=chanid,tkname=name)
         if cur is None:
             db.close(True)
             raise DatabaseException("This token does not exist !")
         tk = cur.fetchone()
         db.close()
-        return Token(i[2],i[0],i[1],i[3],i[4],i[5])
+        return Token(tk[2],tk[0],tk[1],tk[3],tk[4],tk[5])
     load = staticmethod(load)
 
     def save(self):
@@ -196,6 +196,7 @@ class Token:
 class Map:
     colorscale = [(255,0,0,128),(192,192,192,192),(255,255,0,128),(128,128,0,128),(0,128,0,128),
         (0,255,255,128),(0,0,255,128),(255,0,255,128),(128,0,128,128),(23,165,137,128),(211,84,0,128)]
+    font = ImageFont.truetype("arial.ttf",20)
 
     def __init__(self,cols,rows,servid,chanid):
         self.cols = cols
@@ -247,7 +248,12 @@ class Map:
             for k in tk.spawnAreaEffect(i[5],i[6],i[7],i[4],reformatAreaParameters(i[8])):
                 drawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
         for i in token:
-            drawer.text([(i.x*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[0]//2),(i.y*self.scale)+(self.scale//2)-(drawer.textsize(i.name[:3])[1]//2)],i.name[:3],fill="#000000")
+            txt = i.name[:3]
+            if i.z > 0: txt += "+{}".format(int(i.z))
+            elif i.z < 0: txt += str(i.z)
+            corrector = 0
+            if i.z != 0: corrector = 5
+            drawer.text([(i.x*self.scale)+((self.scale-drawer.textsize(txt)[0])//2)-corrector,(i.y*self.scale)+((self.scale-drawer.textsize(txt)[1])//2)],txt,fill="#000000",font=Map.font)
         for x in range(0,(self.cols+1)*self.scale,self.scale):
             for y in range(0,(self.rows+1)*self.scale,self.scale):
                 drawer.line([x,0,x,self.rows*self.scale],fill="#000000")
@@ -255,7 +261,7 @@ class Map:
         bytes = io.BytesIO()
         self.img.save(bytes,'PNG')
         bytes.seek(0)
-        yield from cli.send_file(chan,bytes)
+        yield from cli.send_file(chan,bytes,filename="map.png")
         bytes.close()
 
 def reformatAreaParameters(src):

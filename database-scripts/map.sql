@@ -36,7 +36,7 @@ CREATE OR REPLACE FUNCTION addtoken
 ) RETURNS void AS $$
 BEGIN
 	INSERT INTO Maptoken
-	VALUES (idserv,idchan,tkname,x,y,z);
+	VALUES (idserv,idchan,tkname,tkx,tky,tkz);
 END;
 $$ LANGUAGE plpgsql;
 

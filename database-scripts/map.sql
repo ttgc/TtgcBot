@@ -178,3 +178,26 @@ BEGIN
   WHERE id_server = idserv AND id_channel = idchan;
 END;
 $$ LANGUAGE plpgsql;
+
+--REWRITTEN FUNCTION
+CREATE OR REPLACE FUNCTION jdrdelete
+(
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS void AS $$
+DECLARE
+	line RECORD;
+BEGIN
+	PERFORM JDRstopallextend(idserv,idchan);
+	FOR line IN (SELECT charkey FROM Characterr WHERE id_server = idserv AND id_channel = idchan) LOOP
+		PERFORM chardelete(line.charkey, idserv, idchan);
+	END LOOP;
+	DELETE FROM finalize
+	WHERE id_server = idserv AND id_channel = idchan;
+  --update here
+  PERFORM clearmap(idserv,idchan);
+  --end of update
+	DELETE FROM JDR
+	WHERE id_server = idserv AND id_channel = idchan;
+END;
+$$ LANGUAGE plpgsql;

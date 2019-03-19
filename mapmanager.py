@@ -110,7 +110,6 @@ class Token:
         db.close()
 
     def spawnAreaEffect(self,dx,dy,dz,shape,shapeParameter):
-        print(dx,dy,dz,shape,shapeParameter)
         initpoint = (self.x+dx,self.y+dy,self.z+dz)
         area = []
         if shape == Shape.CIRCLE or shape == Shape.SPHERE:
@@ -201,7 +200,7 @@ class Token:
         return area
 
 class Map:
-    colorscale = [(255,0,0,128),(192,192,192,192),(255,255,0,128),(128,128,0,128),(0,128,0,128),
+    colorscale = [(255,0,0,128),(192,192,192,128),(255,255,0,128),(128,128,0,128),(0,128,0,128),
         (0,255,255,128),(0,0,255,128),(255,0,255,128),(128,0,128,128),(23,165,137,128),(211,84,0,128)]
     font = ImageFont.truetype("arial.ttf",20)
 
@@ -252,8 +251,11 @@ class Map:
                     break
             color = Map.colorscale[colorindex]
             colorindex += 1
+            mask = Image.new('RGBA',(self.width+1,self.height+1))
+            maskdrawer = ImageDraw.Draw(mask)
             for k in tk.spawnAreaEffect(i[5],i[6],i[7],Shape.retrieveByID(i[4]),reformatAreaParameters(i[8])):
-                drawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
+                maskdrawer.rectangle([k[0]*self.scale,k[1]*self.scale,(k[0]+1)*self.scale,(k[1]+1)*self.scale],fill=color,outline=color)
+            self.img.paste(mask,(0,0),mask)
         for i in token:
             txt = i.name[:3]
             if i.z > 0: txt += "+{}".format(int(i.z))
@@ -265,6 +267,12 @@ class Map:
             for y in range(0,(self.rows+1)*self.scale,self.scale):
                 drawer.line([x,0,x,self.rows*self.scale],fill="#000000")
                 drawer.line([0,y,self.cols*self.scale,y],fill="#000000")
+        extract = self.img.getdata()
+        data = []
+        for i in extract:
+            if i[3] > 0: data.append((i[0],i[1],i[2],255))
+            else: data.append(i)
+        self.img.putdata(data)
         bytes = io.BytesIO()
         self.img.save(bytes,'PNG')
         bytes.seek(0)

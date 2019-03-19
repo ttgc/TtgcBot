@@ -206,3 +206,14 @@ userunblock=Les utilisateurs ayant le modele suivant dans leur pseudo ne seront 
 userunblock_notexist=Le modele d'utilisateur suivant n'existe pas : `{}`
 sklist=Liste des competences de bases
 unknown_class=La race ou la classe saisie n'existe pas
+charselect=Changement de personnage : `{}` :arrow_right: `{}`
+charnotexist=Le personnage `{}` n'existe pas
+#Movement update v1.4
+mapreset=La map a ete reinitialise
+tokenadd=Le token suivant a ete ajoute a votre carte : `{}`
+token_notexist=Le token `{}` n'existe pas
+tokenrm=Le token suivant a ete supprime de votre carte : `{}`
+tokenmove=Le token `{}` a ete deplace avec succes a la position ({} ; {} ; {})
+effect_parse_error=Une erreur est survenue lors de la generation de l'effet. Peut-etre avez-vous mal ecrit votre commande ?
+effect_register=L'effet a ete enregistre pour le token `{}` avec succes
+token_clear=Tout les effets pour le token `{}` ont ete supprimes

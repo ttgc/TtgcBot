@@ -50,8 +50,8 @@ Set your language for bot messages, language represents the code of your languag
 NB : language code is case insensitive so you can precise it in upper or lower case as you wish
 Aliases : `setlanguage`
 - `/rollindep <expression>` <br/>
-Roll dices and perform operations (supported symbols and operations : `*,+,-,/,()`) if given in the expression field. For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example). You can also roll special dices with your own values by writing them between brackets as following : `1d{red,blue,yellow,green}`. <br/>
-Full example : `/rollindep (10+1d100)*(2d10-5d8)` will return the result of the following expression : `(10+(1 dice with 100 sides))*((2 dices with 10 sides)-(5 dices with 8 sides))` <br/>
+Roll dice and perform operations (supported symbols and operations : `*,+,-,/,()`) if given in the expression field. For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example). You can also roll special dice with your own values by writing them between brackets as following : `1d{red,blue,yellow,green}`. <br/>
+Full example : `/rollindep (10+1d100)*(2d10-5d8)` will return the result of the following expression : `(10+(1 dice with 100 sides))*((2 dice with 10 sides)-(5 dice with 8 sides))` <br/>
 Special dice example : `/rollindep 1d{1,2,3,4,5,6,7,8,9,10,Jack,Queen,King}+1d{Clubs,Diamonds,Hearts,Spades}` will return a single card with its value and its color (example : Queen of Spades) <br/>
 Aliases : `rolldice`, `r`
 - `/tell <msg>` <br/>
@@ -174,6 +174,8 @@ Aliases : `charlink`
 - `/unlink [mention]` (MJ only and JDR channel only) <br/>
 Unlink a discord account from a character, if not provided, unlink the author of the command <br/>
 Aliases : `charunlink`
+- `/charselect <charkey>` (PJ only) <br/>
+Select an other character. For selecting a character, you'll need to be linked first to this character with the `link` command. `charselect` allow you to switch from a character to an other.
 - `/charset <item> <charkey> <value>` (MJ only and JDR channel only) <br/>
 Set a property of a character to the given value. The following properties can be set with this command : <br/>
 Aliases : you can write in one word charset+item (example : `/charsetpv`)
@@ -221,6 +223,37 @@ Give to the character the amount of money provided <br/>
 Aliases : `earnpo`, `earnPO`
 - `/map` (MJ only and JDR channel only) <br/>
 Display the world map of Terae
+- `/map show <width> <height> [depth]` (MJ only and JDR channel only) <br/>
+Show the local fight map displaying all tokens and effects registered for the current game. Only effects affecting this depth (Z axis) given will be displayed, if not given, depth is considered equal to 0.
+- `/map clearall` (MJ only and JDR channel only) <br/>
+Clear all tokens and effects on your local fight map <br/>
+Aliases : `map clrall`, `map reset`
+- `/map token add <name>` (MJ only and JDR channel only) <br/>
+Add a token on your local fight map, a token represents an entity that can be moved and can generate area of effects (AOE). When created, the token will automatically put on the origin (0;0;0) of the map. Use token move command to move it. <br/>
+Aliases : `map tk add`, `map token +`, `map tk +`
+- `/map token remove <name>` (MJ only and JDR channel only) <br/>
+Remove a token from your local fight map <br/>
+Aliases : `map tk rm`, `map token rm`, `map tk remove`, `map token -`, `map tk -`
+- `/map token move <name> <dx> <dy> [dz]` (MJ only and JDR channel only) <br/>
+Move a token in the direction given by the vector (dx;dy;dz). If not given dz is equal to 0 <br/>
+Aliases : `map tk move`
+- `/map effect add <tkname> <dx> <dy> <dz> <shape> [parameters]` (MJ only and JDR channel only) <br/>
+Register an area of effect for a given token. shape must be one of the following : `circle`,`sphere`,`line`,`rect`,`cube`,`conic`. Each of theese shape have their own parameters, some of them have to be given for the generation.
+Aliases : `map effect +`<br/>
+```
+List of parameters avalaible :
+circle : <r>
+sphere : <r>
+line : <length> [<orientation (default=0)> <height (default=1)> <thickness (default=0)>]
+    orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
+rect : <rx> <ry>
+cube : <rx> <ry> <rz>
+conic : <lengths> [orientation (default=0)]
+    lengths -> list of lengths separated with '-' symbol, the first value is the closest line from the origin and the last the farthest line from the origin (example : 1-3-5). DO NOT USE SPACE BETWEEN LENGTHS VALUES.
+    orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
+```
+- `/map effect clear <tkname>` (MJ only and JDR channel only) <br/>
+Clear all effects for the given token
 - `/apart [mention(s)]` (MJ only and JDR channel only) <br/>
 Mute and deafen all the players that are not mentionned by the command. If there is no single mention, the bot will unmute and undeafen all the players. (Spectators and MJ will not be affected by this)
 - `/lvlup <charkey>` (MJ only and JDR channel only) <br/>

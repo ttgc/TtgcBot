@@ -33,6 +33,7 @@ from CharacterUtils import *
 from converter import *
 from BotTools import *
 from Translator import *
+from mapmanager import *
 import os
 import zipfile
 import sys
@@ -219,7 +220,8 @@ def on_message(message):
     else:
         head = {'Authorization': "Bot "+TOKEN}
         r = requests.get("https://discordapp.com/api/v7/channels/"+str(message.channel.id),headers=head)
-        nsfw = r.json()['nsfw']
+        try: nsfw = r.json()['nsfw']
+        except: nsfw = False
     if message.channel.id == "237668457963847681": musicchannel = True
     #get charbase
     jdr = None
@@ -228,10 +230,11 @@ def on_message(message):
         jdr = srv.getJDR(message.channel.id)
         charbase_exist = True
         charbase = jdr.get_charbase()
+        member_charbase = []
         for i in charbase:
             if i.linked == str(message.author.id):
-                char = i
-                break
+                member_charbase.append(i)
+                if i.selected: char = i
     #get vocal
     vocal = vocalcore.getvocal(str(message.server.id))
 
@@ -324,6 +327,14 @@ def on_message(message):
             character = jdr.get_character(get_args(prefix,message,'unlink',['charunlink']))
             character.unlink()
             yield from client.send_message(message.channel,lang["charunlink"].format(character.name))
+    if command_check(prefix,message,'charselect') and jdrchannel:
+        key = get_args(prefix,message,'charselect')
+        for i in member_charbase:
+            if i.key == key and i.linked == str(message.author.id):
+                i.select()
+                yield from client.send_message(message.channel,lang["charselect"].format(char.key,i.key))
+                return
+        yield from client.send_message(message.channel,lang["charnotexist"].format(key))
     if command_check(prefix,message,'charset name',['charsetname','charset PV','charsetpv','charsetPV','charset pv','charset PM','charsetpm','charsetPM','charset pm',
                                                                          'charset force','charset strength','charset str','charsetstr','charset esprit','charset spirit','charset spr','charsetspr',
                                                                          'charset charisme','charset charisma','charset cha','charsetcha','charset agilite','charset furtivite','charset agi',
@@ -573,10 +584,98 @@ def on_message(message):
         if not char.dead: embd.add_field(name=lang["mod"].capitalize()+" :",value=modd,inline=True)
         embd.add_field(name=lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
         yield from client.send_message(message.channel,embed=embd)
-    if command_check(prefix,message,'map',[]) and chanMJ:
-        f = open("mapmonde.png","rb")
-        yield from client.send_file(message.channel,f)
-        f.close()
+    if command_check(prefix,message,'map') and chanMJ:
+        if command_check(prefix,message,'map clearall',['map clrall','map reset']):
+            Map.clear(jdr.server,jdr.channel)
+            yield from client.send_message(message.channel,lang["mapreset"])
+        elif command_check(prefix,message,'map show'):
+            dim = get_args(prefix,message,'map show').split(" ")
+            mp = Map(int(dim[0]),int(dim[1]),jdr.server,jdr.channel)
+            depth = 0
+            if len(dim) > 2: depth = int(dim[2])
+            yield from mp.send(client,message.channel,depth)
+        elif command_check(prefix,message,'map token',['map tk']):
+            if command_check(prefix,message,'map token add',['map tk add','map token +','map tk +']):
+                tk = Token(get_args(prefix,message,'map token add',['map tk add','map token +','map tk +']),jdr.server,jdr.channel)
+                tk.save()
+                yield from client.send_message(message.channel,lang["tokenadd"].format(tk.name))
+            elif command_check(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove','map token -','map tk -']):
+                tkname = get_args(prefix,message,'map token remove',['map tk rm','map token rm','map tk remove','map token -','map tk -'])
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                tk.remove()
+                yield from client.send_message(message.channel,lang["tokenrm"].format(tkname))
+            elif command_check(prefix,message,'map token move',['map tk move']):
+                args = get_args(prefix,message,'map token move',['map tk move']).split(" ")
+                while "" in args: args.remove("")
+                tkname = args[0]
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                dz = 0
+                if len(args) > 3: dz = int(args[3])
+                tk.move(int(args[1]),int(args[2]),dz)
+                yield from client.send_message(message.channel,lang["tokenmove"].format(tkname,tk.x,tk.y,tk.z))
+        elif command_check(prefix,message,'map effect'):
+            if command_check(prefix,message,'map effect add',['map effect +']):
+                args = get_args(prefix,message,'map effect add',['map effect +'])
+                # parameters = {}
+                # if "{" in args and "}" in args:
+                #     parameters = reformatAreaParameters(args[args.find("{"):args.find("}")+1])
+                args = args.split(" ")
+                while "" in args: args.remove("")
+                tkname = args[0]
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                if args[4].lower() == "sphere":
+                    shape = Shape.SPHERE
+                    parameters = {"r":int(args[5])}
+                elif args[4].lower() == "line":
+                    shape = Shape.LINE
+                    parameters = {"length":int(args[5])}
+                    if len(args) > 6:
+                        parameters["orientation"] = int(args[6])
+                        parameters["height"] = int(args[7])
+                        parameters["thickness"] = int(args[8])
+                elif args[4].lower() == "rect":
+                    shape = Shape.RECT
+                    parameters = {"rx":int(args[5]),"ry":int(args[6])}
+                elif args[4].lower() == "cube":
+                    shape = Shape.CUBE
+                    parameters = {"rx":int(args[5]),"ry":int(args[6]),"rz":int(args[7])}
+                elif args[4].lower() == "conic":
+                    shape = Shape.CONIC
+                    lenls = args[5].split("-")
+                    for i in range(len(lenls)): lenls[i] = int(lenls[i])
+                    parameters = {"lengths":lenls}
+                    if len(args) > 6:
+                        parameters["orientation"] = int(args[6])
+                else:
+                    shape = Shape.CIRCLE
+                    parameters = {"r":int(args[5])}
+                try: tk.spawnAreaEffect(int(args[1]),int(args[2]),int(args[3]),shape,parameters)
+                except:
+                    yield from client.send_message(message.channel,lang["effect_parse_error"])
+                    return
+                tk.registerEffect(int(args[1]),int(args[2]),int(args[3]),shape,parameters)
+                yield from client.send_message(message.channel,lang["effect_register"].format(tkname))
+            if command_check(prefix,message,'map effect clear'):
+                tkname = get_args(prefix,message,'map effect clear')
+                try: tk = Token.load(tkname,jdr.server,jdr.channel)
+                except:
+                    yield from client.send_message(message.channel,lang["token_notexist"].format(tkname))
+                    return
+                tk.cleareffect()
+                yield from client.send_message(message.channel,lang["token_clear"].format(tkname))
+        else:
+            f = open("mapmonde.png","rb")
+            yield from client.send_file(message.channel,f)
+            f.close()
     if command_check(prefix,message,'stat',['charstat','characterstat']) and jdrchannel:
         embd = discord.Embed(title=lang["stat"],description=char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
@@ -1004,7 +1103,7 @@ def on_message(message):
             return
         val = int((message.content).split(" ")[3])#replace(prefix+'getPM ',""))
         if char.pet[pet].PM + val < 0:
-            yield from client.send_message(message.channel,lang["no_more_pm"].format(str(char.pet[pet].pm)))
+            yield from client.send_message(message.channel,lang["no_more_pm"].format(str(char.pet[pet].PM)))
             return
         else:
             if char.pet[pet].PM+val > char.pet[pet].PMmax: val=char.pet[pet].PMmax-char.pet[pet].PM#char.PM = char.PMmax

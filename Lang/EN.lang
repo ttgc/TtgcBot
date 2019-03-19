@@ -206,3 +206,14 @@ userunblock=The following template of user wont be banned anymore on joining you
 userunblock_notexist=The template `{}` does not exist
 sklist=Skill list
 unknown_class=This Race or Class does not exist
+charselect=Switched character : `{}` :arrow_right: `{}`
+charnotexist=The character `{}` does not exist
+#Movement update v1.4
+mapreset=The map has been reset
+tokenadd=The token `{}` has been added to your map
+token_notexist=The token `{}` does not exist !
+tokenrm=The token `{}` has been removed from your map
+tokenmove=The token `{}` has been moved to the position ({} ; {} ; {})
+effect_parse_error=There was an error while parsing the effect. Maybe the effect is not correctly written in your command
+effect_register=The effect has been registered for the token `{}` successful
+token_clear=All effects for the token `{}` have been removed

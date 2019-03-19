@@ -103,3 +103,4 @@ ENV/
 # Token and cache files
 __cache/
 token.ini
+arial.ttf

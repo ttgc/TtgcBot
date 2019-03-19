@@ -238,18 +238,18 @@ Aliases : `map tk rm`, `map token rm`, `map tk remove`, `map token -`, `map tk -
 Move a token in the direction given by the vector (dx;dy;dz). If not given dz is equal to 0 <br/>
 Aliases : `map tk move`
 - `/map effect add <tkname> <dx> <dy> <dz> <shape> [parameters]` (MJ only and JDR channel only) <br/>
-Register an area of effect for a given token. shape must be one of the following : `circle`,`sphere`,`line`,`rect`,`cube`,`conic`. Each of theese shape have their own parameters, some of them have to be given for the generation. the `parameters` argument have to be put into brackets using the following format : `{rx:5,ry:3,rz:0}`. Split parameters with a `,` between them, and each parameter follow this rule : `name:value`. <br/>
+Register an area of effect for a given token. shape must be one of the following : `circle`,`sphere`,`line`,`rect`,`cube`,`conic`. Each of theese shape have their own parameters, some of them have to be given for the generation.
 Aliases : `map effect +`<br/>
 ```
 List of parameters avalaible :
-circle : r
-sphere : r
-line : length, orientation (default=0), height (default=1), thickness (default=0)
+circle : <r>
+sphere : <r>
+line : <length> [<orientation (default=0)> <height (default=1)> <thickness (default=0)>]
     orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
-rect : rx, ry
-cube : rx, ry, rz
-conic : lengths, orientation (default=0)
-    lengths -> list of lengths separated with comma and put into [], the first value is the closest line from the origin and the last the farthest line from the origin (example : [1,3,5])
+rect : <rx> <ry>
+cube : <rx> <ry> <rz>
+conic : <lengths> [orientation (default=0)]
+    lengths -> list of lengths separated with '-' symbol, the first value is the closest line from the origin and the last the farthest line from the origin (example : 1-3-5). DO NOT USE SPACE BETWEEN LENGTHS VALUES.
     orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
 ```
 - `/map effect clear <tkname>` (MJ only and JDR channel only) <br/>

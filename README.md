@@ -1,5 +1,5 @@
 # TtgcBot 
-[![CircleCI](https://circleci.com/gh/ttgc/TtgcBot/tree/master.svg?style=svg)](https://circleci.com/gh/ttgc/TtgcBot/tree/master)
+![CircleCI](https://circleci.com/gh/ttgc/TtgcBot/tree/master.svg?style=svg)
 
 TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of Great Cosmos universe ([French Website here](http://thetaleofgreatcosmos.fr)). But, today the bot is having many useful tools and features such as Keeprole system that allow leaving member to keep their roles after joining again your server, warn users that doesn't follow your rules, and more things (list of commands below). The bot is developed in Python 3 using [discord.py](https://github.com/Rapptz/discord.py/tree/async) lib and use also a postgresql 9 database.
 

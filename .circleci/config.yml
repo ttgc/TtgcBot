@@ -78,7 +78,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            timeout --preserve-status -s SIGTERM --kill-after=30 60 python3 TtgcBot.py
+            timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py
 
       - store_artifacts:
           path: test-reports

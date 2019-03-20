@@ -39,6 +39,7 @@ jobs:
       - run:
           name: install database
           command: |
+            sudo apt-get update
             sudo apt-get install postgresql-client-9.6
             psql -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
             psql -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql

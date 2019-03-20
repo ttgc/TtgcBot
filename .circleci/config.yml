@@ -63,7 +63,7 @@ jobs:
             echo 'Amper=None' >> token.ini
             echo '' >> token.ini
             echo '[DATABASE]' >> token.ini
-            echo 'name=circletest' >> token.ini
+            echo 'name=circle_test' >> token.ini
             echo 'IP=localhost' >> token.ini
             echo 'port=5432' >> token.ini
             echo 'user=root' >> token.ini
@@ -78,7 +78,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python3 TtgcBot.py
+            timeout --preserve-status 60 python3 TtgcBot.py
 
       - store_artifacts:
           path: test-reports

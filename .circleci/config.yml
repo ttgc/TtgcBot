@@ -10,6 +10,7 @@ jobs:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
       - image: circleci/python:3.6.1
+      - image: circleci/postgres:9.6.5-alpine-ram
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -35,21 +36,47 @@ jobs:
             . venv/bin/activate
             pip3 install -r requirements.txt
 
+      - run:
+          name: install database
+          command: |
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/procedures.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/lang_features.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/userblock_features.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/skill_and_kill_features.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/map.sql
+            psql -d postgresql://root@localhost/circle_test -f database-scripts/swap.sql
+
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: write config
+          command: |
+            echo '[TOKEN]' > token.ini
+            echo 'Bot='$token >> token.ini
+            echo 'Amper=None' >> token.ini
+            echo '' >> token.ini
+            echo '[DATABASE]' >> token.ini
+            echo 'name=circletest' >> token.ini
+            echo 'IP=localhost' >> token.ini
+            echo 'port=5432' >> token.ini
+            echo 'user=root' >> token.ini
+            echo 'pwd=' >> token.ini
 
       # run tests!
       # this example uses Django's built-in test-runner
       # other common Python testing frameworks include pytest and nose
       # https://pytest.org
       # https://nose.readthedocs.io
-      #- run:
-      #    name: run tests
-      #    command: |
-      #      . venv/bin/activate
-      #      python TtgcBot.py test
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            python3 TtgcBot.py
 
       - store_artifacts:
           path: test-reports

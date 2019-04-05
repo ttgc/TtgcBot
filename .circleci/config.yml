@@ -40,6 +40,7 @@ jobs:
           name: install database
           command: |
             sudo apt-get autoremove --purge
+            sudo apt-get autoclean
             sudo apt-get update
             sudo apt-get install postgresql-client
             psql -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql

@@ -39,8 +39,9 @@ jobs:
       - run:
           name: install database
           command: |
+            sudo apt-get autoremove --purge
             sudo apt-get update
-            sudo apt-get install postgresql-client-9.4
+            sudo apt-get install postgresql-client
             psql -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
             psql -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql
             psql -d postgresql://root@localhost/circle_test -f database-scripts/procedures.sql

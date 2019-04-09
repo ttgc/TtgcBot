@@ -17,6 +17,9 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+# THIS FILE IS NO LONGER AVALAIBLE AND WILL BE REWRITTEN
+# THIS FILE USE discord.py V0.16 AND WILL BE UPDATED TO v1.0 OF THE LIB
+
 import discord
 import asyncio
 from random import randint,choice

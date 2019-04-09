@@ -104,3 +104,4 @@ ENV/
 __cache/
 token.ini
 arial.ttf
+__deprecated__*

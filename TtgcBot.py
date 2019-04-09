@@ -34,14 +34,13 @@ import logging
 # custom libs
 from logs import *
 from INIfiles import *
-# from logfile import *
 # from parsingdice import *
 # from VocalUtilities import *
 # from Character import *
 # from CharacterUtils import *
 # from converter import *
-# from BotTools import *
-# from Translator import *
+from BotTools import *
+from Translator import *
 # from mapmanager import *
 
 global logger

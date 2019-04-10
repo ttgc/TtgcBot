@@ -19,6 +19,7 @@
 
 # external and python libs
 import discord
+from discord.ext import commands
 import asyncio
 # from random import randint,choice
 # from threading import Thread
@@ -55,12 +56,16 @@ del(tokenf)
 global statut
 statut = discord.Game(name="Ohayo !")
 
+def get_prefix(bot,message):
+    return '$'
+
 global client
-client = discord.Client()
+client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut)
 
 @client.event
 async def on_message(message):
-    if message.author.id != client.user.id: print("hello world !")
+    ctx = await client.get_context(message)
+    await client.invoke(ctx)
 
 @client.event
 async def on_member_join(member):
@@ -115,7 +120,6 @@ async def on_error(event,*args,**kwargs):
 async def on_ready():
     global statut,logger
     logger.info("Successful connected. Initializing bot system")
-    await client.change_presence(activity=statut)
     botaskperm = discord.Permissions().all()
     botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
     url = discord.utils.oauth_url(str(client.user.id),botaskperm)

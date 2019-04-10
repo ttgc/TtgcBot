@@ -64,11 +64,29 @@ async def on_message(message):
 
 @client.event
 async def on_member_join(member):
-    print("member joined")
+    global logger
+    srv = DBServer(str(member.guild.id))
+    userblocked = srv.blockuserlist()
+    for i in userblocked:
+        if i in str(member).split("#")[0]:
+            await asyncio.sleep(1)
+            await member.ban(delete_message_days=1)
+            try: logger.info("Auto banned user '%s'(ID=%s) from guild '%s'(ID=%s) because of blockuserlist",str(member),str(member.id),str(member.guild),str(member.guild.id))
+            except: logger.info("Auto banned user '%s' from guild '%s' because of blockuserlist",str(member.id),str(member.guild.id))
+            return
+    if srv.keepingrole:
+        await asyncio.sleep(1)
+        await srv.restorerolemember(member.guild,member)
+        try: logger.info("Restored user roles for %s(ID=%s) in guild %s(ID=%s)",str(member),str(member.id),str(member.guild),str(member.guild.id))
+        except: logger.info("Restored user roles for %s in guild %s",str(member.id),str(member.guild.id))
 
 @client.event
 async def on_member_remove(member):
-    print("member removed")
+    srv = DBServer(str(member.guild.id))
+    if srv.keepingrole:
+        srv.backuprolemember(member)
+        try: logger.info("Backuped user roles for %s(ID=%s) in guild %s(ID=%s)",str(member),str(member.id),str(member.guild),str(member.guild.id))
+        except: logger.info("Backuped user roles for %s in guild %s",str(member.id),str(member.guild.id))
 
 @client.event
 async def on_guild_join(guild):
@@ -86,11 +104,11 @@ async def on_guild_remove(guild):
 
 @client.event
 async def on_error(event,*args,**kwargs):
+    logging.warning(traceback.format_exc())
     message = args[0]
     lgcode = getuserlang(str(message.author.id))
     if not lang_exist(lgcode): lgcode = "EN"
     lang = get_lang(lgcode)
-    logging.warning(traceback.format_exc())
     await client.send_message(message.channel,lang["error"].format(traceback.format_exc(limit=1000)))
 
 @client.event

@@ -193,11 +193,10 @@ class DBServer:
         ls = self.keeprolelist()
         for i in member.roles:
             if str(i.id) in ls:
-                db.call("backuprolemember",idmemb=member.id,idserv=self.ID,idrole=i.id)
+                db.call("backuprolemember",idmemb=str(member.id),idserv=self.ID,idrole=str(i.id))
         db.close()
 
-    @asyncio.coroutine
-    def restorerolemember(self,client,srv,member):
+    async def restorerolemember(self,srv,member):
         db = Database()
         cur = db.execute("SELECT id_role FROM keeprole WHERE id_server = %(idserv)s AND id_member = %(idmemb)s;",idserv=self.ID,idmemb=member.id)
         if cur is None:
@@ -205,11 +204,11 @@ class DBServer:
             raise DatabaseException("unable to restore roles of the member")
         ls = []
         for i in cur:
-            rl = discord.utils.get(srv.roles,id=i[0])
+            rl = discord.utils.get(srv.roles,id=int(i[0]))
             ls.append(rl)
-            yield from client.add_roles(member,rl)
+            await member.add_roles(rl)
         for i in ls:
-            db.call("restorerolemember",idmemb=member.id,idserv=self.ID,idrole=i.id)
+            db.call("restorerolemember",idmemb=str(member.id),idserv=self.ID,idrole=str(i.id))
         db.close()
 
     def addkeeprole(self,roleid):

@@ -72,11 +72,17 @@ async def on_member_remove(member):
 
 @client.event
 async def on_guild_join(guild):
-    print("server joined")
+    global logger
+    addserver(guild)
+    try: logger.info("Added server '%s' to the database : ID=%s",str(guild),str(guild.id))
+    except: logger.info("Added server to the database : ID=%s",str(guild.id))
 
 @client.event
 async def on_guild_remove(guild):
-    print("server removed")
+    global logger
+    srv = DBServer(str(guild.id))
+    srv.remove()
+    logger.info("Removed server from the database : ID=%s",str(guild.id))
 
 @client.event
 async def on_error(event,*args,**kwargs):
@@ -89,12 +95,33 @@ async def on_error(event,*args,**kwargs):
 
 @client.event
 async def on_ready():
-    global statut
+    global statut,logger
+    logger.info("Successful connected. Initializing bot system")
     await client.change_presence(activity=statut)
     botaskperm = discord.Permissions().all()
     botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
     url = discord.utils.oauth_url(str(client.user.id),botaskperm)
     print(url)
+    logger.info("Generate invite link : %s",url)
+    srvid,nbr = [],0
+    for i in client.guilds:
+        srvid.append(str(i.id))
+        if str(i.id) not in srvlist():
+            addserver(i)
+            nbr += 1
+            try: logger.info("This server has invited the bot during off period, adding it to the database : %s (ID=%s)",str(i),str(i.id))
+            except: logger.info("Server added (ID=%s)",str(i.id))
+    logger.info("Added %d new servers to the database successful",nbr)
+    logger.info("Purged %d servers wich have kicked the bot at least one year ago successful",purgeservers(365))
+    nbr = 0
+    for i in srvlist():
+        if i not in srvid:
+            srv = DBServer(i)
+            srv.remove()
+            nbr += 1
+            logger.info("This server has kicked the bot during off period, removing it from the database : ID=%s",str(i))
+    logger.info("Removed %d old servers from the database successful",nbr)
+    logger.info("Bot is now ready")
 
 async def main():
     global TOKEN

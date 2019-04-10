@@ -289,14 +289,19 @@ class DBServer:
 
 def addserver(server):
     db = Database()
-    db.call("addserver",idserv=server.id)
+    db.call("addserver",idserv=str(server.id))
     db.close()
-    return DBServer(server.id)
+    return DBServer(str(server.id))
 
 def purgeservers(days_):
     db = Database()
-    db.call("purgeserver",days=days_)
+    cur = db.call("purgeserver",days=days_)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("unable to purge servers")
+    nbr = cur.fetchone()[0]
     db.close()
+    return int(nbr)
 
 def srvlist():
     db = Database()

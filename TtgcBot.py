@@ -30,7 +30,7 @@ import logging
 # import sys
 # import requests
 # import subprocess as sub
-# import traceback
+import traceback
 
 # custom libs
 from logs import *
@@ -43,6 +43,7 @@ from INIfiles import *
 from BotTools import *
 from Translator import *
 # from mapmanager import *
+from checks import *
 
 global logger
 logger = initlogs()
@@ -57,15 +58,52 @@ global statut
 statut = discord.Game(name="Ohayo !")
 
 def get_prefix(bot,message):
-    return '$'
+    try:
+        srv = DBServer(str(message.guild.id))
+        return srv.prefix
+    except AttributeError,DatabaseException: return '/'
 
 global client
 client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut)
 
+@client.check
+def isbot(ctx): return !ctx.message.author.bot
+
+@client.check
+async def blacklist(ctx):
+    srv = DBServer(str(ctx.message.guild.id))
+    blacklisted,reason = is_blacklisted(str(ctx.message.author.id))
+    if blacklisted:
+        lgcode = getuserlang(str(ctx.message.author.id))
+        if not lang_exist(lgcode): lgcode = "EN"
+        lang = get_lang(lgcode)
+        await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention,str(reason)))
+    return !blacklisted
+
 @client.event
 async def on_message(message):
-    ctx = await client.get_context(message)
-    await client.invoke(ctx)
+    if not message.content.startswith(get_prefix(client,message)):
+        filtre = srv.wordblocklist()
+        for i in filtre:
+            if i in message.content:
+                lgcode = getuserlang(str(message.author.id))
+                if not lang_exist(lgcode): lgcode = "EN"
+                lang = get_lang(lgcode)
+                await message.delete()
+                await message.author.send(lang["contentbanned"])
+                return
+
+@client.event
+async def on_command_error(ctx,error):
+    global logger
+    lgcode = getuserlang(str(ctx.message.author.id))
+    if not lang_exist(lgcode): lgcode = "EN"
+    lang = get_lang(lgcode)
+    msg = lang["error"].format_exc(limit=100)
+
+    if isinstance(error,commands.CheckFailure): return
+    else: logger.warning(traceback.format_exc(limit=1))
+    await ctx.message.author.send(msg)
 
 @client.event
 async def on_member_join(member):
@@ -109,12 +147,10 @@ async def on_guild_remove(guild):
 
 @client.event
 async def on_error(event,*args,**kwargs):
-    logging.warning(traceback.format_exc())
-    message = args[0]
-    lgcode = getuserlang(str(message.author.id))
-    if not lang_exist(lgcode): lgcode = "EN"
-    lang = get_lang(lgcode)
-    await client.send_message(message.channel,lang["error"].format(traceback.format_exc(limit=1000)))
+    global logger
+    logger.error(traceback.format_exc())
+    infos = await client.application_info()
+    await owner.send(get_lang()["error"].format(traceback.format_exc(limit=100)))
 
 @client.event
 async def on_ready():

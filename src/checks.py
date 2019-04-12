@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from BotTools import *
+from src.BotTools import *
 import discord.utils
 
 def is_blacklisted(ID):

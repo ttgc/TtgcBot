@@ -33,17 +33,17 @@ import logging
 import traceback
 
 # custom libs
-from logs import *
-from INIfiles import *
+from src.logs import *
+from src.INIfiles import *
 # from parsingdice import *
 # from VocalUtilities import *
 # from Character import *
 # from CharacterUtils import *
 # from converter import *
-from BotTools import *
-from Translator import *
+from src.BotTools import *
+from src.Translator import *
 # from mapmanager import *
-from checks import *
+from src.checks import *
 
 global logger
 logger = initlogs()
@@ -61,13 +61,13 @@ def get_prefix(bot,message):
     try:
         srv = DBServer(str(message.guild.id))
         return srv.prefix
-    except AttributeError,DatabaseException: return '/'
+    except (AttributeError,DatabaseException): return '/'
 
 global client
 client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut)
 
 @client.check
-def isbot(ctx): return !ctx.message.author.bot
+def isbot(ctx): return not ctx.message.author.bot
 
 @client.check
 async def blacklist(ctx):
@@ -78,7 +78,7 @@ async def blacklist(ctx):
         if not lang_exist(lgcode): lgcode = "EN"
         lang = get_lang(lgcode)
         await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention,str(reason)))
-    return !blacklisted
+    return not blacklisted
 
 @client.event
 async def on_message(message):

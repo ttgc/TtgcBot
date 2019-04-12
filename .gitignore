@@ -101,7 +101,7 @@ ENV/
 .mypy_cache/
 
 # Token and cache files
-__cache/
+__cache__/
 token.ini
 arial.ttf
-__deprecated__*
+__deprecated__/

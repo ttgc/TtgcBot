@@ -49,14 +49,14 @@ from src.cogs.BotManage import *
 global logger
 logger = initlogs()
 
+global statut
+statut = discord.Game(name="Ohayo !")
+
 global TOKEN
 tokenf = INI()
 tokenf.load("token")
 TOKEN = tokenf.section["TOKEN"]["Bot"]
 del(tokenf)
-
-global statut
-statut = discord.Game(name="Ohayo !")
 
 def get_prefix(bot,message):
     try:
@@ -110,9 +110,10 @@ async def on_command_error(ctx,error):
     lang = get_lang(lgcode)
     msg = lang["error"].format(traceback.format_exc(limit=100))
 
-    if isinstance(error,commands.CheckFailure): pass
+    if isinstance(error,commands.CheckFailure): return
+    elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
     else: logger.warning(traceback.format_exc(limit=1))
-    await ctx.message.author.send(msg)
+    await ctx.message.channel.send(msg)
 
 @client.event
 async def on_member_join(member):

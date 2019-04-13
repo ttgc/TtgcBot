@@ -217,3 +217,5 @@ tokenmove=The token `{}` has been moved to the position ({} ; {} ; {})
 effect_parse_error=There was an error while parsing the effect. Maybe the effect is not correctly written in your command
 effect_register=The effect has been registered for the token `{}` successful
 token_clear=All effects for the token `{}` have been removed
+#Rewrite v2.0
+error_argument=An argument is not correct !

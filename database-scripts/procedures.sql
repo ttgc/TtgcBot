@@ -758,7 +758,7 @@ BEGIN
 		FOR jdrl IN (SELECT id_server,id_channel FROM JDR WHERE id_server = line.id_server) LOOP
 			PERFORM jdrdelete(jdrl.id_server,jdrl.id_channel);
 		END LOOP;
-		FOR rol IN (SELECT id_role FROM role WHERE id_server = idserv) LOOP
+		FOR rol IN (SELECT id_role FROM role WHERE id_server = line.id_server) LOOP
 			PERFORM removerole(idserv,rol.id_role);
 		END LOOP;
 		DELETE FROM keeprole

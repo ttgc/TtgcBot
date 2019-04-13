@@ -217,3 +217,5 @@ tokenmove=Le token `{}` a ete deplace avec succes a la position ({} ; {} ; {})
 effect_parse_error=Une erreur est survenue lors de la generation de l'effet. Peut-etre avez-vous mal ecrit votre commande ?
 effect_register=L'effet a ete enregistre pour le token `{}` avec succes
 token_clear=Tout les effets pour le token `{}` ont ete supprimes
+#Rewrite v2.0
+error_argument=Un argument de la commande n'est pas correct !

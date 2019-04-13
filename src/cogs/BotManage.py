@@ -20,12 +20,100 @@
 from src.checks import *
 from src.BotTools import *
 from discord.ext import commands
+import logging,sys,asyncio
+import subprocess as sub
+from src.logs import getlogs
 
 class BotManage(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
+        self.logger = getlogs()
 
     @commands.check(check_botowner)
     @commands.command(aliases=["eval"])
-    async def debug(self,ctx):
-        print("hello world")
+    async def debug(self,ctx,*,arg):
+        self.logger.log(logging.DEBUG+1,"running debug instruction : %s",arg.replace("```python","").replace("```",""))
+        exec(arg.replace("```python","").replace("```",""))
+
+    @commands.check(check_botowner)
+    @commands.command()
+    async def setgame(self,ctx,*,game):
+        global statut
+        statut = discord.Game(name=game)
+        await self.bot.change_presence(activity=statut)
+
+    @commands.check(check_botowner)
+    @commands.command()
+    async def setbotmanager(self,ctx,user):
+        grantuser(user,'M')
+        self.logger.warning("Granted botmanager rights to : %s",user)
+        await ctx.message.channel.send("The ID has been set as botmanager succesful")
+
+    @commands.check(check_botowner)
+    @commands.command()
+    async def setpremium(self,ctx,user):
+        grantuser(user,'P')
+        self.logger.info("Granted premium rights to : %s",user)
+        await ctx.message.channel.send("The ID has been set as premium succesful")
+
+    @commands.check(check_botowner)
+    @commands.command()
+    async def setbotmanager(self,ctx,user):
+        grantuser(user,'M')
+        self.logger.warning("Granted botmanager rights to : %s",user)
+        await ctx.message.channel.send("The ID has been set as botmanager succesful")
+
+    @commands.check(check_botmanager)
+    @commands.command()
+    async def blacklist(self,ctx,user,*,reason):
+        blacklist(user,reason)
+        self.logger.info("blacklisted user %s by %s",user,str(ctx.message.author))
+        await ctx.message.channel.send("The following id has been blacklisted : `{}` for\n```\n{}\n```".format(user,reason))
+
+    @commands.check(check_botmanager)
+    @commands.command()
+    async def unblacklist(self,ctx,user):
+        mb = None
+        try: mb = DBMember(user)
+        except: pass
+        if mb is not None:
+            mb.unblacklist()
+            self.logger.info("unblacklisted user %s by %s",user,str(ctx.message.author))
+            await ctx.message.channel.send("The following id has been unblacklisted : `{}`".format(user))
+
+    @commands.check(check_botmanager)
+    @commands.command()
+    async def purgeserver(self,ctx,days: int):
+        nbr = purgeservers(days)
+        self.logger.warning("purged servers older than %d days requested by %s",days,str(ctx.message.author))
+        self.logger.info("purged %d servers",nbr)
+        await ctx.message.channel.send("Purged servers successful")
+
+    @commands.check(check_botmanager)
+    @commands.command()
+    async def shutdown(self,ctx):
+        await ctx.message.channel.send("You are requesting a shutdown, please ensure that you want to performe it by typing `confirm`")
+        chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
+        try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+        except asyncio.TimeoutError: answer = None
+        if answer is None:
+            await ctx.message.channel.send("your request has timeout")
+        else:
+            self.logger.warning("Shutdown requested by %s",str(ctx.message.author))
+            await self.bot.logout()
+            sys.exit(0)
+
+    @commands.check(check_botmanager)
+    @commands.command()
+    async def reboot(self,ctx):
+        await ctx.message.channel.send("You are requesting a reboot, please ensure that you want to performe it by typing `confirm`")
+        chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
+        try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+        except asyncio.TimeoutError: answer = None
+        if answer is None:
+            await ctx.message.channel.send("your request has timeout")
+        else:
+            self.logger.warning("Reboot requested by %s",str(ctx.message.author))
+            await self.bot.logout()
+            sub.call(['./bootbot.sh'])
+            sys.exit(0)

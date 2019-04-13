@@ -46,7 +46,7 @@ def check_admin(ctx):
     return discord.utils.get(ctx.message.guild.roles,id=srv.adminrole) in ctx.message.author.roles or ctx.message.author == ctx.message.guild.owner
 
 def check_botmanager(ctx): return is_botmanager(str(ctx.message.author.id))
-def check_botowner(ctx): return is_botowner(str(ctx.message.author.id))
+def check_botowner(ctx): return is_owner(str(ctx.message.author.id))
 def check_premium(ctx): return is_premium(str(ctx.message.author.id))
 
 def check_mj(ctx):

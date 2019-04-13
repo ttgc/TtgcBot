@@ -44,6 +44,7 @@ from src.BotTools import *
 from src.Translator import *
 # from mapmanager import *
 from src.checks import *
+from src.cogs.BotManage import *
 
 global logger
 logger = initlogs()
@@ -67,6 +68,9 @@ global client
 client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut)
 
 @client.check
+def no_pm(ctx): return ctx.message.guild is not None
+
+@client.check
 def isbot(ctx): return not ctx.message.author.bot
 
 @client.check
@@ -83,15 +87,20 @@ async def blacklist(ctx):
 @client.event
 async def on_message(message):
     if not message.content.startswith(get_prefix(client,message)):
-        filtre = srv.wordblocklist()
-        for i in filtre:
-            if i in message.content:
-                lgcode = getuserlang(str(message.author.id))
-                if not lang_exist(lgcode): lgcode = "EN"
-                lang = get_lang(lgcode)
-                await message.delete()
-                await message.author.send(lang["contentbanned"])
-                return
+        if message.guild is not None:
+            srv = DBServer(str(message.guild.id))
+            filtre = srv.wordblocklist()
+            for i in filtre:
+                if i in message.content:
+                    lgcode = getuserlang(str(message.author.id))
+                    if not lang_exist(lgcode): lgcode = "EN"
+                    lang = get_lang(lgcode)
+                    await message.delete()
+                    await message.author.send(lang["contentbanned"])
+                    return
+    else:
+        ctx = await client.get_context(message)
+        await client.invoke(ctx)
 
 @client.event
 async def on_command_error(ctx,error):
@@ -99,9 +108,9 @@ async def on_command_error(ctx,error):
     lgcode = getuserlang(str(ctx.message.author.id))
     if not lang_exist(lgcode): lgcode = "EN"
     lang = get_lang(lgcode)
-    msg = lang["error"].format_exc(limit=100)
+    msg = lang["error"].format(traceback.format_exc(limit=100))
 
-    if isinstance(error,commands.CheckFailure): return
+    if isinstance(error,commands.CheckFailure): pass
     else: logger.warning(traceback.format_exc(limit=1))
     await ctx.message.author.send(msg)
 
@@ -150,7 +159,7 @@ async def on_error(event,*args,**kwargs):
     global logger
     logger.error(traceback.format_exc())
     infos = await client.application_info()
-    await owner.send(get_lang()["error"].format(traceback.format_exc(limit=100)))
+    await infos.owner.send(get_lang()["error"].format(traceback.format_exc(limit=100)))
 
 @client.event
 async def on_ready():
@@ -183,6 +192,7 @@ async def on_ready():
 
 async def main():
     global TOKEN
+    client.add_cog(BotManage(client))
     await client.login(TOKEN)
     await client.connect()
 

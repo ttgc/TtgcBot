@@ -56,13 +56,6 @@ class BotManage(commands.Cog):
         self.logger.info("Granted premium rights to : %s",user)
         await ctx.message.channel.send("The ID has been set as premium succesful")
 
-    @commands.check(check_botowner)
-    @commands.command()
-    async def setbotmanager(self,ctx,user):
-        grantuser(user,'M')
-        self.logger.warning("Granted botmanager rights to : %s",user)
-        await ctx.message.channel.send("The ID has been set as botmanager succesful")
-
     @commands.check(check_botmanager)
     @commands.command()
     async def blacklist(self,ctx,user,*,reason):

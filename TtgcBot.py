@@ -192,8 +192,8 @@ async def on_ready():
     logger.info("Bot is now ready")
 
 async def main():
-    global TOKEN
-    client.add_cog(BotManage(client))
+    global TOKEN,logger
+    client.add_cog(BotManage(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

@@ -22,12 +22,11 @@ from src.BotTools import *
 from discord.ext import commands
 import logging,sys,asyncio
 import subprocess as sub
-from src.logs import getlogs
 
 class BotManage(commands.Cog):
-    def __init__(self,bot):
+    def __init__(self,bot,logger):
         self.bot = bot
-        self.logger = getlogs()
+        self.logger = logger
 
     @commands.check(check_botowner)
     @commands.command(aliases=["eval"])

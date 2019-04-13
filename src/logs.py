@@ -46,6 +46,3 @@ def initlogs():
     handler.addFilter(DebugFilter())
     logger.addHandler(handler)
     return logger
-
-def getlogs():
-    return logging.getLogger('discord')

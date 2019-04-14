@@ -219,3 +219,8 @@ effect_register=The effect has been registered for the token `{}` successful
 token_clear=All effects for the token `{}` have been removed
 #Rewrite v2.0
 error_argument=An argument is not correct !
+error_perms=The bot does not have all permissions required to execute your command
+error_cd=This command is still on cooldown, please try again in {} seconds
+punish=Punishment
+none=None
+error_notfound=This command does not exist !

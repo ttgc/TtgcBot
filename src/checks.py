@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from src.BotTools import *
+from src.Translator import *
 import discord.utils
 
 def is_blacklisted(ID):
@@ -72,13 +73,13 @@ class GenericCommandParameters:
         lgcode = getuserlang(str(ctx.message.author.id))
         if not lang_exist(lgcode): lgcode = "EN"
         self.lang = get_lang(lgcode)
-        self.jdrlist = srv.jdrlist()
+        self.jdrlist = self.srv.jdrlist()
         self.jdr = None
         self.charbase = None
         self.char = None
         if check_jdrchannel(ctx):
-            self.jdr = srv.getJDR(str(ctx.message.channel.id))
-            self.charbase = jdr.get_charbase()
+            self.jdr = self.srv.getJDR(str(ctx.message.channel.id))
+            self.charbase = self.jdr.get_charbase()
             for i in self.charbase:
                 if i.linked == str(ctx.message.author.id) and i.selected:
                     self.char = i

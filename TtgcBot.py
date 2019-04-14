@@ -45,6 +45,7 @@ from src.Translator import *
 # from mapmanager import *
 from src.checks import *
 from src.cogs.BotManage import *
+from src.cogs.Moderation import *
 
 global logger
 logger = initlogs()
@@ -87,7 +88,7 @@ async def blacklist(ctx):
 @client.event
 async def on_message(message):
     if not message.content.startswith(get_prefix(client,message)):
-        if message.guild is not None:
+        if message.guild is not None and message.author != client.user:
             srv = DBServer(str(message.guild.id))
             filtre = srv.wordblocklist()
             for i in filtre:
@@ -108,11 +109,14 @@ async def on_command_error(ctx,error):
     lgcode = getuserlang(str(ctx.message.author.id))
     if not lang_exist(lgcode): lgcode = "EN"
     lang = get_lang(lgcode)
-    msg = lang["error"].format(traceback.format_exc(limit=100))
+    msg = lang["error"].format(error)
 
-    if isinstance(error,commands.CheckFailure): return
+    if isinstance(error,commands.CommandNotFound): msg = lang["error_notfound"]
+    elif isinstance(error,commands.BotMissingPermissions): msg = lang["error_perms"]
+    elif isinstance(error,commands.CheckFailure): return
     elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
-    else: logger.warning(traceback.format_exc(limit=1))
+    elif isinstance(error,commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))
+    else: logger.warning(error)
     await ctx.message.channel.send(msg)
 
 @client.event
@@ -194,6 +198,7 @@ async def on_ready():
 async def main():
     global TOKEN,logger
     client.add_cog(BotManage(client,logger))
+    client.add_cog(Moderation(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

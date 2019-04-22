@@ -224,3 +224,4 @@ error_cd=Cette commande est actuellement en cooldown, essayez a nouveau dans {} 
 punish=Sanction
 none=Aucune
 error_notfound=Cette commande n'existe pas !
+setlang_notexist=La langue `{}` n'est pas supportee. Vous pouvez contribuer a la traduction ici : https://ttgc.github.io/TtgcBot/

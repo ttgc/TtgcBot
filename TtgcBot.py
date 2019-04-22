@@ -46,6 +46,7 @@ from src.Translator import *
 from src.checks import *
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
+from src.cogs.Other import *
 
 global logger
 logger = initlogs()
@@ -199,6 +200,7 @@ async def main():
     global TOKEN,logger
     client.add_cog(BotManage(client,logger))
     client.add_cog(Moderation(client,logger))
+    client.add_cog(Other(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

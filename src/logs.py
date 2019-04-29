@@ -17,13 +17,15 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
+import logging,os
 
 class DebugFilter(logging.Filter):
     def filter(self,record):
         return record.levelno == logging.DEBUG+1
 
 def initlogs():
+    if not os.access("Logs",os.F_OK):
+        os.mkdir("Logs")
     logger = logging.getLogger('discord')
     # basic handler (all)
     logging.basicConfig(level=logging.DEBUG+1)

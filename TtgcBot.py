@@ -25,7 +25,7 @@ import asyncio
 # from threading import Thread
 import logging
 # import time
-import os
+# import os
 # import zipfile
 # import sys
 # import requests
@@ -204,8 +204,6 @@ async def main():
     await client.login(TOKEN)
     await client.connect()
 
-if not os.access("Logs",os.F_OK):
-    os.mkdir("Logs")
 loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(main())

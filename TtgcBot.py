@@ -47,6 +47,7 @@ from src.checks import *
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
+from src.cogs.NSFW import *
 
 global logger
 logger = initlogs()
@@ -117,6 +118,7 @@ async def on_command_error(ctx,error):
     elif isinstance(error,commands.CheckFailure): return
     elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
     elif isinstance(error,commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))
+    elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
     else: logger.warning(error)
     await ctx.message.channel.send(msg)
 
@@ -201,6 +203,7 @@ async def main():
     client.add_cog(BotManage(client,logger))
     client.add_cog(Moderation(client,logger))
     client.add_cog(Other(client,logger))
+    client.add_cog(NSFW(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

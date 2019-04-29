@@ -225,3 +225,4 @@ punish=Sanction
 none=Aucune
 error_notfound=Cette commande n'existe pas !
 setlang_notexist=La langue `{}` n'est pas supportee. Vous pouvez contribuer a la traduction ici : https://ttgc.github.io/TtgcBot/
+error_nsfw=Vous ne pouvez pas utiliser cette commande en dehors d'un channel NSFW

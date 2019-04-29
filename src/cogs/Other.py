@@ -41,7 +41,7 @@ class Other(commands.Cog):
         await ctx.message.channel.send(data.lang["ping"].format(ping))
         self.logger.log(logging.DEBUG+1,"current ping : %d ms",ping)
 
-    @commands.cooldown(1,60,BucketType.user)
+    @commands.cooldown(1,60,commands.BucketType.user)
     @commands.command(aliases=['setlanguage'])
     async def setlang(self,ctx,lg):
         if lang_exist(lg):
@@ -68,33 +68,33 @@ class Other(commands.Cog):
         await ctx.message.channel.send(embed=embd)
         self.logger.info("Invite generated on channel %d from server %d by %d",ctx.message.channel.id,ctx.message.guild.id,ctx.message.author.id)
 
-    @commands.cooldown(1,30,BucketType.channel)
+    @commands.cooldown(1,30,commands.BucketType.channel)
     @commands.command()
     async def yay(self,ctx):
         f = open("pictures/YAY.png","rb")
         await ctx.message.channel.send("YAY !",file=discord.File(f))
         f.close()
 
-    @commands.cooldown(1,30,BucketType.channel)
+    @commands.cooldown(1,30,commands.BucketType.channel)
     @commands.command()
     async def choquedecu(self,ctx):
         f = open("pictures/choquedecu.png","rb")
         await ctx.message.channel.send("#choquedecu",file=discord.File(f))
         f.close()
 
-    @commands.cooldown(1,30,BucketType.channel)
+    @commands.cooldown(1,30,commands.BucketType.channel)
     @commands.command()
     async def onichan(self,ctx):
         f = open("pictures/onichan.jpg","rb")
         await ctx.message.channel.send(file=discord.File(f))
         f.close()
 
-    @commands.cooldown(1,30,BucketType.channel)
+    @commands.cooldown(1,30,commands.BucketType.channel)
     @commands.command()
     async def pi(self,ctx):
         await ctx.message.channel.send("3,141 592 653 589 793 238 462 643 383 279 502 884 197 169 399 375 105 820 974 944 592 307 816 406 286 208 998 628 034 825 342 117 0679...\nhttp://www.nombrepi.com/")
 
-    @commands.cooldown(7,30,BucketType.channel)
+    @commands.cooldown(7,30,commands.BucketType.channel)
     @commands.bot_has_permissions(manage_messages=True)
     @commands.command()
     async def tell(self,ctx,*,msg):
@@ -102,7 +102,7 @@ class Other(commands.Cog):
         await ctx.message.channel.send(msg)
         await ctx.message.delete()
 
-    @commands.cooldown(3,30,BucketType.channel)
+    @commands.cooldown(3,30,commands.BucketType.channel)
     @commands.bot_has_permissions(manage_messages=True,send_tts_messages=True)
     @commands.command(aliases=['telltts'])
     async def ttstell(self,ctx,*,msg):
@@ -120,7 +120,7 @@ class Other(commands.Cog):
     #     await ctx.message.channel.send(data.lang["setprefix"].format(pref))
     #
     # @commands.check(check_admin)
-    # @commands.cooldown(1,60,commands.BucketType.default)
+    # @commands.cooldown(1,60,commands.commands.BucketType.default)
     # @commands.command(aliases=['adminrole'])
     # async def setadminrole(self,ctx,role: discord.Role):
     #     data = GenericCommandParameters(ctx)

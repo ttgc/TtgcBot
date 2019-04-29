@@ -198,14 +198,14 @@ async def on_ready():
 
 async def main():
     global TOKEN,logger
-    if not os.access("Logs",os.F_OK):
-        os.mkdir("Logs")
     client.add_cog(BotManage(client,logger))
     client.add_cog(Moderation(client,logger))
     client.add_cog(Other(client,logger))
     await client.login(TOKEN)
     await client.connect()
 
+if not os.access("Logs",os.F_OK):
+    os.mkdir("Logs")
 loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(main())

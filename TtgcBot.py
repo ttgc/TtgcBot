@@ -25,7 +25,7 @@ import asyncio
 # from threading import Thread
 import logging
 # import time
-# import os
+import os
 # import zipfile
 # import sys
 # import requests
@@ -198,6 +198,8 @@ async def on_ready():
 
 async def main():
     global TOKEN,logger
+    if not os.access("Logs",os.F_OK):
+        os.mkdir("Logs")
     client.add_cog(BotManage(client,logger))
     client.add_cog(Moderation(client,logger))
     client.add_cog(Other(client,logger))

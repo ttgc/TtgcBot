@@ -30,7 +30,7 @@ class Other(commands.Cog):
         self.bot = bot
         self.logger = logger
 
-    @commands.cooldown(1,30,BucketType.user)
+    @commands.cooldown(1,30,commands.BucketType.user)
     @commands.command()
     async def ping(self,ctx):
         data = GenericCommandParameters(ctx)

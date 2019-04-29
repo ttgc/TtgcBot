@@ -22,6 +22,7 @@ from src.BotTools import *
 from discord.ext import commands
 import logging,asyncio
 import discord
+import os
 from random import choice
 from src.Translator import *
 
@@ -36,14 +37,14 @@ class NSFW(commands.Cog):
     @commands.command()
     async def nsfwjoke(self,ctx):
         with open("Jokes/nsfw-fr.txt") as f:
-            await ctx.message.channel.send(choice(f.readlines()))
+            await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))
 
     @commands.cooldown(5,30,commands.BucketType.channel)
     @commands.cooldown(3,5,commands.BucketType.user)
     @commands.is_nsfw()
     @commands.command()
     async def hentai(self,ctx):
-        with open("Hentai/{}".format(choice),"rb") as f:
+        with open("Hentai/{}".format(choice(os.listdir("Hentai"))),"rb") as f:
             await ctx.message.channel.send(file=discord.File(f))
 
     @commands.cooldown(1,30,commands.BucketType.channel)

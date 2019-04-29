@@ -58,13 +58,13 @@ class Other(commands.Cog):
         data = GenericCommandParameters(ctx)
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
-        url = discord.utils.oauth_url(str(client.user.id),botaskperm)
+        url = discord.utils.oauth_url(str(self.bot.user.id),botaskperm)
         embd = discord.Embed(title="TtgcBot",description=lang["invite"],colour=discord.Color(randint(0,int('ffffff',16))),url=url)
-        embd.set_footer(text=lang["invite_author"],icon_url=client.user.avatar_url)
-        embd.set_image(url=client.user.avatar_url)
+        embd.set_footer(text=lang["invite_author"],icon_url=self.bot.user.avatar_url)
+        embd.set_image(url=self.bot.user.avatar_url)
         embd.set_author(name="Ttgc",icon_url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/08/avatar-2-perso.png",url=url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-        embd.add_field(name=lang["invite_srv"],value=str(len(client.guilds))+" servers",inline=True)
+        embd.add_field(name=lang["invite_srv"],value=str(len(self.bot.guilds))+" servers",inline=True)
         await ctx.message.channel.send(embed=embd)
         self.logger.info("Invite generated on channel %d from server %d by %d",ctx.message.channel.id,ctx.message.guild.id,ctx.message.author.id)
 
@@ -115,4 +115,4 @@ class Other(commands.Cog):
     @commands.command()
     async def joke(self,ctx):
         with open("Jokes/joke-fr.txt") as f:
-            await ctx.message.channel.send(choice(f.readlines()))
+            await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))

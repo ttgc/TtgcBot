@@ -22,7 +22,7 @@ from src.BotTools import *
 from discord.ext import commands
 import logging,asyncio,time
 import discord
-from random import choice
+from random import randint,choice
 from src.Translator import *
 
 class Other(commands.Cog):

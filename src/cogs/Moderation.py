@@ -31,7 +31,7 @@ class Moderation(commands.Cog):
         self.logger = logger
 
     @commands.check(check_admin)
-    @commands.cooldown(1,30,commands.BucketType.default)
+    @commands.cooldown(1,30,commands.BucketType.guild)
     @commands.command(aliases=['prefix'])
     async def setprefix(self,ctx,pref):
         data = GenericCommandParameters(ctx)
@@ -40,7 +40,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(data.lang["setprefix"].format(pref))
 
     @commands.check(check_admin)
-    @commands.cooldown(1,60,commands.BucketType.default)
+    @commands.cooldown(1,60,commands.BucketType.guild)
     @commands.command(aliases=['adminrole'])
     async def setadminrole(self,ctx,role: discord.Role):
         data = GenericCommandParameters(ctx)

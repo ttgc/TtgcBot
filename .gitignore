@@ -105,4 +105,12 @@ __cache__/
 token.ini
 arial.ttf
 __deprecated__/
+
+# Custom files
 Hentai/
+ffmpeg-*/
+ffmpeg.exe
+Music/
+Backup.*
+nogit-*
+*.zip

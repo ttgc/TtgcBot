@@ -53,9 +53,8 @@ class Keeprole(commands.Cog):
         self.logger.info("purged keeprole on server %s",str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["kr_purge"])
 
-    @keeprole.group(name="roles",invoke_without_command=True)
-    async def keeprole_roles(self,ctx):
-        await self.keeprole_roles_list(ctx)
+    @keeprole.group(name="roles",invoke_without_command=True,callback=keeprole_roles_list)
+    async def keeprole_roles(self,ctx): pass
 
     @keeprole_roles.command(name="list")
     async def keeprole_roles_list(self,ctx):
@@ -77,34 +76,27 @@ class Keeprole(commands.Cog):
         info = await self.bot.application_info()
         botmember = ctx.message.guild.get_member(info.id)
         strls = ""
-        print(roles)
+        nbr = 0
         for i in roles:
             if i.position < botmember.top_role.position:
                 strls += "\n{}".format(i.mention)
-                print(str(i),i.mention)
                 data.srv.addkeeprole(str(i.id))
-        self.logger.info("added %d roles to keeprole on server %s",len(roles),str(ctx.message.guild.id))
-        print(strls)
+                nbr += 1
+        self.logger.info("added %d roles to keeprole on server %s",nbr,str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["kr_add"].format(strls))
 
     @keeprole_roles.command(name="delete",aliases=["-","del","remove","rm"])
     async def keeprole_roles_delete(self,ctx,roles: commands.Greedy[discord.Role]):
         data = GenericCommandParameters(ctx)
-        info = await self.bot.application_info()
-        botmember = ctx.message.guild.get_member(info.id)
         strls = ""
         for i in roles:
-            if i.position < botmember.top_role.position:
-                strls += "\n{}".format(i.mention)
-                print(i,i.mention)
-                data.srv.removekeeprole(str(i.id))
+            strls += "\n{}".format(i.mention)
+            data.srv.removekeeprole(str(i.id))
         self.logger.info("removed %d roles from keeprole on server %s",len(roles),str(ctx.message.guild.id))
-        print(strls)
         await ctx.message.channel.send(data.lang["kr_del"].format(strls))
 
-    @keeprole.group(name="members",invoke_without_command=True)
-    async def keeprole_members(self,ctx):
-        await self.keeprole_members_list(ctx)
+    @keeprole.group(name="members",invoke_without_command=True,callback=keeprole_members_list)
+    async def keeprole_members(self,ctx): pass
 
     @keeprole_members.command(name="list")
     async def keeprole_members_list(self,ctx):

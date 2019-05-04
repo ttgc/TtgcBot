@@ -64,7 +64,7 @@ class Keeprole(commands.Cog):
         rllist = ""
         for i in ls:
             rllist += "{}\n".format(discord.utils.get(ctx.message.guild.roles,id=int(i)).mention)
-        if rllist = "": rllist = "No roles"
+        if rllist == "": rllist = "No roles"
         embd = discord.Embed(title="Keeprole system",description=data.lang["kr_roles"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)

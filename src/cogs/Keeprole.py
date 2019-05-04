@@ -40,7 +40,7 @@ class Keeprole(commands.Cog):
         data = GenericCommandParameters(ctx)
         data.srv.togglekeeprole()
         self.logger.info("Toggle Keeprole system on server %s",str(ctx.message.guild.id))
-        if !data.srv.keepingrole:
+        if not data.srv.keepingrole:
             await ctx.message.channel.send(data.lang["kr_on"])
         else:
             await ctx.message.channel.send(data.lang["kr_off"])

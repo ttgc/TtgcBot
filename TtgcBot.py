@@ -48,6 +48,7 @@ from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
 from src.cogs.NSFW import *
+from src.cogs.Keeprole import *
 
 global logger
 logger = initlogs()
@@ -204,6 +205,7 @@ async def main():
     client.add_cog(Moderation(client,logger))
     client.add_cog(Other(client,logger))
     client.add_cog(NSFW(client,logger))
+    client.add_cog(Keeprole(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

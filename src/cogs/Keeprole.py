@@ -53,7 +53,7 @@ class Keeprole(commands.Cog):
         self.logger.info("purged keeprole on server %s",str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["kr_purge"])
 
-    @keeprole.group(name="roles",invoke_without_command=True,callback=keeprole_roles_list)
+    @keeprole.group(name="roles",invoke_without_command=False)
     async def keeprole_roles(self,ctx): pass
 
     @keeprole_roles.command(name="list")
@@ -95,7 +95,7 @@ class Keeprole(commands.Cog):
         self.logger.info("removed %d roles from keeprole on server %s",len(roles),str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["kr_del"].format(strls))
 
-    @keeprole.group(name="members",invoke_without_command=True,callback=keeprole_members_list)
+    @keeprole.group(name="members",invoke_without_command=False)
     async def keeprole_members(self,ctx): pass
 
     @keeprole_members.command(name="list")

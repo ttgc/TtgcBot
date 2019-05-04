@@ -70,7 +70,7 @@ class Keeprole(commands.Cog):
         embd.add_field(name="Roles list :",value=rllist,inline=True)
         await ctx.message.channel.send(embed=embd)
 
-    @keeprole_roles.command(name="add",aliases="+")
+    @keeprole_roles.command(name="add",aliases=["+"])
     async def keeprole_roles_add(self,ctx,roles: commands.Greedy[discord.Role]):
         data = GenericCommandParameters(ctx)
         info = await self.bot.application_info()

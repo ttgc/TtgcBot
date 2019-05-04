@@ -64,6 +64,7 @@ class Keeprole(commands.Cog):
         rllist = ""
         for i in ls:
             rllist += "{}\n".format(discord.utils.get(ctx.message.guild.roles,id=int(i)).mention)
+        if rllist = "": rllist = "No roles"
         embd = discord.Embed(title="Keeprole system",description=data.lang["kr_roles"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -76,9 +77,11 @@ class Keeprole(commands.Cog):
         info = await self.bot.application_info()
         botmember = ctx.message.guild.get_member(info.id)
         strls = ""
+        print(roles)
         for i in roles:
             if i.position < botmember.top_role.position:
                 strls += "\n{}".format(i.mention)
+                print(str(i),i.mention)
                 data.srv.addkeeprole(str(i.id))
         self.logger.info("added %d roles to keeprole on server %s",len(roles),str(ctx.message.guild.id))
         print(strls)
@@ -93,6 +96,7 @@ class Keeprole(commands.Cog):
         for i in roles:
             if i.position < botmember.top_role.position:
                 strls += "\n{}".format(i.mention)
+                print(i,i.mention)
                 data.srv.removekeeprole(str(i.id))
         self.logger.info("removed %d roles from keeprole on server %s",len(roles),str(ctx.message.guild.id))
         print(strls)

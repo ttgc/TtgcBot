@@ -40,7 +40,7 @@ class Keeprole(commands.Cog):
         data = GenericCommandParameters(ctx)
         data.srv.togglekeeprole()
         self.logger.info("Toggle Keeprole system on server %s",str(ctx.message.guild.id))
-        if not data.srv.keepingrole:
+        if data.srv.keepingrole:
             await ctx.message.channel.send(data.lang["kr_on"])
         else:
             await ctx.message.channel.send(data.lang["kr_off"])
@@ -60,7 +60,7 @@ class Keeprole(commands.Cog):
     @keeprole_roles.command(name="list")
     async def keeprole_roles_list(self,ctx):
         data = GenericCommandParameters(ctx)
-        ls = srv.keeprolelist()
+        ls = data.srv.keeprolelist()
         rllist = ""
         for i in ls:
             rllist += "{}\n".format(discord.utils.get(ctx.message.guild.roles,id=int(i)).mention)
@@ -81,6 +81,7 @@ class Keeprole(commands.Cog):
                 strls += "\n{}".format(i.mention)
                 data.srv.addkeeprole(str(i.id))
         self.logger.info("added %d roles to keeprole on server %s",len(roles),str(ctx.message.guild.id))
+        print(strls)
         await ctx.message.channel.send(data.lang["kr_add"].format(strls))
 
     @keeprole_roles.command(name="delete",aliases=["-","del","remove","rm"])
@@ -94,6 +95,7 @@ class Keeprole(commands.Cog):
                 strls += "\n{}".format(i.mention)
                 data.srv.removekeeprole(str(i.id))
         self.logger.info("removed %d roles from keeprole on server %s",len(roles),str(ctx.message.guild.id))
+        print(strls)
         await ctx.message.channel.send(data.lang["kr_del"].format(strls))
 
     @keeprole.group(name="members",invoke_without_command=True)

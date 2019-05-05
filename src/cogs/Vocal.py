@@ -71,17 +71,17 @@ class Vocal(commands.Cog):
     async def vocal_skip(self,ctx):
         self.vocalcore.getvocal(str(ctx.message.guild.id)).skip()
 
-    @command.check(check_admin)
+    @commands.check(check_admin)
     @vocal.command(name="pause")
     async def vocal_pause(self,ctx):
         self.vocalcore.getvocal(str(ctx.message.guild.id)).pause()
 
-    @command.check(check_admin)
+    @commands.check(check_admin)
     @vocal.command(name="resume")
     async def vocal_resume(self,ctx):
         self.vocalcore.getvocal(str(ctx.message.guild.id)).resume()
 
-    @command.check(check_botmanager)
+    @commands.check(check_botmanager)
     @vocal.command(name="disconnectall",aliases=["forcedisconect"])
     async def vocal_disconnectall(self,ctx):
         await ctx.message.channel.send("This will disconnect the bot from all vocal connections, are you sure ?\nType `confirm` to perform this")

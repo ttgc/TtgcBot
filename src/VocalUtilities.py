@@ -109,7 +109,7 @@ class VocalSystem:
             name = path.replace("\\","/").split("/")[-1]
         song = discord.FFmpegPCMAudio(path)
         if not self.co.is_playing():
-            self.co.play(song,after=lambda err: self.bot.loop.call_soon_threadsafe(self.after))
+            self.co.play(song,after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
         self.queue.append((name,song))
         self.logger.info("added song %s (%s) to queue on server %d",name,path,self.vocalchan.guild.id)
         await self.textchan.send(self.lang["vocal_play"].format(name))

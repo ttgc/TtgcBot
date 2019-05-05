@@ -122,7 +122,7 @@ class VocalSystem:
             await self.textchan.send(self.lang["vocal_stop"])
             self.logger.info("finished playing on server %d",self.vocalchan.guild.id)
         else:
-            self.co.play(self.queue[0][1])
+            self.co.play(self.queue[0][1],after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
             await self.textchan.send(self.lang["vocal_next"].format(self.queue[0][0]))
             self.logger.info("playing next song on server %d",self.vocalchan.guild.id)
 

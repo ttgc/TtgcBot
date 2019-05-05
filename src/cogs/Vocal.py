@@ -64,7 +64,7 @@ class Vocal(commands.Cog):
             path = search
             if "{}.mp3".format(search) in os.listdir("Music/"): path += ".mp3"
             elif "{}.wav".format(search) in os.listdir("Music/"): path += ".wav"
-            await vc.append(path,False)
+            await vc.append("Music/{}".format(path),False)
 
     @commands.cooldown(1,2,commands.BucketType.guild)
     @vocal.command(name="skip")

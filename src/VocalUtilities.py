@@ -100,10 +100,10 @@ class VocalSystem:
             with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
                 song_info = ydl.extract_info(path,download=False)
             if "entries" in song_info:
-                path = song_info["entries"][0]["webpage_url"]
+                path = song_info#["entries"][0]["webpage_url"]
                 name = song_info["entries"][0]["title"]
             else:
-                path = song_info["webpage_url"]
+                path = song_info#["webpage_url"]
                 name = song_info["title"]
         else:
             name = path.replace("\\","/").split("/")[-1]

@@ -100,12 +100,12 @@ class VocalSystem:
             with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
                 song_info = ydl.extract_info(path,download=False)
                 if "entries" in song_info: song_info = song_info["entries"][0]
-                path = ydl.urlopen(song_info["webpage_url"]).file.read()
+                path = ydl.urlopen(song_info["webpage_url"]).file
             #path = song_info#["webpage_url"]
             name = song_info["title"]
         else:
             name = path.replace("\\","/").split("/")[-1]
-        song = discord.FFmpegPCMAudio(path)
+        song = discord.FFmpegPCMAudio(path,yt)
         if not self.co.is_playing():
             self.co.play(song,after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
         self.queue.append((name,song))

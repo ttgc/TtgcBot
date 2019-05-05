@@ -58,7 +58,7 @@ class Vocal(commands.Cog):
     @vocal.command(name="playlocal",aliases=["localplay"])
     async def vocal_playlocal(self,ctx,*,search):
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
-        if not os.access("Music/",os.F_OK) or not search in os.listdir("Music/") or not "{}.mp3".format(search) in os.listdir("Music/") or not "{}.wav".format(search) in os.listdir("Music/"):
+        if not os.access("Music/",os.F_OK) or (not search in os.listdir("Music/") and not "{}.mp3".format(search) in os.listdir("Music/") and not "{}.wav".format(search) in os.listdir("Music/")):
             await vc.textchan.send(vc.lang["playlocal_notfound"])
         else:
             path = search

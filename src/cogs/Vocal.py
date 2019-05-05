@@ -66,6 +66,7 @@ class Vocal(commands.Cog):
             elif "{}.wav".format(search) in os.listdir("Music/"): path += ".wav"
             await vc.append(path,False)
 
+    @commands.cooldown(1,2,commands.BucketType.guild)
     @vocal.command(name="skip")
     async def vocal_skip(self,ctx):
         self.vocalcore.getvocal(str(ctx.message.guild.id)).skip()
@@ -81,6 +82,7 @@ class Vocal(commands.Cog):
         self.vocalcore.getvocal(str(ctx.message.guild.id)).resume()
 
     @commands.check(check_botmanager)
+    @commands.cooldown(1,60,commands.BucketType.default)
     @vocal.command(name="disconnectall",aliases=["forcedisconect"])
     async def vocal_disconnectall(self,ctx):
         await ctx.message.channel.send("This will disconnect the bot from all vocal connections, are you sure ?\nType `confirm` to perform this")

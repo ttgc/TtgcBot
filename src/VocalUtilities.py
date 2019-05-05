@@ -64,7 +64,7 @@ class VocalCore:
 
     async def interupt(self,ctx):
         self.logger.warning("Vocal service interuption requested by botmanager")
-        for i in self.voclist.keys():
+        for i in list(self.voclist.keys()):
             if self.voclist[i].vocal:
                 await self.voclist[i].textchan.send(":x: System interuption launched by administrators, vocal disconnected")
                 await self.voclist[i].leave(True)

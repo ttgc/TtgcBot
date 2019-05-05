@@ -69,17 +69,17 @@ class Vocal(commands.Cog):
     @commands.cooldown(1,2,commands.BucketType.guild)
     @vocal.command(name="skip")
     async def vocal_skip(self,ctx):
-        self.vocalcore.getvocal(str(ctx.message.guild.id)).skip()
+        await self.vocalcore.getvocal(str(ctx.message.guild.id)).skip()
 
     @commands.check(check_admin)
     @vocal.command(name="pause")
     async def vocal_pause(self,ctx):
-        self.vocalcore.getvocal(str(ctx.message.guild.id)).pause()
+        await self.vocalcore.getvocal(str(ctx.message.guild.id)).pause()
 
     @commands.check(check_admin)
     @vocal.command(name="resume")
     async def vocal_resume(self,ctx):
-        self.vocalcore.getvocal(str(ctx.message.guild.id)).resume()
+        await self.vocalcore.getvocal(str(ctx.message.guild.id)).resume()
 
     @commands.check(check_botmanager)
     @commands.cooldown(1,60,commands.BucketType.default)

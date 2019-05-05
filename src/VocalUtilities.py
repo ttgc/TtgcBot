@@ -105,7 +105,7 @@ class VocalSystem:
             name = song_info["title"]
         else:
             name = path.replace("\\","/").split("/")[-1]
-        song = discord.FFmpegPCMAudio(path,yt)
+        song = discord.FFmpegPCMAudio(path,pipe=yt)
         if not self.co.is_playing():
             self.co.play(song,after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
         self.queue.append((name,song))

@@ -92,6 +92,7 @@ class BotManage(commands.Cog):
             await ctx.message.channel.send("your request has timeout")
         else:
             self.logger.warning("Shutdown requested by %s",str(ctx.message.author))
+            await self.bot.get_cog("Vocal").vocalcore.interupt(ctx)
             await self.bot.logout()
             sys.exit(0)
 
@@ -106,6 +107,7 @@ class BotManage(commands.Cog):
             await ctx.message.channel.send("your request has timeout")
         else:
             self.logger.warning("Reboot requested by %s",str(ctx.message.author))
+            await self.bot.get_cog("Vocal").vocalcore.interupt(ctx)
             await self.bot.logout()
             sub.call(['./bootbot.sh'])
             sys.exit(0)

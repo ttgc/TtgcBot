@@ -18,31 +18,33 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from threading import Thread
-import time
 import asyncio
 import discord
+import youtube_dl
+import logging
 
-def singleton(classe_definie):
-    instances = {} # Dictionnaire de nos instances singletons
-    def get_instance():
-        if classe_definie not in instances:
-            # On crée notre premier objet de classe_definie
-            instances[classe_definie] = classe_definie()
-        return instances[classe_definie]
-    return get_instance
-
-@singleton
+# def singleton(classe_definie):
+#     instances = {} # Dictionnaire de nos instances singletons
+#     def get_instance():
+#         if classe_definie not in instances:
+#             # On crée notre premier objet de classe_definie
+#             instances[classe_definie] = classe_definie()
+#         return instances[classe_definie]
+#     return get_instance
+#
+# @singleton
 class VocalCore:
-    def __init__(self):
-        self.bot = None
-        self.loop = asyncio.get_event_loop()
+    def __init__(self,bot,logger):
+        self.bot = bot
+        self.logger = logger
         self.voclist = {}
 
     def _addtolist(self,servid,vocobj):
         if not servid in self.voclist:
+            self.logger.log(logging.DEBUG+1,"vocalcore - server added to list : %s",servid)
             self.voclist[servid] = vocobj
             return True
+        self.logger.log(logging.DEBUG+1,"vocalcore - cannot add server %s to list, already exist",servid)
         return False
 
     def removefromlist(self,servid):
@@ -50,7 +52,9 @@ class VocalCore:
             vocobj = self.voclist[servid]
             del(vocobj)
             del(self.voclist[servid])
+            self.logger.log(logging.DEBUG+1,"vocalcore - server removed from list : %s",servid)
             return True
+        self.logger.log(logging.DEBUG+1,"vocalcore - cannot remove server %s from list, doesnt exist",servid)
         return False
 
     def getvocal(self,servid):
@@ -58,122 +62,98 @@ class VocalCore:
             return self.voclist[servid]
         return None
 
-    @asyncio.coroutine
-    def interupt(self):
+    async def interupt(self,ctx):
+        self.log.warning("Vocal service interuption requested by botmanager")
         for i in self.voclist.keys():
             if self.voclist[i].vocal:
-                yield from self.bot.send_message(self.voclist[i].textchan,":x: System interuption launched by administrators, vocal disconnected")
-                yield from self.voclist[i].leave()
-            vocobj = self.voclist[i]
-            del(vocobj)
-            self.voclist[i] = None
-        self.voclist = {}
-                
-        
+                await self.voclist[i].textchan.send(":x: System interuption launched by administrators, vocal disconnected")
+                await self.voclist[i].leave(True)
+                asyncio.sleep(1)
+            self.removefromlist(i)
+        await ctx.message.channel.send("Vocal service disconnected successful")
+
 class VocalSystem:
-    def __init__(self,servid,vc=VocalCore()):
+    def __init__(self,servid,vc):
         self.vocal = False
         self.co = None
-        self.loop = vc.loop
-        self.timer = VocalTimeout(60,self.loop)
         self.queue = []
-        self.current = None
-        self.is_playing = False
         self.textchan = None
+        self.vocalchan = None
         self.bot = vc.bot
+        self.logger = vc.logger
+        self.lang = None
         vc._addtolist(servid,self)
 
-    @asyncio.coroutine
-    def join(self,chan,textchan):
+    async def join(self,chan,textchan,lang):
         self.vocal = True
-        self.co = yield from self.bot.join_voice_channel(chan)
+        self.co = await chan.connect()
+        self.vocalchan = chan
         self.textchan = textchan
-        self.timer.start()
+        self.lang = lang
+        self.logger.info("Joining vocal channel %d (binding to text channel %d) on server %d",self.vocalchan.id,self.textchan.id,self.vocalchan.guild.id)
+        await self.textchan.send(self.lang["vocal_on"].format(str(self.vocalchan),str(self.textchan)))
 
-    @asyncio.coroutine
-    def append(self,path,yt=True):
-        self.timer.reset()
+    async def append(self,path,yt=True):
+        self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
         if yt:
-            song = yield from self.co.create_ytdl_player(path,ytdl_options={"noplaylist":True,"playlist_items":"1"},after=self.after)
+            with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
+                song_info = ydl.extract_info(path,download=False)
+            if "entries" in song_info:
+                path = song_info["entries"][0]["webpage_url"]
+                name = song_info["entries"][0]["title"]
+            else:
+                path = song_info["webpage_url"]
+                name = song_info["title"]
         else:
-            song = self.co.create_ffmpeg_player(path,after=self.after)
-        self.queue.append(song)
-        self.timer.reset()
+            name = path.replace("\\","/").split("/")[-1]
+        song = discord.FFmpegPCMAudio(path)
+        self.co.play(song,after=lambda err: self.bot.loop.call_soon_threadsafe(self.after))
+        self.queue.append(name)
+        self.logger.info("added song %s (%s) to queue on server %d",name,path,self.vocalchan.guild.id)
+        await self.textchan.send(self.lang["vocal_play"].format(name))
 
-    def play(self):
+    async def after(self):
+        self.queue.pop(0)
+        self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
-        if self.is_playing: return
-        if len(self.queue) == 0:
-            self.is_playing = False
-            return
-        self.is_playing = True
-        self.timer = VocalTimeout(60,self.loop)
-        self.queue[0].start()
-        self.current = self.queue[0]
-        del(self.queue[0])
+        asyncio.sleep(1)
+        if not self.co.is_playing():
+            await self.textchan.send(self.lang["vocal_stop"])
+            self.logger.info("finished playing on server %d",self.vocalchan.guild.id)
+        else:
+            await self.textchan.send(self.lang["vocal_next"].format(self.queue[0]))
+            self.logger.info("playing next song on server %d",self.vocalchan.guild.id)
 
-    def after(self):
+    async def skip(self):
+        self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
-        self.is_playing = False
-        self.play()
-        if not self.is_playing:
-            self.current = None
-            self.queue = []
-            #self.timer = VocalTimeout(60)
-            self.timer.start()
+        if not self.co.is_playing(): return
+        self.co.stop()
+        await self.textchan.send(self.lang["musicskip"])
+        self.logger.info("skipping song on server %d",self.vocalchan.guild.id)
 
-    def skip(self):
+    async def pause(self):
+        self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
-        if not self.is_playing: return
-        if not self.current.is_done():
-            self.current.stop()
-        #del(self.queue[0])
-        #self.after()             
+        self.co.pause()
+        self.logger.info("pausing vocal on server %d",self.vocalchan.guild.id)
+        await self.textchan.send(self.lang["vocal_pause"])
 
-    @asyncio.coroutine
-    def leave(self):
+    async def resume(self):
+        self.vocal = self.co is not None and self.co.is_connected()
+        if not self.vocal: return
+        self.co.resume()
+        self.logger.info("resuming vocal on server %d",self.vocalchan.guild.id)
+        await self.textchan.send(self.lang["vocal_resume"])
+
+    async def leave(self,forced=False):
         self.vocal = False
-        yield from self.co.disconnect()
+        await self.co.disconnect(force=forced)
+        self.logger.info("leaving voice channel on server %d",self.vocalchan.guild.id)
+        await self.textchan.send(self.lang["vocal_off"])
         self.co = None
-        self.timer = VocalTimeout(60,self.loop)
         self.queue = []
-        self.current = None
-        self.is_playing = False
+        self.vocalchan = None
         self.textchan = None
-
-    @asyncio.coroutine
-    def _timeout_leave(self):
-        yield from self.bot.send_message(self.textchan,"Leaving Voice for inactivity")
-        yield from self.leave()
-
-class VocalTimeout(Thread):
-    def __init__(self,tmax,loop):
-        Thread.__init__(self)
-        self.timer = 0
-        self.tmax = tmax
-        self.from_ = None
-        self.current = None
-        self.timeout = False
-        self.loop = loop
-        #self.loop = asyncio.get_event_loop()
-
-    def run(self):
-        self.from_ = time.clock()
-        self.current = time.clock()
-        self.timer = self.current - self.from_
-        while self.timer < self.tmax:
-            self.current = time.clock()
-            self.timer = self.current - self.from_
-            time.sleep(0.01)
-        self.timeout = True
-        system = VocalSystem()
-        if self == system.timer and system.vocal and (not system.is_playing):
-            self.loop.create_task(system._timeout_leave())
-            #loop = asyncio.get_event_loop()
-            #asyncio.set_event_loop(loop)
-            #loop.run_until_complete(system._timeout_leave())
-            #asyncio.async(system._timeout_leave())
-
-    def reset(self):
-        self.from_ = time.clock()
+        self.lang = None

@@ -49,6 +49,7 @@ from src.cogs.Moderation import *
 from src.cogs.Other import *
 from src.cogs.NSFW import *
 from src.cogs.Keeprole import *
+from src.cogs.Vocal import *
 
 global logger
 logger = initlogs()
@@ -206,6 +207,7 @@ async def main():
     client.add_cog(Other(client,logger))
     client.add_cog(NSFW(client,logger))
     client.add_cog(Keeprole(client,logger))
+    client.add_cog(Vocal(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

@@ -33,7 +33,6 @@ class Vocal(commands.Cog):
         self.vocalcore = VocalCore(self.bot,self.logger)
 
     @commands.check(check_premium)
-    @commands.bot_has_permissions(connect=True,speak=True)
     @commands.group(invoke_without_command=False,aliases=["music"])
     async def vocal(self,ctx):
         if self.vocalcore.getvocal(str(ctx.message.guild.id)) is None:

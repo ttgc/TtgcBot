@@ -41,14 +41,16 @@ class Vocal(commands.Cog):
     @vocal.command(name="on")
     async def vocal_on(self,ctx):
         data = GenericCommandParameters(ctx)
+        vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
         if ctx.message.author.voice.channel is None:
             await ctx.message.channel.send(data.lang["vocal_cantconnect"])
         else:
-            await self.vocalcore.getvocal(str(ctx.message.guild.id)).join(ctx.message.author.voice.channel,ctx.message.channel,data.lang)
+            if not vc.vocal: await vc.join(ctx.message.author.voice.channel,ctx.message.channel,data.lang)
 
     @vocal.command(name="off")
     async def vocal_off(self,ctx):
-        await self.vocalcore.getvocal(str(ctx.message.guild.id)).leave()
+        vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
+        if vc.vocal: await vc.leave()
 
     @vocal.command(name="play",aliases=["ytplay"])
     async def vocal_play(self,ctx,*,search):

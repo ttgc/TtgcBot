@@ -108,8 +108,9 @@ class VocalSystem:
         else:
             name = path.replace("\\","/").split("/")[-1]
         song = discord.FFmpegPCMAudio(path)
-        self.co.play(song,after=lambda err: self.bot.loop.call_soon_threadsafe(self.after))
-        self.queue.append(name)
+        if not self.co.is_playing():
+            self.co.play(song,after=lambda err: self.bot.loop.call_soon_threadsafe(self.after))
+        self.queue.append((name,song))
         self.logger.info("added song %s (%s) to queue on server %d",name,path,self.vocalchan.guild.id)
         await self.textchan.send(self.lang["vocal_play"].format(name))
 
@@ -117,12 +118,12 @@ class VocalSystem:
         self.queue.pop(0)
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
-        asyncio.sleep(1)
-        if not self.co.is_playing():
+        if len(self.queue) == 0:
             await self.textchan.send(self.lang["vocal_stop"])
             self.logger.info("finished playing on server %d",self.vocalchan.guild.id)
         else:
-            await self.textchan.send(self.lang["vocal_next"].format(self.queue[0]))
+            self.co.play(self.queue[0][1])
+            await self.textchan.send(self.lang["vocal_next"].format(self.queue[0][0]))
             self.logger.info("playing next song on server %d",self.vocalchan.guild.id)
 
     async def skip(self):

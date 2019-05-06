@@ -76,7 +76,7 @@ class MainJDR(commands.Cog):
         info = requests.get("http://thetaleofgreatcosmos.fr/wiki/api.php?action=parse&page="+query+"&format=json&redirects=true")
         exist_test = requests.get("http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query)
         if exist_test.status_code != 200:
-            yield from client.send_message(ctx.message.channel,data.lang["wiki_unexisting"].format(str(exist_test.status_code)))
+            await ctx.message.channel.send(data.lang["wiki_unexisting"].format(str(exist_test.status_code)))
             return
         descrip = info.json()["parse"]["text"]["*"]
         descrip = descrip.split("</p>")[0]

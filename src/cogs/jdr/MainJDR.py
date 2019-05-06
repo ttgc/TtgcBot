@@ -70,6 +70,7 @@ class MainJDR(commands.Cog):
                             await i.edit(i,mute=True,deafen=True)
 
     @commands.cooldown(1,1,commands.BucketType.channel)
+    @commands.command()
     async def wiki(self,ctx,*,query):
         data = GenericCommandParameters(ctx)
         query = query.replace(" ","_")
@@ -102,6 +103,7 @@ class MainJDR(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.command(aliases=['jointtgc','ttgc'])
+    @commands.command()
     async def jointhegame(self,ctx):
         inv = await self.bot.get_channel(326648561976737792).create_invite(max_age=3600)
         await ctx.message.channel.send("Rejoignez le serveur officiel The Tale of Great Cosmos (serveur FR) : \n{}".format(str(inv.url)))

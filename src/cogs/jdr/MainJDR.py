@@ -103,7 +103,6 @@ class MainJDR(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.command(aliases=['jointtgc','ttgc'])
-    @commands.command()
     async def jointhegame(self,ctx):
         inv = await self.bot.get_channel(326648561976737792).create_invite(max_age=3600)
         await ctx.message.channel.send("Rejoignez le serveur officiel The Tale of Great Cosmos (serveur FR) : \n{}".format(str(inv.url)))

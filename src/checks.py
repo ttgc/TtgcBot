@@ -84,3 +84,7 @@ class GenericCommandParameters:
                 if i.linked == str(ctx.message.author.id) and i.selected:
                     self.char = i
                     break
+
+def check_haschar(ctx):
+    data = GenericCommandParameters(ctx)
+    return data.char is not None

@@ -50,6 +50,7 @@ from src.cogs.Other import *
 from src.cogs.NSFW import *
 from src.cogs.Keeprole import *
 from src.cogs.jdr.MainJDR import *
+from src.cogs.jdr.CharacterCog import *
 
 global logger
 logger = initlogs()
@@ -208,6 +209,7 @@ async def main():
     client.add_cog(NSFW(client,logger))
     client.add_cog(Keeprole(client,logger))
     client.add_cog(MainJDR(client,logger))
+    client.add_cog(CharacterCog(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

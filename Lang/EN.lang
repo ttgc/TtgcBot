@@ -226,3 +226,4 @@ none=None
 error_notfound=This command does not exist !
 setlang_notexist=The language `{}` is not supported. You can contribute to translation here : https://ttgc.github.io/TtgcBot/
 error_nsfw=This command can only be used in a NSFW channel
+charset_invalid=Unknown key : {}

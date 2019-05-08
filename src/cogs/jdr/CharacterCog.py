@@ -108,3 +108,54 @@ class CharacterCog(commands.Cog):
             await data.char.roll(ctx.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
         else:
             await ctx.message.channel.send(data.lang["is_dead"].format(data.char.name))
+
+    @commands.check(check_chanmj)
+    @character.command(name="set")
+    async def character_set(self,ctx,key,char: CharacterConverter,*,value):
+        data = GenericCommandParameters(ctx)
+        if key.lower() == "name":
+            char.setname(value)
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["name"]))
+        elif key.lower() == "pv":
+            char = char.charset('pvmax',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["PV"]+" max"))
+        elif key.lower() == "pm":
+            char = char.charset('pmmax',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["PM"]+" max"))
+        elif key.lower() in ["str","force","strength"]:
+            char = char.charset('str',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["force"]))
+        elif key.lower() in ["spr","esprit","spirit"]:
+            char = char.charset('spr',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["esprit"]))
+        elif key.lower() in ["cha","charisme","charisma"]:
+            char = char.charset('cha',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["charisme"]))
+        elif key.lower() in ["agi","agilite","agility","furtivite"]:
+            char = char.charset('agi',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["agilite"]))
+        elif key.lower() in ["lp","lightpt","lightpoint"]:
+            if int(value) >= 0:
+                char = char.charset('lp',int(value))
+                await ctx.message.channel.send(data.lang["charset"].format("Light Points"))
+        elif key.lower() in ["dp","darkpt","darkpoint"]:
+            if int(value) >= 0:
+                char = char.charset('dp',int(value))
+                await ctx.message.channel.send(data.lang["charset"].format("Dark Points"))
+        elif key.lower() in ["dmod","defaultmod"]:
+            if value in ["offensive","offensif","defensive","defensif"]:
+                ndm = 0
+                if ndm in ["defensive","defensif"]: ndm = 1
+                if ndm != char.default_mod:
+                    char = char.switchmod(True)
+                await ctx.message.channel.send(data.lang["charset"].format(data.lang["default"]+" "+data.lang["mod"]))
+        elif key.lower() in ["dkar","dkarma","defaultkarma"]:
+            if int(value) >= -10 and int(value) <= 10:
+                char = char.charset('dkar',int(value))
+                await ctx.message.channel.send(data.lang["charset"].format(data.lang["default"]+" karma"))
+        elif key.lower() in ["int","intuition","instinct"]:
+            if int(value) >= 1 and int(value) <= 6:
+                char = char.charset('int',int(value))
+                await ctx.message.channel.send(data.lang["charset"].format(data.lang["intuition"]))
+        else:
+            await ctx.message.channel.send(data.lang["charset_invalid"].format(key))

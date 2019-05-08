@@ -159,3 +159,148 @@ class CharacterCog(commands.Cog):
                 await ctx.message.channel.send(data.lang["charset"].format(data.lang["intuition"]))
         else:
             await ctx.message.channel.send(data.lang["charset_invalid"].format(key))
+
+    @commands.check(check_chanmj)
+    @character.command(name="damage",aliases=["dmg"])
+    async def character_damage(self,ctx,char: CharacterConverter, val: int):
+        data = GenericCommandParameters(ctx)
+        val = abs(val)
+        char = char.charset('pv',-val)
+        embd = discord.Embed(title=char.name,description=data.lang["damaged"],colour=discord.Color(int('ff0000',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["damage_taken"],value=str(val),inline=True)
+        embd.add_field(name=data.lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @character.command(name="heal")
+    async def character_heal(self,ctx,char: CharacterConverter, val: int):
+        data = GenericCommandParameters(ctx)
+        val = abs(val)
+        if char.PV+ val > char.PVmax: val = char.PVmax-char.PV
+        char = char.charset('pv',val)
+        embd = discord.Embed(title=char.name,description=data.lang["healed"],colour=discord.Color(int('00ff00',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["heal_amount"],value=str(val),inline=True)
+        embd.add_field(name=data.lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+
+    @commands.check(check_chanmj)
+    @character.command(name="getpm",aliases=["getmp"])
+    async def character_getpm(self,ctx,char: CharacterConverter, val: int):
+        data = GenericCommandParameters(ctx)
+        if char.PM + val < 0:
+            await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.pm)))
+        else:
+            if char.PM+val > char.PMmax: val = char.PMmax - char.PM
+            char = char.charset('pm',val)
+        got = data.lang["recovered"]
+        if val < 0: got = data.lang["lost"]
+        embd = discord.Embed(title=char.name,description=data.lang["get_pm"].format(got),colour=discord.Color(int('0000ff',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
+        embd.add_field(name=data.lang["remaining_pm"],value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @character.command(name="setkarma",aliases=["getkarma","addkarma"])
+    async def character_setkarma(self,ctx,char: CharacterConverter, val: int):
+        data = GenericCommandParameters(ctx)
+        if Skill.isskillin(char.skills,7): val *= 2 #chanceux
+        if Skill.isskillin(char.skills,84): #creature harmonieuse
+            if char.karma == 0 and val < 0: val -= 5
+            elif char.karma == 0 and val > 0: val += 5
+            elif char.karma+val > -5 and char.karma+val < 5 and val < 0: val -= 9
+            elif char.karma+val > -5 and char.karma+val < 5 and val > 0: val += 9
+        if char.karma+val < -10: val=-10-char.karma #char.karma = -10
+        if char.karma+val > 10: val=10-char.karma #char.karma = 10
+        char = char.charset('kar',val)
+        got = data.lang["recovered"]
+        if val < 0: got = data.lang["lost"]
+        embd = discord.Embed(title=char.name,description=data.lang["get_karma"].format(got),colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["get_karma_amount"].format(got),value=str(val),inline=True)
+        embd.add_field(name=data.lang["current_karma"],value=str(char.karma),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @character.command(name="reset")
+    async def character_reset(self,ctx,char: CharacterConverter):
+        data = GenericCommandParameters(ctx)
+        char.resetchar()
+        await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
+
+    @commands.check(check_haschar)
+    @character.command(name="pay")
+    async def character_pay(self,ctx,val: int):
+        data = GenericCommandParameters(ctx)
+        val = abs(val)
+        if data.char.money-val < 0:
+            await ctx.message.channel.send(data.lang["no_more_money"].format(char.money))
+        else:
+            data.char = data.char.charset('po',-val)
+            embd = discord.Embed(title=data.char.name,description=data.data.lang["paid"],colour=discord.Color(int('ffff00',16)))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+            embd.add_field(name=data.lang["money_spent"],value=str(val),inline=True)
+            embd.add_field(name=data.lang["remaining_money"],value=str(data.char.money),inline=True)
+            await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @character.command(name="earnmoney",aliases=["earnpo"])
+    async def character_earnpo(self,ctx,char: CharacterConverter, val: int):
+        data = GenericCommandParameters(ctx)
+        val = abs(val)
+        char = char.charset('po',val)
+        embd = discord.Embed(title=char.name,description=data.lang["paid"],colour=discord.Color(int('ffff00',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["money_spent"],value=str(val),inline=True)
+        embd.add_field(name=data.lang["remaining_money"],value=str(char.money),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_haschar)
+    @commands.cooldown(1,10,BucketType.user)
+    @character.command(name="info")
+    async def character_info(self,ctx):
+        data = GenericCommandParameters(ctx)
+        if data.char.mod == 0: modd = data.lang["offensive"]
+        else: modd = data.lang["defensive"]
+        embd = discord.Embed(title=char.name,description="{} {}".format(data.char.race,data.char.classe))
+        if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        if data.char.dead:
+            embd.add_field(name=data.lang["PV"]+" :",value="DEAD",inline=True)
+        else:
+            embd.add_field(name=data.lang["PV"]+" :",value=str(data.char.PV)+"/"+str(data.char.PVmax),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["PM"]+" :",value=str(char.PM)+"/"+str(data.char.PMmax),inline=True)
+        embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(data.char.lvl),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["force"].capitalize()+" :",value=str(data.char.force),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(data.char.esprit),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["charisme"].capitalize()+" :",value=str(data.char.charisme),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["agilite"].capitalize()+" :",value=str(data.char.furtivite),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["karma"].capitalize()+" :",value=str(data.char.karma),inline=True)
+        embd.add_field(name=data.lang["money"].capitalize()+" :",value=str(data.char.money),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["lp"]+" :",value=str(data.char.lp),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["dp"]+" :",value=str(data.char.dp),inline=True)
+        if not data.char.dead: embd.add_field(name=data.lang["mod"].capitalize()+" :",value=modd,inline=True)
+        embd.add_field(name=data.lang["mental"].capitalize()+" :",value=str(data.char.mental),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_haschar)
+    @commands.cooldown(1,10,BucketType.user)
+    @character.command(name="stat")
+    async def character_stat(self,ctx):
+        data = GenericCommandParameters(ctx)

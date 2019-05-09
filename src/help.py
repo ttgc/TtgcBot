@@ -48,6 +48,7 @@ class Help(commands.HelpCommand):
             ls = []
             for cmd in k:
                 ls.append(cmd.qualified_name)
+            if len(ls) == 0: ls = ["None"]
             if i is not None: embd.add_field(name=i.qualified_name,value="\n".join(ls),inline=True)
         await self.get_destination().send(embed=embd)
 
@@ -64,8 +65,8 @@ class Help(commands.HelpCommand):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+command.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
-        embd.add_field(name=self.data.lang["help_proto"]+" :",value=self.get_command_signature(command),inline=True)
-        embd.add_field(name=self.data.lang["help_descr"]+" :",value=command.help,inline=True)
+        embd.add_field(name=self.data.lang["help_proto"]+" :",value=self.get_command_signature(command),inline=False)
+        embd.add_field(name=self.data.lang["help_descr"]+" :",value=command.help,inline=False)
         await self.get_destination().send(embed=embd)
 
     async def send_group_help(self,group):
@@ -73,5 +74,5 @@ class Help(commands.HelpCommand):
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
         for cmd in group.commands:
-            embd.add_field(name=i.qualified_name,value=self.get_command_signature(cmd),inline=True)
+            embd.add_field(name=cmd.qualified_name,value=self.get_command_signature(cmd),inline=True)
         await self.get_destination().send(embed=embd)

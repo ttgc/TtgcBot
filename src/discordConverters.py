@@ -43,3 +43,7 @@ class OperatorConverter(commands.Converter):
         if arg not in ["+","-"]:
             raise commands.BadArgument("Operator conversion error ! Not a valid operator")
         return arg
+
+class ItemConverter(commands.Converter):
+    async def convert(self,ctx,arg):
+        return Item.find(arg)

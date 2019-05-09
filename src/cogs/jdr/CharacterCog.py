@@ -28,6 +28,7 @@ from src.CharacterUtils import *
 from src.discordConverters import *
 from src.parsingdice import *
 import typing
+from random import randint
 
 class CharacterCog(commands.Cog):
     def __init__(self,bot,logger):
@@ -269,7 +270,7 @@ class CharacterCog(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_haschar)
-    @commands.cooldown(1,10,BucketType.user)
+    @commands.cooldown(1,10,commands.BucketType.user)
     @character.command(name="info")
     async def character_info(self,ctx):
         data = GenericCommandParameters(ctx)
@@ -300,7 +301,166 @@ class CharacterCog(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_haschar)
-    @commands.cooldown(1,10,BucketType.user)
+    @commands.cooldown(1,10,commands.BucketType.user)
     @character.command(name="stat")
     async def character_stat(self,ctx):
         data = GenericCommandParameters(ctx)
+        embd = discord.Embed(title=data.lang["stat"],description=data.char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+data.char.name.replace(" ","_"))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["dice_rolled"],value=str(data.char.stat[0]),inline=True)
+        embd.add_field(name=data.lang["super_critic_success"],value=str(data.char.stat[1]),inline=True)
+        embd.add_field(name=data.lang["critic_success"],value=str(data.char.stat[2]),inline=True)
+        embd.add_field(name=data.lang["success"],value=str(data.char.stat[3]),inline=True)
+        embd.add_field(name=data.lang["fail"],value=str(data.char.stat[4]),inline=True)
+        embd.add_field(name=data.lang["critic_fail"],value=str(data.char.stat[5]),inline=True)
+        embd.add_field(name=data.lang["super_critic_fail"],value=str(data.char.stat[6]),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_haschar)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @character.group(name="use",invoke_without_command=True)
+    async def character_use(self,ctx,*,itname):
+        data = GenericCommandParameters(ctx)
+        for i in data.char.inventory.items.keys():
+            if i.name == itname:
+                data.char.inventory -= i
+                await ctx.message.channel.send(data.lang["used_item"].format(data.char.name,i.name))
+                return
+        await ctx.message.channel.send(data.lang["no_more_item"])
+
+    @character_use.command(name="lightpt",aliases=["lp","lightpoint"])
+    async def character_use_lightpt(self,ctx):
+        data = GenericCommandParameters(ctx)
+        if data.char.lp <= 0:
+            await ctx.message.channel.send(data.lang["no_more_lp"])
+        else:
+            await ctx.message.channel.send(data.lang["used_lp"].format(data.char.name))
+            data.char.uselp()
+            result = randint(1,6)
+            await ctx.message.channel.send(data.lang["result_test_nomax"].format(data.lang["chance"],str(result)))
+            if result == 1: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_1"])
+            elif result == 2: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_2"])
+            elif result == 3: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_3"])
+            elif result == 4: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_4"])
+            elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_5"])
+            elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_1"])
+
+    @character_use.command(name="darkpt",aliases=["dp","darkpoint"])
+    async def character_use_darkpt(self,ctx):
+        data = GenericCommandParameters(ctx)
+        if data.char.lp <= 0:
+            await ctx.message.channel.send(data.lang["no_more_dp"])
+        else:
+            await ctx.message.channel.send(data.lang["used_dp"].format(data.char.name))
+            data.char.usedp()
+            result = randint(1,6)
+            await ctx.message.channel.send(data.lang["result_test_nomax"].format(data.lang["malchance"],str(result)))
+            if result == 1: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_1"])
+            elif result == 2: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_2"])
+            elif result == 3: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_3"])
+            elif result == 4: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_4"])
+            elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_5"])
+            elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_1"])
+
+    @commands.check(check_haschar)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @character.command(name="switchmod",aliases=["switchmode"])
+    async def character_switchmod(self,ctx):
+        data = GenericCommandParameters(ctx)
+        data.char = data.char.switchmod()
+        strmod = data.lang["offensive"]
+        if data.char.mod == 1:
+            strmod = data.lang["defensive"]
+        await ctx.message.channel.send(data.lang["switchmod"].format(data.char.name,strmod))
+
+    @commands.check(check_haschar)
+    @character.command(name="setmental")
+    async def character_setmental(self,ctx,op: typing.Optional[OperatorConverter] = None,amount: int):
+        data = GenericCommandParameters(ctx)
+        if data.char.dead:
+            await ctx.message.channel.send(data.lang["is_dead"].format(data.char.name))
+        else:
+            got = data.lang["new_value"]
+            newval = amount
+            if op is not None:
+                if op == "+":
+                    got = data.lang["recovered"]
+                    newval += data.char.mental
+                else:
+                    got = data.lang["lost"]
+                    newval = data.char.mental - amount
+            data.char = data.char.charset('ment',newval)
+            embd = discord.Embed(title=data.char.name,description=lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+            if op is not None: embd.add_field(name=data.lang["mental_amount"].format(got),value=amount,inline=True)
+            embd.add_field(name=data.lang["current_mental"],value=str(data.char.mental),inline=True)
+            await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(5,5,commands.BucketType.channel)
+    @character.command(name="lvlup",aliases=["levelup"])
+    async def character_lvlup(self,ctx,char: CharacterConverter):
+        data = GenericCommandParameters(ctx)
+        char.lvlup()
+        embd = discord.Embed(title=char.name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(data.char.lvl),inline=True)
+        if char.lvl == 2:
+            dice,dice2 = randint(1,10),randint(1,10)
+            embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_2"].format(str(dice),str(dice2)),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["force"]),value=str(char.force),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+        elif char.lvl == 3:
+            dice = randint(1,10)
+            dic = {"force":char.force,"esprit":char.esprit,"charisme":char.charisme,"agilite":char.furtivite}
+            statmin = ("force",char.force)
+            for i,k in dic.items():
+                if k < statmin[1]: statmin = (i,k)
+            embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_3"].format(statmin[0],str(dice)),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang[statmin[0]]),value=str(statmin[1]),inline=True)
+            embd.add_field(name=data.lang["lvlup_next"].format(data.lang[statmin[0]]),value=str(statmin[1]+dice),inline=True)
+        elif char.lvl == 4:
+            dice = randint(1,100)
+            embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_4"].format(str(dice)),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["PV"]),value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["PM"]),value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        elif char.lvl == 5:
+            embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_5"],inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["force"]),value=str(char.force),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+        else:
+            embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_6"],inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["PV"]),value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["PM"]),value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["force"]),value=str(char.force),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(5,5,commands.BucketType.channel)
+    @character.command(name="kill")
+    async def character_kill(self,ctx,char: CharacterConverter):
+        data = GenericCommandParameters(ctx)
+        await ctx.message.channel.send(data.lang["kill_confirm"].format(char.name))
+        chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
+        try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+        except asyncio.TimeoutError: answer = None
+        if answer is None:
+            await ctx.message.channel.send(data.lang["timeout"])
+        else:
+            char.kill()
+            char.unlink()
+            with open("pictures/you are dead.png","rb") as f:
+                await ctx.message.channel.send(file=discord.File(f))

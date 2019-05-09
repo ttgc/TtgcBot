@@ -44,6 +44,7 @@ from src.BotTools import *
 from src.Translator import *
 # from mapmanager import *
 from src.checks import *
+from src.help import *
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
@@ -71,7 +72,7 @@ def get_prefix(bot,message):
     except (AttributeError,DatabaseException): return '/'
 
 global client
-client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut)
+client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut,help_command=Help())
 
 @client.check
 def no_pm(ctx): return ctx.message.guild is not None

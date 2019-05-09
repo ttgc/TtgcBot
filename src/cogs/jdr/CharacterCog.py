@@ -276,7 +276,7 @@ class CharacterCog(commands.Cog):
         data = GenericCommandParameters(ctx)
         if data.char.mod == 0: modd = data.lang["offensive"]
         else: modd = data.lang["defensive"]
-        embd = discord.Embed(title=char.name,description="{} {}".format(data.char.race,data.char.classe))
+        embd = discord.Embed(title=char.name,description="{} {}".format(data.char.race,data.char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+data.char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)

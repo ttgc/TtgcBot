@@ -26,20 +26,20 @@ class Help(commands.HelpCommand):
         commands.HelpCommand.__init__(self)
         self.data = None
 
-    async def prepare_help_command(ctx,command=None):
+    async def prepare_help_command(self,ctx,command=None):
         self.context = ctx
         self.cog = self.context.bot.get_cog("Other")
         self.data = GenericCommandParameters(self.context)
 
-    async def command_not_found(string):
+    async def command_not_found(self,string):
         return self.data.lang["error_help_notfound"].format(string)
 
-    async def subcommand_not_found(command,string):
+    async def subcommand_not_found(self,command,string):
         if isinstance(command,commands.Group):
             return self.data.lang["error_help_subnotfound"].format(command.qualified_name,string)
         return self.data.lang["error_help_subnone"].format(command.qualified_name)
 
-    async def send_bot_help(mapping):
+    async def send_bot_help(self,mapping):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"],colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
@@ -52,7 +52,7 @@ class Help(commands.HelpCommand):
         dest = await self.get_destination()
         await dest.send(embed=embd)
 
-    async def send_cog_help(cog):
+    async def send_cog_help(self,cog):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+cog.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
@@ -63,7 +63,7 @@ class Help(commands.HelpCommand):
         dest = await self.get_destination()
         await dest.send(embed=embd)
 
-    async def send_command_help(command):
+    async def send_command_help(self,command):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+command.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
@@ -73,7 +73,7 @@ class Help(commands.HelpCommand):
         dest = await self.get_destination()
         await dest.send(embed=embd)
 
-    async def send_group_help(group):
+    async def send_group_help(self,group):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+group.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)

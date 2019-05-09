@@ -47,7 +47,7 @@ class Help(commands.HelpCommand):
             k = await self.filter_commands(k,sort=True)
             ls = []
             for cmd in k:
-                ls.append(k.qualified_name)
+                ls.append(cmd.qualified_name)
             embd.add_field(name=i.qualified_name,value="\n".join(ls),inline=True)
         dest = await self.get_destination()
         await dest.send(embed=embd)
@@ -60,18 +60,16 @@ class Help(commands.HelpCommand):
         pref = await self.context.bot.get_prefix(self.context.message)
         for i in ls:
             embd.add_field(name=i.qualified_name,value="{}{} {}".format(pref,i.qualified_name,self.get_command_signature(i)),inline=True)
-        dest = await self.get_destination()
-        await dest.send(embed=embd)
+        await self.get_destination().send(embed=embd)
 
     async def send_command_help(self,command):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+command.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
         pref = await self.context.bot.get_prefix(self.context.message)
-        embd.add_field(name=self.data.lang["help_proto"]+" :",value="{}{} {}".format(pref,i.qualified_name,self.get_command_signature(i)),inline=True)
+        embd.add_field(name=self.data.lang["help_proto"]+" :",value="{}{} {}".format(pref,command.qualified_name,self.get_command_signature(command)),inline=True)
         embd.add_field(name=self.data.lang["help_descr"]+" :",value=command.help,inline=True)
-        dest = await self.get_destination()
-        await dest.send(embed=embd)
+        await self.get_destination().send(embed=embd)
 
     async def send_group_help(self,group):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+group.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
@@ -80,5 +78,4 @@ class Help(commands.HelpCommand):
         pref = await self.context.bot.get_prefix(self.context.message)
         for cmd in group.commands:
             embd.add_field(name=i.qualified_name,value="{}{} {}".format(pref,i.qualified_name,self.get_command_signature(i)),inline=True)
-        dest = await self.get_destination()
-        await dest.send(embed=embd)
+        await self.get_destination().send(embed=embd)

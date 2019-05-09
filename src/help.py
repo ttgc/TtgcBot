@@ -49,8 +49,7 @@ class Help(commands.HelpCommand):
             for cmd in k:
                 ls.append(cmd.qualified_name)
             if i is not None: embd.add_field(name=i.qualified_name,value="\n".join(ls),inline=True)
-        dest = await self.get_destination()
-        await dest.send(embed=embd)
+        await self.get_destination().send(embed=embd)
 
     async def send_cog_help(self,cog):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"]+" : "+cog.qualified_name,colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")

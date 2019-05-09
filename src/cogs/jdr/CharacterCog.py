@@ -377,7 +377,7 @@ class CharacterCog(commands.Cog):
 
     @commands.check(check_haschar)
     @character.command(name="setmental")
-    async def character_setmental(self,ctx,op: typing.Optional[OperatorConverter] = None,amount: int):
+    async def character_setmental(self,ctx,op: typing.Optional[OperatorConverter],amount: int):
         data = GenericCommandParameters(ctx)
         if data.char.dead:
             await ctx.message.channel.send(data.lang["is_dead"].format(data.char.name))

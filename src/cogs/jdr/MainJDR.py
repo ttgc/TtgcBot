@@ -197,3 +197,18 @@ class MainJDR(commands.Cog):
         data = GenericCommandParameters(ctx)
         srv.getJDR(str(src.id)).unextend_all()
         await ctx.message.channel.send(data.lang["jdrunextend"])
+
+    @commands.check(check_admin)
+    @commands.cooldown(1,30,commands.BucketType.user)
+    @jdr.command(name="list")
+    async def jdr_list(self,ctx):
+        data = GenericCommandParameters(ctx)
+        ls = srv.jdrlist()
+        embd = discord.Embed(title=data.lang["jdrlist_title"],description=data.lang["jdrlist"],colour=discord.Color(int('0000ff',16)))
+        embd.set_footer(text=str(ctx.message.created_at))
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in ls:
+            info = data.lang["jdrlist_info"].format(discord.utils.get(ctx.message.guild.members,id=int(i[3])).mention,str(i[2]),str(i[1]))
+            embd.add_field(name="#{} :".format(str(discord.utils.get(ctx.message.guild.channels,id=int(i[0])))),value=info,inline=True)
+        await ctx.message.channel.send(embed=embd)

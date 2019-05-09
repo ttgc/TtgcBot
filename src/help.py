@@ -24,6 +24,10 @@ from src.checks import GenericCommandParameters
 class Help(commands.HelpCommand):
     def __init__(self):
         commands.HelpCommand.__init__(self)
+        self.data = None
+
+    async def prepare_help_command(ctx,command=None):
+        self.context = ctx
         self.cog = self.context.bot.get_cog("Other")
         self.data = GenericCommandParameters(self.context)
 

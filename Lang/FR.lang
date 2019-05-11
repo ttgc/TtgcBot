@@ -233,3 +233,6 @@ error_help_subnone=La commande `{}` n'a pas de sous-commande !
 help=Aide
 help_proto=Prototype
 help_descr=Description
+skill_assign_choice=Choisissez la bonne capacite a appliquer au personnage {} en répondant à ce message avec l'ID correspondant
+skill_notfound=La capacité n'existe pas
+skill_invalidid=L'ID n'appartient a aucun skill liste ci-dessus

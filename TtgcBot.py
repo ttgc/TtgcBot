@@ -211,6 +211,7 @@ async def main():
     client.add_cog(Keeprole(client,logger))
     client.add_cog(MainJDR(client,logger))
     client.add_cog(CharacterCog(client,logger))
+    client.add_cog(SkillCog(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

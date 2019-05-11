@@ -233,3 +233,6 @@ error_help_subnone=The command `{}` has no subcommands !
 help=Help
 help_proto=Prototype
 help_descr=Description
+skill_assign_choice=Choose the right skill you want to assign to the character {} by answering this message with the matching ID
+skill_notfound=This skill does not exist
+skill_invalidid=The ID does not belong to any skill listed above

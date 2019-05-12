@@ -49,8 +49,7 @@ class SkillCog(commands.Cog):
     @skill.command(name="info")
     async def skill_info(self,ctx,search: commands.Greedy[SkillConverter]):
         data = GenericCommandParameters(ctx)
-        descr = str(sklist).replace("[","").replace("]","")
-        embd = discord.Embed(title=data.lang["skillsearch"],description=descr,colour=discord.Color(int('5B005B',16)))
+        embd = discord.Embed(title=data.lang["skillsearch"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")

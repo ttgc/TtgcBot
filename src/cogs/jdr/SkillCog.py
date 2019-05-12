@@ -31,7 +31,6 @@ class SkillCog(commands.Cog):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
-        self.qualified_name = "Skills"
 
     @commands.check(check_haschar)
     @commands.group(invoke_without_command=True,aliases=['sk'])

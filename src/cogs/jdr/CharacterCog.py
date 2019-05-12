@@ -34,7 +34,6 @@ class CharacterCog(commands.Cog):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
-        self.qualified_name = "Characters"
 
     @commands.check(check_jdrchannel)
     @commands.group(invoke_without_command=False,aliases=['char'])

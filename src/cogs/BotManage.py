@@ -27,7 +27,6 @@ class BotManage(commands.Cog):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
-        self.qualified_name = "Bot Management"
 
     @commands.check(check_botowner)
     @commands.command(aliases=["eval"])

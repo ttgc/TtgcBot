@@ -52,7 +52,7 @@ def check_premium(ctx): return is_premium(str(ctx.message.author.id))
 
 def check_mj(ctx):
     srv = DBServer(str(ctx.message.guild.id))
-    return discord.utils.get(ctx.message.guild.roles,id=srv.mjrole) in ctx.message.author.roles
+    return discord.utils.get(ctx.message.guild.roles,id=int(srv.mjrole)) in ctx.message.author.roles
 
 def check_jdrchannel(ctx):
     srv = DBServer(str(ctx.message.guild.id))

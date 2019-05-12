@@ -39,7 +39,7 @@ jobs:
       - run:
           name: install postgres
           command: |
-            sudo apt-get isntall postgresql
+            sudo apt-get install postgresql
 
       # - run:
       #     name: temp

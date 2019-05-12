@@ -52,6 +52,7 @@ from src.cogs.NSFW import *
 from src.cogs.Keeprole import *
 from src.cogs.jdr.MainJDR import *
 from src.cogs.jdr.CharacterCog import *
+from src.cogs.jdr.SkillCog import *
 
 global logger
 logger = initlogs()

@@ -114,7 +114,7 @@ class MainJDR(commands.Cog):
     @commands.cooldown(1,60,commands.BucketType.user)
     @jdr.command(name="start",aliases=["create"])
     async def jdr_start(self,ctx,chan: discord.TextChannel):
-        data = GenericCommandParameters(data)
+        data = GenericCommandParameters(ctx)
         try:
             data.srv.getJDR(str(chan.id))
             await ctx.message.channel.send(data.lang["jdr_exist"].format(chan.mention))

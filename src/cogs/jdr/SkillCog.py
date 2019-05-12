@@ -47,7 +47,7 @@ class SkillCog(commands.Cog):
 
     @commands.check(check_jdrchannel)
     @skill.command(name="info")
-    async def skill_info(self,ctx,*,search: commands.Greedy[SkillConverter]):
+    async def skill_info(self,ctx,search: commands.Greedy[SkillConverter]):
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["skillsearch"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")

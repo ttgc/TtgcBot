@@ -35,7 +35,7 @@ class RaceConverter(commands.Converter):
 class SkillConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if arg.isdecimal():
-            return Skill(int(arg))
+            return [Skill(int(arg))]
         return Skill.skillsearch(arg.replace("_"," "))
 
 class OperatorConverter(commands.Converter):

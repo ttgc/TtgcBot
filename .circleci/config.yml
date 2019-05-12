@@ -39,6 +39,7 @@ jobs:
       - run:
           name: install postgres
           command: |
+<<<<<<< HEAD
             sudo apt-get update
             sudo apt-get isntall postgresql
 
@@ -48,6 +49,13 @@ jobs:
       #      sudo apt-get autoremove --purge
       #      sudo apt-get autoclean
       #      sudo apt-get install postgresql-client
+=======
+      #      sudo apt-get autoremove --purge
+      #      sudo apt-get autoclean
+            sudo apt-get update
+      #      sudo apt-get install postgresql-client
+            sudo apt-get isntall postgresql
+>>>>>>> ad28a3db9dd2cdaa481543b2fe79a51b3fdbc7ec
 
       - run:
           name: deploy database

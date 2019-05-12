@@ -52,14 +52,14 @@ jobs:
       - run:
           name: deploy database
           command: |
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/procedures.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/lang_features.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/userblock_features.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/skill_and_kill_features.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/map.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/swap.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/procedures.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/lang_features.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/userblock_features.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/skill_and_kill_features.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/map.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/swap.sql
 
       - save_cache:
           paths:

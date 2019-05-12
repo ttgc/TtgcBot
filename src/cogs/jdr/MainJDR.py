@@ -174,9 +174,9 @@ class MainJDR(commands.Cog):
                 await ctx.message.channel.send(data.lang["timeout"])
             else:
                 try:
-                    srv.getJDR(str(dest.id)).delete()
+                    data.srv.getJDR(str(dest.id)).delete()
                 except: pass
-                srv.getJDR(str(src.id)).extend(str(dest.id))
+                data.srv.getJDR(str(src.id)).extend(str(dest.id))
                 await ctx.message.channel.send(data.lang["jdrextend"])
 
     @commands.check(check_admin)
@@ -187,7 +187,7 @@ class MainJDR(commands.Cog):
         if src.guild.id != ctx.message.guild.id or src.guild.id != dest.guild.id:
             await ctx.message.channel.send(data.lang["jdrcopy_serverror"])
         else:
-            srv.getJDR(str(src.id)).unextend(str(dest.id))
+            data.srv.getJDR(str(src.id)).unextend(str(dest.id))
             await ctx.message.channel.send(data.lang["jdrunextend"])
 
     @commands.check(check_admin)
@@ -195,7 +195,7 @@ class MainJDR(commands.Cog):
     @jdr.command(name="unextendall")
     async def jdr_unextendall(self,ctx,src: discord.TextChannel):
         data = GenericCommandParameters(ctx)
-        srv.getJDR(str(src.id)).unextend_all()
+        data.srv.getJDR(str(src.id)).unextend_all()
         await ctx.message.channel.send(data.lang["jdrunextend"])
 
     @commands.check(check_admin)
@@ -203,7 +203,7 @@ class MainJDR(commands.Cog):
     @jdr.command(name="list")
     async def jdr_list(self,ctx):
         data = GenericCommandParameters(ctx)
-        ls = srv.jdrlist()
+        ls = data.srv.jdrlist()
         embd = discord.Embed(title=data.lang["jdrlist_title"],description=data.lang["jdrlist"],colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text=str(ctx.message.created_at))
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)

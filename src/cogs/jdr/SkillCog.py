@@ -47,7 +47,7 @@ class SkillCog(commands.Cog):
 
     @commands.check(check_jdrchannel)
     @skill.command(name="info")
-    async def skill_info(self,ctx,search: commands.Greedy[SkillConverter]):
+    async def skill_info(self,ctx,*,search: commands.Greedy[SkillConverter]):
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["skillsearch"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
@@ -60,7 +60,7 @@ class SkillCog(commands.Cog):
 
     @commands.check(check_chanmj)
     @skill.command(name="assign")
-    async def skill_assign(self,ctx,char: CharacterConverter, skill: SkillConverter):
+    async def skill_assign(self,ctx,char: CharacterConverter,*, skill: SkillConverter):
         data = GenericCommandParameters(ctx)
         if len(skill) == 0:
             await ctx.message.channel.send(data.lang["skill_notfound"])

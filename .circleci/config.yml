@@ -36,17 +36,17 @@ jobs:
             . venv/bin/activate
             pip3 install -r requirements.txt
 
-      # - run:
-      #     name: install postgres
-      #     command: |
-      #       sudo apt-get update
-      #       sudo apt-get isntall postgresql
+      - run:
+          name: install postgres
+          command: |
+            sudo apt-get isntall postgresql
 
       # - run:
       #     name: temp
       #     command: |
       #      sudo apt-get autoremove --purge
       #      sudo apt-get autoclean
+      #      sudo apt-get update
       #      sudo apt-get install postgresql-client
 
       - run:

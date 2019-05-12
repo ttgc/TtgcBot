@@ -74,7 +74,7 @@ class SkillCog(commands.Cog):
                 embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
             botmsg = await ctx.message.channel.send(embed=embd)
             chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.isdecimal()
-            try: answer = await.self.bot.wait_for('message',check=chk,timeout=60)
+            try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
             except asyncio.TimeoutError: answer = None
             botmsg.delete(delay=0.5)
             if answer is None:

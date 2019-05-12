@@ -30,6 +30,7 @@ class MainJDR(commands.Cog):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
+        self.qualified_name = "RP"
 
     @commands.cooldown(1,2,commands.BucketType.user)
     @commands.command(aliases=["rollindep","r","rolldice"])

@@ -21,30 +21,32 @@
 import discord
 from discord.ext import commands
 import asyncio
+import logging
+import traceback
 # from random import randint,choice
 # from threading import Thread
-import logging
 # import time
 # import os
 # import zipfile
 # import sys
 # import requests
 # import subprocess as sub
-import traceback
 
 # custom libs
 from src.logs import *
 from src.INIfiles import *
+from src.BotTools import *
+from src.Translator import *
+from src.checks import *
+from src.help import *
 # from parsingdice import *
 # from VocalUtilities import *
 # from Character import *
 # from CharacterUtils import *
 # from converter import *
-from src.BotTools import *
-from src.Translator import *
 # from mapmanager import *
-from src.checks import *
-from src.help import *
+
+# Cogs
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
@@ -53,6 +55,7 @@ from src.cogs.Keeprole import *
 from src.cogs.jdr.MainJDR import *
 from src.cogs.jdr.CharacterCog import *
 from src.cogs.jdr.SkillCog import *
+from src.cogs.jdr.MJ import *
 
 global logger
 logger = initlogs()
@@ -213,6 +216,7 @@ async def main():
     client.add_cog(MainJDR(client,logger))
     client.add_cog(CharacterCog(client,logger))
     client.add_cog(SkillCog(client,logger))
+    client.add_cog(MJ(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

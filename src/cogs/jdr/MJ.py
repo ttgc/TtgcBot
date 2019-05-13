@@ -18,12 +18,8 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from src.checks import *
-from src.BotTools import *
 from discord.ext import commands
-import logging,asyncio
-import discord
-from src.Translator import *
-from src.CharacterUtils import *
+import logging
 from src.discordConverters import *
 import typing
 

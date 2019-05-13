@@ -30,7 +30,7 @@ from src.parsingdice import *
 import typing
 from random import randint
 
-class SkillCog(commands.Cog):
+class PetCog(commands.Cog):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger

@@ -98,7 +98,7 @@ class CharacterCog(commands.Cog):
                 return
         await ctx.message.channel.send(data.lang["charnotexist"].format(key))
 
-    async def charroll(self,ctx,data,char,stat,operator,expression):
+    async def _charroll(self,ctx,data,char,stat,operator,expression):
         modifier = 0
         if expression is not None:
             modifier = ParseRoll(expression).resolv()
@@ -111,7 +111,7 @@ class CharacterCog(commands.Cog):
     @character.command(name="roll",aliases=["r"])
     async def character_roll(self,ctx,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         data = GenericCommandParameters(ctx)
-        await self.charroll(ctx,data,data.char,stat,operator,expression)
+        await self._charroll(ctx,data,data.char,stat,operator,expression)
 
     @commands.check(check_chanmj)
     @character.command(name="set")
@@ -197,7 +197,7 @@ class CharacterCog(commands.Cog):
     async def character_getpm(self,ctx,char: CharacterConverter, val: int):
         data = GenericCommandParameters(ctx)
         if char.PM + val < 0:
-            await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.pm)))
+            await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.PM)))
         else:
             if char.PM+val > char.PMmax: val = char.PMmax - char.PM
             char = char.charset('pm',val)
@@ -241,7 +241,7 @@ class CharacterCog(commands.Cog):
         char.resetchar()
         await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
 
-    async def pay(self,ctx,data,char,val):
+    async def _pay(self,ctx,data,char,val):
         val = abs(val)
         if char.money-val < 0:
             await ctx.message.channel.send(data.lang["no_more_money"].format(char.money))
@@ -259,7 +259,7 @@ class CharacterCog(commands.Cog):
     @character.command(name="pay")
     async def character_pay(self,ctx,val: int):
         data = GenericCommandParameters(ctx)
-        await self.pay(ctx,data,data.char,val)
+        await self._pay(ctx,data,data.char,val)
 
     @commands.check(check_chanmj)
     @character.command(name="earnmoney",aliases=["earnpo"])
@@ -275,7 +275,7 @@ class CharacterCog(commands.Cog):
         embd.add_field(name=data.lang["remaining_money"],value=str(char.money),inline=True)
         await ctx.message.channel.send(embed=embd)
 
-    async def charinfo(self,ctx,data,char):
+    async def _charinfo(self,ctx,data,char):
         if char.mod == 0: modd = data.lang["offensive"]
         else: modd = data.lang["defensive"]
         embd = discord.Embed(title=char.name,description="{} {}".format(char.race,char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
@@ -307,7 +307,7 @@ class CharacterCog(commands.Cog):
     @character.command(name="info")
     async def character_info(self,ctx):
         data = GenericCommandParameters(ctx)
-        await self.charinfo(ctx,data,data.char)
+        await self._charinfo(ctx,data,data.char)
 
     @commands.check(check_haschar)
     @commands.cooldown(1,10,commands.BucketType.user)
@@ -373,7 +373,7 @@ class CharacterCog(commands.Cog):
             elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_5"])
             elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_1"])
 
-    async def switchmod(self,ctx,data,char):
+    async def _switchmod(self,ctx,data,char):
         char = char.switchmod()
         strmod = data.lang["offensive"]
         if char.mod == 1:
@@ -385,9 +385,9 @@ class CharacterCog(commands.Cog):
     @character.command(name="switchmod",aliases=["switchmode"])
     async def character_switchmod(self,ctx):
         data = GenericCommandParameters(ctx)
-        await self.switchmod(ctx,data,data.char)
+        await self._switchmod(ctx,data,data.char)
 
-    async def setmental(ctx,data,char,op,val):
+    async def _setmental(ctx,data,char,op,val):
         if char.dead:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
         else:
@@ -413,7 +413,7 @@ class CharacterCog(commands.Cog):
     @character.command(name="setmental")
     async def character_setmental(self,ctx,op: typing.Optional[OperatorConverter],amount: int):
         data = GenericCommandParameters(ctx)
-        await self.setmental(ctx,data,data.char,op,val)
+        await self._setmental(ctx,data,data.char,op,val)
 
     @commands.check(check_chanmj)
     @commands.cooldown(5,5,commands.BucketType.channel)

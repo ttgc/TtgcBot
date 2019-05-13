@@ -103,7 +103,7 @@ class CharacterCog(commands.Cog):
         if expression is not None:
             modifier = ParseRoll(expression).resolv()
         if not char.dead:
-            await char.roll(ctx.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
+            await char.roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
         else:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
 

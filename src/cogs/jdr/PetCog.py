@@ -289,7 +289,7 @@ class SkillCog(commands.Cog):
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
             if char.pet[petkey].PM + val < 0:
-                await ctx.message.channel.send(data.lang["no_more_pm"].format(str(cha.pet[petkey]r.PM)))
+                await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.pet[petkey].PM)))
             else:
                 if char.pet[petkey].PM+val > char.pet[petkey].PMmax: val = char.pet[petkey].PMmax - char.pet[petkey].PM
                 char = char.pet[petkey].charset('pm',val)

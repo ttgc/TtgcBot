@@ -23,9 +23,12 @@ from discord.ext import commands
 import logging,asyncio
 import discord
 from src.Translator import *
+from src.Character import *
 from src.CharacterUtils import *
 from src.discordConverters import *
+from src.parsingdice import *
 import typing
+from random import randint
 
 class SkillCog(commands.Cog):
     def __init__(self,bot,logger):

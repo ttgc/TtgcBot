@@ -29,7 +29,7 @@ class MJ(commands.Cog):
         self.logger = logger
         self.charcog = self.bot.get_cog("CharacterCog")
         # self.invcog = self.bot.get_cog("InventoryCog")
-        # self.petcog = self.bot.get_cog("PetCog")
+        self.petcog = self.bot.get_cog("PetCog")
 
     @commands.check(check_chanmj)
     @commands.group(invoke_without_command=False)
@@ -38,7 +38,7 @@ class MJ(commands.Cog):
     @mj.command(name="info",aliases=["charinfo","characterinfo"])
     async def mj_info(self,ctx,char: CharacterConverter):
         data = GenericCommandParameters(ctx)
-        await self.charcog.charinfo(ctx,data,char)
+        await self.charcog._charinfo(ctx,data,char)
 
     # @mj.command(name="inventory",aliases=["inv"])
     # async def mj_inventory(self,ctx,char: CharacterConverter):
@@ -47,34 +47,37 @@ class MJ(commands.Cog):
     @mj.command(name="switchmod",aliases=["switchmode"])
     async def mj_switchmod(self,ctx,char: CharacterConverter):
         data = GenericCommandParameters(ctx)
-        await self.charcog.switchmod(ctx,data,char)
+        await self.charcog._switchmod(ctx,data,char)
 
     @mj.command(name="pay")
     async def mj_pay(self,ctx,char: CharacterConverter,amount: int):
         data = GenericCommandParameters(ctx)
-        await self.charcog.pay(ctx,data,char,val)
+        await self.charcog._pay(ctx,data,char,val)
 
     @mj.command(name="setmental")
     async def mj_setmental(self,ctx,char: CharacterConverter,op: typing.Optional[OperatorConverter],amount: int):
         data = GenericCommandParameters(ctx)
-        await self.charcog.setmental(ctx,data,char,op,val)
+        await self.charcog._setmental(ctx,data,char,op,val)
 
     @mj.command(name="roll",aliases=["r"])
     async def mj_roll(self,ctx,char,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         data = GenericCommandParameters(ctx)
-        await self.charcog.charroll(ctx,data,char,stat,operator,expression)
+        await self.charcog._charroll(ctx,data,char,stat,operator,expression)
 
-    # @mj.group(name="pet",invoke_without_command=False)
-    # async def mj_pet(self,ctx): pass
-    #
-    # @mj_pet.command(name="roll",aliases=["r"])
-    # async def mj_pet_roll(self,ctx,...):
-    #     pass
-    #
-    # @mj_pet.command(name="switchmod",aliases=["switchmode"])
-    # async def mj_pet_switchmod(self,ctx,...):
-    #     pass
-    #
-    # @mj_pet.command(name="info")
-    # async def mj_pet_info(self,ctx,...):
-    #     pass
+    @mj.group(name="pet",invoke_without_command=False)
+    async def mj_pet(self,ctx): pass
+
+    @mj_pet.command(name="roll",aliases=["r"])
+    async def mj_pet_roll(self,ctx,char: CharacterConverter,petkey,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
+        data = GenericCommandParameters(ctx)
+        await self.petcog._petroll(ctx,data,char,petkey,stat,operator,expression)
+
+    @mj_pet.command(name="switchmod",aliases=["switchmode"])
+    async def mj_pet_switchmod(self,ctx,char: CharacterConverter,petkey):
+        data = GenericCommandParameters(ctx)
+        await self.petcog._switchmod(ctx,data,char,petkey)
+
+    @mj_pet.command(name="info")
+    async def mj_pet_info(self,ctx,char: CharacterConverter,petkey):
+        data = GenericCommandParameters(ctx)
+        await self.petcog._petinfo(ctx,data,char,petkey)

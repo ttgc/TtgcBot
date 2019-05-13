@@ -279,7 +279,7 @@ class SkillCog(commands.Cog):
             embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name=data.lang["heal_amount"],value=str(val),inline=True)
-            embd.add_field(name=data.lang["remaining_pv"],value=str(cha.pet[petkey]r.PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
+            embd.add_field(name=data.lang["remaining_pv"],value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
 
     @commands.check(check_chanmj)
     @pet.command("getpm",aliases=["getmp"])

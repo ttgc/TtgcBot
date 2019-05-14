@@ -57,6 +57,7 @@ from src.cogs.jdr.CharacterCog import *
 from src.cogs.jdr.SkillCog import *
 from src.cogs.jdr.MJ import *
 from src.cogs.jdr.PetCog import *
+from src.cogs.jdr.JDRGlobal import *
 
 global logger
 logger = initlogs()
@@ -219,6 +220,7 @@ async def main():
     client.add_cog(SkillCog(client,logger))
     client.add_cog(MJ(client,logger))
     client.add_cog(PetCog(client,logger))
+    client.add_cog(JDRGlobal(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

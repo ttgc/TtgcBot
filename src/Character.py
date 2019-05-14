@@ -20,7 +20,7 @@
 import discord
 import asyncio
 from random import randint,choice
-from src.converter import *
+#from src.converter import *
 from src.DatabaseManager import *
 #from BotTools import DBJDR
 #import BotTools as bt

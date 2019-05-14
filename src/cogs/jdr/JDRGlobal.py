@@ -51,7 +51,7 @@ class JDRGlobal(commands.Cog):
         for i in chars:
             if i.dead: continue
             i = i.charset('pv',-val)
-            embd.add_field(name=i.name,value=str(i.PV)+" (-"+str(val)")",inline=True)
+            embd.add_field(name=i.name,value=str(i.PV)+" (-"+str(val)+")",inline=True)
             if not i.check_life():
                 deads += 1
                 dead_ls += "{}\n".format(i.name)

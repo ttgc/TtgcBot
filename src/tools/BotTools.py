@@ -19,9 +19,9 @@
 
 import discord
 import asyncio
-from src.DatabaseManager import *
-import src.Character as ch
-import src.CharacterUtils as chutil
+from src.utils.DatabaseManager import *
+import src.tools.Character as ch
+import src.tools.CharacterUtils as chutil
 
 class DBServer:
     def __init__(self,ID):

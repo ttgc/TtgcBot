@@ -17,13 +17,13 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.checks import *
-from src.BotTools import *
+from src.utils.checks import *
+from src.tools.BotTools import *
 from discord.ext import commands
 import logging,asyncio
 import discord
-from src.Translator import *
-from src.parsingdice import *
+from src.tools.Translator import *
+from src.tools.parsingdice import *
 import requests
 
 class MainJDR(commands.Cog):

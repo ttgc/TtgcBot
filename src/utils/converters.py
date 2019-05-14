@@ -19,9 +19,9 @@
 
 import discord
 from discord.ext import commands
-from src.Character import *
-from src.CharacterUtils import *
-from src.checks import GenericCommandParameters
+from src.tools.Character import *
+from src.tools.CharacterUtils import *
+from src.utils.checks import GenericCommandParameters
 
 class CharacterConverter(commands.Converter):
     async def convert(self,ctx,arg):

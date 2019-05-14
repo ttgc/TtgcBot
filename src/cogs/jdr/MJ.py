@@ -17,10 +17,10 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.checks import *
+from src.utils.checks import *
 from discord.ext import commands
 import logging
-from src.discordConverters import *
+from src.utils.converters import *
 import typing
 
 class MJ(commands.Cog):

@@ -33,11 +33,11 @@ import traceback
 # import subprocess as sub
 
 # custom libs
-from src.logs import *
-from src.INIfiles import *
-from src.BotTools import *
-from src.Translator import *
-from src.checks import *
+from src.utils.logs import *
+from src.utils.INIfiles import *
+from src.tools.BotTools import *
+from src.tools.Translator import *
+from src.utils.checks import *
 from src.help import *
 # from parsingdice import *
 # from VocalUtilities import *

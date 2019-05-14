@@ -21,10 +21,10 @@ import discord
 import asyncio
 from random import randint,choice
 #from src.converter import *
-from src.DatabaseManager import *
-#from BotTools import DBJDR
-#import BotTools as bt
-from src.CharacterUtils import *
+from src.utils.DatabaseManager import *
+#from tools.BotTools import DBJDR
+#import tools.BotTools as bt
+from src.tools.CharacterUtils import *
 
 class Character:
     """Character class"""

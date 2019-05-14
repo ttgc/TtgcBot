@@ -19,7 +19,7 @@
 
 import discord
 from discord.ext import commands
-from src.checks import GenericCommandParameters
+from src.utils.checks import GenericCommandParameters
 
 class Help(commands.HelpCommand):
     def __init__(self):

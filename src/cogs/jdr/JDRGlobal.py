@@ -36,7 +36,7 @@ class JDRGlobal(commands.Cog):
     async def global_(self,ctx): pass
 
     @commands.check(check_chanmj)
-    @global.command(name="damage",aliases=["dmg"])
+    @global_.command(name="damage",aliases=["dmg"])
     async def global_damage(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
         data = GenericCommandParameters(ctx)
         if len(chars) == 0:
@@ -60,7 +60,7 @@ class JDRGlobal(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
-    @global.command(name="heal")
+    @global_.command(name="heal")
     async def global_heal(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
         data = GenericCommandParameters(ctx)
         if len(chars) == 0:
@@ -80,7 +80,7 @@ class JDRGlobal(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
-    @global.command(name="getpm",aliases=["getmp"])
+    @global_.command(name="getpm",aliases=["getmp"])
     async def global_getpm(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
         data = GenericCommandParameters(ctx)
         if len(chars) == 0:
@@ -101,7 +101,7 @@ class JDRGlobal(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.cooldown(1,30,commands.BucketType.channel)
-    @global.command(name="stat")
+    @global_.command(name="stat")
     async def global_stat(self,ctx):
         ls = [0,0,0,0,0,0,0]
         for i in charbase:

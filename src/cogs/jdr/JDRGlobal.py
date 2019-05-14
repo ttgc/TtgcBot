@@ -32,8 +32,8 @@ class JDRGlobal(commands.Cog):
         self.logger = logger
 
     @commands.check(check_jdrchannel)
-    @commands.group(invoke_without_command=False)
-    async def global(self,ctx): pass
+    @commands.group(name="global",invoke_without_command=False)
+    async def global_(self,ctx): pass
 
     @commands.check(check_chanmj)
     @global.command(name="damage",aliases=["dmg"])

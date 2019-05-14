@@ -17,22 +17,22 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-# external and python libs
+# import external and python libs
 import discord
 from discord.ext import commands
 import asyncio
 import logging
 import traceback
+import os
+import sys
 # from random import randint,choice
 # from threading import Thread
 # import time
-# import os
 # import zipfile
-# import sys
 # import requests
 # import subprocess as sub
 
-# custom libs
+# import custom libs
 from src.utils.logs import *
 from src.utils.INIfiles import *
 from src.tools.BotTools import *
@@ -46,7 +46,7 @@ from src.help import *
 # from converter import *
 # from mapmanager import *
 
-# Cogs
+# import Cogs
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
@@ -59,27 +59,50 @@ from src.cogs.jdr.MJ import *
 from src.cogs.jdr.PetCog import *
 from src.cogs.jdr.JDRGlobal import *
 
+# Initialize logs
 global logger
 logger = initlogs()
 
+# Check bot directories
+if not os.access("Hentai/",os.F_OK):
+    os.mkdir("Hentai")
+    logger.info("Create Hentai directory")
+
+if not os.access("Music/",os.F_OK):
+    os.mkdir("Music")
+    logger.info("Create Music directory")
+
+if not os.access("ffmpeg.exe",os.F_OK):
+    logger.critical("ffmpeg not found !")
+    raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
+
+if not os.access("arial.ttf",os.F_OK) and "--no-fontcheck" not in sys.argv:
+    logger.error("Map management features need 'arial.ttf' font to work")
+    raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
+
+# Initialize bot status
 global statut
 statut = discord.Game(name="Ohayo !")
 
+# Get bot Token
 global TOKEN
 tokenf = INI()
 tokenf.load("token")
 TOKEN = tokenf.section["TOKEN"]["Bot"]
 del(tokenf)
 
+# Get prefix function
 def get_prefix(bot,message):
     try:
         srv = DBServer(str(message.guild.id))
         return srv.prefix
     except (AttributeError,DatabaseException): return '/'
 
+# Initialize client
 global client
 client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut,help_command=Help())
 
+# Global checks
 @client.check
 def no_pm(ctx): return ctx.message.guild is not None
 
@@ -97,6 +120,7 @@ async def blacklist(ctx):
         await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention,str(reason)))
     return not blacklisted
 
+# Client events
 @client.event
 async def on_message(message):
     if not message.content.startswith(get_prefix(client,message)):
@@ -208,6 +232,7 @@ async def on_ready():
     logger.info("Removed %d old servers from the database successful",nbr)
     logger.info("Bot is now ready")
 
+# ========== MAIN ========== #
 async def main():
     global TOKEN,logger
     client.add_cog(BotManage(client,logger))
@@ -224,6 +249,7 @@ async def main():
     await client.login(TOKEN)
     await client.connect()
 
+# Launch the bot
 loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(main())

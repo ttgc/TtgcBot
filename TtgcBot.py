@@ -17,61 +17,80 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-# external and python libs
+# import external and python libs
 import discord
 from discord.ext import commands
 import asyncio
+import logging
+import traceback
+import os
+import sys
 # from random import randint,choice
 # from threading import Thread
-import logging
 # import time
-# import os
 # import zipfile
-# import sys
 # import requests
 # import subprocess as sub
-import traceback
 
-# custom libs
-from src.logs import *
-from src.INIfiles import *
+# import custom libs
+from src.utils.inits import *
+from src.utils.INIfiles import *
+from src.tools.BotTools import *
+from src.tools.Translator import *
+from src.utils.checks import *
+from src.help import *
 # from parsingdice import *
 # from VocalUtilities import *
 # from Character import *
 # from CharacterUtils import *
 # from converter import *
-from src.BotTools import *
-from src.Translator import *
 # from mapmanager import *
-from src.checks import *
+
+# import Cogs
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
 from src.cogs.NSFW import *
 from src.cogs.Keeprole import *
 from src.cogs.Vocal import *
+from src.cogs.jdr.MainJDR import *
+from src.cogs.jdr.CharacterCog import *
+from src.cogs.jdr.SkillCog import *
+from src.cogs.jdr.MJ import *
+from src.cogs.jdr.PetCog import *
+from src.cogs.jdr.JDRGlobal import *
 
+# Initialize logs
 global logger
 logger = initlogs()
 
+# Check bot directories and files
+initdirs(logger)
+checkfiles(logger,sys.argv)
+
+# Initialize bot status
 global statut
 statut = discord.Game(name="Ohayo !")
 
+# Get bot Token
 global TOKEN
 tokenf = INI()
 tokenf.load("token")
 TOKEN = tokenf.section["TOKEN"]["Bot"]
 del(tokenf)
 
+# Get prefix function
 def get_prefix(bot,message):
     try:
         srv = DBServer(str(message.guild.id))
         return srv.prefix
     except (AttributeError,DatabaseException): return '/'
 
+# Initialize client
 global client
-client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut)
+client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut,help_command=Help())
 
+# Global checks
 @client.check
 def no_pm(ctx): return ctx.message.guild is not None
 
@@ -89,6 +108,7 @@ async def blacklist(ctx):
         await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention,str(reason)))
     return not blacklisted
 
+# Client events
 @client.event
 async def on_message(message):
     if not message.content.startswith(get_prefix(client,message)):
@@ -117,7 +137,7 @@ async def on_command_error(ctx,error):
 
     if isinstance(error,commands.CommandNotFound): msg = lang["error_notfound"]
     elif isinstance(error,commands.BotMissingPermissions): msg = lang["error_perms"]
-    #elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
+    elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
     elif isinstance(error,commands.DisabledCommand): msg = lang["error_disabled"]
     elif isinstance(error,commands.CheckFailure): return
     elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
@@ -201,6 +221,7 @@ async def on_ready():
     logger.info("Removed %d old servers from the database successful",nbr)
     logger.info("Bot is now ready")
 
+# ========== MAIN ========== #
 async def main():
     global TOKEN,logger
     client.add_cog(BotManage(client,logger))
@@ -209,9 +230,16 @@ async def main():
     client.add_cog(NSFW(client,logger))
     client.add_cog(Keeprole(client,logger))
     client.add_cog(Vocal(client,logger))
+    client.add_cog(MainJDR(client,logger))
+    client.add_cog(CharacterCog(client,logger))
+    client.add_cog(SkillCog(client,logger))
+    client.add_cog(MJ(client,logger))
+    client.add_cog(PetCog(client,logger))
+    client.add_cog(JDRGlobal(client,logger))
     await client.login(TOKEN)
     await client.connect()
 
+# Launch the bot
 loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(main())

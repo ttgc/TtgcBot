@@ -19,7 +19,7 @@
 
 from enum import Enum
 from PIL import Image,ImageDraw,ImageFont
-from src.DatabaseManager import *
+from src.utils.DatabaseManager import *
 import io,asyncio
 
 class Shape(Enum):

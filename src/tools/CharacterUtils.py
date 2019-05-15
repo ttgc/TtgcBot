@@ -17,8 +17,8 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.DatabaseManager import *
-#from BotTools import DBJDR
+from src.utils.DatabaseManager import *
+#from tools.BotTools import DBJDR
 
 class Item:
     def __init__(self,name,descr,weight):

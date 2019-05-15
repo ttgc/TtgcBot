@@ -17,8 +17,8 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.BotTools import *
-from src.Translator import *
+from src.tools.BotTools import *
+from src.tools.Translator import *
 import discord.utils
 
 def is_blacklisted(ID):
@@ -52,7 +52,7 @@ def check_premium(ctx): return is_premium(str(ctx.message.author.id))
 
 def check_mj(ctx):
     srv = DBServer(str(ctx.message.guild.id))
-    return discord.utils.get(ctx.message.guild.roles,id=srv.mjrole) in ctx.message.author.roles
+    return discord.utils.get(ctx.message.guild.roles,id=int(srv.mjrole)) in ctx.message.author.roles
 
 def check_jdrchannel(ctx):
     srv = DBServer(str(ctx.message.guild.id))
@@ -84,3 +84,7 @@ class GenericCommandParameters:
                 if i.linked == str(ctx.message.author.id) and i.selected:
                     self.char = i
                     break
+
+def check_haschar(ctx):
+    data = GenericCommandParameters(ctx)
+    return data.char is not None

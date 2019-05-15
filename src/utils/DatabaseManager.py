@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import psycopg2 as sql
-from src.INIfiles import *
+from src.utils.INIfiles import *
 
 class Database:
     def __init__(self):

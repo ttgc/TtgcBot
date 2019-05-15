@@ -243,3 +243,4 @@ help_descr=Description
 skill_assign_choice=Choisissez la bonne capacite a appliquer au personnage {} en répondant à ce message avec l'ID correspondant
 skill_notfound=La capacité n'existe pas
 skill_invalidid=L'ID n'appartient a aucun skill liste ci-dessus
+set_finalizer_ask=Entrez le message de champs de finalisation ci-dessous :

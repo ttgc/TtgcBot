@@ -243,3 +243,6 @@ help_descr=Description
 skill_assign_choice=Choose the right skill you want to assign to the character {} by answering this message with the matching ID
 skill_notfound=This skill does not exist
 skill_invalidid=The ID does not belong to any skill listed above
+set_finalizer_ask=Enter the content of this finalizer field below this message :
+finalize_notemptyqueue=The vocal queue is not empty. Please wait few seconds while clearing it...
+finalize_emptyqueue_timeout=This operation take too much time. Skipping it.

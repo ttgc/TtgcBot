@@ -52,6 +52,7 @@ from src.cogs.Moderation import *
 from src.cogs.Other import *
 from src.cogs.NSFW import *
 from src.cogs.Keeprole import *
+from src.cogs.Vocal import *
 from src.cogs.jdr.MainJDR import *
 from src.cogs.jdr.CharacterCog import *
 from src.cogs.jdr.SkillCog import *
@@ -137,6 +138,7 @@ async def on_command_error(ctx,error):
     if isinstance(error,commands.CommandNotFound): msg = lang["error_notfound"]
     elif isinstance(error,commands.BotMissingPermissions): msg = lang["error_perms"]
     elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
+    elif isinstance(error,commands.DisabledCommand): msg = lang["error_disabled"]
     elif isinstance(error,commands.CheckFailure): return
     elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
     elif isinstance(error,commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))
@@ -227,6 +229,7 @@ async def main():
     client.add_cog(Other(client,logger))
     client.add_cog(NSFW(client,logger))
     client.add_cog(Keeprole(client,logger))
+    client.add_cog(Vocal(client,logger))
     client.add_cog(MainJDR(client,logger))
     client.add_cog(CharacterCog(client,logger))
     client.add_cog(SkillCog(client,logger))

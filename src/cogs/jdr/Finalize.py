@@ -70,7 +70,7 @@ class Finalize(commands.Cog):
                 ctdead += "{}\n".format(i.name)
             elif i.linked is not None:
                 ct += "{} as {}\n".fprmat(str(discord.utils.get(message.guild.members,id=str(i.linked))),i.name)
-        if ctdead = "": ctdead = "No player dead"
+        if ctdead == "": ctdead = "No player dead"
         lucky = data.charbase[luck.index(max(luck))]
         ctlucky = lucky.name
         if lucky.linked is not None: ctlucky += " ({})".format(str(discord.utils.get(message.guild.members,id=int(lucky.linked))))

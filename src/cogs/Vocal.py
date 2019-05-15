@@ -22,7 +22,7 @@ from src.BotTools import *
 from discord.ext import commands
 import logging,asyncio
 import discord
-from src.Translator import *
+from src.tools.Translator import *
 from src.VocalUtilities import *
 import os
 

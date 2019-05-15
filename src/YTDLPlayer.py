@@ -24,8 +24,8 @@ from functools import partial
 from youtube_dl import YoutubeDL
 
 class YTDLSource(discord.PCMVolumeTransformer):
-    YTDLSource.ytdlopt = {"noplaylist":True,"playlist_items":"1","default_search":"auto"}
-    YTDLSource.ytdl = YoutubeDL(YTDLSource.ytdlopt)
+    ytdlopt = {"noplaylist":True,"playlist_items":"1","default_search":"auto"}
+    ytdl = YoutubeDL(ytdlopt)
 
     def __init__(self, source, *, data, requester):
         super().__init__(source)

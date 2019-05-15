@@ -33,7 +33,7 @@ import sys
 # import subprocess as sub
 
 # import custom libs
-from src.utils.logs import *
+from src.utils.inits import *
 from src.utils.INIfiles import *
 from src.tools.BotTools import *
 from src.tools.Translator import *
@@ -63,22 +63,9 @@ from src.cogs.jdr.JDRGlobal import *
 global logger
 logger = initlogs()
 
-# Check bot directories
-if not os.access("Hentai/",os.F_OK):
-    os.mkdir("Hentai")
-    logger.info("Create Hentai directory")
-
-if not os.access("Music/",os.F_OK):
-    os.mkdir("Music")
-    logger.info("Create Music directory")
-
-if not os.access("ffmpeg.exe",os.F_OK):
-    logger.critical("ffmpeg not found !")
-    raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
-
-if not os.access("arial.ttf",os.F_OK) and "--no-fontcheck" not in sys.argv:
-    logger.error("Map management features need 'arial.ttf' font to work")
-    raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
+# Check bot directories and files
+initdirs(logger)
+checkfiles(logger,argv)
 
 # Initialize bot status
 global statut

@@ -48,3 +48,28 @@ def initlogs():
     handler.addFilter(DebugFilter())
     logger.addHandler(handler)
     return logger
+
+def initdirs(logger):
+    if not os.access("Hentai/",os.F_OK):
+        os.mkdir("Hentai")
+        logger.info("Create Hentai directory")
+
+    if not os.access("Music/",os.F_OK):
+        os.mkdir("Music")
+        logger.info("Create Music directory")
+
+def checkfiles(logger,argv):
+    if not os.access("ffmpeg.exe",os.F_OK):
+        logger.critical("ffmpeg not found !")
+        raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
+
+    if not os.access("arial.ttf",os.F_OK) and "--no-fontcheck" not in argv:
+        logger.error("Map management features need 'arial.ttf' font to work")
+        raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
+
+def checktest(logger,argv):
+    for i in argv:
+        if i.startswith("-") and not i.startswith("--") and 't' in i:
+            logger.info("Test mod enabled, launching tests")
+            return True
+    return False

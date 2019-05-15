@@ -131,12 +131,13 @@ class VocalSystem:
                 await self.textchan.send(self.lang["vocal_next"].format(self.queue[0][0]))
             self.logger.info("playing next song on server %d",self.vocalchan.guild.id)
 
-    async def skip(self):
+    async def skip(self,no_output=False):
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
         if not self.co.is_playing(): return
         self.co.stop()
-        await self.textchan.send(self.lang["musicskip"])
+        if not no_output:
+            await self.textchan.send(self.lang["musicskip"])
         self.logger.info("skipping song on server %d",self.vocalchan.guild.id)
 
     async def pause(self):

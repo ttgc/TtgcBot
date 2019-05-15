@@ -22,7 +22,7 @@ import asyncio
 import discord
 import youtube_dl
 import logging
-from src.YTDLPlayer import *
+#from src.YTDLPlayer import *
 
 # def singleton(classe_definie):
 #     instances = {} # Dictionnaire de nos instances singletons
@@ -97,10 +97,10 @@ class VocalSystem:
     async def append(self,path,yt=True,ctx=None):
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
-        if yt:
-            src = await YTDLSource.create_source(ctx,path,loop=self.bot.loop,download=False)
-            name = src["title"]
-            song = await YTDLSource.regather_stream(src,loop=self.bot.loop)
+        if yt: pass
+            # src = await YTDLSource.create_source(ctx,path,loop=self.bot.loop,download=False)
+            # name = src["title"]
+            # song = await YTDLSource.regather_stream(src,loop=self.bot.loop)
             # with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
             #     song_info = ydl.extract_info(path,download=False)
             #     if "entries" in song_info: song_info = song_info["entries"][0]

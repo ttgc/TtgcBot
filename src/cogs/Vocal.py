@@ -52,7 +52,7 @@ class Vocal(commands.Cog):
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
         if vc.vocal: await vc.leave()
 
-    @vocal.command(name="play",aliases=["ytplay"])
+    @vocal.command(name="play",aliases=["ytplay"],enabled=False)
     async def vocal_play(self,ctx,*,search):
         await self.vocalcore.getvocal(str(ctx.message.guild.id)).append(search,ctx=ctx)
 

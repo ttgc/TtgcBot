@@ -23,7 +23,7 @@ from discord.ext import commands
 import logging,asyncio
 import discord
 from src.tools.Translator import *
-from src.VocalUtilities import *
+from src.tools.VocalUtilities import *
 import os
 
 class Vocal(commands.Cog):

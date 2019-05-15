@@ -94,7 +94,7 @@ class VocalSystem:
         self.logger.info("Joining vocal channel %d (binding to text channel %d) on server %d",self.vocalchan.id,self.textchan.id,self.vocalchan.guild.id)
         await self.textchan.send(self.lang["vocal_on"].format(str(self.vocalchan),str(self.textchan)))
 
-    async def append(self,path,yt=True,ctx=None):
+    async def append(self,path,yt=True,ctx=None,no_output=False):
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
         if yt: pass
@@ -111,21 +111,24 @@ class VocalSystem:
             name = path.replace("\\","/").split("/")[-1]
             song = discord.FFmpegPCMAudio(path)
         if not self.co.is_playing():
-            self.co.play(song,after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
+            self.co.play(song,after=lambda err: asyncio.run_coroutine_threadsafe(self.after(no_output),self.bot.loop))
         self.queue.append((name,song))
         self.logger.info("added song %s (%s) to queue on server %d",name,path,self.vocalchan.guild.id)
-        await self.textchan.send(self.lang["vocal_play"].format(name))
+        if not no_output:
+            await self.textchan.send(self.lang["vocal_play"].format(name))
 
-    async def after(self):
+    async def after(self,no_output=False):
         self.queue.pop(0)
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
         if len(self.queue) == 0:
-            await self.textchan.send(self.lang["vocal_stop"])
+            if not no_output:
+                await self.textchan.send(self.lang["vocal_stop"])
             self.logger.info("finished playing on server %d",self.vocalchan.guild.id)
         else:
             self.co.play(self.queue[0][1],after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
-            await self.textchan.send(self.lang["vocal_next"].format(self.queue[0][0]))
+            if not no_output:
+                await self.textchan.send(self.lang["vocal_next"].format(self.queue[0][0]))
             self.logger.info("playing next song on server %d",self.vocalchan.guild.id)
 
     async def skip(self):

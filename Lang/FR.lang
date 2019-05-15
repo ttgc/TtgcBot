@@ -244,3 +244,5 @@ skill_assign_choice=Choisissez la bonne capacite a appliquer au personnage {} en
 skill_notfound=La capacité n'existe pas
 skill_invalidid=L'ID n'appartient a aucun skill liste ci-dessus
 set_finalizer_ask=Entrez le message de champs de finalisation ci-dessous :
+finalize_notemptyqueue=La file de musique n'est pas vide. Veuillez patienter...
+finalize_emptyqueue_timeout=Cette operation est trop longue et a ete annulee

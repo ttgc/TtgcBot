@@ -22,6 +22,7 @@ import asyncio
 import discord
 import youtube_dl
 import logging
+from src.YTDLPlayer import *
 
 # def singleton(classe_definie):
 #     instances = {} # Dictionnaire de nos instances singletons
@@ -93,19 +94,21 @@ class VocalSystem:
         self.logger.info("Joining vocal channel %d (binding to text channel %d) on server %d",self.vocalchan.id,self.textchan.id,self.vocalchan.guild.id)
         await self.textchan.send(self.lang["vocal_on"].format(str(self.vocalchan),str(self.textchan)))
 
-    async def append(self,path,yt=True):
+    async def append(self,path,yt=True,ctx=None):
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
         if yt:
-            with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
-                song_info = ydl.extract_info(path,download=False)
-                if "entries" in song_info: song_info = song_info["entries"][0]
-                path = ydl.urlopen(song_info["webpage_url"]).file
-            #path = song_info#["webpage_url"]
-            name = song_info["title"]
+            song = await YTDLSource.create_source(ctx,path,loop=self.bot.loop,download=False)
+            name = song["title"]
+            # with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
+            #     song_info = ydl.extract_info(path,download=False)
+            #     if "entries" in song_info: song_info = song_info["entries"][0]
+            #     path = ydl.urlopen(song_info["webpage_url"]).file
+            # path = song_info#["webpage_url"]
+            # name = song_info["title"]
         else:
             name = path.replace("\\","/").split("/")[-1]
-        song = discord.FFmpegPCMAudio(path,pipe=yt)
+            song = discord.FFmpegPCMAudio(path)
         if not self.co.is_playing():
             self.co.play(song,after=lambda err: asyncio.run_coroutine_threadsafe(self.after(),self.bot.loop))
         self.queue.append((name,song))

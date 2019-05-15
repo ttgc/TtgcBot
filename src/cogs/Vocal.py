@@ -54,7 +54,7 @@ class Vocal(commands.Cog):
 
     @vocal.command(name="play",aliases=["ytplay"])
     async def vocal_play(self,ctx,*,search):
-        await self.vocalcore.getvocal(str(ctx.message.guild.id)).append(search)
+        await self.vocalcore.getvocal(str(ctx.message.guild.id)).append(search,ctx=ctx)
 
     @commands.check(check_botowner)
     @vocal.command(name="playlocal",aliases=["localplay"])

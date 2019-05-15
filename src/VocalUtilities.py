@@ -98,8 +98,9 @@ class VocalSystem:
         self.vocal = self.co is not None and self.co.is_connected()
         if not self.vocal: return
         if yt:
-            song = await YTDLSource.create_source(ctx,path,loop=self.bot.loop,download=False)
+            src = await YTDLSource.create_source(ctx,path,loop=self.bot.loop,download=False)
             name = song["title"]
+            song = await YTDLSource.regather_stream(src,loop=self.bot.loop)
             # with youtube_dl.YoutubeDL({"no_playlist":True,"playlist_items":"1","default_search":"ytsearch"}) as ydl:
             #     song_info = ydl.extract_info(path,download=False)
             #     if "entries" in song_info: song_info = song_info["entries"][0]

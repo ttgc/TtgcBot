@@ -232,3 +232,4 @@ vocal_pause=:pause_button: Pausing song
 vocal_resume=:play_pause: Resuming song
 vocal_cantconnect=:x: Unable to join vocal channel, please go into a vocal channel before
 vocal_play=:arrow_forward: Adding song to queue : \n```diff\n+{}\n```
+error_disabled=This command is disabled

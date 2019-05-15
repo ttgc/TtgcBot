@@ -232,3 +232,4 @@ vocal_pause=:pause_button: Musique mise en pause
 vocal_resume=:play_pause: Reprise de la lecture
 vocal_cantconnect=:x: Impossible de se connecter au vocal, veuillez rejoindre un channel vocal
 vocal_play=:arrow_forward: Ajout de la chanson a la queue : \n```diff\n+{}\n```
+error_disabled=Cette commande est desactivee

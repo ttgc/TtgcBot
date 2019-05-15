@@ -118,6 +118,7 @@ async def on_command_error(ctx,error):
     if isinstance(error,commands.CommandNotFound): msg = lang["error_notfound"]
     elif isinstance(error,commands.BotMissingPermissions): msg = lang["error_perms"]
     #elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
+    elif isinstance(error,commands.DisabledCommand): msg = lang["error_disabled"]
     elif isinstance(error,commands.CheckFailure): return
     elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
     elif isinstance(error,commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))

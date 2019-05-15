@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from src.utils.checks import *
-from src.BotTools import *
+from src.tools.BotTools import *
 from discord.ext import commands
 import logging,asyncio
 import discord

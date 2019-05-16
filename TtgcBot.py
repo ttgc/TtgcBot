@@ -60,6 +60,7 @@ from src.cogs.jdr.MJ import *
 from src.cogs.jdr.PetCog import *
 from src.cogs.jdr.JDRGlobal import *
 from src.cogs.jdr.Finalize import *
+from src.cogs.jdr.Maps import *
 
 # Initialize logs
 global logger
@@ -238,6 +239,7 @@ async def main():
     client.add_cog(PetCog(client,logger))
     client.add_cog(JDRGlobal(client,logger))
     client.add_cog(Finalize(client,logger))
+    client.add_cog(Maps(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

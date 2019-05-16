@@ -19,8 +19,9 @@
 
 from src.utils.checks import *
 from discord.ext import commands
-import logging
+import logging,asyncio
 from src.utils.converters import *
+import discord
 import typing
 
 class MJ(commands.Cog):
@@ -63,6 +64,30 @@ class MJ(commands.Cog):
     async def mj_roll(self,ctx,char,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         data = GenericCommandParameters(ctx)
         await self.charcog._charroll(ctx,data,char,stat,operator,expression)
+
+    @mj.command(name="transfer")
+    async def mj_transfer(self,ctx,newMJ: discord.Member):
+        data = GenericCommandParameters(ctx)
+        destisMJ = discord.utils.get(ctx.message.guild.roles,id=int(data.srv.mjrole)) in newMJ
+        if not destisMJ:
+            await ctx.message.channel.send(data.lang["mjtransfer_notmj"])
+        else:
+            await ctx.message.channel.send(data.lang["mjtransfer_step1"].format(ctx.message.channel.mention,newMJ.mention))
+            chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
+            try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+            except asyncio.TimeoutError: answer = None
+            if answer is None:
+                await ctx.message.channel.send(data.lang["timeout"])
+            else:
+                await ctx.message.channel.send(data.lang["mjtransfer_step2"].format(newMJ.mention,ctx.message.author.mention,ctx.message.channel.mention))
+                chk = lambda m: m.author == newMJ and m.channel == ctx.message.channel and m.content.lower() == 'accept'
+                try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+                except asyncio.TimeoutError: answer = None
+                if answer is None:
+                    await ctx.message.channel.send(data.lang["mjtransfer_timeout"].format(newMJ))
+                else:
+                    data.jdr.MJtransfer(str(newMJ.id))
+                    await ctx.message.channel.send(data.lang["mjtransfer"].format(newMJ))
 
     @mj.group(name="pet",invoke_without_command=False)
     async def mj_pet(self,ctx): pass

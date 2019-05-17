@@ -25,6 +25,7 @@ class Help(commands.HelpCommand):
     def __init__(self):
         commands.HelpCommand.__init__(self)
         self.data = None
+        self.verify_checks = False
 
     async def prepare_help_command(self,ctx,command=None):
         self.context = ctx
@@ -44,6 +45,7 @@ class Help(commands.HelpCommand):
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
         for i,k in mapping.items():
+            if i is not None and i.qualified_name == "BotManage": continue
             k = await self.filter_commands(k,sort=True)
             ls = []
             for cmd in k:

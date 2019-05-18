@@ -59,7 +59,7 @@ def initdirs(logger):
         logger.info("Create Music directory")
 
 def checkfiles(logger,argv):
-    if not os.access("ffmpeg.exe",os.F_OK):
+    if not os.access("ffmpeg.exe",os.F_OK) and "--no-vocal" not in argv:
         logger.critical("ffmpeg not found !")
         raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
 

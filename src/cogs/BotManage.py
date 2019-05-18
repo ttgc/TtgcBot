@@ -23,7 +23,7 @@ from discord.ext import commands
 import logging,sys,asyncio
 import subprocess as sub
 
-class BotManage(commands.Cog, command_attrs=dict(hidden=True)):
+class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=True)):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger

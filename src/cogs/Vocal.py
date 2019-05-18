@@ -24,9 +24,9 @@ import logging,asyncio
 import discord
 from src.tools.Translator import *
 from src.tools.VocalUtilities import *
-import os
+import os,sys
 
-class Vocal(commands.Cog):
+class Vocal(commands.Cog, command_attrs=dict(enabled="--no-vocal" not in sys.argv)):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
@@ -42,7 +42,7 @@ class Vocal(commands.Cog):
     async def vocal_on(self,ctx):
         data = GenericCommandParameters(ctx)
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
-        if ctx.message.author.voice.channel is None:
+        if ctx.message.author.voice is None:
             await ctx.message.channel.send(data.lang["vocal_cantconnect"])
         else:
             if not vc.vocal: await vc.join(ctx.message.author.voice.channel,ctx.message.channel,data.lang)

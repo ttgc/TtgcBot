@@ -40,12 +40,26 @@ class Help(commands.HelpCommand):
             return self.data.lang["error_help_subnotfound"].format(command.qualified_name,string)
         return self.data.lang["error_help_subnone"].format(command.qualified_name)
 
+    async def filter_commands(self,cmdlist,*,sort=False,key=None):
+        cmdlist = await commands.HelpCommand.filter_commands(self,cmdlist,sort=sort,key=key)
+        finalcmdlist = []
+        for cmd in cmdlist:
+            curlist = []
+            if isinstance(cmd,commands.Group):
+                if cmd.invoke_without_command: finalcmdlist.append(cmd)
+                for cmdgrp in cmd.commands:
+                    finalcmdlist.append(cmdgrp)
+            else:
+                finalcmdlist.append(cmd)
+            finalcmdlist += curlist
+        return finalcmdlist
+
     async def send_bot_help(self,mapping):
         embd = discord.Embed(title="TtgcBot",description=self.data.lang["help"],colour=discord.Color(int('5B005B',16)),url="https://ttgc.github.io/TtgcBot/")
         embd.set_footer(text="Made by Ttgc")
         embd.set_author(name="TtgcBot",icon_url=self.context.bot.user.avatar_url)
         for i,k in mapping.items():
-            if i is not None and i.qualified_name == "BotManage": continue
+            if i is not None and i.qualified_name == "Bot Management": continue
             k = await self.filter_commands(k,sort=True)
             ls = []
             for cmd in k:

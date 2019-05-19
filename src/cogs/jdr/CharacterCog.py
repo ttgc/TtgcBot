@@ -53,6 +53,7 @@ class CharacterCog(commands.Cog, name="Characters"):
                 await ctx.message.channel.send(data.lang["character_existing"])
             else:
                 data.jdr.charcreate(name,classe)
+                self.logger.log(logging.DEBUG+1,"/charcreate (%s) in channel %d of server %d",name,ctx.message.channel.id,ctx.message.guild.id)
                 await ctx.message.channel.send(data.lang["charcreate"].format(name))
 
     @commands.check(check_chanmj)
@@ -70,6 +71,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             await ctx.message.channel.send(data.lang["timeout"])
         else:
             data.jdr.chardelete(name)
+            self.logger.log(logging.DEBUG+1,"/chardelete (%s) in channel %d of server %d",name,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["chardelete"])
 
     @commands.check(check_chanmj)
@@ -79,6 +81,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
         data = GenericCommandParameters(ctx)
         character.link(str(player.id))
+        self.logger.log(logging.DEBUG+1,"/charlink in channel %d of server %d between %s and %d",ctx.message.channel.id,ctx.message.guild.id,character.key,player.id)
         await ctx.message.channel.send(data.lang["charlink"].format(character.name,player.mention))
 
     @commands.check(check_chanmj)
@@ -89,9 +92,11 @@ class CharacterCog(commands.Cog, name="Characters"):
         data = GenericCommandParameters(ctx)
         if character is None and data.char is not None:
             data.char.unlink()
+            self.logger.log(logging.DEBUG+1,"/charunlink of character %s in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["charunlink"].format(data.char.name))
         elif character is not None:
             character.unlink()
+            self.logger.log(logging.DEBUG+1,"/charcreate of character %s in channel %d of server %d",character.key,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["charunlink"].format(character.name))
 
     @commands.check(check_haschar)
@@ -104,6 +109,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         for i in member_charbase:
             if i.key == key and i.linked == str(ctx.message.author.id):
                 i.select()
+                self.logger.log(logging.DEBUG+1,"/charselect (%s -> %s) in channel %d of server %d",data.char.key,i.key,ctx.message.channel.id,ctx.message.guild.id)
                 await ctx.message.channel.send(data.lang["charselect"].format(data.char.key,i.key))
                 return
         await ctx.message.channel.send(data.lang["charnotexist"].format(key))
@@ -124,6 +130,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Roll dice for the given statistic and adding/substractiong bonus or malus if provided. According the rules, the result will also tell you if the action is a success or not.
         Finally bonus and malus can also be dices expression (see help of roll for more information)"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charroll (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._charroll(ctx,data,data.char,stat,operator,expression)
 
     @commands.check(check_chanmj)
@@ -147,6 +154,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         int/intuition/instinct
         ```"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charset %s for %s in channel %d of server %d",key,char.key,ctx.message.channel.id,ctx.message.guild.id)
         if key.lower() == "name":
             char.setname(value)
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["name"]))
@@ -208,6 +216,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=data.lang["damage_taken"],value=str(val),inline=True)
         embd.add_field(name=data.lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+        self.logger.log(logging.DEBUG+1,"/chardmg (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
@@ -225,6 +234,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=data.lang["heal_amount"],value=str(val),inline=True)
         embd.add_field(name=data.lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
+        self.logger.log(logging.DEBUG+1,"/charheal (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @character.command(name="getpm",aliases=["getmp"])
@@ -246,6 +257,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=data.lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
         embd.add_field(name=data.lang["remaining_pm"],value=str(char.PM)+"/"+str(char.PMmax),inline=True)
+        self.logger.log(logging.DEBUG+1,"/chargetpm (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
@@ -272,6 +284,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=data.lang["get_karma_amount"].format(got),value=str(val),inline=True)
         embd.add_field(name=data.lang["current_karma"],value=str(char.karma),inline=True)
+        self.logger.log(logging.DEBUG+1,"/charsetkarma (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
@@ -281,6 +294,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Reset a character. This action won't delete the character but will restore base amount of HP/PV, MP/PM, karma and fight mod (offensive/defensive)"""
         data = GenericCommandParameters(ctx)
         char.resetchar()
+        self.logger.log(logging.DEBUG+1,"/charreset (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
 
     async def _pay(self,ctx,data,char,val):
@@ -303,6 +317,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Pay the specified amount if you have enough money"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charpay (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._pay(ctx,data,data.char,val)
 
     @commands.check(check_chanmj)
@@ -319,6 +334,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         embd.add_field(name=data.lang["money_spent"],value=str(val),inline=True)
         embd.add_field(name=data.lang["remaining_money"],value=str(char.money),inline=True)
+        self.logger.log(logging.DEBUG+1,"/charearnpo (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     async def _charinfo(self,ctx,data,char):
@@ -355,6 +371,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Show all information related to your character"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charinfo (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._charinfo(ctx,data,data.char)
 
     @commands.check(check_haschar)
@@ -375,6 +392,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.add_field(name=data.lang["fail"],value=str(data.char.stat[4]),inline=True)
         embd.add_field(name=data.lang["critic_fail"],value=str(data.char.stat[5]),inline=True)
         embd.add_field(name=data.lang["super_critic_fail"],value=str(data.char.stat[6]),inline=True)
+        self.logger.log(logging.DEBUG+1,"/charstat (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_haschar)
@@ -387,6 +405,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         for i in data.char.inventory.items.keys():
             if i.name == itname:
                 data.char.inventory -= i
+                self.logger.log(logging.DEBUG+1,"/charuse (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
                 await ctx.message.channel.send(data.lang["used_item"].format(data.char.name,i.name))
                 return
         await ctx.message.channel.send(data.lang["no_more_item"])
@@ -409,6 +428,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             elif result == 4: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_4"])
             elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_5"])
             elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_1"])
+            self.logger.log(logging.DEBUG+1,"/charuselp (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
 
     @character_use.command(name="darkpt",aliases=["dp","darkpoint"])
     async def character_use_darkpt(self,ctx):
@@ -428,6 +448,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             elif result == 4: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_4"])
             elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_5"])
             elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_1"])
+            self.logger.log(logging.DEBUG+1,"/charusedp (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
 
     async def _switchmod(self,ctx,data,char):
         char = char.switchmod()
@@ -444,6 +465,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Switch your current fight mod
         If you are in defensive you will be in offensive, and if you are in offensive you will be in defensive"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/switchmod (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._switchmod(ctx,data,data.char)
 
     async def _setmental(ctx,data,char,op,val):
@@ -475,6 +497,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Set the mental health of your character.
         Using + or - before the amount (and separated by space character) will result to add or substract the amount from your current mental health"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charsetmental (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._setmental(ctx,data,data.char,op,val)
 
     @commands.check(check_chanmj)
@@ -525,6 +548,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+        self.logger.log(logging.DEBUG+1,"/charlvlup (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
@@ -545,5 +569,6 @@ class CharacterCog(commands.Cog, name="Characters"):
         else:
             char.kill()
             char.unlink()
+            self.logger.log(logging.DEBUG+1,"/charkill (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
             with open("pictures/you are dead.png","rb") as f:
                 await ctx.message.channel.send(file=discord.File(f))

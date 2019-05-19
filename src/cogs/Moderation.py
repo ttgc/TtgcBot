@@ -35,8 +35,7 @@ class Moderation(commands.Cog):
     @commands.command(aliases=['prefix'])
     async def setprefix(self,ctx,pref):
         """**Admin only**
-        Set the prefix used by the bot for the command on your server
-        This command as a cooldown of 30s per server"""
+        Set the prefix used by the bot for the command on your server"""
         data = GenericCommandParameters(ctx)
         data.srv.setprefix(pref)
         self.logger.info("Changing command prefix on server %s into '%s'",str(ctx.message.guild.id),pref)

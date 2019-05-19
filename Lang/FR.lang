@@ -220,6 +220,7 @@ token_clear=Tout les effets pour le token `{}` ont ete supprimes
 #Rewrite v2.0
 error_argument=Un argument de la commande n'est pas correct !
 error_perms=Le bot ne dispose pas de permissions suffisantes pour executer votre commande
+error_selfperms=Vous ne disposes pas de permissions suffisantes pour executer cette commande
 error_cd=Cette commande est actuellement en cooldown, essayez a nouveau dans {} secondes
 punish=Sanction
 none=Aucune

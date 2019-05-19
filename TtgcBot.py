@@ -138,6 +138,7 @@ async def on_command_error(ctx,error):
     msg = lang["error"].format(error)
 
     if isinstance(error,commands.CommandNotFound): msg = lang["error_notfound"]
+    elif isinstance(error,commands.MissingPermissions): msg = lang["error_selfperms"]
     elif isinstance(error,commands.BotMissingPermissions): msg = lang["error_perms"]
     elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
     elif isinstance(error,commands.DisabledCommand): msg = lang["error_disabled"]

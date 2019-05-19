@@ -36,6 +36,8 @@ class NSFW(commands.Cog):
     @commands.is_nsfw()
     @commands.command()
     async def nsfwjoke(self,ctx):
+        """**NSFW channel required**
+        Display a NSFW joke (only in french currently)"""
         with open("Jokes/nsfw-fr.txt") as f:
             await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))
 
@@ -44,6 +46,8 @@ class NSFW(commands.Cog):
     @commands.is_nsfw()
     @commands.command()
     async def hentai(self,ctx):
+        """**NSFW channel required**
+        Display a random hentai pic :smirk:"""
         with open("Hentai/{}".format(choice(os.listdir("Hentai"))),"rb") as f:
             await ctx.message.channel.send(file=discord.File(f))
 
@@ -51,4 +55,6 @@ class NSFW(commands.Cog):
     @commands.is_nsfw()
     @commands.command()
     async def rule34(self,ctx):
+        """**NSFW channel required**
+        Do you really need some further explanations ?"""
         await ctx.message.channel.send("Rule 34 : *If it exists, there is porn on it*\nhttps://rule34.paheal.net/")

@@ -40,6 +40,8 @@ class Vocal(commands.Cog, command_attrs=dict(enabled="--no-vocal" not in sys.arg
 
     @vocal.command(name="on")
     async def vocal_on(self,ctx):
+        """**Premium Only**
+        Join vocal. You have to be also in a vocal channel"""
         data = GenericCommandParameters(ctx)
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
         if ctx.message.author.voice is None:
@@ -49,15 +51,19 @@ class Vocal(commands.Cog, command_attrs=dict(enabled="--no-vocal" not in sys.arg
 
     @vocal.command(name="off")
     async def vocal_off(self,ctx):
+        """**Premium Only**
+        Leave vocal"""
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
         if vc.vocal: await vc.leave()
 
     @vocal.command(name="play",aliases=["ytplay"],enabled=False)
     async def vocal_play(self,ctx,*,search):
+        """**Premium Only** / **Disabled command**
+        Play a song from YouTube"""
         await self.vocalcore.getvocal(str(ctx.message.guild.id)).append(search,ctx=ctx)
 
     @commands.check(check_botowner)
-    @vocal.command(name="playlocal",aliases=["localplay"])
+    @vocal.command(name="playlocal",aliases=["localplay"],hidden=True)
     async def vocal_playlocal(self,ctx,*,search):
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
         if not os.access("Music/",os.F_OK) or (not search in os.listdir("Music/") and not "{}.mp3".format(search) in os.listdir("Music/") and not "{}.wav".format(search) in os.listdir("Music/")):
@@ -71,21 +77,27 @@ class Vocal(commands.Cog, command_attrs=dict(enabled="--no-vocal" not in sys.arg
     @commands.cooldown(1,2,commands.BucketType.guild)
     @vocal.command(name="skip")
     async def vocal_skip(self,ctx):
+        """**Premium Only**
+        Skip the current playing song"""
         await self.vocalcore.getvocal(str(ctx.message.guild.id)).skip()
 
     @commands.check(check_admin)
     @vocal.command(name="pause")
     async def vocal_pause(self,ctx):
+        """**Premium Only**
+        Pause the current playing song"""
         await self.vocalcore.getvocal(str(ctx.message.guild.id)).pause()
 
     @commands.check(check_admin)
     @vocal.command(name="resume")
     async def vocal_resume(self,ctx):
+        """**Premium Only**
+        Resume the current playing song"""
         await self.vocalcore.getvocal(str(ctx.message.guild.id)).resume()
 
     @commands.check(check_botmanager)
     @commands.cooldown(1,60,commands.BucketType.default)
-    @vocal.command(name="disconnectall",aliases=["forcedisconect"])
+    @vocal.command(name="disconnectall",aliases=["forcedisconect"],hidden=True)
     async def vocal_disconnectall(self,ctx):
         await ctx.message.channel.send("This will disconnect the bot from all vocal connections, are you sure ?\nType `confirm` to perform this")
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'

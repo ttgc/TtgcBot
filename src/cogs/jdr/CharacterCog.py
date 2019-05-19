@@ -30,7 +30,7 @@ from src.tools.parsingdice import *
 import typing
 from random import randint
 
-class CharacterCog(commands.Cog):
+class CharacterCog(commands.Cog, name="Characters"):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
@@ -42,6 +42,8 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="create",aliases=["+"])
     async def character_create(self,ctx,race: RaceConverter,classeName,name):
+        """**GM/MJ only**
+        Create a new character"""
         classe = retrieveClassID(race,classeName.replace("_"," "))
         data = GenericCommandParameters(ctx)
         if (race is None or classe is None):
@@ -57,6 +59,8 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.channel)
     @character.command(name="delete",aliases=["del","-"])
     async def character_delete(self,ctx,name):
+        """**GM/MJ only**
+        Delete an existing character. This cannot be undone"""
         data = GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["chardelete_confirm"].format(name))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
@@ -71,6 +75,8 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="link",aliases=["assign"])
     async def character_link(self,ctx,character: CharacterConverter, player: discord.Member):
+        """**GM/MJ only**
+        Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
         data = GenericCommandParameters(ctx)
         character.link(str(player.id))
         await ctx.message.channel.send(data.lang["charlink"].format(character.name,player.mention))
@@ -78,6 +84,8 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="unlink",aliases=["unassign"])
     async def character_unlink(self,ctx,character: typing.Optional[CharacterConverter] = None):
+        """**GM/MJ only**
+        Unlink a character from his/her owner (player)"""
         data = GenericCommandParameters(ctx)
         if character is None and data.char is not None:
             data.char.unlink()
@@ -90,6 +98,8 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.user)
     @character.command(name="select")
     async def character_select(self,ctx,key):
+        """**PC/PJ only**
+        Select a character from all characters linked to you"""
         data = GenericCommandParameters(ctx)
         for i in member_charbase:
             if i.key == key and i.linked == str(ctx.message.author.id):
@@ -110,20 +120,40 @@ class CharacterCog(commands.Cog):
     @commands.check(check_haschar)
     @character.command(name="roll",aliases=["r"])
     async def character_roll(self,ctx,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
+        """**PC/PJ only**
+        Roll dice for the given statistic and adding/substractiong bonus or malus if provided. According the rules, the result will also tell you if the action is a success or not.
+        Finally bonus and malus can also be dices expression (see help of roll for more information)"""
         data = GenericCommandParameters(ctx)
         await self._charroll(ctx,data,data.char,stat,operator,expression)
 
     @commands.check(check_chanmj)
     @character.command(name="set")
     async def character_set(self,ctx,key,char: CharacterConverter,*,value):
+        """**GM/MJ only**
+        Set an information of the specified character.
+        The avalaible information that can be set are the following :
+        ```
+        name
+        pv/hp
+        pm/mp
+        str/force/strength
+        spr/esprit/spirit
+        cha/charisme/charisma
+        agi/agilite/agility
+        lp/lightpt/lightpoint
+        dp/darkpt/darkpoint
+        dmod/defaultmod
+        dkar/dkarma/defaultkarma
+        int/intuition/instinct
+        ```"""
         data = GenericCommandParameters(ctx)
         if key.lower() == "name":
             char.setname(value)
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["name"]))
-        elif key.lower() == "pv":
+        elif key.lower() in ["pv","hp"]:
             char = char.charset('pvmax',int(value))
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["PV"]+" max"))
-        elif key.lower() == "pm":
+        elif key.lower() in ["pm","mp"]:
             char = char.charset('pmmax',int(value))
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["PM"]+" max"))
         elif key.lower() in ["str","force","strength"]:
@@ -167,6 +197,8 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="damage",aliases=["dmg"])
     async def character_damage(self,ctx,char: CharacterConverter, val: int):
+        """**GM/MJ only**
+        Inflict damages to the specified character"""
         data = GenericCommandParameters(ctx)
         val = abs(val)
         char = char.charset('pv',-val)
@@ -181,6 +213,8 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="heal")
     async def character_heal(self,ctx,char: CharacterConverter, val: int):
+        """**GM/MJ only**
+        Heal the specified character"""
         data = GenericCommandParameters(ctx)
         val = abs(val)
         if char.PV+ val > char.PVmax: val = char.PVmax-char.PV
@@ -195,6 +229,9 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="getpm",aliases=["getmp"])
     async def character_getpm(self,ctx,char: CharacterConverter, val: int):
+        """**GM/MJ only**
+        Give to or take from the specified character the specified amount of MP/PM
+        If the value is negative, the amount will be taken from the character else it will be given to the character"""
         data = GenericCommandParameters(ctx)
         if char.PM + val < 0:
             await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.PM)))
@@ -214,6 +251,9 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="setkarma",aliases=["getkarma","addkarma"])
     async def character_setkarma(self,ctx,char: CharacterConverter, val: int):
+        """**GM/MJ only**
+        Give to or take from the specified character the specified amount of karma
+        If the value is negative, the amount will be taken from the character else it will be given to the character"""
         data = GenericCommandParameters(ctx)
         if Skill.isskillin(char.skills,7): val *= 2 #chanceux
         if Skill.isskillin(char.skills,84): #creature harmonieuse
@@ -237,6 +277,8 @@ class CharacterCog(commands.Cog):
     @commands.check(check_chanmj)
     @character.command(name="reset")
     async def character_reset(self,ctx,char: CharacterConverter):
+        """**GM/MJ only**
+        Reset a character. This action won't delete the character but will restore base amount of HP/PV, MP/PM, karma and fight mod (offensive/defensive)"""
         data = GenericCommandParameters(ctx)
         char.resetchar()
         await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
@@ -258,12 +300,16 @@ class CharacterCog(commands.Cog):
     @commands.check(check_haschar)
     @character.command(name="pay")
     async def character_pay(self,ctx,val: int):
+        """**PC/PJ only**
+        Pay the specified amount if you have enough money"""
         data = GenericCommandParameters(ctx)
         await self._pay(ctx,data,data.char,val)
 
     @commands.check(check_chanmj)
     @character.command(name="earnmoney",aliases=["earnpo"])
     async def character_earnpo(self,ctx,char: CharacterConverter, val: int):
+        """**GM/MJ only**
+        Give money to a character"""
         data = GenericCommandParameters(ctx)
         val = abs(val)
         char = char.charset('po',val)
@@ -306,6 +352,8 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(1,10,commands.BucketType.user)
     @character.command(name="info")
     async def character_info(self,ctx):
+        """**PC/PJ only**
+        Show all information related to your character"""
         data = GenericCommandParameters(ctx)
         await self._charinfo(ctx,data,data.char)
 
@@ -313,6 +361,8 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(1,10,commands.BucketType.user)
     @character.command(name="stat")
     async def character_stat(self,ctx):
+        """**PC/PJ only**
+        Show dice related statistic - such as fails, success, critic, etc. - of your character"""
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["stat"],description=data.char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+data.char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
@@ -331,6 +381,8 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.user)
     @character.group(name="use",invoke_without_command=True)
     async def character_use(self,ctx,*,itname):
+        """**PC/PJ only**
+        Use an item and remove it from your inventory"""
         data = GenericCommandParameters(ctx)
         for i in data.char.inventory.items.keys():
             if i.name == itname:
@@ -341,6 +393,8 @@ class CharacterCog(commands.Cog):
 
     @character_use.command(name="lightpt",aliases=["lp","lightpoint"])
     async def character_use_lightpt(self,ctx):
+        """**PC/PJ only**
+        Consume a light point from your character and apply all the consequences to you"""
         data = GenericCommandParameters(ctx)
         if data.char.lp <= 0:
             await ctx.message.channel.send(data.lang["no_more_lp"])
@@ -358,6 +412,8 @@ class CharacterCog(commands.Cog):
 
     @character_use.command(name="darkpt",aliases=["dp","darkpoint"])
     async def character_use_darkpt(self,ctx):
+        """**PC/PJ only**
+        Consume a dark point from your character and apply all consquences to you"""
         data = GenericCommandParameters(ctx)
         if data.char.lp <= 0:
             await ctx.message.channel.send(data.lang["no_more_dp"])
@@ -384,6 +440,9 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.user)
     @character.command(name="switchmod",aliases=["switchmode"])
     async def character_switchmod(self,ctx):
+        """**PC/PJ only**
+        Switch your current fight mod
+        If you are in defensive you will be in offensive, and if you are in offensive you will be in defensive"""
         data = GenericCommandParameters(ctx)
         await self._switchmod(ctx,data,data.char)
 
@@ -412,6 +471,9 @@ class CharacterCog(commands.Cog):
     @commands.check(check_haschar)
     @character.command(name="setmental")
     async def character_setmental(self,ctx,op: typing.Optional[OperatorConverter],amount: int):
+        """**PC/PJ only**
+        Set the mental health of your character.
+        Using + or - before the amount (and separated by space character) will result to add or substract the amount from your current mental health"""
         data = GenericCommandParameters(ctx)
         await self._setmental(ctx,data,data.char,op,val)
 
@@ -419,6 +481,8 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(5,5,commands.BucketType.channel)
     @character.command(name="lvlup",aliases=["levelup"])
     async def character_lvlup(self,ctx,char: CharacterConverter):
+        """**GM/MJ only**
+        Make level up the specified character"""
         data = GenericCommandParameters(ctx)
         char.lvlup()
         embd = discord.Embed(title=char.name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
@@ -467,6 +531,10 @@ class CharacterCog(commands.Cog):
     @commands.cooldown(5,5,commands.BucketType.channel)
     @character.command(name="kill")
     async def character_kill(self,ctx,char: CharacterConverter):
+        """**GM/MJ only**
+        Kill definitively the specified character, this action cannot be undone !
+        If the character is linked, it will be automatically unlinked and nobody will be able to use it anymore.
+        Killed character are kept for statistic purpose and for finalize command"""
         data = GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["kill_confirm"].format(char.name))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'

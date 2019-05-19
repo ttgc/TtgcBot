@@ -37,6 +37,9 @@ class Keeprole(commands.Cog):
     @commands.cooldown(1,30,commands.BucketType.guild)
     @keeprole.command(name="enabled",aliases=['switch'])
     async def keeprole_enabled(self,ctx):
+        """**Admin only**
+        Switch on/off the Keeprole system on your server.
+        The Keeprole system allow members to keep some of their roles when leaving then joining again your server"""
         data = GenericCommandParameters(ctx)
         data.srv.togglekeeprole()
         self.logger.info("Toggle Keeprole system on server %s",str(ctx.message.guild.id))
@@ -48,6 +51,9 @@ class Keeprole(commands.Cog):
     @commands.cooldown(1,3600,commands.BucketType.guild)
     @keeprole.command(name="clear")
     async def keeprole_clear(self,ctx):
+        """**Admin only**
+        Clear user list for your server. This list contains all users who left your server with their roles belonging to the Keeprole system.
+        Once cleared, this action cannot be undone and users who will rejoin your server won't have their roles assigned back by the bot"""
         data = GenericCommandParameters(ctx)
         data.srv.clearkeeprole()
         self.logger.info("purged keeprole on server %s",str(ctx.message.guild.id))
@@ -58,6 +64,9 @@ class Keeprole(commands.Cog):
 
     @keeprole_roles.command(name="list")
     async def keeprole_roles_list(self,ctx):
+        """**Admin only**
+        Show the list of roles belonging to the Keeprole system
+        i.e. roles that would be reassigned to users automatically"""
         data = GenericCommandParameters(ctx)
         ls = data.srv.keeprolelist()
         rllist = ""
@@ -72,6 +81,8 @@ class Keeprole(commands.Cog):
 
     @keeprole_roles.command(name="add",aliases=["+"])
     async def keeprole_roles_add(self,ctx,roles: commands.Greedy[discord.Role]):
+        """**Admin only**
+        Add role(s) to the Keeprole system on your server"""
         data = GenericCommandParameters(ctx)
         info = await self.bot.application_info()
         botmember = ctx.message.guild.get_member(info.id)
@@ -87,6 +98,8 @@ class Keeprole(commands.Cog):
 
     @keeprole_roles.command(name="delete",aliases=["-","del","remove","rm"])
     async def keeprole_roles_delete(self,ctx,roles: commands.Greedy[discord.Role]):
+        """**Admin only**
+        Remove role(s) from the Keeprole system on your server"""
         data = GenericCommandParameters(ctx)
         strls = ""
         for i in roles:
@@ -100,6 +113,8 @@ class Keeprole(commands.Cog):
 
     @keeprole_members.command(name="list")
     async def keeprole_members_list(self,ctx):
+        """**Admin only**
+        Show the member list of users that had left your server with their roles to reassign back when rejoining your server"""
         data = GenericCommandParameters(ctx)
         ls = data.srv.keeprolememberwithrole()
         mblist = {}

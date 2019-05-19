@@ -34,7 +34,8 @@ class Moderation(commands.Cog):
     @commands.cooldown(1,30,commands.BucketType.guild)
     @commands.command(aliases=['prefix'])
     async def setprefix(self,ctx,pref):
-        """Set the prefix used by the bot for the command on your server
+        """**Admin only**
+        Set the prefix used by the bot for the command on your server
         This command as a cooldown of 30s per server"""
         data = GenericCommandParameters(ctx)
         data.srv.setprefix(pref)
@@ -45,7 +46,8 @@ class Moderation(commands.Cog):
     @commands.cooldown(1,60,commands.BucketType.guild)
     @commands.command(aliases=['adminrole'])
     async def setadminrole(self,ctx,role: discord.Role):
-        """Define or change the role designed as Admin of the bot for your server
+        """**Admin only**
+        Define or change the role designed as Admin of the bot for your server
         All members with this role will be able to use every command specified as 'Admin' commands.
         Be sure of what you are doing before granting permissions to someone else.
         Even if the owner doesn't have the role, he will be able to use 'Admin' specified commands"""
@@ -57,7 +59,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command()
     async def contentban(self,ctx,ctban):
-        """Forbid a content on your server. All message containing banned content will be automatically deleted by the bot and the author will receive a private message explaining why.
+        """**Admin only**
+        Forbid a content on your server. All message containing banned content will be automatically deleted by the bot and the author will receive a private message explaining why.
         You can only ban 20 differents content on each server except if you are a premium user"""
         data = GenericCommandParameters(ctx)
         if len(data.srv.wordblocklist()) < 20 or check_premium(ctx):
@@ -73,7 +76,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command()
     async def contentunban(self,ctx,ctban):
-        """Unban content previously banned by `contentban` command"""
+        """**Admin only**
+        Unban content previously banned by `contentban` command"""
         data = GenericCommandParameters(ctx)
         data.srv.unblockword(ctban)
         self.logger.info("'%s' unbanned on server %s",ctban,str(ctx.message.guild.id))
@@ -83,7 +87,8 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True,ban_members=True,kick_members=True)
     @commands.command()
     async def warn(self,ctx,members: commands.Greedy[discord.Member],*,reason):
-        """Warn one or many members. The warn does nothing except inform the members that they have not followed your guidelines if you didn't configure the warn sanctions through `configwarn` command."""
+        """**Admin only**
+        Warn one or many members. The warn does nothing except inform the members that they have not followed your guidelines if you didn't configure the warn sanctions through `configwarn` command."""
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title="WARN",description=reason,colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
@@ -128,7 +133,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command()
     async def unwarn(self,ctx,members: commands.Greedy[discord.Member]):
-        """Remove a warn from one or many users. The number of warnings is important only if you have configure warn sanctions through `configwarn` command"""
+        """**Admin only**
+        Remove a warn from one or many users. The number of warnings is important only if you have configure warn sanctions through `configwarn` command"""
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title="UNWARN",colour=discord.Color(int('00ff00',16)))
         embd.set_footer(text=str(ctx.message.created_at))
@@ -145,7 +151,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command()
     async def configwarn(self,ctx,value: int,sanction,rl: typing.Optional[discord.Role]):
-        """Configure warn sanctions. Set a sanction for a certain amount of warnings received. The sanction will be automatically applied to each members with at least the number of warnings given. Only the most valuable sanction will be applied.
+        """**Admin only**
+        Configure warn sanctions. Set a sanction for a certain amount of warnings received. The sanction will be automatically applied to each members with at least the number of warnings given. Only the most valuable sanction will be applied.
         You have 3 types of sanction that you can apply to the warn command :
         `assign <role>` assign a role to members
         `kick` kick members from your server
@@ -172,7 +179,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command(aliases=['warnls'])
     async def warnlist(self,ctx):
-        """Show all members with warnings and their number of warnings received"""
+        """**Admin only**
+        Show all members with warnings and their number of warnings received"""
         data = GenericCommandParameters(ctx)
         ls = data.srv.get_warned()
         embd = discord.Embed(title="Warned list",description=data.lang["warnlist"],colour=discord.Color(int('ff0000',16)))
@@ -186,7 +194,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command(aliases=['warnconfigls','warncfgls','warncfglist'])
     async def warnconfiglist(self,ctx):
-        """Show the sanction configuration of warn command on your server"""
+        """**Admin only**
+        Show the sanction configuration of warn command on your server"""
         data = GenericCommandParameters(ctx)
         ls = data.srv.get_warnconfig()
         embd = discord.Embed(title=data.lang["punishlist"],description=data.lang["warncfglist"],colour=discord.Color(int('ff0000',16)))
@@ -205,7 +214,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command()
     async def userblock(self,ctx,usr):
-        """Block users joining your server by banning them if their username contains the specified value given"""
+        """**Admin only**
+        Block users joining your server by banning them if their username contains the specified value given"""
         data = GenericCommandParameters(ctx)
         data.srv.blockusername(usr)
         self.logger.info("username %s blocked on server %s",usr,str(ctx.message.guild.id))
@@ -214,7 +224,8 @@ class Moderation(commands.Cog):
     @commands.check(check_admin)
     @commands.command()
     async def userunblock(self,ctx,usr):
-        """Remove user blocking for the specified value"""
+        """**Admin only**
+        Remove user blocking for the specified value"""
         data = GenericCommandParameters(ctx)
         if not data.srv.unblockusername(usr):
             await ctx.message.channel.send(data.lang["userunblock_notexist"].format(usr))

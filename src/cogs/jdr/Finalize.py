@@ -30,6 +30,7 @@ class Finalize(commands.Cog):
         self.logger = logger
 
     async def _finalizing_vocalstart(self,ctx,data):
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_vocalstart begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         vsys = self.bot.get_cog("Vocal").vocalcore
         vc = vsys.getvocal(str(ctx.message.guild.id))
         if vc is not None and vc.vocal and os.access("Music/never_give_up_tsfh.mp3",os.F_OK):
@@ -43,7 +44,8 @@ class Finalize(commands.Cog):
                     playable = False
                     break
                 await vc.skip(True)
-            if playable: await vc.append("Music/never_give_up_tsfh.mp3",yt=False)
+            if playable: await vc.append("Music/never_give_up_tsfh.mp3",yt=False,no_output=True)
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_vocalstart end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         return vsys,vc
 
     def _finalizing_generateinfo(self,ctx,data):
@@ -53,6 +55,7 @@ class Finalize(commands.Cog):
                 lsf[i] += ls2[i]
             return lsf
 
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_generateinfo begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         msg = [("The Tale of Great Cosmos","Created by Ttgc\nAn original adventure in the world of Terae and the multiverse")]
         msg += [("Game Master (GM) :",str(discord.utils.get(message.guild.members,id=int(jdr.mj))))]
         ct = ""
@@ -92,9 +95,11 @@ class Finalize(commands.Cog):
         msg += data.jdr.get_finalizer()
         msg += [("The Tale of Great Cosmos","Find more information on the official website/wiki\nJoin the community on the official discord"),
                 ("The Tale of Great Cosmos","Thank you for playing The Tale of Great Cosmos\nA chapter is closing, a new one is opening\nSee you soon in a new adventure")]
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_generateinfo end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         return msg
 
     async def _finalizing_sendinfo(self,ctx,msg):
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_sendinfo begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         for i in msg:
             titl = i[0]
             cont = i[1]
@@ -103,8 +108,10 @@ class Finalize(commands.Cog):
             embd.set_footer(text=time.asctime())
             await ctx.message.channel.send(embed=embd)
             await asyncio.sleep(10)
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_sendinfo end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
 
     async def _finalizing_sendthanks(self,ctx,data):
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_sendthanks begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         thanksmsg = await ctx.message.channel.send("Thanks for playing **The Tale of Great Cosmos** !")
         try:
             await thanksmsg.add_reaction("\U0001F4AF")
@@ -114,8 +121,10 @@ class Finalize(commands.Cog):
             await thanksmsg.add_reaction("\U0001F1E9")
         except discord.Forbidden: pass
         await ctx.message.channel.send(data.lang["finalize_end"])
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_sendthanks end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
 
     async def _finalizing_operation(self,ctx,data):
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_operation begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["finalize_start"])
         vsys,vc = await self._finalizing_vocalstart(ctx,data)
         await asyncio.sleep(2)
@@ -129,10 +138,16 @@ class Finalize(commands.Cog):
         await self._finalizing_sendinfo(ctx,msg)
         await self._finalizing_sendthanks(ctx,data)
         data.jdr.delete()
+        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_operation end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
 
     @commands.check(check_chanmj)
     @commands.group(invoke_without_command=True)
     async def finalize(self,ctx):
+        """**GM/MJ only**
+        This action conclude a RP/JDR. When using it, all data related to it will be deleted, some fun statistics will be shown and credits will be displaying.
+        If you have activated vocal before this command, the bot will also play the credits song
+        Current song : 'Never Give Up On Your Dreams' by Two Steps From Hell
+        All rights for the music go to their owners"""
         data = GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["chardelete_confirm"].format(name))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm finalize'
@@ -141,11 +156,15 @@ class Finalize(commands.Cog):
         if answer is None:
             await ctx.message.channel.send(data.lang["finalize_timeout"])
         else:
+            self.logger.log(logging.DEBUG+1,"begin finalize in %d channel of %d server",ctx.message.channel.id,ctx.message.guild.id)
             await self._finalizing_operation(ctx,data)
+            self.logger.log(logging.DEBUG+1,"end of finalize in %d channel of %d server",ctx.message.channel.id,ctx.message.guild.id)
 
     @commands.check(check_chanmj)
     @finalize.command(name="set")
     async def finalize_set(self,ctx,*,title):
+        """**GM/MJ only**
+        Set a credit field for the finalize command."""
         data = GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["set_finalizer_ask"].format(title))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel
@@ -155,11 +174,15 @@ class Finalize(commands.Cog):
             await ctx.message.channel.send(data.lang["timeout"])
         else:
             data.jdr.set_finalizer_field(title,ct)
+            self.logger.log(logging.DEBUG+1,"add finalize field %s in %d channel of %d server",title,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["finalizer_add"].format(title,content))
 
     @commands.check(check_chanmj)
     @finalize.command(name="delete",aliases=["del","-","remove","rm"])
-    async def finalize_set(self,ctx,*,title):
+    async def finalize_delete(self,ctx,*,title):
+        """**GM/MJ only**
+        remove a credit field from the finalize command."""
         data = GenericCommandParameters(ctx)
         data.jdr.del_finalizer_field(title)
+        self.logger.log(logging.DEBUG+1,"remove finalize field %s in %d channel of %d server",title,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["finalizer_del"].format(title))

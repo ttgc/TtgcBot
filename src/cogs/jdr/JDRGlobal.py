@@ -26,7 +26,7 @@ from src.tools.Character import *
 from src.utils.converters import *
 import typing
 
-class JDRGlobal(commands.Cog):
+class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
@@ -38,6 +38,8 @@ class JDRGlobal(commands.Cog):
     @commands.check(check_chanmj)
     @global_.command(name="damage",aliases=["dmg"])
     async def global_damage(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
+        """**GM/MJ only**
+        Inflict damages to the specified characters or to everyone if not specified"""
         data = GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
@@ -57,11 +59,14 @@ class JDRGlobal(commands.Cog):
                 dead_ls += "{}\n".format(i.name)
         if deads > 0:
             embd.add_field(name=data.lang["dead_players"],value=dead_ls,inline=False)
+        self.logger.log(logging.DEBUG+1,"globaldmg to %s in channel %d of server %d",str(chars),ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @global_.command(name="heal")
     async def global_heal(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
+        """**GM/MJ only**
+        Heal the specified characters or everyone if not specified"""
         data = GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
@@ -77,11 +82,15 @@ class JDRGlobal(commands.Cog):
                 trueval = i.PVmax-i.PV
             i = i.charset('pv',trueval)
             embd.add_field(name=i.name,value=str(i.PV)+" (+"+str(trueval)+")",inline=True)
+        self.logger.log(logging.DEBUG+1,"globalheal to %s in channel %d of server %d",str(chars),ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @global_.command(name="getpm",aliases=["getmp"])
     async def global_getpm(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
+        """**GM/MJ only**
+        Give to or take MP/PM from the specified characters or everyone if not specified.
+        The command follow the same rules as for `character getpm` command."""
         data = GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
@@ -98,11 +107,14 @@ class JDRGlobal(commands.Cog):
                 trueval = -i.PM
             i = i.charset('pm',trueval)
             embd.add_field(name=i.name,value="{} ({}{})".format(i.PM,("+" if val >= 0 else "-"),abs(val)),inline=True)
+        self.logger.log(logging.DEBUG+1,"globalgetpm to %s in channel %d of server %d",str(chars),ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.cooldown(1,30,commands.BucketType.channel)
     @global_.command(name="stat")
     async def global_stat(self,ctx):
+        """**RP/JDR channel only**
+        Show dice related statistic - such as fails, success, critic, etc. - of every characters"""
         ls = [0,0,0,0,0,0,0]
         for i in charbase:
             for k in range(len(ls)): ls[k] += i.stat[k]
@@ -117,4 +129,5 @@ class JDRGlobal(commands.Cog):
         embd.add_field(name=data.lang["fail"],value=str(ls[4]),inline=True)
         embd.add_field(name=data.lang["critic_fail"],value=str(ls[5]),inline=True)
         embd.add_field(name=data.lang["super_critic_fail"],value=str(ls[6]),inline=True)
+        self.logger.log(logging.DEBUG+1,"globalstat in channel %d of server %d",ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)

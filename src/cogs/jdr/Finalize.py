@@ -24,7 +24,7 @@ import logging,asyncio
 import discord
 import os,time
 
-class Finalize(commands.Cog):
+class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger

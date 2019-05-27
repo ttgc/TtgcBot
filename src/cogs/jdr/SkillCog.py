@@ -35,6 +35,8 @@ class SkillCog(commands.Cog):
     @commands.check(check_haschar)
     @commands.group(invoke_without_command=True,aliases=['sk'])
     async def skill(self,ctx):
+        """**Player only**
+        Display all natural skills inherited by your character"""
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.char.name,description=data.lang["sklist"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
@@ -42,12 +44,15 @@ class SkillCog(commands.Cog):
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         for i in data.char.skills:
             embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+        self.logger.log(logging.DEBUG+1,"skill list requested for character %s in channel %d on server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
 
     @commands.check(check_jdrchannel)
     @skill.command(name="info")
     async def skill_info(self,ctx,search: commands.Greedy[SkillConverter]):
+        """**RP/JDR channel only**
+        Search for one or many natural skills, retrieving all information and ID"""
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["skillsearch"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
@@ -56,11 +61,14 @@ class SkillCog(commands.Cog):
         for sklist in search:
             for i in sklist:
                 embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+        self.logger.log(logging.DEBUG+1,"skill search by %d in channel %d on server %d",ctx.message.author.id,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @skill.command(name="assign")
     async def skill_assign(self,ctx,char: CharacterConverter,*, skill: SkillConverter):
+        """**GM/MJ only**
+        Assign a natural skill to a given character"""
         data = GenericCommandParameters(ctx)
         if len(skill) == 0:
             await ctx.message.channel.send(data.lang["skill_notfound"])
@@ -84,9 +92,11 @@ class SkillCog(commands.Cog):
                 for i in skill:
                     if i.ID == val:
                         char.assign_skill(i)
+                        self.logger.log(logging.DEBUG+1,"assign skill %d to %s in channel %d on server %d",i.ID,char.key,ctx.message.channel.id,ctx.message.guild.id)
                         await ctx.message.channel.send(data.lang["assign_skill"].format(i.name,char.name))
                         return
                 await ctx.message.channel.send(data.lang["skill_invalidid"])
         else:
             char.assign_skill(skill[0])
+            self.logger.log(logging.DEBUG+1,"assign skill %d to %s in channel %d on server %d",skill[0].ID,char.key,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["assign_skill"].format(skill[0].name,char.name))

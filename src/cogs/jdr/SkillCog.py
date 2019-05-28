@@ -27,7 +27,7 @@ from src.tools.CharacterUtils import *
 from src.utils.converters import *
 import typing
 
-class SkillCog(commands.Cog):
+class SkillCog(commands.Cog, name="Skills"):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger

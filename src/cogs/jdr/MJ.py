@@ -28,9 +28,9 @@ class MJ(commands.Cog):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
-        self.charcog = self.bot.get_cog("CharacterCog")
+        self.charcog = self.bot.get_cog("Characters")
         # self.invcog = self.bot.get_cog("InventoryCog")
-        self.petcog = self.bot.get_cog("PetCog")
+        self.petcog = self.bot.get_cog("Pets")
 
     @commands.check(check_chanmj)
     @commands.group(invoke_without_command=False)
@@ -70,7 +70,7 @@ class MJ(commands.Cog):
         GM version of character setmental command"""
         data = GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjsetmental (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
-        await self.charcog._setmental(ctx,data,char,op,val)
+        await self.charcog._setmental(ctx,data,char,op,amount)
 
     @mj.command(name="roll",aliases=["r"])
     async def mj_roll(self,ctx,char,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):

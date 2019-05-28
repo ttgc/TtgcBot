@@ -38,7 +38,7 @@ class Maps(commands.Cog):
         """**RP/JDR channel only**
         Display the worldmap of Terae (alpha dimension)"""
         self.logger.log(logging.DEBUG+1,"worldmap requested by %d in channel %d on server %d",ctx.message.author.id,ctx.message.channel.id,ctx.message.guild.id)
-        with open("pictures/mapmonde.png") as f:
+        with open("pictures/mapmonde.png","rb") as f:
             await ctx.message.channel.send(file=discord.File(f))
 
     @commands.check(check_chanmj)
@@ -74,7 +74,7 @@ class Maps(commands.Cog):
         data = GenericCommandParameters(ctx)
         tk = Token(tkname,data.jdr.server,data.jdr.channel)
         tk.save()
-        self.logger.log(logging.DEBUG+1,"token %s registered in channel %d on server %d",tkname.id,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"token %s registered in channel %d on server %d",tkname,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["tokenadd"].format(tk.name))
 
     @map_token.command(name="remove",aliases=["rm","-","delete","del"])

@@ -115,8 +115,9 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     async def global_stat(self,ctx):
         """**RP/JDR channel only**
         Show dice related statistic - such as fails, success, critic, etc. - of every characters"""
+        data = GenericCommandParameters(ctx)
         ls = [0,0,0,0,0,0,0]
-        for i in charbase:
+        for i in data.charbase:
             for k in range(len(ls)): ls[k] += i.stat[k]
         embd = discord.Embed(title=data.lang["stat"],description=data.lang["stat_all"],colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos")

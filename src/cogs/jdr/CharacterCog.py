@@ -106,7 +106,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Select a character from all characters linked to you"""
         data = GenericCommandParameters(ctx)
-        for i in member_charbase:
+        for i in data.charbase:
             if i.key == key and i.linked == str(ctx.message.author.id):
                 i.select()
                 self.logger.log(logging.DEBUG+1,"/charselect (%s -> %s) in channel %d of server %d",data.char.key,i.key,ctx.message.channel.id,ctx.message.guild.id)
@@ -117,7 +117,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def _charroll(self,ctx,data,char,stat,operator,expression):
         modifier = 0
         if expression is not None:
-            modifier = ParseRoll(expression).resolv()
+            modifier,expr = ParseRoll(expression).resolv()
         if not char.dead:
             await char.roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
         else:
@@ -303,7 +303,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             await ctx.message.channel.send(data.lang["no_more_money"].format(char.money))
         else:
             char = char.charset('po',-val)
-            embd = discord.Embed(title=char.name,description=data.data.lang["paid"],colour=discord.Color(int('ffff00',16)))
+            embd = discord.Embed(title=char.name,description=data.lang["paid"],colour=discord.Color(int('ffff00',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
@@ -498,7 +498,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Using + or - before the amount (and separated by space character) will result to add or substract the amount from your current mental health"""
         data = GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charsetmental (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
-        await self._setmental(ctx,data,data.char,op,val)
+        await self._setmental(ctx,data,data.char,op,amount)
 
     @commands.check(check_chanmj)
     @commands.cooldown(5,5,commands.BucketType.channel)
@@ -512,7 +512,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
-        embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(data.char.lvl),inline=True)
+        embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
         if char.lvl == 2:
             dice,dice2 = randint(1,10),randint(1,10)
             embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_2"].format(str(dice),str(dice2)),inline=True)

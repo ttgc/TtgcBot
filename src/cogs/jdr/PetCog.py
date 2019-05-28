@@ -53,7 +53,7 @@ class PetCog(commands.Cog, name="Pets"):
 
     @commands.check(check_chanmj)
     @commands.cooldown(3,5,commands.BucketType.user)
-    @pet.command(name="remove",aliases=["-","delete","del"])
+    @pet.command(name="remove",aliases=["-","delete","del","rm"])
     async def pet_remove(self,ctx,char: CharacterConverter,petkey):
         """**GM/MJ only**
         Delete a pet from the given character. This cannot be undone"""
@@ -191,7 +191,7 @@ class PetCog(commands.Cog, name="Pets"):
         else:
             modifier = 0
             if expression is not None:
-                modifier = ParseRoll(expression).resolv()
+                modifier,expr = ParseRoll(expression).resolv()
             await char.pet[petkey].roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
 
     @commands.check(check_haschar)

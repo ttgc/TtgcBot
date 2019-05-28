@@ -149,7 +149,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
         Current song : 'Never Give Up On Your Dreams' by Two Steps From Hell
         All rights for the music go to their owners"""
         data = GenericCommandParameters(ctx)
-        await ctx.message.channel.send(data.lang["chardelete_confirm"].format(name))
+        await ctx.message.channel.send(data.lang["finalize"])
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm finalize'
         try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
         except asyncio.TimeoutError: answer = None

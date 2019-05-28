@@ -133,6 +133,7 @@ class Maps(commands.Cog):
     async def map_effect_clear(self,ctx,tk: MapTokenConverter):
         """**GM/MJ only**
         Clear all effects from the given token"""
+        data = GenericCommandParameters(ctx)
         if tk is not None:
             tk.cleareffect()
             self.logger.log(logging.DEBUG+1,"token effect clear requested for token %s in channel %d on server %d",tk.name,ctx.message.channel.id,ctx.message.guild.id)

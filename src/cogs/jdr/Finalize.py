@@ -57,7 +57,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
 
         self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_generateinfo begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         msg = [("The Tale of Great Cosmos","Created by Ttgc\nAn original adventure in the world of Terae and the multiverse")]
-        msg += [("Game Master (GM) :",str(discord.utils.get(ctx.message.guild.members,id=int(jdr.mj))))]
+        msg += [("Game Master (GM) :",str(discord.utils.get(ctx.message.guild.members,id=int(data.jdr.mj))))]
         ct = ""
         ctdead = ""
         luck = []

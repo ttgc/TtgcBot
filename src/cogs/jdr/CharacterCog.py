@@ -482,7 +482,7 @@ class CharacterCog(commands.Cog, name="Characters"):
                     got = data.lang["lost"]
                     newval = char.mental - amount
             char = char.charset('ment',newval)
-            embd = discord.Embed(title=char.name,description=lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
+            embd = discord.Embed(title=char.name,description=data.lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")

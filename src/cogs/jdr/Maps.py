@@ -118,6 +118,7 @@ class Maps(commands.Cog):
             lengths -> list of lengths separated with '-' symbol, the first value is the closest line from the origin and the last the farthest line from the origin (example : 1-3-5). DO NOT USE SPACE BETWEEN LENGTHS VALUES.
             orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
         ```"""
+        data = GenericCommandParameters(ctx)
         if tk is not None:
             try: tk.spawnAreaEffect(dx,dy,dz,shape,params)
             except:

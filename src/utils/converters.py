@@ -69,8 +69,8 @@ class ShapeConverter(commands.Converter):
         raise commands.BadArgument("Shape conversion error ! Not a valid shape")
 
 class MapEffectParameterConverter(commands.Converter):
-    async def convert(self,ctx,args):
-        ls = args.split(" ")
+    async def convert(self,ctx,arg):
+        args = arg.split(" ")
         while "" in args: args.remove("")
         data = {}
         for i in args:

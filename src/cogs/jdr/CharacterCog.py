@@ -468,7 +468,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/switchmod (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._switchmod(ctx,data,data.char)
 
-    async def _setmental(self,ctx,data,char,op,val):
+    async def _setmental(self,ctx,data,char,op,amount):
         if char.dead:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
         else:

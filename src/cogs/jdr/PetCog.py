@@ -30,7 +30,7 @@ from src.tools.parsingdice import *
 import typing
 from random import randint
 
-class PetCog(commands.Cog):
+class PetCog(commands.Cog, name="Pets"):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
@@ -42,8 +42,11 @@ class PetCog(commands.Cog):
     @commands.check(check_chanmj)
     @pet.command(name="add",aliases=["+"])
     async def pet_add(self,ctx,char: CharacterConverter,petkey):
+        """**GM/MJ only**
+        Add a pet to a given character"""
         data = GenericCommandParameters(ctx)
         if char.pet_add(petkey):
+            self.logger.log(logging.DEBUG+1,"/petadd (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["petadd"].format(petkey,char.name))
         else:
             await ctx.message.channel.send(data.lang["petexist"].format(petkey))
@@ -52,8 +55,11 @@ class PetCog(commands.Cog):
     @commands.cooldown(3,5,commands.BucketType.user)
     @pet.command(name="remove",aliases=["-","delete","del"])
     async def pet_remove(self,ctx,char: CharacterConverter,petkey):
+        """**GM/MJ only**
+        Delete a pet from the given character. This cannot be undone"""
         data = GenericCommandParameters(ctx)
         if char.pet_delete(petkey):
+            self.logger.log(logging.DEBUG+1,"/petrm (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["petrm"].format(petkey,char.name))
         else:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
@@ -61,10 +67,14 @@ class PetCog(commands.Cog):
     @commands.check(check_chanmj)
     @pet.command(name="set")
     async def pet_set(self,ctx,key,char: CharacterConverter,petkey,*,value):
+        """**GM/MJ only**
+        Same as character set command but for the specified pet.
+        Somme attributes for characters are not avalaible for pet."""
         data = GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
+            self.logger.log(logging.DEBUG+1,"/petset %s (%s / %s) in channel %d of server %d",key,char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             if key.lower() == "name":
                 char.pet[petkey].setname(value)
                 await ctx.message.channel.send(data.lang["petset"].format(data.lang["name"]))
@@ -116,16 +126,22 @@ class PetCog(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.user)
     @pet.command(name="switchmod",aliases=["switchmode"])
     async def pet_switchmod(self,ctx,petkey):
+        """**Player only**
+        Switch the battle mod of one of your pet"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/petswitchmod (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self._switchmod(ctx,data,data.char,petkey)
 
     @commands.check(check_chanmj)
     @pet.command(name="lvlup",aliases=["levelup"])
     async def pet_lvlup(self,ctx,char: CharacterConverter,petkey):
+        """**GM/MJ only**
+        Make level up the specified pet of the given character"""
         data = GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
+            self.logger.log(logging.DEBUG+1,"/petlevelup (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             char.pet[petkey].lvlup()
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
@@ -181,7 +197,10 @@ class PetCog(commands.Cog):
     @commands.check(check_haschar)
     @pet.command(name="roll",aliases=["r"])
     async def pet_roll(self,ctx,petkey,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
+        """**Player only**
+        Same as your character roll command, but for one of your pet"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/petroll (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self._petroll(ctx,data,data.char,petkey,stat,operator,expression)
 
     async def _petinfo(self,ctx,data,char,petkey):
@@ -210,12 +229,17 @@ class PetCog(commands.Cog):
     @commands.cooldown(1,10,commands.BucketType.user)
     @pet.command(name="info")
     async def pet_info(self,ctx,petkey):
+        """**Player only**
+        Show all information related to one of your pets"""
         data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/petinfo (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self._petinfo(ctx,data,data.char,petkey)
 
     @commands.check(check_chanmj)
     @pet.command(name="setkarma")
     async def pet_setkarma(ctx,data,char: CharacterConverter,petkey,amount: int):
+        """**GM/MJ only**
+        Set the karma like character setkarma command for the given pet"""
         data = GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
@@ -229,11 +253,15 @@ class PetCog(commands.Cog):
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name=data.lang["get_karma_amount"].format(got),value=str(amount),inline=True)
             embd.add_field(name=data.lang["current_karma"],value=str(char.pet[petkey].karma),inline=True)
+            self.logger.log(logging.DEBUG+1,"/petsetkarma (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
+            await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_haschar)
     @commands.cooldown(1,10,commands.BucketType.user)
     @pet.command(name="stat")
     async def pet_stat(self,ctx,petkey):
+        """**Player only**
+        Show dice related statistics of one of your pets"""
         data = GenericCommandParameters(ctx)
         if petkey not in data.char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
@@ -249,10 +277,14 @@ class PetCog(commands.Cog):
         embd.add_field(name=data.lang["fail"],value=str(data.char.pet[petkey].stat[4]),inline=True)
         embd.add_field(name=data.lang["critic_fail"],value=str(data.char.pet[petkey].stat[5]),inline=True)
         embd.add_field(name=data.lang["super_critic_fail"],value=str(data.char.pet[petkey].stat[6]),inline=True)
+        self.logger.log(logging.DEBUG+1,"/petstat (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @pet.command(name="damage",aliases=["dmg"])
     async def pet_damage(self,ctx,char: CharacterConverter,petkey,val: int):
+        """**GM/MJ only**
+        Inflict damage to a pet"""
         data = GenericCommandParameters(ctx)
         if petkey not in data.char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
@@ -265,11 +297,14 @@ class PetCog(commands.Cog):
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name=data.lang["damage_taken"],value=str(val),inline=True)
             embd.add_field(name=data.lang["remaining_pv"],value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
+            self.logger.log(logging.DEBUG+1,"/petdmg (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @pet.command(name="heal")
     async def pet_heal(self,ctx,char: CharacterConverter,petkey,val: int):
+        """**GM/MJ only**
+        Heal the given pet"""
         data = GenericCommandParameters(ctx)
         if petkey not in data.char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
@@ -283,10 +318,14 @@ class PetCog(commands.Cog):
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name=data.lang["heal_amount"],value=str(val),inline=True)
             embd.add_field(name=data.lang["remaining_pv"],value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
+            self.logger.log(logging.DEBUG+1,"/petheal (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
+            await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
     @pet.command("getpm",aliases=["getmp"])
     async def pet_getpm(self,ctx,char: CharacterConverter,petkey,val: int):
+        """**GM/MJ only**
+        Set MP/PM for the given pet such as character getPM for characters does"""
         data = GenericCommandParameters(ctx)
         if petkey not in data.char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
@@ -304,4 +343,5 @@ class PetCog(commands.Cog):
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name=data.lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
             embd.add_field(name=data.lang["remaining_pm"],value=str(char.pet[petkey].PM)+"/"+str(char.pet[petkey].PMmax),inline=True)
+            self.logger.log(logging.DEBUG+1,"/petgetpm (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(embed=embd)

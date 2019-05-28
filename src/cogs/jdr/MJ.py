@@ -41,7 +41,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of character info command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjcharinfo (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjcharinfo (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._charinfo(ctx,data,char)
 
     # @mj.command(name="inventory",aliases=["inv"])
@@ -53,7 +53,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of character switchmod command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjswitchmod (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjswitchmod (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._switchmod(ctx,data,char)
 
     @mj.command(name="pay")
@@ -61,7 +61,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of character pay command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjpay (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjpay (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._pay(ctx,data,char,val)
 
     @mj.command(name="setmental")
@@ -69,7 +69,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of character setmental command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjsetmental (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjsetmental (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._setmental(ctx,data,char,op,val)
 
     @mj.command(name="roll",aliases=["r"])
@@ -77,7 +77,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of character roll command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjroll (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjroll (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._charroll(ctx,data,char,stat,operator,expression)
 
     @mj.command(name="transfer")
@@ -115,7 +115,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of pet roll command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjpetroll (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjpetroll (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self.petcog._petroll(ctx,data,char,petkey,stat,operator,expression)
 
     @mj_pet.command(name="switchmod",aliases=["switchmode"])
@@ -123,7 +123,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of pet switchmod command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjpetswitchmod (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjpetswitchmod (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self.petcog._switchmod(ctx,data,char,petkey)
 
     @mj_pet.command(name="info")
@@ -131,5 +131,5 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         GM version of pet info command"""
         data = GenericCommandParameters(ctx)
-        self.logger.log(logging.DEBUG+1,"/mjpetinfo (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
+        self.logger.log(logging.DEBUG+1,"/mjpetinfo (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self.petcog._petinfo(ctx,data,char,petkey)

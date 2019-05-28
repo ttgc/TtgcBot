@@ -57,7 +57,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
 
         self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_generateinfo begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         msg = [("The Tale of Great Cosmos","Created by Ttgc\nAn original adventure in the world of Terae and the multiverse")]
-        msg += [("Game Master (GM) :",str(discord.utils.get(message.guild.members,id=int(jdr.mj))))]
+        msg += [("Game Master (GM) :",str(discord.utils.get(ctx.message.guild.members,id=int(jdr.mj))))]
         ct = ""
         ctdead = ""
         luck = []
@@ -72,17 +72,17 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
             if i.dead:
                 ctdead += "{}\n".format(i.name)
             elif i.linked is not None:
-                ct += "{} as {}\n".fprmat(str(discord.utils.get(message.guild.members,id=str(i.linked))),i.name)
+                ct += "{} as {}\n".fprmat(str(discord.utils.get(ctx.message.guild.members,id=str(i.linked))),i.name)
         if ctdead == "": ctdead = "No player dead"
         lucky = data.charbase[luck.index(max(luck))]
         ctlucky = lucky.name
-        if lucky.linked is not None: ctlucky += " ({})".format(str(discord.utils.get(message.guild.members,id=int(lucky.linked))))
+        if lucky.linked is not None: ctlucky += " ({})".format(str(discord.utils.get(ctx.message.guild.members,id=int(lucky.linked))))
         unlucky = data.charbase[unluck.index(max(unluck))]
         ctunlucky = unlucky.name
-        if unlucky.linked is not None: ctunlucky += " ({})".format(str(discord.utils.get(message.guild.members,id=int(unlucky.linked))))
+        if unlucky.linked is not None: ctunlucky += " ({})".format(str(discord.utils.get(ctx.message.guild.members,id=int(unlucky.linked))))
         mostroll = data.charbase[rolled.index(max(rolled))]
         ctmostroll = mostroll.name
-        if mostroll.linked is not None: ctmostroll += " ({})".format(str(discord.utils.get(message.guild.members,id=int(mostroll.linked))))
+        if mostroll.linked is not None: ctmostroll += " ({})".format(str(discord.utils.get(ctx.message.guild.members,id=int(mostroll.linked))))
         msg += [("Players (PC) :",ct),
                 ("Deads Players during the adventure :",ctdead),
                 ("Most Lucky PC :",ctlucky),

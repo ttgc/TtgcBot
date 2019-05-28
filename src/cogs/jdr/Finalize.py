@@ -72,7 +72,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
             if i.dead:
                 ctdead += "{}\n".format(i.name)
             elif i.linked is not None:
-                ct += "{} as {}\n".format(str(discord.utils.get(ctx.message.guild.members,id=str(i.linked))),i.name)
+                ct += "{} as {}\n".format(str(discord.utils.get(ctx.message.guild.members,id=int(i.linked))),i.name)
         if ctdead == "": ctdead = "No player dead"
         lucky = data.charbase[luck.index(max(luck))]
         ctlucky = lucky.name

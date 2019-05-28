@@ -85,7 +85,7 @@ class MJ(commands.Cog):
         """**GM/MJ only**
         Transfer ownership of a RP/JDR to someone else (this member needs the GM/MJ role)"""
         data = GenericCommandParameters(ctx)
-        destisMJ = discord.utils.get(ctx.message.guild.roles,id=int(data.srv.mjrole)) in newMJ
+        destisMJ = discord.utils.get(ctx.message.guild.roles,id=int(data.srv.mjrole)) in newMJ.roles
         if not destisMJ:
             await ctx.message.channel.send(data.lang["mjtransfer_notmj"])
         else:

@@ -91,6 +91,7 @@ class Maps(commands.Cog):
     async def map_token_move(self,ctx,tk: MapTokenConverter, dx: int, dy: int, dz: typing.Optional[int] = 0):
         """**GM/MJ only**
         Move a token in the given direction"""
+        data = GenericCommandParameters(ctx)
         if tk is not None:
             tk.move(dx,dy,dz)
             self.logger.log(logging.DEBUG+1,"token %s moved into direction (%d,%d,%d) in channel %d on server %d",tk.name,dx,dy,dz,ctx.message.channel.id,ctx.message.guild.id)

@@ -211,7 +211,7 @@ class PetCog(commands.Cog, name="Pets"):
             if char.pet[petkey].mod == 0: modd = data.lang["offensive"]
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["petbelong"].format(char.pet[petkey].espece,char.name),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
             embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
             embd.add_field(name=data.lang["PV"]+" :",value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
             embd.add_field(name=data.lang["PM"]+" :",value=str(char.pet[petkey].PM)+"/"+str(char.pet[petkey].PMmax),inline=True)
@@ -237,7 +237,7 @@ class PetCog(commands.Cog, name="Pets"):
 
     @commands.check(check_chanmj)
     @pet.command(name="setkarma")
-    async def pet_setkarma(ctx,data,char: CharacterConverter,petkey,amount: int):
+    async def pet_setkarma(self,ctx,char: CharacterConverter,petkey,amount: int):
         """**GM/MJ only**
         Set the karma like character setkarma command for the given pet"""
         data = GenericCommandParameters(ctx)
@@ -290,7 +290,7 @@ class PetCog(commands.Cog, name="Pets"):
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
             val = abs(val)
-            char = char.pet[petkey].charset('pv',-val)
+            char = char.pet[petkey].petset('pv',-val)
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["damaged"],colour=discord.Color(int('ff0000',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -311,7 +311,7 @@ class PetCog(commands.Cog, name="Pets"):
         else:
             val = abs(val)
             if char.pet[petkey].PV+ val > char.pet[petkey].PVmax: val = char.pet[petkey].PVmax-char.pet[petkey].PV
-            char = char.pet[petkey].charset('pv',val)
+            char = char.pet[petkey].petset('pv',val)
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["healed"],colour=discord.Color(int('00ff00',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -334,7 +334,7 @@ class PetCog(commands.Cog, name="Pets"):
                 await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.pet[petkey].PM)))
             else:
                 if char.pet[petkey].PM+val > char.pet[petkey].PMmax: val = char.pet[petkey].PMmax - char.pet[petkey].PM
-                char = char.pet[petkey].charset('pm',val)
+                char = char.pet[petkey].petset('pm',val)
             got = data.lang["recovered"]
             if val < 0: got = data.lang["lost"]
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["get_pm"].format(got),colour=discord.Color(int('0000ff',16)))

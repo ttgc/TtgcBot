@@ -106,7 +106,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
             if i.PM+trueval < 0:
                 trueval = -i.PM
             i = i.charset('pm',trueval)
-            embd.add_field(name=i.name,value="{} ({}{})".format(i.PM,("+" if val >= 0 else "-"),abs(val)),inline=True)
+            embd.add_field(name=i.name,value="{} ({}{})".format(i.PM,("+" if trueval >= 0 else "-"),abs(trueval)),inline=True)
         self.logger.log(logging.DEBUG+1,"globalgetpm to %s in channel %d of server %d",str(chars),ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 

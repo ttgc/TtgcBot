@@ -143,7 +143,7 @@ async def on_command_error(ctx,error):
     elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
     elif isinstance(error,commands.DisabledCommand): msg = lang["error_disabled"]
     elif isinstance(error,commands.CheckFailure): return
-    elif isinstance(error,commands.BadArgument): msg = lang["error_argument"]
+    elif isinstance(error,commands.UserInputError): msg = lang["error_argument"]
     elif isinstance(error,commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))
     else: logger.warning(error)
     await ctx.message.channel.send(msg)
@@ -192,8 +192,9 @@ async def on_guild_remove(guild):
 async def on_error(event,*args,**kwargs):
     global logger
     logger.error(traceback.format_exc())
-    infos = await client.application_info()
-    await infos.owner.send(get_lang()["error"].format(traceback.format_exc(limit=100)))
+    # infos = await client.application_info()
+    # await infos.owner.send(get_lang()["error"].format(traceback.format_exc(limit=100)))
+    client.get_cog("Bot Management").handlederror += 1
 
 @client.event
 async def on_ready():

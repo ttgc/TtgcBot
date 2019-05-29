@@ -27,6 +27,7 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger
+        self.handlederror = 0
 
     @commands.check(check_botowner)
     @commands.command(aliases=["eval"])
@@ -109,3 +110,8 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
             await self.bot.logout()
             sub.call(['./bootbot.sh'])
             sys.exit(0)
+
+    @commands.check(check_botmanager)
+    @commands.command()
+    async def geterrornbr(self,ctx):
+        await ctx.message.author.send("Handled error since boot : {}".format(self.handlederror))

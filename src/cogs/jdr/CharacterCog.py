@@ -141,17 +141,17 @@ class CharacterCog(commands.Cog, name="Characters"):
         The avalaible information that can be set are the following :
         ```
         name
-        pv/hp
-        pm/mp
-        str/force/strength
-        spr/esprit/spirit
-        cha/charisme/charisma
-        agi/agilite/agility
+        hp/pv
+        mp/pm
+        force/str/strength
+        esprit/spr/spirit
+        charisme/cha/charisma
+        agilite/furtivite/agi/agility
         lp/lightpt/lightpoint
         dp/darkpt/darkpoint
-        dmod/defaultmod
-        dkar/dkarma/defaultkarma
-        int/intuition/instinct
+        defaultmod/dmod
+        defaultkarma/dkar/dkarma
+        intuition/int/instinct
         ```"""
         data = GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charset %s for %s in channel %d of server %d",key,char.key,ctx.message.channel.id,ctx.message.guild.id)

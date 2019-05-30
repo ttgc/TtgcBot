@@ -78,10 +78,10 @@ class PetCog(commands.Cog, name="Pets"):
             if key.lower() == "name":
                 char.pet[petkey].setname(value)
                 await ctx.message.channel.send(data.lang["petset"].format(data.lang["name"]))
-            elif key.lower() == "pv":
+            elif key.lower() in ["pv","hp"]:
                 char = char.pet[petkey].petset('pvmax',int(value))
                 await ctx.message.channel.send(data.lang["petset"].format(data.lang["PV"]+" max"))
-            elif key.lower() == "pm":
+            elif key.lower() in ["pm","mp"]:
                 char = char.pet[petkey].petset('pmmax',int(value))
                 await ctx.message.channel.send(data.lang["petset"].format(data.lang["PM"]+" max"))
             elif key.lower() in ["str","force","strength"]:
@@ -301,7 +301,7 @@ class PetCog(commands.Cog, name="Pets"):
             await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
-    @pet.command(name="heal")
+    @pet.command(name="heal",aliases=["cure"])
     async def pet_heal(self,ctx,char: CharacterConverter,petkey,val: int):
         """**GM/MJ only**
         Heal the given pet"""

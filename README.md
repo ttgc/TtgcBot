@@ -124,7 +124,7 @@ Show the list of members that will get roles after joining your server (the list
 ### Vocal commands (Premium user only)
 - `/(vocal|music) <on/off>` <br/>
 Make the bot join or leave your voice channel
-- ~~`/vocal play <url>`~~ **(DISABLED)** <br/>
+- ~~`/(vocal|music) play <url>`~~ **(DISABLED)** <br/>
 Make the bot play the youtube video given. You can provide keywords instead of url and the bot will search and play the first result of your query. <br/>
 Alias : `ytplay`
 - `/(vocal|music) playlocal <song>` (Bot owner only) <br/>

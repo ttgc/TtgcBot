@@ -9,7 +9,7 @@ jobs:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.7.1
       - image: circleci/postgres:9.6.5-alpine-ram
 
       # Specify service dependencies here if necessary
@@ -34,23 +34,34 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip3 install --upgrade pip
             pip3 install -r requirements.txt
 
       - run:
-          name: install database
+          name: install postgres
           command: |
-            sudo apt-get autoremove --purge
-            sudo apt-get autoclean
             sudo apt-get update
-            sudo apt-get install postgresql-client
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/procedures.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/lang_features.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/userblock_features.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/skill_and_kill_features.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/map.sql
-            psql -d postgresql://root@localhost/circle_test -f database-scripts/swap.sql
+            sudo apt-get install postgresql
+
+      # - run:
+      #     name: temp
+      #     command: |
+      #      sudo apt-get autoremove --purge
+      #      sudo apt-get autoclean
+      #      sudo apt-get update
+      #      sudo apt-get install postgresql-client
+
+      - run:
+          name: deploy database
+          command: |
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/tables.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/triggers.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/procedures.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/lang_features.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/userblock_features.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/skill_and_kill_features.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/map.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/swap.sql
 
       - save_cache:
           paths:
@@ -62,7 +73,6 @@ jobs:
           command: |
             echo '[TOKEN]' > token.ini
             echo 'Bot='$token >> token.ini
-            echo 'Amper=None' >> token.ini
             echo '' >> token.ini
             echo '[DATABASE]' >> token.ini
             echo 'name=circle_test' >> token.ini
@@ -80,7 +90,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py
+            timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py --no-fontcheck --no-vocal
 
       - store_artifacts:
           path: test-reports

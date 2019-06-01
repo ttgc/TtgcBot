@@ -1,4 +1,4 @@
-#!usr/bin/env python3.4
+#!usr/bin/env python3.7
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -19,8 +19,8 @@
 
 from enum import Enum
 from PIL import Image,ImageDraw,ImageFont
-from DatabaseManager import *
-import io,asyncio
+from src.utils.DatabaseManager import *
+import io,asyncio,discord
 
 class Shape(Enum):
     """
@@ -221,8 +221,7 @@ class Map:
         db.close()
     clear = staticmethod(clear)
 
-    @asyncio.coroutine
-    def send(self,cli,chan,depth=0):
+    async def send(self,ctx,depth=0):
         db = Database()
         cur = db.call("getmap",idserv=self.server,idchan=self.channel)
         if cur is None:
@@ -278,7 +277,7 @@ class Map:
         bytes = io.BytesIO()
         self.img.save(bytes,'PNG')
         bytes.seek(0)
-        yield from cli.send_file(chan,bytes,filename="map.png")
+        await ctx.message.channel.send(file=discord.File(bytes,"map.png"))
         bytes.close()
 
 def reformatAreaParameters(src):

@@ -20,7 +20,7 @@
 
 import asyncio
 import discord
-import youtube_dl
+#import youtube_dl
 import logging
 #from src.YTDLPlayer import *
 

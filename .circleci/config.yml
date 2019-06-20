@@ -38,9 +38,14 @@ jobs:
             pip3 install -r requirements.txt
 
       - run:
-          name: install postgres
+          name: install LaTeX environment
           command: |
             sudo apt-get update
+            sudo apt-get install texlive
+
+      - run:
+          name: install postgres
+          command: |
             sudo apt-get install postgresql
 
       # - run:

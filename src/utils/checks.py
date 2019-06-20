@@ -44,7 +44,7 @@ def is_owner(ID):
 
 def check_admin(ctx):
     srv = DBServer(str(ctx.message.guild.id))
-    return discord.utils.get(ctx.message.guild.roles,id=srv.adminrole) in ctx.message.author.roles or ctx.message.author == ctx.message.guild.owner
+    return discord.utils.get(ctx.message.guild.roles,id=int(srv.adminrole)) in ctx.message.author.roles or ctx.message.author == ctx.message.guild.owner
 
 def check_botmanager(ctx): return is_botmanager(str(ctx.message.author.id))
 def check_botowner(ctx): return is_owner(str(ctx.message.author.id))

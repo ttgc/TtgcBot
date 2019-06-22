@@ -28,6 +28,8 @@ from src.tools.CharacterUtils import *
 
 class Character:
     """Character class"""
+    Character.lvlcolor = ["00FF00","FFFF00","FF00FF","FF0000"]
+
     def __init__(self,dic={"charkey":"","name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100,"lvl":1,"linked":None,"selected":False,"inventory":Inventory(),"pet":{},"skills":[],"dead":False,"classe":1}):
         self.key = dic["charkey"]
         self.name = dic["name"]

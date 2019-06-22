@@ -27,8 +27,10 @@ from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.converters import *
 from src.tools.parsingdice import *
+from src.tools.LatexTools import *
 import typing
 from random import randint
+import os
 
 class CharacterCog(commands.Cog, name="Characters"):
     def __init__(self,bot,logger):
@@ -572,3 +574,30 @@ class CharacterCog(commands.Cog, name="Characters"):
             self.logger.log(logging.DEBUG+1,"/charkill (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
             with open("pictures/you are dead.png","rb") as f:
                 await ctx.message.channel.send(file=discord.File(f))
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(1,30,commands.BucketType.channel)
+    @character.command(name="export")
+    async def character_export(self,ctx,char: CharacterConverter, lang: typing.Optional[string] = "FR"):
+        """**GM/MJ only**
+        Export the character information in PDF file format and send it in the channel"""
+        if not os.access("template/{}".format(lang), os.F_OK): lang = "FR"
+        datalang = get_lang(lang) if lang_exist(lang) else get_lang()
+        template = LatexBuilder(file="template/{}/main.tex".format(lang))
+        template.set_remote(None)
+        modd = datalang["offensive"] if char.mod == 0 else datalang["defensive"]
+        sklist = ""
+        for i in char.skills:
+            sklist += "\\item {} : {}".format(i.name, i.description) if len(i.description) <= 80 else "\\item {}".format(i.name)
+        if sklist == "":
+            sklist = "\\item \\dotfill \n"*10
+        latexcolor = {"00FF00": "green", "FFFF00": "yellow", "FF00FF": "magenta", "FF0000": "red"}
+        color = latexcolor[Character.lvlcolor[(char.lvl-2)%len(Character.lvlcolor)]] if char.lvl > 1 else "white"
+        template.parse(name=char.name, race=char.race, class=char.classe, dmod=modd, pv=str(char.PV),
+                        str=str(char.force), cha=str(char.charisme), sm=str(char.mental),
+                        pm=str(char.PM), spr=str(char.esprit), agi=str(char.furtivite),
+                        int=str(char.intuition), baseskill=sklist, inventory="",
+                        money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,
+                        dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,xp="1")
+        pdf = template.compile()
+        await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(char.name))

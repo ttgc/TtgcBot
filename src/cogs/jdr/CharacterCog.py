@@ -593,8 +593,8 @@ class CharacterCog(commands.Cog, name="Characters"):
             sklist = "\\item \\dotfill \n"*10
         latexcolor = {"00FF00": "green", "FFFF00": "yellow", "FF00FF": "magenta", "FF0000": "red"}
         color = latexcolor[Character.lvlcolor[(char.lvl-2)%len(Character.lvlcolor)]] if char.lvl > 1 else "white"
-        template.parse(name=char.name, race=char.race, class=char.classe, dmod=modd, pv=str(char.PV),
-                        str=str(char.force), cha=str(char.charisme), sm=str(char.mental),
+        template.parse(name=char.name, race=char.race, class_=char.classe, dmod=modd, pv=str(char.PV),
+                        str_=str(char.force), cha=str(char.charisme), sm=str(char.mental),
                         pm=str(char.PM), spr=str(char.esprit), agi=str(char.furtivite),
                         int=str(char.intuition), baseskill=sklist, inventory="",
                         money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,

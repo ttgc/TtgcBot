@@ -1,0 +1,42 @@
+% Personal informations and picture
+\begin{multicols}{2}
+\begin{minipage}{1.25\linewidth}% #0
+\raggedright
+Nom : <python.name> \\[4pt]
+Race : <python.race> \\[4pt]
+Classe : <python.class> \\[4pt]
+Mode de combat par d\'efaut : <python.dmod> \\[4pt]
+
+% Stats
+\paragraph{Statistiques :}
+\begin{multicols}{2}% #1
+\setlength{\columnsep}{40pt}
+\begin{minipage}{1\linewidth}% #2
+\raggedright
+\vskip 4pt
+PV : <python.pv> \\[4pt]
+Force : <python.str> \\[4pt]
+Charisme : <python.cha> \\[4pt]
+Sant\'e mentale : <python.sm> \\[4pt]
+\end{minipage}% #2
+\columnbreak
+\paragraph{}
+\begin{minipage}{1\linewidth}% #3
+\raggedright
+\vskip 4pt
+PM : <python.pm> \\[4pt]
+Esprit : <python.spr> \\[4pt]
+Agilit\'e : <python.agi> \\[4pt]
+Intuition : <python.int> \\[4pt]
+\end{minipage}% #3
+\end{multicols}% #1
+\end{minipage}% #0
+
+\columnbreak
+
+% Picture
+\begin{flushright}
+    \includegraphics[scale=1]{empty.jpg}
+\end{flushright}
+
+\end{multicols}

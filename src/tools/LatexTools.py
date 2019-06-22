@@ -19,6 +19,8 @@
 
 import latex
 import os
+import data
+import discord
 
 class LatexBuilder:
     def __init__(self,file=None,autoinclude=True):
@@ -71,3 +73,6 @@ class LatexBuilder:
             path += ".pdf"
             pdf.save_to(path)
         return pdf
+
+async def sendPDF(channel: discord.TextChannel, pdf: data.Data, filename="latest.pdf"):
+    await channel.send(file=discord.File(pdf.stream,filename))

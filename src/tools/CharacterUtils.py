@@ -21,55 +21,12 @@ from src.utils.DatabaseManager import *
 #from tools.BotTools import DBJDR
 
 class Item:
-    def __init__(self,name,descr,weight):
+    def __init__(self,name,weight):
         self.name = name
-        self.description = descr
         self.weight = weight
-        self.ID = None
 
     def __str__(self):
-        return self.name+" ("+self.weight+") : "+self.description
-
-    def create(self):
-        db = Database()
-        cur = db.call("createitem",name=self.name,descr=self.description,poids=self.weight)
-        if cur is None:
-            db.close(True)
-            raise DatabaseError("unable to create the item")
-        self.ID = cur.fetchone()[0]
-        db.close()
-
-    def load(self):
-        db = Database()
-        cur = db.execute("SELECT id_item FROM Items WHERE nom = %(nom)s AND description = %(descr)s AND weight = %(poids)s;",nom=self.name,descr=self.description,poids=self.weight)
-        if cur is None:
-            db.close(True)
-            raise DatabaseErrror("unable to load the item")
-        self.ID = cur.fetchone()[0]
-        db.close()
-
-    def delete(self):
-        if self.ID is None:
-            raise AttributeError("self.ID is not defined for this item, maybe it has not be loaded or created before")
-        db = Database()
-        db.call("deleteitem",item=self.ID)
-        db.close()
-
-    def find(name):
-        db = Database()
-        cur = db.execute("SELECT id_item,description,weight FROM Items WHERE nom = %(nom)s;",nom=name)
-        if cur is None:
-            db.close(True)
-            raise DatabaseError("unable to find the item")
-        it = cur.fetchone()
-        if it is None:
-            db.close(True)
-            return None
-        db.close()
-        item = Item(name,it[1],it[2])
-        item.ID = it[0]
-        return item
-    find = staticmethod(find)
+        return self.name+" ("+self.weight+")"
 
 class Inventory:
     def __init__(self,maxw=20):
@@ -86,13 +43,13 @@ class Inventory:
 
     def loadfromdb(self,inventory_id):
         db = Database()
-        cur = db.execute("SELECT nom,qte,description,weight FROM contient INNER JOIN items ON (contient.id_item = items.id_item) WHERE id_inventory = %(idinv)s;",idinv=inventory_id)
+        cur = db.execute("SELECT item_name,qte,weight FROM items WHERE id_inventory = %(idinv)s;",idinv=inventory_id)
         if cur is None:
             db.close(True)
             raise DatabaseException("unable to find the inventory")
         self.items = {}
         for i in cur:
-            it = Item(i[0],i[2],i[3])
+            it = Item(i[0],i[2])
             it.load()
             self.items[it] = i[1]
         db.close()
@@ -124,7 +81,7 @@ class Inventory:
 
     def additem(self,it,qte):
         db = Database()
-        db.call("additem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
+        db.call("additem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte,poids=it.weight)
         db.close()
         self.loadfromdb(self.ID)
 
@@ -133,6 +90,12 @@ class Inventory:
         db.call("removeitem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
         db.close()
         self.loadfromdb(self.ID)
+
+    @staticmethod
+    def forceinvcalc():
+        db = Database()
+        db.call("forceinvcalc")
+        db.close()
 
 class Skill:
     def __init__(self,ID):

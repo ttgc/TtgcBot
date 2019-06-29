@@ -61,6 +61,7 @@ from src.cogs.jdr.PetCog import *
 from src.cogs.jdr.JDRGlobal import *
 from src.cogs.jdr.Finalize import *
 from src.cogs.jdr.Maps import *
+from src.cogs.jdr.InventoryCog import *
 
 # Initialize logs
 global logger
@@ -242,6 +243,7 @@ async def main():
     client.add_cog(JDRGlobal(client,logger))
     client.add_cog(Finalize(client,logger))
     client.add_cog(Maps(client,logger))
+    client.add_cog(InventoryCog(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

@@ -26,7 +26,7 @@ from src.tools.CharacterUtils import *
 from src.utils.converters import *
 import typing
 
-class CharacterCog(commands.Cog, name="Characters"):
+class InventoryCog(commands.Cog, name="Inventory"):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger

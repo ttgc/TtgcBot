@@ -29,7 +29,7 @@ class MJ(commands.Cog):
         self.bot = bot
         self.logger = logger
         self.charcog = self.bot.get_cog("Characters")
-        # self.invcog = self.bot.get_cog("InventoryCog")
+        self.invcog = self.bot.get_cog("Inventory")
         self.petcog = self.bot.get_cog("Pets")
 
     @commands.check(check_chanmj)
@@ -44,9 +44,10 @@ class MJ(commands.Cog):
         self.logger.log(logging.DEBUG+1,"/mjcharinfo (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._charinfo(ctx,data,char)
 
-    # @mj.command(name="inventory",aliases=["inv"])
-    # async def mj_inventory(self,ctx,char: CharacterConverter):
-    #     pass
+    @mj.command(name="inventory",aliases=["inv"])
+    async def mj_inventory(self,ctx,char: CharacterConverter):
+        data = GenericCommandParameters(ctx)
+        self.invcog._inventory(ctx,data,char)
 
     @mj.command(name="switchmod",aliases=["switchmode"])
     async def mj_switchmod(self,ctx,char: CharacterConverter):

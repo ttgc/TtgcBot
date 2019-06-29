@@ -8,3 +8,4 @@ First Create the Database, then Run the SQL script in the following order :
 6. skill_and_kill_features.sql
 7. map.sql
 8. swap.sql
+9. jdr_rewrite.sql

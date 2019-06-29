@@ -37,6 +37,12 @@ class Inventory:
         self.jdr = None
         self.ID = None
 
+    def __str__(self):
+        itemstring = []
+        for i,k in self.items.items():
+            itemstring.append("{}{}".format(i.name, str(k) if k > 1 else ""))
+        return ", ".join(itemstring)
+
     def bind(self,char,jdr):
         self.character = char
         self.jdr = jdr

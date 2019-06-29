@@ -62,7 +62,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_chanmj)
     @commands.cooldown(6,10,commands.BucketType.user)
-    @inventory.command(name="remove", aliases=["-","rm"])
+    @inventory.command(name="remove", aliases=["-","rm","delete","del"])
     async def inventory_remove(self,ctx,char: CharacterConverter,item,quantity: typing.Optional[int] = 1):
         data = GenericCommandParameters(ctx)
         itemobject = None

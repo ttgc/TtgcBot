@@ -605,4 +605,13 @@ class CharacterCog(commands.Cog, name="Characters"):
                         dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,
                         xp=min(char.xp,100)/100)
         pdf = template.compile()
+        self.logger.log(logging.DEBUG+1,"/export (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(char.name))
+
+    @commands.check(check_chanmj)
+    @character.command(name="xp",aliases=["exp"])
+    async def character_xp(self,ctx,char: CharacterConverter,xp: int,allowlevelup: typing.Optional[bool] = false):
+        data = GenericCommandParameters(ctx)
+        earnedlvl = char.xp(xp, allowlevelup)
+        self.logger.log(logging.DEBUG+1,"/xp +%d (%s) in channel %d of server %d",amount,char.key,ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.channel.send(data.lang["xp"].format(char.name,amount))

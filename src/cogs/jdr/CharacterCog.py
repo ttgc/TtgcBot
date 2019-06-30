@@ -613,7 +613,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_chanmj)
     @character.command(name="xp",aliases=["exp"])
-    async def character_xp(self,ctx,char: CharacterConverter,xp: int,allowlevelup: typing.Optional[bool] = false):
+    async def character_xp(self,ctx,char: CharacterConverter,xp: int,allowlevelup: typing.Optional[bool] = False):
         data = GenericCommandParameters(ctx)
         earnedlvl = char.xp(xp, allowlevelup)
         self.logger.log(logging.DEBUG+1,"/xp +%d (%s) in channel %d of server %d",amount,char.key,ctx.message.channel.id,ctx.message.guild.id)

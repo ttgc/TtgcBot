@@ -47,7 +47,7 @@ class MJ(commands.Cog):
     @mj.command(name="inventory",aliases=["inv"])
     async def mj_inventory(self,ctx,char: CharacterConverter):
         data = GenericCommandParameters(ctx)
-        self.invcog._inventory(ctx,data,char)
+        await self.invcog._inventory(ctx,data,char)
 
     @mj.command(name="switchmod",aliases=["switchmode"])
     async def mj_switchmod(self,ctx,char: CharacterConverter):

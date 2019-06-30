@@ -23,11 +23,12 @@ import data
 import discord
 
 class LatexBuilder:
-    def __init__(self,file=None,autoinclude=True):
-        self.remote = file
+    def __init__(self,file=None,dir="./",autoinclude=True):
+        self.remote = dir+file
+        self.dir = dir
         self.content = ""
         if file is not None:
-            with open(file,"r") as file:
+            with open(dir+file,"r") as file:
                 self.content = file.read()
         if autoinclude: self.include()
 
@@ -57,7 +58,7 @@ class LatexBuilder:
             begin = self.content.find(r"\input{")+cmdsize
             end = self.content.find(r"}",begin)
             filename = "{}.tex".format(self.content[begin:end])
-            with open(filename,"r") as file:
+            with open(self.dir+filename,"r") as file:
                 included = file.read()
             self.content = self.content.replace(self.content[begin-cmdsize:end+1],included)
 

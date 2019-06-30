@@ -591,7 +591,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         By default, the generated PDF is in french, use `EN` value for `language` to output in english your character."""
         if not os.access("template/{}".format(lang), os.F_OK): lang = "FR"
         datalang = get_lang(lang) if lang_exist(lang) else get_lang()
-        template = LatexBuilder(file="template/{}/main.tex".format(lang))
+        template = LatexBuilder(file="main.tex",dir="template/{}/".format(lang))
         template.set_remote(None)
         modd = datalang["offensive"] if char.mod == 0 else datalang["defensive"]
         sklist = ""

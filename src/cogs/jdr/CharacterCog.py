@@ -621,7 +621,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         if allowlevelup is true, then every 100 XP, the character will automatically earn one level.
         It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors."""
         data = GenericCommandParameters(ctx)
-        earnedlvl = char.xp(xp, allowlevelup)
+        earnedlvl = char.xpup(xp, allowlevelup)
         self.logger.log(logging.DEBUG+1,"/xp +%d (%s) in channel %d of server %d",amount,char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.channel.send(data.lang["xp"].format(char.name,amount))
         if allowlevelup:

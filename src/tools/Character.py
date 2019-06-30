@@ -1021,7 +1021,7 @@ class Character:
         db.call("kill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
 
-    def xp(self,amount,allowlevelup=False):
+    def xpup(self,amount,allowlevelup=False):
         db = Database()
         cur = db.call("charxp",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,amount=amount,allowlevelup=allowlevelup)
         result = cur.fetchone()

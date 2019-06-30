@@ -239,11 +239,11 @@ async def main():
     client.add_cog(CharacterCog(client,logger))
     client.add_cog(SkillCog(client,logger))
     client.add_cog(PetCog(client,logger))
-    client.add_cog(MJ(client,logger))
     client.add_cog(JDRGlobal(client,logger))
     client.add_cog(Finalize(client,logger))
     client.add_cog(Maps(client,logger))
     client.add_cog(InventoryCog(client,logger))
+    client.add_cog(MJ(client,logger))
     await client.login(TOKEN)
     await client.connect()
 

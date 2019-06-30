@@ -56,7 +56,6 @@ class Inventory:
         self.items = {}
         for i in cur:
             it = Item(i[0],i[2])
-            it.load()
             self.items[it] = i[1]
         db.close()
         self.ID = inventory_id

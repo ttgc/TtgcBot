@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import latex
+from latex.build import PdfLatexBuilder
 import os
 import data
 import discord
@@ -77,3 +78,7 @@ class LatexBuilder:
 
 async def sendPDF(channel: discord.TextChannel, pdf: data.Data, filename="latest.pdf"):
     await channel.send(file=discord.File(pdf.stream,filename))
+
+lb = LatexBuilder(file="main.tex",dir="../../template/FR/")
+lb.parse(class_="none",str_="63",baseskill=r"\item nothing",xp="0.5",lvlcolor="green")
+pdf = PdfLatexBuilder().build_pdf(lb.content)

@@ -506,14 +506,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/charsetmental (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._setmental(ctx,data,data.char,op,amount)
 
-    @commands.check(check_chanmj)
-    @commands.cooldown(5,5,commands.BucketType.channel)
-    @character.command(name="lvlup",aliases=["levelup"])
-    async def character_lvlup(self,ctx,char: CharacterConverter):
-        """**GM/MJ only**
-        Make level up the specified character"""
-        data = GenericCommandParameters(ctx)
-        char.lvlup()
+    async def _levelup_embed(self,ctx,data,char):
         embd = discord.Embed(title=char.name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -554,8 +547,18 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+        return embd
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(5,5,commands.BucketType.channel)
+    @character.command(name="lvlup",aliases=["levelup"])
+    async def character_lvlup(self,ctx,char: CharacterConverter):
+        """**GM/MJ only**
+        Make level up the specified character"""
+        data = GenericCommandParameters(ctx)
+        char.lvlup()
         self.logger.log(logging.DEBUG+1,"/charlvlup (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
-        await ctx.message.channel.send(embed=embd)
+        await ctx.message.channel.send(embed=self._levelup_embed(ctx,data,char))
 
     @commands.check(check_chanmj)
     @commands.cooldown(5,5,commands.BucketType.channel)

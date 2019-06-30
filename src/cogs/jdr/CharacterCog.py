@@ -599,7 +599,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             sklist.append("\\item {} : {}".format(i.name, i.description.replace("%","\\%")) if len(i.description) <= 80 else "\\item {}".format(i.name))
         if sklist == []:
             sklist = ["\\item \\dotfill \n"]*10
-        sklist = " \\\\\n".join(sklist)
+        sklist = " \n".join(sklist)
         latexcolor = {"00FF00": "green", "FFFF00": "yellow", "FF00FF": "magenta", "FF0000": "red"}
         color = latexcolor[Character.lvlcolor[(char.lvl-2)%len(Character.lvlcolor)]] if char.lvl > 1 else "white"
         pathtoimage = "{}/template/{}/".format(os.getcwd().replace("\\","/"), lang)

@@ -1021,6 +1021,13 @@ class Character:
         db.call("kill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
 
+    def xp(self,amount,allowlevelup=False):
+        db = Database()
+        cur = db.call("charxp",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,amount=amount,allowlevelup=allowlevelup)
+        result = cur.fetchone()
+        db.close()
+        return result[0]
+
 class Pet:
     def __init__(self,dic={"petkey":"","charkey":"","name":"","espece":"Unknown","PVm":1,"PMm":0,"force":50,"esprit":50,"charisme":50,"agilite":50,"karma":0,"stat":[0,0,0,0,0,0,0],"mod":0,"PV":1,"PM":0,"default_mod":0,"instinct":3,"lvl":1}):
         self.key = dic["petkey"]

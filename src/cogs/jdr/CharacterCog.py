@@ -607,7 +607,7 @@ class CharacterCog(commands.Cog, name="Characters"):
                         int=str(char.intuition), baseskill=sklist, inventory=str(char.inventory),
                         money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,
                         dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,
-                        xp=min(char.xp,100)/100)
+                        xp=str(min(char.xp,100)/100))
         pdf = template.compile()
         self.logger.log(logging.DEBUG+1,"/export (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(char.name))

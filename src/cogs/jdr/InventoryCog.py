@@ -45,6 +45,8 @@ class InventoryCog(commands.Cog, name="Inventory"):
     @commands.cooldown(1,10,commands.BucketType.user)
     @commands.group(invoke_without_command=True, aliases=["inv"])
     async def inventory(self,ctx):
+        """**PC/PJ only**
+        Show your current inventory"""
         data = GenericCommandParameters(ctx)
         await self._inventory(ctx,data,data.char)
 
@@ -52,6 +54,10 @@ class InventoryCog(commands.Cog, name="Inventory"):
     @commands.cooldown(6,10,commands.BucketType.user)
     @inventory.command(name="add", aliases=["+","append"])
     async def inventory_add(self,ctx,char: CharacterConverter,item,quantity: typing.Optional[int] = 1,weight: typing.Optional[float] = 1.0):
+        """**GM/MJ only**
+        Add the number of item to the inventory of the character.
+        By default number is equal to 1 and weight to 1.0.
+        The item name must not contains space char or need to be escaped with `""` (write `"healing potion"` instead of `healing potion`)"""
         data = GenericCommandParameters(ctx)
         if char.inventory.weight + (quantity*weight) > char.inventory.maxweight:
             await ctx.message.channel.send(data.lang["inv_full"])
@@ -64,6 +70,9 @@ class InventoryCog(commands.Cog, name="Inventory"):
     @commands.cooldown(6,10,commands.BucketType.user)
     @inventory.command(name="remove", aliases=["-","rm","delete","del"])
     async def inventory_remove(self,ctx,char: CharacterConverter,item,quantity: typing.Optional[int] = 1):
+        """**GM/MJ only**
+        Remove the number of item from the inventory of the character.
+        This command works similary to the `inventory add` command"""
         data = GenericCommandParameters(ctx)
         itemobject = None
         for i in char.inventory.items.keys():

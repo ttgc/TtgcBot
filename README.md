@@ -255,6 +255,11 @@ Give one more level to the character and announce the bonus for this level <br/>
 Alias : `levelup`
 - `/(character|char) kill <charkey>` (MJ only and JDR channel only) <br/>
 Kill definitively a character, this will unlink it from its owner and the character wont be playable anymore
+- `/(character|char) export <charkey> [language]` (MJ only and JDR channel only) <br/>
+Export a character to PDF format using LaTeX technology, and send the generated file through discord. By default, the generated PDF is in french, use `EN` value for `language` to output in english your character.
+- `/(character|char) xp <charkey> <amount> [allowlevelup]` (MJ only and JDR channel only) <br/>
+Give XP to a character. XP is printed on exported PDF from the character, but it can also be used by the level system. if allowlevelup is true, then every 100 XP, the character will automatically earn one level. It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors. <br/>
+Alias : `exp`
 
 #### Global commands
 - `/global damage <amount>` (MJ only and JDR channel only) <br/>
@@ -283,6 +288,7 @@ The following commands can be used : <br/>
 /mj pet (roll|r) <charkey> <petkey> <stat> [<+|-> <expression>]
 /mj pet (switchmod|switchmode) <charkey> <petkey>
 /mj pet info <charkey> <petkey>
+/mj (inventory|inv) <charkey>
 ```
 
 #### Skill commands
@@ -374,6 +380,16 @@ conic : <lengths> [orientation (default=0)]
 Clear all effects for the given token <br/>
 Aliases : `clr`, `reset`
 
+#### Inventory commands
+- `/(inventory|inv)` (PJ only) <br/>
+Show your current inventory
+- `/(inventory|inv) add <charkey> <item> [number] [weight]` (MJ only and JDR channel only) <br/>
+Add the number of item to the inventory of the character, by default number is equal to 1 and weight to 1.0. The item name must not contains space char or need to be escaped with `""` (write `"healing potion"` instead of `healing potion`) <br/>
+Aliases : `+`, `append`
+- `/(inventory|inv) remove <charkey> <item> [number]` (MJ only and JDR channel only)<br/>
+Remove the number of item from the inventory of the character, by default number is equal to 1. Item name must not contains spaces like for `inventory add` command <br/>
+Aliases : `rm`, `delete`, `del`, `-`
+
 #### Finalize commands
 - `/finalize` (MJ only and JDR channel only) <br/>
 This command will start the finalizing operation displaying credits with some random informations of your game and also your own finalize fields. After that, the JDR will be fully deleted from the database.
@@ -382,17 +398,6 @@ Set the finalize field with the given title (if it doesn't exists, it will be cr
 - `/finalize delete <title>` (MJ only and JDR channel only) <br/>
 Delete the finalize field given <br/>
 Aliases : `del`, `-`, `remove`, `rm`
-
-#### Inventory commands (Coming back in 2.1)
-- ~~`/inventory add <charkey> <item> [number]` (MJ only and JDR channel only)~~ **(DELETED)** <br/>
-Add the number of item to the inventory of the character, by default number is equal to 1. The item name must not contains space char and spaces have to be replaces by underscore (write `potion_soin` instead of `potion soin`) <br/>
-Aliases : `inv add`
-- ~~`/inventory delete <charkey> <item> [number]` (MJ only and JDR channel only)~~ **(DELETED)** <br/>
-Remove the number of item from the inventory of the character, by default number is equal to 1. Item name must not contains space like for "inventory add" command <br/>
-Aliases : `inv delete`, `inventory del`, `inv del`
-- ~~`/inventory` (PJ only)~~ **(DELETED)** <br/>
-Show your current inventory <br/>
-Aliases : `inv`
 
 ### Bot Management (Bot Manager only)
 - `/blacklist <user_id> | <reason>` (Bot manager only) <br/>

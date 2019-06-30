@@ -587,7 +587,8 @@ class CharacterCog(commands.Cog, name="Characters"):
     @character.command(name="export")
     async def character_export(self,ctx,char: CharacterConverter, lang: typing.Optional[str] = "FR"):
         """**GM/MJ only**
-        Export the character information in PDF file format and send it in the channel"""
+        Export the character information in PDF file format and send it in the channel
+        By default, the generated PDF is in french, use `EN` value for `language` to output in english your character."""
         if not os.access("template/{}".format(lang), os.F_OK): lang = "FR"
         datalang = get_lang(lang) if lang_exist(lang) else get_lang()
         template = LatexBuilder(file="template/{}/main.tex".format(lang))
@@ -614,6 +615,11 @@ class CharacterCog(commands.Cog, name="Characters"):
     @commands.check(check_chanmj)
     @character.command(name="xp",aliases=["exp"])
     async def character_xp(self,ctx,char: CharacterConverter,xp: int,allowlevelup: typing.Optional[bool] = False):
+        """**GM/MJ only**
+        Give XP to a character.
+        XP is printed on exported PDF from the character, but it can also be used by the level system.
+        if allowlevelup is true, then every 100 XP, the character will automatically earn one level.
+        It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors."""
         data = GenericCommandParameters(ctx)
         earnedlvl = char.xp(xp, allowlevelup)
         self.logger.log(logging.DEBUG+1,"/xp +%d (%s) in channel %d of server %d",amount,char.key,ctx.message.channel.id,ctx.message.guild.id)

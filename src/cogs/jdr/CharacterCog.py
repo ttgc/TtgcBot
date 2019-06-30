@@ -602,6 +602,7 @@ class CharacterCog(commands.Cog, name="Characters"):
                         pm=str(char.PM), spr=str(char.esprit), agi=str(char.furtivite),
                         int=str(char.intuition), baseskill=sklist, inventory=str(char.inventory),
                         money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,
-                        dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,xp=char.xp)
+                        dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,
+                        xp=min(char.xp,100)/100)
         pdf = template.compile()
         await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(char.name))

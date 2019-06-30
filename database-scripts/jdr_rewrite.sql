@@ -175,3 +175,34 @@ BEGIN
 	--end of update
 END;
 $$ LANGUAGE plpgsql;
+
+-- new fonctions
+CREATE OR REPLACE FUNCTION charxp
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	amount Characterr.xp%TYPE,
+	allowlevelup BOOL
+) RETURNS INT AS $$
+DECLARE
+	earnedlvl INT;
+	curxp Characterr.xp%TYPE;
+BEGIN
+	earnedlvl := 0;
+	IF allowlevelup THEN
+		SELECT xp INTO curxp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		earnedlvl := FLOOR((curxp + amount) / 100);
+		amount := amount - (earnedlvl * 100);
+		UPDATE Characterr
+		SET xp = amount
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	ELSE
+		UPDATE Characterr
+		SET xp = xp + amount
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	RETURN earnedlvl;
+END;
+$$ LANGUAGE plpgsql;

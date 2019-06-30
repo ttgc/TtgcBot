@@ -4,7 +4,7 @@ CREATE TABLE public.Items(
 	id_inventory   INT,
   item_name      VARCHAR(100),
 	qte			       INT CONSTRAINT item_qte_null NOT NULL CONSTRAINT item_qte_check CHECK (qte > 0) ,
-  weight         FLOAT CONSTRAINT item_weight_null NOT NULL CONSTRAINT item_weight_check (weight > 0),
+  weight         FLOAT CONSTRAINT item_weight_null NOT NULL CONSTRAINT item_weight_check CHECK (weight > 0),
 	CONSTRAINT prk_constraint_item PRIMARY KEY (id_inventory,item_name)
 )WITHOUT OIDS;
 

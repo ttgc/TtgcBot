@@ -600,7 +600,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         template.parse(name=char.name, race=char.race, class_=char.classe, dmod=modd, pv=str(char.PV),
                         str_=str(char.force), cha=str(char.charisme), sm=str(char.mental),
                         pm=str(char.PM), spr=str(char.esprit), agi=str(char.furtivite),
-                        int=str(char.intuition), baseskill=sklist, inventory="",
+                        int=str(char.intuition), baseskill=sklist, inventory=str(char.inventory),
                         money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,
                         dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,xp="1")
         pdf = template.compile()

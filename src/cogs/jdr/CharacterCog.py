@@ -402,13 +402,17 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Use an item and remove it from your inventory"""
         data = GenericCommandParameters(ctx)
+        item = None
         for i in data.char.inventory.items.keys():
             if i.name == itname:
-                data.char.inventory -= i
-                self.logger.log(logging.DEBUG+1,"/charuse (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
-                await ctx.message.channel.send(data.lang["used_item"].format(data.char.name,i.name))
-                return
-        await ctx.message.channel.send(data.lang["no_more_item"])
+                item = i
+                break
+        if item is not None:
+            data.char.inventory -= item
+            self.logger.log(logging.DEBUG+1,"/charuse (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+            await ctx.message.channel.send(data.lang["used_item"].format(data.char.name,item.name))
+        else:
+            await ctx.message.channel.send(data.lang["no_more_item"])
 
     @character_use.command(name="lightpt",aliases=["lp","lightpoint"])
     async def character_use_lightpt(self,ctx):

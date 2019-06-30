@@ -45,10 +45,6 @@ class OperatorConverter(commands.Converter):
             raise commands.BadArgument("Operator conversion error ! Not a valid operator")
         return arg
 
-class ItemConverter(commands.Converter):
-    async def convert(self,ctx,arg):
-        return Item.find(arg)
-
 class MapTokenConverter(commands.Converter):
     async def convert(self,ctx,arg):
         data = GenericCommandParameters(ctx)

@@ -506,7 +506,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/charsetmental (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._setmental(ctx,data,data.char,op,amount)
 
-    async def _levelup_embed(self,ctx,data,char):
+    def _levelup_embed(self,ctx,data,char):
         embd = discord.Embed(title=char.name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -618,3 +618,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         earnedlvl = char.xp(xp, allowlevelup)
         self.logger.log(logging.DEBUG+1,"/xp +%d (%s) in channel %d of server %d",amount,char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.channel.send(data.lang["xp"].format(char.name,amount))
+        if allowlevelup:
+            for i in range(earnedlvl):
+                await asyncio.sleep(0.5)
+                char.lvlup()
+                await ctx.message.channel.send(embed=self._levelup_embed(ctx,data,char))

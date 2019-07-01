@@ -13,6 +13,34 @@ TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of G
 
 <hr/>
 
+# Table of content
+<!-- MDTOC maxdepth:6 firsth1:0 numbering:1 flatten:0 bullets:0 updateOnSave:1 -->
+
+1. [Contribute to translation](#contribute-to-translation)   
+2. [Command Help](#command-help)   
+&emsp;2.1. [How it works](#how-it-works)   
+&emsp;2.2. [Basic commands](#basic-commands)   
+&emsp;2.3. [Fun commands](#fun-commands)   
+&emsp;2.4. [Moderation commands](#moderation-commands)   
+&emsp;2.5. [Keeprole commands (Administrator only)](#keeprole-commands-administrator-only)   
+&emsp;2.6. [Vocal commands (Premium user only)](#vocal-commands-premium-user-only)   
+&emsp;2.7. [NSFW commands (NSFW channels only)](#nsfw-commands-nsfw-channels-only)   
+&emsp;2.8. [RP/JDR commands](#rpjdr-commands)   
+&emsp;&emsp;2.8.1. [Main commands](#main-commands)   
+&emsp;&emsp;2.8.2. [Character commands](#character-commands)   
+&emsp;&emsp;2.8.3. [Global commands](#global-commands)   
+&emsp;&emsp;2.8.4. [GM/MJ commands](#gmmj-commands)   
+&emsp;&emsp;2.8.5. [Skill commands](#skill-commands)   
+&emsp;&emsp;2.8.6. [Pet commands](#pet-commands)   
+&emsp;&emsp;2.8.7. [Map commands](#map-commands)   
+&emsp;&emsp;2.8.8. [Inventory commands](#inventory-commands)   
+&emsp;&emsp;2.8.9. [Finalize commands](#finalize-commands)   
+&emsp;2.9. [Bot Management (Bot Manager only)](#bot-management-bot-manager-only)   
+
+<!-- /MDTOC -->
+
+<hr/>
+
 ## Contribute to translation
 TtgcBot supports currently only two languages (English and French), if you want that the bot support more languages you can contribute by creating your own translation in a language file ! Follow the steps and rules given below to contribute to translation :
 1. Create a new file named as following : the language code in uppercasse (`EN` for English for example) and with the extension `.lang`

@@ -603,7 +603,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             sklist = ["\\item \\dotfill \n"]*10
         sklist = " \n".join(sklist)
         latexcolor = {"00FF00": "green", "FFFF00": "yellow", "FF00FF": "magenta", "FF0000": "red"}
-        color = latexcolor[Character.lvlcolor[(char.lvl-2)%len(Character.lvlcolor)]] if char.lvl > 1 else "white"
+        color = latexcolor[Character.lvlcolor[(char.lvl-1)%len(Character.lvlcolor)]]
         pathtoimage = "{}/template/{}/".format(os.getcwd().replace("\\","/"), lang)
         template.parse(name=char.name, race=char.race, class_=char.classe, dmod=modd, pv=str(char.PV),
                         str_=str(char.force), cha=str(char.charisme), sm=str(char.mental),

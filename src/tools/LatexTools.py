@@ -21,6 +21,7 @@ import latex
 import os
 import data
 import discord
+import asyncio
 
 class LatexBuilder:
     def __init__(self,file=None,dir="./",autoinclude=True):
@@ -78,6 +79,6 @@ class LatexBuilder:
 async def sendPDF(channel: discord.TextChannel, pdf: data.Data, filename="latest.pdf"):
     await channel.send(file=discord.File(pdf.stream,filename))
 
-async def compileAndSendPDF(channel, template, filename):
+def compileAndSendPDF(channel, template, filename, loop):
     pdf = template.compile()
-    await sendPDF(channel, pdf, "{}.pdf".format(filename))
+    asyncio.run_coroutine_threadsafe(sendPDF(channel, pdf, "{}.pdf".format(filename)), loop)

@@ -612,7 +612,7 @@ class CharacterCog(commands.Cog, name="Characters"):
                         dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,
                         xp=str(min(char.xp,100)/100), imgpath=pathtoimage)
         self.logger.log(logging.DEBUG+1,"/export (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
-        callback = functools.partial(compileAndSendPDF, ctx.message.channel, template, char.name)
+        callback = functools.partial(compileAndSendPDF, ctx.message.channel, template, char.name, self.bot.loop)
         self.bot.loop.call_soon_threadsafe(callback)
 
     @commands.check(check_chanmj)

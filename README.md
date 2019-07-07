@@ -2,7 +2,7 @@
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 
 ![Generic badge](https://img.shields.io/badge/Bot Version-2.0-blue.svg) [![GitHub license](https://img.shields.io/github/license/ttgc/TtgcBot.svg)](https://github.com/ttgc/TtgcBot/blob/master/LICENSE) ![Generic badge](https://img.shields.io/badge/Python Version-3.5 | 3.6 | 3.7-blue.svg) [![Generic badge](https://img.shields.io/badge/Languages-EN | FR-green.svg)](https://github.com/ttgc/TtgcBot/tree/master/Lang) ![CircleCI](https://circleci.com/gh/ttgc/TtgcBot/tree/master.svg?style=svg) <br/>
-[![Generic badge](https://img.shields.io/badge/discord.py-1.1.1-blue.svg)](https://pypi.python.org/pypi/discord.py/) [![Generic badge](https://img.shields.io/badge/asyncio-3.4.3-blue.svg)](https://pypi.org/project/asyncio/) [![Generic badge](https://img.shields.io/badge/Pillow-5.4.1-blue.svg)](https://pypi.org/project/Pillow/) [![Generic badge](https://img.shields.io/badge/psycopg2-2.8.1-blue.svg)](https://pypi.org/project/psycopg2/) [![Generic badge](https://img.shields.io/badge/PyNaCl-1.3.0-blue.svg)](https://pypi.org/project/PyNaCl/) [![Generic badge](https://img.shields.io/badge/request-2018.11.20-blue.svg)](https://pypi.org/project/request/) [![Generic badge](https://img.shields.io/badge/requests-2.21.0-blue.svg)](https://pypi.org/project/requests/) [![Generic badge](https://img.shields.io/badge/urllib3-1.24.2-blue.svg)](https://pypi.org/project/urllib3/)
+[![Generic badge](https://img.shields.io/badge/discord.py-1.2.3-blue.svg)](https://pypi.python.org/pypi/discord.py/) [![Generic badge](https://img.shields.io/badge/asyncio-3.4.3-blue.svg)](https://pypi.org/project/asyncio/) [![Generic badge](https://img.shields.io/badge/Pillow-5.4.1-blue.svg)](https://pypi.org/project/Pillow/) [![Generic badge](https://img.shields.io/badge/psycopg2-2.8.1-blue.svg)](https://pypi.org/project/psycopg2/) [![Generic badge](https://img.shields.io/badge/PyNaCl-1.3.0-blue.svg)](https://pypi.org/project/PyNaCl/) [![Generic badge](https://img.shields.io/badge/request-2018.11.20-blue.svg)](https://pypi.org/project/request/) [![Generic badge](https://img.shields.io/badge/requests-2.21.0-blue.svg)](https://pypi.org/project/requests/) [![Generic badge](https://img.shields.io/badge/urllib3-1.24.2-blue.svg)](https://pypi.org/project/urllib3/) [![Generic badge](https://img.shields.io/badge/latex-0.7.0-blue.svg)](https://pypi.org/project/latex/)
 
 TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of Great Cosmos universe ([French Website here](http://thetaleofgreatcosmos.fr)). But, today the bot is having many useful tools and features such as Keeprole system that allow leaving member to keep their roles after joining again your server, warn users that doesn't follow your rules, and more things (list of commands below). The bot is developed in Python 3 using [discord.py](https://github.com/Rapptz/discord.py/tree/async) lib and use also a postgresql 9 database.
 
@@ -10,6 +10,34 @@ TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of G
 
 *you can invit him from a server with command* `/invite`  
 *Also available on The Tale of Great Cosmos discord*
+
+<hr/>
+
+# Table of content
+<!-- MDTOC maxdepth:6 firsth1:0 numbering:1 flatten:0 bullets:0 updateOnSave:1 -->
+
+1. [Contribute to translation](#contribute-to-translation)   
+2. [Command Help](#command-help)   
+&emsp;2.1. [How it works](#how-it-works)   
+&emsp;2.2. [Basic commands](#basic-commands)   
+&emsp;2.3. [Fun commands](#fun-commands)   
+&emsp;2.4. [Moderation commands](#moderation-commands)   
+&emsp;2.5. [Keeprole commands (Administrator only)](#keeprole-commands-administrator-only)   
+&emsp;2.6. [Vocal commands (Premium user only)](#vocal-commands-premium-user-only)   
+&emsp;2.7. [NSFW commands (NSFW channels only)](#nsfw-commands-nsfw-channels-only)   
+&emsp;2.8. [RP/JDR commands](#rpjdr-commands)   
+&emsp;&emsp;2.8.1. [Main commands](#main-commands)   
+&emsp;&emsp;2.8.2. [Character commands](#character-commands)   
+&emsp;&emsp;2.8.3. [Global commands](#global-commands)   
+&emsp;&emsp;2.8.4. [GM/MJ commands](#gmmj-commands)   
+&emsp;&emsp;2.8.5. [Skill commands](#skill-commands)   
+&emsp;&emsp;2.8.6. [Pet commands](#pet-commands)   
+&emsp;&emsp;2.8.7. [Map commands](#map-commands)   
+&emsp;&emsp;2.8.8. [Inventory commands](#inventory-commands)   
+&emsp;&emsp;2.8.9. [Finalize commands](#finalize-commands)   
+&emsp;2.9. [Bot Management (Bot Manager only)](#bot-management-bot-manager-only)   
+
+<!-- /MDTOC -->
 
 <hr/>
 
@@ -255,6 +283,11 @@ Give one more level to the character and announce the bonus for this level <br/>
 Alias : `levelup`
 - `/(character|char) kill <charkey>` (MJ only and JDR channel only) <br/>
 Kill definitively a character, this will unlink it from its owner and the character wont be playable anymore
+- `/(character|char) export <charkey> [language]` (MJ only and JDR channel only) <br/>
+Export a character to PDF format using LaTeX technology, and send the generated file through discord. By default, the generated PDF is in french, use `EN` value for `language` to output in english your character.
+- `/(character|char) xp <charkey> <amount> [allowlevelup]` (MJ only and JDR channel only) <br/>
+Give XP to a character. XP is printed on exported PDF from the character, but it can also be used by the level system. if allowlevelup is true, then every 100 XP, the character will automatically earn one level. It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors. <br/>
+Alias : `exp`
 
 #### Global commands
 - `/global damage <amount>` (MJ only and JDR channel only) <br/>
@@ -283,6 +316,7 @@ The following commands can be used : <br/>
 /mj pet (roll|r) <charkey> <petkey> <stat> [<+|-> <expression>]
 /mj pet (switchmod|switchmode) <charkey> <petkey>
 /mj pet info <charkey> <petkey>
+/mj (inventory|inv) <charkey>
 ```
 
 #### Skill commands
@@ -374,6 +408,16 @@ conic : <lengths> [orientation (default=0)]
 Clear all effects for the given token <br/>
 Aliases : `clr`, `reset`
 
+#### Inventory commands
+- `/(inventory|inv)` (PJ only) <br/>
+Show your current inventory
+- `/(inventory|inv) add <charkey> <item> [number] [weight]` (MJ only and JDR channel only) <br/>
+Add the number of item to the inventory of the character, by default number is equal to 1 and weight to 1.0. The item name must not contains space char or need to be escaped with `""` (write `"healing potion"` instead of `healing potion`) <br/>
+Aliases : `+`, `append`
+- `/(inventory|inv) remove <charkey> <item> [number]` (MJ only and JDR channel only)<br/>
+Remove the number of item from the inventory of the character, by default number is equal to 1. Item name must not contains spaces like for `inventory add` command <br/>
+Aliases : `rm`, `delete`, `del`, `-`
+
 #### Finalize commands
 - `/finalize` (MJ only and JDR channel only) <br/>
 This command will start the finalizing operation displaying credits with some random informations of your game and also your own finalize fields. After that, the JDR will be fully deleted from the database.
@@ -382,17 +426,6 @@ Set the finalize field with the given title (if it doesn't exists, it will be cr
 - `/finalize delete <title>` (MJ only and JDR channel only) <br/>
 Delete the finalize field given <br/>
 Aliases : `del`, `-`, `remove`, `rm`
-
-#### Inventory commands (Coming back in 2.1)
-- ~~`/inventory add <charkey> <item> [number]` (MJ only and JDR channel only)~~ **(DELETED)** <br/>
-Add the number of item to the inventory of the character, by default number is equal to 1. The item name must not contains space char and spaces have to be replaces by underscore (write `potion_soin` instead of `potion soin`) <br/>
-Aliases : `inv add`
-- ~~`/inventory delete <charkey> <item> [number]` (MJ only and JDR channel only)~~ **(DELETED)** <br/>
-Remove the number of item from the inventory of the character, by default number is equal to 1. Item name must not contains space like for "inventory add" command <br/>
-Aliases : `inv delete`, `inventory del`, `inv del`
-- ~~`/inventory` (PJ only)~~ **(DELETED)** <br/>
-Show your current inventory <br/>
-Aliases : `inv`
 
 ### Bot Management (Bot Manager only)
 - `/blacklist <user_id> | <reason>` (Bot manager only) <br/>

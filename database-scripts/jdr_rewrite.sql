@@ -1,3 +1,4 @@
+-- >> INVENTORY <<
 DROP TABLE Items CASCADE;
 
 CREATE TABLE public.Items(
@@ -139,5 +140,69 @@ BEGIN
 		SET size_ = poids
 		WHERE id_inventory = inv.id_inventory;
 	END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- >> XP <<
+ALTER TABLE public.Characterr ADD COLUMN xp INT;
+
+-- Perform update of characterr
+DO $$
+<<xpupdate>>
+BEGIN
+  UPDATE Characterr
+	SET xp = 0;
+END xpupdate $$;
+
+-- Update old fonctions
+CREATE OR REPLACE FUNCTION charcreate
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	cl Classe.id_classe%TYPE
+) RETURNS void AS $$
+DECLARE
+	inv inventaire.id_inventory%TYPE;
+BEGIN
+	INSERT INTO inventaire (charkey)
+	VALUES (dbkey);
+	SELECT MAX(id_inventory) INTO inv FROM inventaire
+	WHERE charkey = dbkey;
+	--update here
+	INSERT INTO Characterr
+	VALUES (dbkey, dbkey, '', 1, 1, 1, 1, 1, 50, 50, 50, 50, 0, 0, 0, 1, 1, 3, 100, 0, 0, 0, 0, 0, 0, 0, idserv, idchan, 'O', 'O', inv, 'NULL',false,cl,false,0);
+	--end of update
+END;
+$$ LANGUAGE plpgsql;
+
+-- new fonctions
+CREATE OR REPLACE FUNCTION charxp
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	amount Characterr.xp%TYPE,
+	allowlevelup BOOL
+) RETURNS INT AS $$
+DECLARE
+	earnedlvl INT;
+	curxp Characterr.xp%TYPE;
+BEGIN
+	earnedlvl := 0;
+	IF allowlevelup THEN
+		SELECT xp INTO curxp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		earnedlvl := FLOOR((curxp + amount) / 100);
+		amount := amount - (earnedlvl * 100);
+		UPDATE Characterr
+		SET xp = amount
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	ELSE
+		UPDATE Characterr
+		SET xp = xp + amount
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	RETURN earnedlvl;
 END;
 $$ LANGUAGE plpgsql;

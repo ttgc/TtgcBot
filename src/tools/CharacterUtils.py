@@ -40,7 +40,7 @@ class Inventory:
     def __str__(self):
         itemstring = []
         for i,k in self.items.items():
-            itemstring.append("{}{}".format(i.name, str(k) if k > 1 else ""))
+            itemstring.append("{}{}".format(i.name, " x{}".format(str(k)) if k > 1 else ""))
         return ", ".join(itemstring)
 
     def bind(self,char,jdr):

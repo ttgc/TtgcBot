@@ -414,7 +414,7 @@ class DBJDR:
         char = ch.Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
                           "charisme":rawchar[10],"furtivite":rawchar[11],"karma":rawchar[12],"default_karma":rawchar[13],"money":rawchar[14],"lp":rawchar[15],"dp":rawchar[16],
                           "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31],"pet":pets,"skills":skls,"dead":rawchar[32],
-                          "classe":rawchar[33],"selected":rawchar[34]})
+                          "classe":rawchar[33],"selected":rawchar[34],"xp":rawchar[35]})
         char.bind(self)
         return char
 

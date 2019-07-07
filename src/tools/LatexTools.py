@@ -77,3 +77,7 @@ class LatexBuilder:
 
 async def sendPDF(channel: discord.TextChannel, pdf: data.Data, filename="latest.pdf"):
     await channel.send(file=discord.File(pdf.stream,filename))
+
+async def compileAndSendPDF(channel, template, filename):
+    pdf = template.compile()
+    await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(filename))

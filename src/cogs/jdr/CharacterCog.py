@@ -610,9 +610,8 @@ class CharacterCog(commands.Cog, name="Characters"):
                         money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,
                         dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,
                         xp=str(min(char.xp,100)/100), imgpath=pathtoimage)
-        pdf = template.compile()
         self.logger.log(logging.DEBUG+1,"/export (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
-        await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(char.name))
+        asyncio.run_coroutine_threadsafe(compileAndSendPDF(ctx.message.channel, template, char.name), self.bot.loop)
 
     @commands.check(check_chanmj)
     @character.command(name="xp",aliases=["exp"])

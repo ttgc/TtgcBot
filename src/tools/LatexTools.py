@@ -80,4 +80,4 @@ async def sendPDF(channel: discord.TextChannel, pdf: data.Data, filename="latest
 
 async def compileAndSendPDF(channel, template, filename):
     pdf = template.compile()
-    await sendPDF(ctx.message.channel, pdf, "{}.pdf".format(filename))
+    await sendPDF(channel, pdf, "{}.pdf".format(filename))

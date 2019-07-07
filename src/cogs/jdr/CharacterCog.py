@@ -22,6 +22,7 @@ from src.tools.BotTools import *
 from discord.ext import commands
 import logging,asyncio
 import functools
+import concurrent.futures
 import discord
 from src.tools.Translator import *
 from src.tools.Character import *
@@ -613,7 +614,8 @@ class CharacterCog(commands.Cog, name="Characters"):
                         xp=str(min(char.xp,100)/100), imgpath=pathtoimage)
         self.logger.log(logging.DEBUG+1,"/export (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         callback = functools.partial(compileAndSendPDF, ctx.message.channel, template, char.name, self.bot.loop)
-        self.bot.loop.call_soon_threadsafe(callback)
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            await self.bot.loop.run_in_executor(pool, callback)
 
     @commands.check(check_chanmj)
     @character.command(name="xp",aliases=["exp"])

@@ -605,7 +605,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         latexcolor = {"00FF00": "green", "FFFF00": "yellow", "FF00FF": "magenta", "FF0000": "red"}
         color = latexcolor[Character.lvlcolor[(char.lvl-1)%len(Character.lvlcolor)]]
         pathtoimage = "{}/template/{}/".format(os.getcwd().replace("\\","/"), lang)
-        inv = str(char.inventory) if len(char.inventory.items) > 0 else "\\dotfill \\ \n"*5
+        inv = str(char.inventory) if len(char.inventory.items) > 0 else "\\dotfill \\\\ \n"*5
         template.parse(name=char.name, race=char.race, class_=char.classe, dmod=modd, pv=str(char.PV),
                         str_=str(char.force), cha=str(char.charisme), sm=str(char.mental),
                         pm=str(char.PM), spr=str(char.esprit), agi=str(char.furtivite),

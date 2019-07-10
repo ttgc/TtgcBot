@@ -194,7 +194,7 @@ BEGIN
 		SELECT xp INTO curxp FROM Characterr
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 		earnedlvl := FLOOR((curxp + amount) / 100);
-		amount := amount - (earnedlvl * 100);
+		amount := curxp + amount - (earnedlvl * 100);
 		UPDATE Characterr
 		SET xp = amount
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);

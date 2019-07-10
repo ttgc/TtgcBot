@@ -33,10 +33,10 @@ class DBServer:
             raise DatabaseException("unable to find the server")
         info = cur.fetchone()
         db.close()
-        self.mjrole = info[1]
+        self.mjrole = info[1] if info[1] is not None else "-1"
         self.prefix = info[2]
         self.keepingrole = info[3]
-        self.adminrole = info[4]
+        self.adminrole = info[4] if info[4] is not None else "-1"
 
     def togglekeeprole(self):
         self.keepingrole = not self.keepingrole

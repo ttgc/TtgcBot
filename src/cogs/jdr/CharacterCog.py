@@ -307,6 +307,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             await ctx.message.channel.send(data.lang["no_more_money"].format(char.money))
         else:
             char = char.charset('po',-val)
+            Inventory.forceinvcalc()
             embd = discord.Embed(title=char.name,description=data.lang["paid"],colour=discord.Color(int('ffff00',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -332,6 +333,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         data = GenericCommandParameters(ctx)
         val = abs(val)
         char = char.charset('po',val)
+        Inventory.forceinvcalc()
         embd = discord.Embed(title=char.name,description=data.lang["paid"],colour=discord.Color(int('ffff00',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)

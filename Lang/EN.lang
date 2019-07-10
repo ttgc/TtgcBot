@@ -112,8 +112,8 @@ lvlup_3={} upgrade : +{}
 lvlup_4=HP or MP upgrade : +{}
 lvlup_5=Move max 10 points of stat
 lvlup_6=No special bonus, ask to your GM
-unexisting_item=unexisting item
-inv_full=This inventory is full and cannot take more items
+#unexisting_item=unexisting item
+inv_full=This inventory is full ! The character is carrying too much.
 inv_add=Item added successful
 item_not_found=This item is not in this inventory
 inv_rm=item removed successful
@@ -247,3 +247,5 @@ skill_invalidid=The ID does not belong to any skill listed above
 set_finalizer_ask=Enter the content of this finalizer field below this message :
 finalize_notemptyqueue=The vocal queue is not empty. Please wait few seconds while clearing it...
 finalize_emptyqueue_timeout=This operation take too much time. Skipping it.
+#Character update v2.1
+xp=The character `{}` has earned {} xp !

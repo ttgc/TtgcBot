@@ -112,8 +112,8 @@ lvlup_3=Amelioration de {} : +{}
 lvlup_4=Amelioration de PV ou de PM : +{}
 lvlup_5=Deplace 10 points max de stat
 lvlup_6=Aucun bonus special, refere toi aux directives de ton MJ
-unexisting_item=item inexistant
-inv_full=Cet inventaire est plein et ne peut porter aucun objet supplementaire
+#unexisting_item=item inexistant
+inv_full=Cet inventaire est plein ! Le personnage est en surcharge.
 inv_add=Objet ajoute avec succes
 item_not_found=Cet objet n'est pas dans cet inventaire
 inv_rm=Objet supprime avec succes
@@ -247,3 +247,5 @@ skill_invalidid=L'ID n'appartient a aucun skill liste ci-dessus
 set_finalizer_ask=Entrez le message de champs de finalisation ci-dessous :
 finalize_notemptyqueue=La file de musique n'est pas vide. Veuillez patienter...
 finalize_emptyqueue_timeout=Cette operation est trop longue et a ete annulee
+#Character update v2.1
+xp=Le personnage `{}` a gagne {} xp !

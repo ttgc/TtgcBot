@@ -46,12 +46,12 @@ BEGIN
 		poids := poids + (new.qte * new.weight);
 		SELECT size_max INTO poids_max FROM inventaire
 		WHERE id_inventory = new.id_inventory;
-		IF poids > poids_max THEN
-			RAISE EXCEPTION 'Inventory size exceeded';
-		ELSE
-			UPDATE inventaire
-			SET size_ = poids
-			WHERE id_inventory = new.id_inventory;
+		--IF poids > poids_max THEN
+			--RAISE EXCEPTION 'Inventory size exceeded';
+		--ELSE
+		UPDATE inventaire
+		SET size_ = poids
+		WHERE id_inventory = new.id_inventory;
 		END IF;
 	END IF;
 	IF TG_OP = 'DELETE' THEN

@@ -61,10 +61,10 @@ class InventoryCog(commands.Cog, name="Inventory"):
         data = GenericCommandParameters(ctx)
         if char.inventory.weight + (quantity*weight) > char.inventory.maxweight:
             await ctx.message.channel.send(data.lang["inv_full"])
-        else:
-            char.inventory.additem(Item(item, weight),quantity)
-            self.logger.log(logging.DEBUG+1,"item %s added to character %s in channel %d on server %d",item,char.key,ctx.message.channel.id,ctx.message.guild.id)
-            await ctx.message.channel.send(data.lang["inv_add"])
+            await asyncio.sleep(0.2)
+        char.inventory.additem(Item(item, weight),quantity)
+        self.logger.log(logging.DEBUG+1,"item %s added to character %s in channel %d on server %d",item,char.key,ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.message.channel.send(data.lang["inv_add"])
 
     @commands.check(check_chanmj)
     @commands.cooldown(6,10,commands.BucketType.user)

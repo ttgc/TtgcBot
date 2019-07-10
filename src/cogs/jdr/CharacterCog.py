@@ -354,7 +354,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         else:
             embd.add_field(name=data.lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
         if not char.dead: embd.add_field(name=data.lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
-        embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
+        embd.add_field(name=data.lang["lvl"].capitalize()+" :",value="{} ({} XP)".format(char.lvl, char.xp),inline=True)
         if not char.dead: embd.add_field(name=data.lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
         if not char.dead: embd.add_field(name=data.lang["force"].capitalize()+" :",value=str(char.force),inline=True)
         if not char.dead: embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)

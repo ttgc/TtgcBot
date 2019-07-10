@@ -90,7 +90,7 @@ BEGIN
 	ELSE
 		UPDATE Items
 		SET qte = qte + quantite
-		WHERE (item_name = item AND id_inventory = inv);
+		WHERE (item_name = itname AND id_inventory = inv);
 	END IF;
 END;
 $$ LANGUAGE plpgsql;

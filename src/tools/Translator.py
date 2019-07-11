@@ -22,7 +22,7 @@ import os
 
 def get_lang(langcode="EN"):
     langcode = langcode.upper()
-    f = open("Lang/"+langcode+".lang","r")
+    f = open("Lang/"+langcode+".lang","r",encoding="utf-8")
     lines = f.readlines()
     f.close()
     lang = {}

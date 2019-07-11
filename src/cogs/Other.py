@@ -130,5 +130,5 @@ class Other(commands.Cog):
     @commands.command()
     async def joke(self,ctx):
         """Funny jokes (only in french currently)"""
-        with open("Jokes/joke-fr.txt") as f:
+        with open("Jokes/joke-fr.txt",encoding="utf-8") as f:
             await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))

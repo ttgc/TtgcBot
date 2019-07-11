@@ -29,7 +29,7 @@ class LatexBuilder:
         self.dir = dir
         self.content = ""
         if file is not None:
-            with open(dir+file,"r") as file:
+            with open(dir+file,"r",encoding="utf-8") as file:
                 self.content = file.read()
         if autoinclude: self.include()
 
@@ -45,11 +45,11 @@ class LatexBuilder:
             self.remote = None
 
     def pull(self):
-        with open(self.remote,"r") as file:
+        with open(self.remote,"r",encoding="utf-8") as file:
             self.content = file.read()
 
     def push(self):
-        with open(self.remote,"w") as file:
+        with open(self.remote,"w",encoding="utf-8") as file:
             file.write(self.content)
 
     def include(self):
@@ -59,7 +59,7 @@ class LatexBuilder:
             begin = self.content.find(r"\input{")+cmdsize
             end = self.content.find(r"}",begin)
             filename = "{}.tex".format(self.content[begin:end])
-            with open(self.dir+filename,"r") as file:
+            with open(self.dir+filename,"r",encoding="utf-8") as file:
                 included = file.read()
             self.content = self.content.replace(self.content[begin-cmdsize:end+1],included)
 

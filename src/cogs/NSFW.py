@@ -38,7 +38,7 @@ class NSFW(commands.Cog):
     async def nsfwjoke(self,ctx):
         """**NSFW channel required**
         Display a NSFW joke (only in french currently)"""
-        with open("Jokes/nsfw-fr.txt") as f:
+        with open("Jokes/nsfw-fr.txt",encoding="utf-8") as f:
             await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))
 
     @commands.cooldown(5,30,commands.BucketType.channel)

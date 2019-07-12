@@ -9,3 +9,4 @@ First Create the Database, then Run the SQL script in the following order :
 7. map.sql
 8. swap.sql
 9. jdr_rewrite.sql
+10. jdr_v4.sql

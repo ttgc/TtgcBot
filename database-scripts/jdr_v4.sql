@@ -50,6 +50,62 @@ INSERT INTO RaceSkills VALUES
 -- Perform update of characterr
 UPDATE Characterr SET prec = 50, luck = 50;
 
+-- new fonctions
+CREATE OR REPLACE FUNCTION affiliate
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	org Organizations.nom%TYPE
+) RETURNS void AS $$
+DECLARE
+	orgid Organizations.id_org%TYPE;
+	nbr INT;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM Organizations
+	WHERE (nom = org);
+	IF nbr > 0 THEN
+		SELECT id_org INTO orgid FROM Organizations
+		WHERE (nom = org);
+		UPDATE Characterr
+		SET affiliated_with = orgid
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_orgskills
+(
+	org Organizations.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	orgid Organizations.id_org%TYPE;
+BEGIN
+	SELECT id_org INTO orgid FROM Organizations
+	WHERE (nom = org);
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, origine, webclass FROM Skills
+	INNER JOIN OrgSkills ON (Skills.id_skill = OrgSkills.id_skill)
+	WHERE id_org = orgid;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_raceskills
+(
+	racename Race.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	raceid Race.id_race%TYPE;
+BEGIN
+	SELECT id_race INTO raceid FROM Race
+	WHERE (nom = racename);
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, origine, webclass FROM Skills
+	INNER JOIN RaceSkills ON (Skills.id_skill = RaceSkills.id_skill)
+	WHERE id_race = raceid;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Update old fonctions
 CREATE OR REPLACE FUNCTION charcreate
 (
@@ -60,6 +116,10 @@ CREATE OR REPLACE FUNCTION charcreate
 ) RETURNS void AS $$
 DECLARE
 	inv inventaire.id_inventory%TYPE;
+	--update here
+	racename Race.nom%TYPE;
+	sk RECORD;
+	--end of update
 BEGIN
 	INSERT INTO inventaire (charkey)
 	VALUES (dbkey);
@@ -68,6 +128,12 @@ BEGIN
 	--update here
 	INSERT INTO Characterr
 	VALUES (dbkey, dbkey, '', 1, 1, 1, 1, 1, 50, 50, 50, 50, 0, 0, 0, 1, 1, 3, 100, 0, 0, 0, 0, 0, 0, 0, idserv, idchan, 'O', 'O', inv, 'NULL',false,cl,false,0,50,50);
+	SELECT race.nom INTO racename FROM race
+	INNER JOIN classe ON (race.id_race = classe.id_race)
+	WHERE id_classe = cl;
+	FOR sk IN (SELECT * FROM get_raceskills(racename)) LOOP
+		PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
+	END LOOP;
 	--end of update
 END;
 $$ LANGUAGE plpgsql;
@@ -208,56 +274,5 @@ BEGIN
 		SET mental = val
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
-END;
-$$ LANGUAGE plpgsql;
-
--- new fonctions
-CREATE OR REPLACE FUNCTION affiliate
-(
-	dbkey Characterr.charkey%TYPE,
-	idserv JDR.id_server%TYPE,
-	idchan JDR.id_channel%TYPE,
-	org Organizations.nom%TYPE
-) RETURNS void AS $$
-DECLARE
-	orgid Organizations.id_org%TYPE;
-BEGIN
-	SELECT id_org INTO orgid FROM Organizations
-	WHERE (nom = org);
-	UPDATE Characterr
-	SET affiliated_with = orgid
-	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION get_orgskills
-(
-	org Organizations.nom%TYPE
-) RETURNS SETOF Skills AS $$
-DECLARE
-	orgid Organizations.id_org%TYPE;
-BEGIN
-	SELECT id_org INTO orgid FROM Organizations
-	WHERE (nom = org);
-	RETURN QUERY
-	SELECT Skills.id_skill, nom, description, webclass FROM Skills
-	INNER JOIN OrgSkills ON (Skills.id_skill = OrgSkills.id_skill)
-	WHERE id_org = orgid;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION get_raceskills
-(
-	racename Race.nom%TYPE
-) RETURNS SETOF Skills AS $$
-DECLARE
-	raceid Race.id_race%TYPE;
-BEGIN
-	SELECT id_race INTO raceid FROM Race
-	WHERE (nom = racename);
-	RETURN QUERY
-	SELECT Skills.id_skill, nom, description, webclass FROM Skills
-	INNER JOIN RaceSkills ON (Skills.id_skill = RaceSkills.id_skill)
-	WHERE id_race = raceid;
 END;
 $$ LANGUAGE plpgsql;

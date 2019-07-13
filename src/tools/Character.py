@@ -30,40 +30,43 @@ class Character:
     """Character class"""
     lvlcolor = ["00FF00","FFFF00","FF00FF","FF0000"]
 
-    def __init__(self,dic={"charkey":"","name":"","lore":"","PVm":1,"PMm":1,"force":50,"esprit":50,"charisme":50,"furtivite":50,"karma":0,"money":0,"stat":[0,0,0,0,0,0,0],"lp":0,"dp":0,"regenkarm":0.1,"mod":0,"armor":0,"RM":0,"PV":1,"PM":1,"default_mod":0,"default_karma":0,"intuition":3,"mentalhealth":100,"lvl":1,"linked":None,"selected":False,"inventory":Inventory(),"pet":{},"skills":[],"dead":False,"classe":1,"xp":0}):
-        self.key = dic["charkey"]
-        self.name = dic["name"]
-        self.lore = dic["lore"]
-        self.PVmax = dic["PVm"]
-        self.PMmax = dic["PMm"]
-        self.PV = dic["PV"]
-        self.PM = dic["PM"]
-        self.force = dic["force"]
-        self.esprit = dic["esprit"]
-        self.charisme = dic["charisme"]
-        self.furtivite = dic["furtivite"]
-        self.karma = dic["karma"]
-        self.money = dic["money"]
-        self.stat = dic["stat"]
-        self.lp = dic["lp"]
-        self.dp = dic["dp"]
-        #self.regenkarm = [0,dic["regenkarm"]]
-        self.mod = dic["mod"]
-        self.default_mod = dic["default_mod"]
-        self.default_karma = dic["default_karma"]
-        self.intuition = dic["intuition"]
-        self.mental = dic["mentalhealth"]
-        self.lvl = dic["lvl"]
-        self.linked = dic["linked"]
+    def __init__(self,**kwargs):
+        self.key = kwargs.get("charkey","unknown")
+        self.name = kwargs.get("name","unknown")
+        self.lore = kwargs.get("lore","")
+        self.PVmax = kwargs.get("PVm",1)
+        self.PMmax = kwargs.get("PMm",1)
+        self.PV = kwargs.get("PV",1)
+        self.PM = kwargs.get("PM",1)
+        self.force = kwargs.get("force",50)
+        self.esprit = kwargs.get("esprit",50)
+        self.charisme = kwargs.get("charisme",50)
+        self.furtivite = kwargs.get("furtivite",50)
+        self.karma = kwargs.get("karma",0)
+        self.money = kwargs.get("money",0)
+        self.stat = kwargs.get("stat",[0,0,0,0,0,0,0])
+        self.lp = kwargs.get("lp",0)
+        self.dp = kwargs.get("dp",0)
+        #self.regenkarm = [0,kwargs.get("regenkarma",None)]
+        self.mod = kwargs.get("mod",0)
+        self.default_mod = kwargs.get("default_mod",0)
+        self.default_karma = kwargs.get("default_karma",0)
+        self.intuition = kwargs.get("intuition",3)
+        self.mental = kwargs.get("mentalhealth",100)
+        self.lvl = kwargs.get("lvl",1)
+        self.linked = kwargs.get("linked","NULL")
         if self.linked.upper() == "NULL": self.linked = None
-        self.selected = dic["selected"]
-        self.inventory = dic["inventory"]
-        self.pet = dic["pet"]
-        self.skills = dic["skills"]
-        self.dead = dic["dead"]
-        self.race,self.classe = retrieveCharacterOrigins(dic["classe"])
+        self.selected = kwargs.get("selected",False)
+        self.inventory = kwargs.get("inventory",Inventory())
+        self.pet = kwargs.get("pet",{})
+        self.skills = kwargs.get("skills",[])
+        self.dead = kwargs.get("dead",False)
+        self.race,self.classe = retrieveCharacterOrigins(kwargs.get("classe",1))
         self.jdr = None
-        self.xp = dic["xp"]
+        self.xp = kwargs.get("xp",0)
+        self.precision = kwargs.get("prec",50)
+        self.luck = kwargs.get("luck",50)
+        self.affiliated_with = kwargs.get("org",None)
         #mod 0 = offensiv / mod 1 = defensiv
 
     def __str__(self):
@@ -1028,26 +1031,35 @@ class Character:
         db.close()
         return result[0]
 
+    def affiliate(self,org):
+        if self.affiliated_with is not None:
+            raise AttributeError("Character {} is already affiliated with an (other) organization".format(self.key))
+        db = Database()
+        db.call("affiliate",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,org=org)
+        db.close()
+
 class Pet:
-    def __init__(self,dic={"petkey":"","charkey":"","name":"","espece":"Unknown","PVm":1,"PMm":0,"force":50,"esprit":50,"charisme":50,"agilite":50,"karma":0,"stat":[0,0,0,0,0,0,0],"mod":0,"PV":1,"PM":0,"default_mod":0,"instinct":3,"lvl":1}):
-        self.key = dic["petkey"]
-        self.charkey = dic["charkey"]
-        self.name = dic["name"]
-        self.espece = dic["espece"]
-        self.PVmax = dic["PVm"]
-        self.PMmax = dic["PMm"]
-        self.PV = dic["PV"]
-        self.PM = dic["PM"]
-        self.force = dic["force"]
-        self.esprit = dic["esprit"]
-        self.charisme = dic["charisme"]
-        self.agilite = dic["agilite"]
-        self.karma = dic["karma"]
-        self.stat = dic["stat"]
-        self.mod = dic["mod"]
-        self.default_mod = dic["default_mod"]
-        self.instinct = dic["instinct"]
-        self.lvl = dic["lvl"]
+    def __init__(self,**kwargs):
+        self.key = kwargs.get("petkey","unknown")
+        self.charkey = kwargs.get("charkey","unknown")
+        self.name = kwargs.get("name","unknown")
+        self.espece = kwargs.get("espece","unknown")
+        self.PVmax = kwargs.get("PVm",1)
+        self.PMmax = kwargs.get("PMm",0)
+        self.PV = kwargs.get("PV",1)
+        self.PM = kwargs.get("PM",0)
+        self.force = kwargs.get("force",50)
+        self.esprit = kwargs.get("esprit",50)
+        self.charisme = kwargs.get("charisme",50)
+        self.agilite = kwargs.get("agilite",50)
+        self.karma = kwargs.get("karma",0)
+        self.stat = kwargs.get("stat",[0,0,0,0,0,0,0])
+        self.mod = kwargs.get("mod",0)
+        self.default_mod = kwargs.get("default_mod",0)
+        self.instinct = kwargs.get("instinct",3)
+        self.lvl = kwargs.get("lvl",1)
+        self.precision = kwargs.get("prec",50)
+        self.luck = kwargs.get("luck",50)
         self.jdr = None
 
     def __str__(self):

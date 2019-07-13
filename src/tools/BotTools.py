@@ -401,8 +401,12 @@ class DBJDR:
                     gmpetdefault = 0
                 else:
                     gmpetdefault = 1
-                pets[i[0]] = ch.Pet({"petkey":i[0],"charkey":rawchar[0],"name":i[1],"espece":i[2],"PVm":i[5],"PMm":i[7],"force":i[8],"esprit":i[9],"charisme":i[10],"agilite":i[11],"karma":i[12],
-                                     "stat":[i[14],i[19],i[17],i[15],i[16],i[18],i[20]],"mod":gmpet,"PV":i[4],"PM":i[6],"default_mod":gmpetdefault,"instinct":i[13],"lvl":i[3]})
+                pets[i[0]] = ch.Pet(petkey=i[0],charkey=rawchar[0],name=i[1],espece=i[2],
+                                    PVm=i[5],PMm=i[7],force=i[8],esprit=i[9],
+                                    charisme=i[10],agilite=i[11],karma=i[12],
+                                    stat=[i[14],i[19],i[17],i[15],i[16],i[18],i[20]],mod=gmpet,
+                                    PV=i[4],PM=i[6],default_mod=gmpetdefault,
+                                    instinct=i[13],lvl=i[3],prec=rawchar[26],luck=rawchar[27])
         db.close()
         db = Database()
         cur = db.call("get_skill",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)
@@ -411,10 +415,17 @@ class DBJDR:
             for i in cur:
                 skls.append(chutil.Skill(i[0]))
         db.close()
-        char = ch.Character({"charkey":rawchar[0],"name":rawchar[1],"lore":rawchar[2],"lvl":rawchar[3],"PV":rawchar[4],"PVm":rawchar[5],"PM":rawchar[6],"PMm":rawchar[7],"force":rawchar[8],"esprit":rawchar[9],
-                          "charisme":rawchar[10],"furtivite":rawchar[11],"karma":rawchar[12],"default_karma":rawchar[13],"money":rawchar[14],"lp":rawchar[15],"dp":rawchar[16],
-                          "intuition":rawchar[17],"mentalhealth":rawchar[18],"stat":stat,"mod":gm,"default_mod":gmdefault,"inventory":inv,"linked":rawchar[31],"pet":pets,"skills":skls,"dead":rawchar[32],
-                          "classe":rawchar[33],"selected":rawchar[34],"xp":rawchar[35]})
+        char = ch.Character(charkey=rawchar[0],name=rawchar[1],lore=rawchar[2],
+                            lvl=rawchar[3],PV=rawchar[4],PVm=rawchar[5],PM=rawchar[6],
+                            PMm=rawchar[7],force=rawchar[8],esprit=rawchar[9],
+                            charisme=rawchar[10],furtivite=rawchar[11],karma=rawchar[12],
+                            default_karma=rawchar[13],money=rawchar[14],lp=rawchar[15],
+                            dp=rawchar[16],intuition=rawchar[17],mentalhealth=rawchar[18],
+                            stat=stat,mod=gm,default_mod=gmdefault,inventory=inv,
+                            linked=rawchar[31],pet=pets,skills=skls,dead=rawchar[32],
+                            classe=rawchar[33],selected=rawchar[34],xp=rawchar[35],
+                            prec=rawchar[36],luck=rawchar[37],
+                            org=chutil.retrieveOrganization(rawchar[38]))
         char.bind(self)
         return char
 

@@ -164,3 +164,37 @@ def retrieveRaceID(rcname):
     row = cur.fetchone()
     db.close()
     return row
+
+def retrieveOrganization(orgid):
+    db = Database()
+    cur = db.execute("SELECT nom FROM organizations WHERE id_org = %(id)s",id=orgid)
+    if cur is None:
+        db.close()
+        return None
+    row = cur.fetchone()
+    db.close()
+    return row
+
+def retrieveOrganizationSkill(orgname):
+    db = Database()
+    cur = db.call("get_orgskills",org=orgname)
+    if cur is None:
+        db.close()
+        return []
+    ls = []
+    for i in row:
+        ls.append(Skill(i[0]))
+    db.close()
+    return ls
+
+def retrieveRaceSkill(racename):
+    db = Database()
+    cur = db.call("get_raceskills",racename=racename)
+    if cur is None:
+        db.close()
+        return []
+    ls = []
+    for i in row:
+        ls.append(Skill(i[0]))
+    db.close()
+    return ls

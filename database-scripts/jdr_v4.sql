@@ -8,6 +8,10 @@ ALTER TABLE public.Characterr ADD COLUMN prec INT;
 ALTER TABLE public.Characterr ADD COLUMN luck INT;
 ALTER TABLE public.Characterr ADD CONSTRAINT character_prec_check CHECK (prec > 0 AND prec <= 100);
 ALTER TABLE public.Characterr ADD CONSTRAINT character_luck_check CHECK (luck > 0 AND luck <= 100);
+ALTER TABLE public.Pet ADD COLUMN prec INT;
+ALTER TABLE public.Pet ADD COLUMN luck INT;
+ALTER TABLE public.Pet ADD CONSTRAINT pet_prec_check CHECK (prec > 0 AND prec <= 100);
+ALTER TABLE public.Pet ADD CONSTRAINT pet_luck_check CHECK (luck > 0 AND luck <= 100);
 
 -- Add organizations and affiliates for the game
 CREATE TABLE public.Organizations(

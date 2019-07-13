@@ -63,6 +63,7 @@ jobs:
             psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/map.sql
             psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/swap.sql
             psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/jdr_rewrite.sql
+            psql -p 5432 -d postgresql://root@localhost/circle_test -f database-scripts/jdr_v4.sql
 
       - save_cache:
           paths:

@@ -9,6 +9,40 @@ ALTER TABLE public.Characterr ADD COLUMN luck INT;
 ALTER TABLE public.Characterr ADD CONSTRAINT character_prec_check CHECK (prec > 0 AND prec <= 100);
 ALTER TABLE public.Characterr ADD CONSTRAINT character_luck_check CHECK (luck > 0 AND luck <= 100);
 
+-- Add organizations and affiliates for the game
+CREATE TABLE public.Organizations(
+	id_org		      			SERIAL ,
+	nom				            VARCHAR (30) CONSTRAINT org_nom_null NOT NULL ,
+	CONSTRAINT prk_constraint_organizations PRIMARY KEY (id_org)
+)WITHOUT OIDS;
+
+CREATE TABLE public.OrgSkills(
+	id_org		      			 INT ,
+	id_skill							 INT ,
+	CONSTRAINT prk_constraint_orgskills PRIMARY KEY (id_org, id_skill)
+)WITHOUT OIDS;
+
+CREATE TABLE public.RaceSkills(
+	id_race		      			 INT ,
+	id_skill							 INT ,
+	CONSTRAINT prk_constraint_raceskills PRIMARY KEY (id_race, id_skill)
+)WITHOUT OIDS;
+
+ALTER TABLE public.OrgSkills ADD CONSTRAINT FK_orgskills_id_org FOREIGN KEY (id_org) REFERENCES public.Organizations(id_org);
+ALTER TABLE public.RaceSkills ADD CONSTRAINT FK_orgskills_id_race FOREIGN KEY (id_race) REFERENCES public.Race(id_race);
+ALTER TABLE public.Characterr ADD COLUMN affiliated_with INT;
+ALTER TABLE public.Characterr ADD CONSTRAINT FK_char_id_org FOREIGN KEY (affiliated_with) REFERENCES public.Organizations(id_org);
+
+-- Add organizations and their skills, and links in skil linking tables for org and race
+INSERT INTO Organizations(nom) VALUES
+('-');
+INSERT INTO Skills(nom,description,origine,webclass) VALUES
+('-','-','-','-');
+INSERT INTO OrgSkills VALUES
+(1,1);
+INSERT INTO RaceSkills VALUES
+(1,1);
+
 -- Perform update of characterr
 UPDATE Characterr SET prec = 50, luck = 50;
 
@@ -170,5 +204,56 @@ BEGIN
 		SET mental = val
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
 	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- new fonctions
+CREATE OR REPLACE FUNCTION affiliate
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	org Organizations.nom%TYPE
+) RETURNS void AS $$
+DECLARE
+	orgid Organizations.id_org%TYPE;
+BEGIN
+	SELECT id_org INTO orgid FROM Organizations
+	WHERE (nom = org);
+	UPDATE Characterr
+	SET affiliated_with = orgid
+	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_orgskills
+(
+	org Organizations.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	orgid Organizations.id_org%TYPE;
+BEGIN
+	SELECT id_org INTO orgid FROM Organizations
+	WHERE (nom = org);
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, webclass FROM Skills
+	INNER JOIN OrgSkills ON (Skills.id_skill = OrgSkills.id_skill)
+	WHERE id_org = orgid;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_raceskills
+(
+	racename Race.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	raceid Race.id_race%TYPE;
+BEGIN
+	SELECT id_race INTO raceid FROM Race
+	WHERE (nom = racename);
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, webclass FROM Skills
+	INNER JOIN RaceSkills ON (Skills.id_skill = RaceSkills.id_skill)
+	WHERE id_race = raceid;
 END;
 $$ LANGUAGE plpgsql;

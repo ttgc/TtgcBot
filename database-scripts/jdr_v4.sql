@@ -276,3 +276,94 @@ BEGIN
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION petset
+(
+	dbkey Pet.petkey%TYPE,
+	charact Characterr.charkey%TYPE,
+	idserv Characterr.id_server%TYPE,
+	idchan Characterr.id_channel%TYPE,
+	stat VARCHAR(5),
+	val INT
+) RETURNS void AS $$
+DECLARE
+	curp INT;
+BEGIN
+	IF LOWER(stat) = 'str' THEN
+		UPDATE Pet
+		SET strength = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'spr' THEN
+		UPDATE Pet
+		SET spirit = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'cha' THEN
+		UPDATE Pet
+		SET charisma = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'agi' THEN
+		UPDATE Pet
+		SET agility = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	-- update here
+	IF LOWER(stat) = 'prec' THEN
+		UPDATE Pet
+		SET prec = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'luck' THEN
+		UPDATE Pet
+		SET luck = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	-- end of update
+	IF LOWER(stat) = 'kar' THEN
+		UPDATE Pet
+		SET karma = karma + val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pvmax' THEN
+		SELECT PV INTO curp FROM Pet
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+		IF (curp > val) THEN
+			UPDATE Pet
+			SET PV = val
+			WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+		END IF;
+		UPDATE Pet
+		SET PVmax = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pmmax' THEN
+		SELECT PM INTO curp FROM Pet
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+		IF (curp > val) THEN
+			UPDATE Pet
+			SET PM = val
+			WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+		END IF;
+		UPDATE Pet
+		SET PMmax = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pv' THEN
+		UPDATE Pet
+		SET PV = PV + val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pm' THEN
+		UPDATE Pet
+		SET PM = PM + val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'int' THEN
+		UPDATE Pet
+		SET instinct = val
+		WHERE (petkey = dbkey AND charkey = charact AND id_server = idserv AND id_channel = idchan);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;

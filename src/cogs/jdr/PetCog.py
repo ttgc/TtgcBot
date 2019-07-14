@@ -96,6 +96,12 @@ class PetCog(commands.Cog, name="Pets"):
             elif key.lower() in ["agi","agilite","agility","furtivite"]:
                 char = char.pet[petkey].petset('agi',int(value))
                 await ctx.message.channel.send(data.lang["petset"].format(data.lang["agilite"]))
+            elif key.lower() in ["prec","precision"]:
+                char = char.pet[petkey].petset('prec',int(value))
+                await ctx.message.channel.send(data.lang["petset"].format(data.lang["precision"]))
+            elif key.lower() in ["luck","chance"]:
+                char = char.pet[petkey].petset('luck',int(value))
+                await ctx.message.channel.send(data.lang["petset"].format(data.lang["chance"]))
             elif key.lower() in ["dmod","defaultmod"]:
                 if value in ["offensive","offensif","defensive","defensif"]:
                     ndm = 0

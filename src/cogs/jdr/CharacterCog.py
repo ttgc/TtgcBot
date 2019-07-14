@@ -122,7 +122,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         if not char.dead:
             parser = ParseCharacterRoll(data.lang,char,stat,operator,expression)
             msg = parser.resolv()
-            await ctx.message.channel.send(msg)
+            await ctx.message.channel.send(msg,tts=parser.tts)
         else:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
 

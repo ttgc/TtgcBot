@@ -251,3 +251,34 @@ class ParseCharacterRoll:
         db = Database()
         db.call("hasroll",dbkey=self.char.key,idserv=self.char.jdr.server,idchan=self.char.jdr.channel,valmax=self.statval,val=self.result)
         db.close()
+
+class ParsePetRoll(ParseCharacterRoll):
+    def __init__(self,lang,char,pet,stat,operator="+",expression=None):
+        ParseCharacterRoll.__init__(self,lang,char,stat,operator,expression)
+        self.petowner = self.char
+        self.char = pet
+
+    def resolv(self):
+        if self.stat in ["force","str","strength","esprit","spr","spirit","charisme","cha",
+                            "charisma","agilite","agi","agility","furtivite","furtivity",
+                            "precision","prec","chance","luck"]:
+            return ParseCharacterRoll.resolv(self)
+        if self.stat in ["instinct","int"]:
+            self.statval = self.char.instinct
+            self.strstat = self.lang["instinct"]
+            return self._resolv_intuition()
+        raise AttributeError("Invalid stat {} in parsing roll".format(self.stat))
+
+    def _resolv_opportunity(self):
+        raise NotImplementedError("unsuported operation for pet")
+
+    def _check_skills(self): pass
+
+    def _apply_karma(self):
+        self.char.petset('kar',val)
+        self.char.karma += self.karma
+
+    def _hasroll(self):
+        db = Database()
+        db.call("pethasroll",dbkey=self.char.key,charact=self.char.charkey,idserv=self.char.jdr.server,idchan=self.char.jdr.channel,valmax=self.statval,val=self.result)
+        db.close()

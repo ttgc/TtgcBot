@@ -195,10 +195,9 @@ class PetCog(commands.Cog, name="Pets"):
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
-            modifier = 0
-            if expression is not None:
-                modifier,expr = ParseRoll(expression).resolv()
-            await char.pet[petkey].roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
+            parser = ParsePetRoll(data.lang,char,char.pet[petkey],stat,operator,expression)
+            msg = parser.resolv()
+            await ctx.message.channel.send(msg,tts=parser.tts)
 
     @commands.check(check_haschar)
     @pet.command(name="roll",aliases=["r"])

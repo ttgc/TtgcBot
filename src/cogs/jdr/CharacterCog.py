@@ -174,6 +174,12 @@ class CharacterCog(commands.Cog, name="Characters"):
         elif key.lower() in ["spr","esprit","spirit"]:
             char = char.charset('spr',int(value))
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["esprit"]))
+        elif key.lower() in ["prec","precision"]:
+            char = char.charset('prec',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["precision"]))
+        elif key.lower() in ["luck","chance"]:
+            char = char.charset('luck',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["chance"]))
         elif key.lower() in ["cha","charisme","charisma"]:
             char = char.charset('cha',int(value))
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["charisme"]))

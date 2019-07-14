@@ -249,3 +249,5 @@ finalize_notemptyqueue=The vocal queue is not empty. Please wait few seconds whi
 finalize_emptyqueue_timeout=This operation take too much time. Skipping it.
 #Character update v2.1
 xp=The character `{}` has earned {} xp !
+#Gamerule v4 update v2.2
+precision=precision

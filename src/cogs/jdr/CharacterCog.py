@@ -119,11 +119,10 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.message.channel.send(data.lang["charnotexist"].format(key))
 
     async def _charroll(self,ctx,data,char,stat,operator,expression):
-        modifier = 0
-        if expression is not None:
-            modifier,expr = ParseRoll(expression).resolv()
         if not char.dead:
-            await char.roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
+            parser = ParseCharacterRoll(data.lang,char,stat,operator,expression)
+            msg = parser.resolv()
+            await ctx.message.channel.send(msg)
         else:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
 

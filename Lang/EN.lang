@@ -251,3 +251,5 @@ finalize_emptyqueue_timeout=This operation take too much time. Skipping it.
 xp=The character `{}` has earned {} xp !
 #Gamerule v4 update v2.2
 precision=precision
+advantage=advantage
+disadvantage=disadvantage

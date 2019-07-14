@@ -251,3 +251,5 @@ finalize_emptyqueue_timeout=Cette operation est trop longue et a été annulée
 xp=Le personnage `{}` à gagné {} xp !
 #Gamerule v4 update v2.2
 precision=précision
+advantage=avantage
+disadvantage=désavantage

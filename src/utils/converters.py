@@ -92,7 +92,7 @@ class MapEffectParameterConverter(commands.Converter):
 
 class AffiliationConverter(commands.Converter):
     async def convert(self,ctx,arg):
-        if arg.lower()0 == "none": return None
+        if arg.lower() == "none": return None
         if not organizationExists(arg):
             raise commands.BadArgument("Unexisting organization provided")
         return arg

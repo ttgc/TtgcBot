@@ -226,6 +226,8 @@ class PetCog(commands.Cog, name="Pets"):
             embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(char.pet[petkey].esprit),inline=True)
             embd.add_field(name=data.lang["charisme"].capitalize()+" :",value=str(char.pet[petkey].charisme),inline=True)
             embd.add_field(name=data.lang["agilite"].capitalize()+" :",value=str(char.pet[petkey].agilite),inline=True)
+            embd.add_field(name=data.lang["precision"].capitalize()+" :",value=str(char.pet[petkey].precision),inline=True)
+            embd.add_field(name=data.lang["chance"].capitalize()+" :",value=str(char.pet[petkey].luck),inline=True)
             embd.add_field(name=data.lang["karma"].capitalize()+" :",value=str(char.pet[petkey].karma),inline=True)
             embd.add_field(name=data.lang["mod"].capitalize()+" :",value=modd,inline=True)
             await ctx.message.channel.send(embed=embd)

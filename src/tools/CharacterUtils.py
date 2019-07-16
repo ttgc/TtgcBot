@@ -175,6 +175,16 @@ def retrieveOrganization(orgid):
     db.close()
     return row
 
+def organizationExists(orgname):
+    db = Database()
+    cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Error when fetching organization table")
+    nbr = cur.fetchone()
+    db.close()
+    return nbr > 0
+
 def retrieveOrganizationSkill(orgname):
     db = Database()
     cur = db.call("get_orgskills",org=orgname)

@@ -253,3 +253,5 @@ xp=Le personnage `{}` à gagné {} xp !
 precision=précision
 advantage=avantage
 disadvantage=désavantage
+affiliate=Le personnage {} est désormais affilié à/aux {}
+unaffiliate=Le personnage {} ne possède désormais plus aucune affiliation

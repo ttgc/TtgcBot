@@ -253,3 +253,5 @@ xp=The character `{}` has earned {} xp !
 precision=precision
 advantage=advantage
 disadvantage=disadvantage
+affiliate=The character {} is now affiliated with {}
+unaffiliate=The character {} is now affiliated with nobody

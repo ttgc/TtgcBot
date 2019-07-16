@@ -646,3 +646,14 @@ class CharacterCog(commands.Cog, name="Characters"):
                 await asyncio.sleep(0.5)
                 char.lvlup()
                 await ctx.message.channel.send(embed=self._levelup_embed(ctx,data,char))
+
+    @commands.check(check_chanmj)
+    @character.command(name="affiliation",aliases=["organization","organisation","org"])
+    async def character_affiliation(self,ctx,char: CharacterConverter,affiliation: typing.Optional[AffiliationConverter] = None):
+        data = GenericCommandParameters(ctx)
+        char.affiliate(affiliation)
+        self.logger.log(logging.DEBUG+1,"/char affiliate (%s with %s) in channel %d of server %d",char.key,affiliation,ctx.message.channel.id,ctx.message.guild.id)
+        if affiliation is None:
+            await ctx.channel.send(data.lang["unaffiliate"].format(char.name))
+        else:
+            await ctx.channel.send(data.lang["affiliate"].format(char.name,affiliation))

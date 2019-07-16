@@ -159,7 +159,7 @@ class ParseCharacterRoll:
         elif resultc == 4: msgc += self.lang["chance_4"]
         elif resultc == 5: msgc += self.lang["chance_5"]
         elif resultc == 6: msgc += self.lang["chance_6"]
-        msgm = self.lang["result_test_nomax"].format(self.lang["disadvantage"],str(resultm)))
+        msgm = self.lang["result_test_nomax"].format(self.lang["disadvantage"],str(resultm))
         if resultm == 1: msgm += self.lang["malchance_1"]
         elif resultm == 2: msgm += self.lang["malchance_2"]
         elif resultm == 3: msgm += self.lang["malchance_3"]

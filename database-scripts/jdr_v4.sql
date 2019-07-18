@@ -61,15 +61,21 @@ CREATE OR REPLACE FUNCTION affiliate
 DECLARE
 	orgid Organizations.id_org%TYPE;
 	nbr INT;
+	sk RECORD;
 BEGIN
 	SELECT COUNT(*) INTO nbr FROM Organizations
 	WHERE (nom = org);
-	IF nbr > 0 THEN
+	IF nbr > 0 OR org = NULL THEN
 		SELECT id_org INTO orgid FROM Organizations
 		WHERE (nom = org);
 		UPDATE Characterr
 		SET affiliated_with = orgid
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		IF org <> NULL THEN
+			FOR sk IN (SELECT * FROM get_orgskills(org)) LOOP
+				PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
+			END LOOP;
+		END IF;
 	END IF;
 END;
 $$ LANGUAGE plpgsql;

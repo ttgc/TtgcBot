@@ -173,7 +173,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
         if ct is None:
             await ctx.message.channel.send(data.lang["timeout"])
         else:
-            data.jdr.set_finalizer_field(title,ct)
+            data.jdr.set_finalizer_field(title,ct.content)
             self.logger.log(logging.DEBUG+1,"add finalize field %s in %d channel of %d server",title,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["finalizer_add"].format(title,ct.content))
 

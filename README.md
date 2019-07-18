@@ -288,6 +288,9 @@ Export a character to PDF format using LaTeX technology, and send the generated 
 - `/(character|char) xp <charkey> <amount> [allowlevelup]` (MJ only and JDR channel only) <br/>
 Give XP to a character. XP is printed on exported PDF from the character, but it can also be used by the level system. if allowlevelup is true, then every 100 XP, the character will automatically earn one level. It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors. <br/>
 Alias : `exp`
+- `/(character|char) affiliate <charkey> [organization]` (MJ only and JDR channel only) <br/>
+Affiliate the character with the specified organization, the organization should exists. This will automatically include all skills related to the organization. If no organization is provided, then the current character's affiliation will be removed. <br/>
+Aliases : `organization`, `organisation`, `org`
 
 #### Global commands
 - `/global damage <amount>` (MJ only and JDR channel only) <br/>

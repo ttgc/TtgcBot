@@ -650,6 +650,10 @@ class CharacterCog(commands.Cog, name="Characters"):
     @commands.check(check_chanmj)
     @character.command(name="affiliation",aliases=["organization","organisation","org"])
     async def character_affiliation(self,ctx,char: CharacterConverter,affiliation: typing.Optional[AffiliationConverter] = None):
+        """**GM/MJ only**
+        Affiliate the character with the specified organization, the organization should exists.
+        This will automatically include all skills related to the organization.
+        If no organization is provided, then the current character's affiliation will be removed."""
         data = GenericCommandParameters(ctx)
         char.affiliate(affiliation)
         self.logger.log(logging.DEBUG+1,"/char affiliate (%s with %s) in channel %d of server %d",char.key,affiliation,ctx.message.channel.id,ctx.message.guild.id)

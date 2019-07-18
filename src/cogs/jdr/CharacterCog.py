@@ -661,3 +661,20 @@ class CharacterCog(commands.Cog, name="Characters"):
             await ctx.channel.send(data.lang["unaffiliate"].format(char.name))
         else:
             await ctx.channel.send(data.lang["affiliate"].format(char.name,affiliation))
+
+    @commands.check(check_chanmj)
+    @character.command(name="list")
+    async def character_list(self,ctx):
+        """**GM/MJ only**
+        Display the list of all characters existing in the current game channel"""
+        data = GenericCommandParameters(ctx)
+        embd = discord.Embed(title=data.lang["charlist"],description=data.lang["charlist_descr"],colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for char in data.charbase:
+            alive = data.lang["dead"] if char.dead else data.lang["alive"]
+            linked = discord.utils.get(ctx.message.channel.members,id=int(char.linked)) if char.linked is not None else None
+            linked = ":no_entry_sign:" if linked is None else linked.mention
+            embd.add_field(name=char.key,value=data.lang["charlist_singlechar"].format(char.name,alive,linked),inline=True)
+        await ctx.message.channel.send(embed=embd)

@@ -144,6 +144,39 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION jdrcopy
+(
+	idserv JDR.id_server%TYPE,
+	src JDR.id_channel%TYPE,
+	dest JDR.id_channel%TYPE
+) RETURNS void AS $$
+DECLARE
+	nbr INT;
+	mj Membre.id_member%TYPE;
+	line RECORD;
+	inv inventaire.id_inventory%TYPE;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM JDR
+	WHERE (id_server = idserv AND id_channel = dest);
+	IF nbr <> 0 THEN
+		PERFORM jdrdelete(idserv,dest);
+	END IF;
+	SELECT id_member INTO mj FROM JDR
+	WHERE (id_server = idserv AND id_channel = src);
+	PERFORM jdrcreate(idserv,dest,mj);
+	FOR line IN (SELECT * FROM Characterr WHERE id_server = idserv AND id_channel = src) LOOP
+		INSERT INTO inventaire (charkey)
+		VALUES (line.charkey);
+		SELECT MAX(id_inventory) INTO inv FROM inventaire
+		WHERE charkey = line.charkey;
+		--update here
+		INSERT INTO Characterr
+		VALUES (line.charkey, line.nom, line.lore, line.lvl, line.PV, line.PVmax, line.PM, line.PMmax, line.strength, line.spirit, line.charisma, line.agility, line.karma, line.defaultkarma, line.argent, line.light_points, line.dark_points, line.intuition, line.mental, line.rolled_dice, line.succes, line.fail, line.critic_success, line.critic_fail, line.super_critic_success, line.super_critic_fail, idserv, dest, line.gm, line.gm_default, inv, line.id_member, line.dead, line.classe, line.linked, line.xp, line.prec, line.luck, line.affiliated_with);
+		--end of update
+	END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION charset
 (
 	dbkey Characterr.charkey%TYPE,

@@ -132,3 +132,31 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         embd.add_field(name=data.lang["super_critic_fail"],value=str(ls[6]),inline=True)
         self.logger.log(logging.DEBUG+1,"globalstat in channel %d of server %d",ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(2,30,commands.BucketType.channel)
+    @global_.command(name="fight",aliases=["battle"])
+    async def global_fight(self,ctx,chars: commands.Greedy[CharacterConverter], other: commands.Greedy[int]):
+        """**GM/MJ only**
+        Start a new fight's round. Use agility stat to determine order of actions.
+        If chars is empty, then all characters will be selected.
+        Other is a list of tag:agility values for other source of actions, such as NPC/PNJ.
+        Format for other items follow the rule : `tag:agility` (for example : `boss:70`)
+        In case of equality between two entities nothing specific will be done and an arbitrary order will be given to each of them"""
+        data = GenericCommandParameters(ctx)
+        if len(chars) == 0:
+            chars = data.charbase
+        entities = []
+        for i in chars:
+            entities.append([i.name, i.agilite])
+        for i in other:
+            entities.append(list(i))
+        entities.sort(key=lambda entity: entity[1])
+        embd = discord.Embed(title=data.lang["fight_round"],colour=discord.Color(int('ff0000',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for i in range(len(entities)):
+            embd.add_field(name="#{} - {}".format(i+1, entities[i][0]),value=str(entities[i][1]),inline=False)
+        self.logger.log(logging.DEBUG+1,"globalfight in channel %d of server %d",ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.message.channel.send(embed=embd)

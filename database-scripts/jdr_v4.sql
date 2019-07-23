@@ -80,10 +80,10 @@ INSERT INTO Skills(nom,description,origine,webclass) VALUES
 ('Endurance de Spatia','vos prieres envers Spatia regenerent vos PM proportionnellement','Faeliath','elem affiliation faeliath'),
 ('Protection divine','vous regenerez lentement vos PV et le bonus d''endurance de Spatia est augmente si vous priez dans une eglise qui lui est dediee','Faeliath','elem affiliation faeliath'),
 ('Transcendance de Spatia','si la deesse Spatia reconnait votre devouement, elle vous octroiera au hasard un effet suivant (1d4) :\n1. Bielementarisation\n2. Competence divine\n3. Messie\n4. Benediction','Faeliath','elem affiliation faeliath'),
-('Transcendance bielementarisation','vous obtenez la capacite de manier un second element sauf si vous en etes deja capable','Faeliath Transcendance','none')
-('Transcendance competence divine','vous obtenez une competence bonus quelque soit votre niveau','Faeliath Transcendance','none')
-('Transcendance messie','vous etes desormais capable de convertir temporairement vos PM en bonus de PV max pour tout les autres fideles de Spatia a proximite. Vous pouvez recuperer vos PM a tout moment, annulant alors le bonus','Faeliath Transcendance','none')
-('Transcendance benediction','Spatia benit un de vos objet fetiche, celui-ci passe ainsi au rang d''Artefact','Faeliath Transcendance','none')
+('Transcendance bielementarisation','vous obtenez la capacite de manier un second element sauf si vous en etes deja capable','Faeliath Transcendance','none'),
+('Transcendance competence divine','vous obtenez une competence bonus quelque soit votre niveau','Faeliath Transcendance','none'),
+('Transcendance messie','vous etes desormais capable de convertir temporairement vos PM en bonus de PV max pour tout les autres fideles de Spatia a proximite. Vous pouvez recuperer vos PM a tout moment, annulant alors le bonus','Faeliath Transcendance','none'),
+('Transcendance benediction','Spatia benit un de vos objet fetiche, celui-ci passe ainsi au rang d''Artefact','Faeliath Transcendance','none'),
 ('Business is business','+10% en negociation en affaire','Okane','elem affiliation okane'),
 ('Comission','Recevez +15% de comission si vous etes impliquez dans une negociation faisant gagner de l''argent','Okane','elem affiliation okane'),
 ('Experimentation','+5% en experimentation pour la recherche','Guilde du Savoir','elem affiliation gsavoir'),

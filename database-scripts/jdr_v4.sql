@@ -37,8 +37,9 @@ ALTER TABLE public.RaceSkills ADD CONSTRAINT FK_orgskills_id_race FOREIGN KEY (i
 ALTER TABLE public.Characterr ADD COLUMN affiliated_with INT;
 ALTER TABLE public.Characterr ADD CONSTRAINT FK_char_id_org FOREIGN KEY (affiliated_with) REFERENCES public.Organizations(id_org);
 
--- Expand skill name column
+-- Expand skill columns
 ALTER TABLE public.Skills ALTER COLUMN nom TYPE VARCHAR(50);
+ALTER TABLE public.Skills ALTER COLUMN description TYPE VARCHAR(300);
 
 -- Add organizations and their skills, and links in skil linking tables for org and race
 UPDATE skills

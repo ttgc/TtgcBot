@@ -291,6 +291,8 @@ Alias : `exp`
 - `/(character|char) affiliate <charkey> [organization]` (MJ only and JDR channel only) <br/>
 Affiliate the character with the specified organization, the organization should exists. This will automatically include all skills related to the organization. If no organization is provided, then the current character's affiliation will be removed. <br/>
 Aliases : `organization`, `organisation`, `org`
+- `/(character|char) list` (MJ only and JDR channel only) <br/>
+Display the list of all characters existing in the current game channel
 
 #### Global commands
 - `/global damage [char[,...]] <amount>` (MJ only and JDR channel only) <br/>

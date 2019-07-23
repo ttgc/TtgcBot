@@ -38,14 +38,235 @@ ALTER TABLE public.Characterr ADD COLUMN affiliated_with INT;
 ALTER TABLE public.Characterr ADD CONSTRAINT FK_char_id_org FOREIGN KEY (affiliated_with) REFERENCES public.Organizations(id_org);
 
 -- Add organizations and their skills, and links in skil linking tables for org and race
+UPDATE skills
+SET origine = 'Gardien Enchanteur',
+webclass = 'guardian enchanteur'
+WHERE nom IN ('Relance', 'Disparition', 'Force alliee');
+
+UPDATE classe
+SET nom = 'Enchanteur'
+WHERE id_race = 6;
+
 INSERT INTO Organizations(nom) VALUES
-('-');
+('Fidele de la lumiere'),
+('Militaire'), ('Ingenieur'), ('Mafieux'), ('Marchand'),
+('Umbrinis'), ('Faeliath'), ('Okane'), ('Guilde du savoir'),
+('Onilord'), ('Kuroni'), ('Kibou'),
+('Disciple de Vitalia'), ('Grand guerrier'), ('Senateur'),
+('Sunien'), ('Unien'), ('Rebelle'),
+('ROOT'), ('Assassin');
 INSERT INTO Skills(nom,description,origine,webclass) VALUES
-('-','-','-','-');
-INSERT INTO OrgSkills VALUES
-(1,1);
-INSERT INTO RaceSkills VALUES
-(1,1);
+('Interposition','peut s''interposer lorsque son hote est cible contre un jet d''agilite, en cas de reussite le gardien peut tenter une parade si applicable','Gardien Protecteur','guardian protecteur'),
+('Hierarchie','+5% de critique sur les jets de force','Gardien Protecteur','guardian protecteur'),
+('La lumiere guide vos pas','Vous permet d''invoquer la lumiere divine pour vous eclairer. Cette lumiere n''a aucun impact offensif ni defensif','Fidele de la lumiere','general affiliation saisho'),
+('Benediction divine','En priant, permet de vous guerir d''une malediction puissante au prix d''un montant proportionnel de PM max perdus definitivement','Fidele de la lumiere','general affiliation saisho'),
+('Absolution','La lumiere ne vous blesse plus mais vous soigne (coeff de -1), en contrepartie le coefficient de degats d''ombre est doublé','Fidele de la lumiere','general affiliation saisho'),
+('Partage','Vous permet d''avoir une autre affiliation en parallele compatible avec celle-ci. Cependant 3 effets d''affiliation au choix ne seront plus pris en compte','Fidele de la lumiere','general affiliation saisho'),
+('Hierarchie','Bonus/Malus pour convaincre (charisme) un autre militaire en fonction de votre (ancien) grade et de celui du PNJ','Militaire','human affiliation militaire'),
+('Survivaliste','+10% pour survivre en pleine nature, loin de toute civilisation','Militaire','human affiliation militaire'),
+('Macgyver','+10% pour fabriquer en urgence un dispositif quelconque','Ingenieur','human affiliation ingenieur'),
+('Expertise','+10% dans l''analyse scientifique','Ingenieur','human affiliation ingenieur'),
+('Baron du crime','les non-mafieux avec qui vous traitez se mefient de vous','Mafieux','human affiliation mafieux'),
+('Qui peux le moins peux le plus','+10% en negociation unilaterale','Mafieux','human affiliation mafieux'),
+('Faire ses preuves','les autres trafiquants perdent facilement confiance en vous en cas d''echec de votre part','Mafieux','human affiliation mafieux'),
+('Mafieux un jour mafieux toujours','Si vous quittez le milieu de la mafia, les autres mafieux voudront vous traquer voir vous eliminer','Mafieux','human affiliation mafieux'),
+('Benefice naturel','+10% pour vendre legerement plus cher un objet et pour acheter legerement moins cher un objet','Marchand','human affiliation marchand'),
+('Commission','Recevez +10% de comission si vous etes impliquez dans une negociation faisant gagner de l''argent','Marchand','human affiliation marchand'),
+('L''argent a une odeur','+2 en intuition pour trouver de l''argent','Marchand','human affiliation marchand'),
+('Boycott','Si vous arretez d''etre marchand, la communaute marchande vous boycottera','Marchand','human affiliation marchand'),
+('Parlementaire','vous pouvez sieger au parlement de Sanctum','Umbrinis','elem affiliation umbrinis'),
+('Patriote','+10% pour rallier des elementaire a votre cause lorsque vous defendez les valeurs de votre pays','Umbrinis','elem affiliation umbrinis'),
+('Inquisiteur','vous etes legalement autorise par votre pays a chasser les heretiques venerant des divinites paiennes','Faeliath','elem affiliation faeliath'),
+('Endurance de Spatia','vos prieres envers Spatia regenerent vos PM proportionnellement','Faeliath','elem affiliation faeliath'),
+('Protection divine','vous regenerez lentement vos PV et le bonus d''endurance de Spatia est augmente si vous priez dans une eglise qui lui est dediee','Faeliath','elem affiliation faeliath'),
+('Transcendance de Spatia','si la deesse Spatia reconnait votre devouement, elle vous octroiera au hasard un effet suivant (1d4) :\n1. Bielementarisation\n2. Competence divine\n3. Messie\n4. Benediction','Faeliath','elem affiliation faeliath'),
+('Transcendance bielementarisation','vous obtenez la capacite de manier un second element sauf si vous en etes deja capable','Faeliath Transcendance','none')
+('Transcendance competence divine','vous obtenez une competence bonus quelque soit votre niveau','Faeliath Transcendance','none')
+('Transcendance messie','vous etes desormais capable de convertir temporairement vos PM en bonus de PV max pour tout les autres fideles de Spatia a proximite. Vous pouvez recuperer vos PM a tout moment, annulant alors le bonus','Faeliath Transcendance','none')
+('Transcendance benediction','Spatia benit un de vos objet fetiche, celui-ci passe ainsi au rang d''Artefact','Faeliath Transcendance','none')
+('Business is business','+10% en negociation en affaire','Okane','elem affiliation okane'),
+('Comission','Recevez +15% de comission si vous etes impliquez dans une negociation faisant gagner de l''argent','Okane','elem affiliation okane'),
+('Experimentation','+5% en experimentation pour la recherche','Guilde du Savoir','elem affiliation gsavoir'),
+('Savoir','+5% en analyse de magie','Guilde du Savoir','elem affiliation gsavoir'),
+('Hors la loi','votre affiliation est consideree comme hors la loi partout dans le monde. Si on la decouvre, vous serez traque et arrete','Onilord','onikaosu succube affiliation onilord'),
+('La loi du plus fort','vous devez obeissance aux plus fort que vous au sein de l''ordre et inversement aupres des plus faibles que vous','Onilord','onikaosu succube affiliation onilord'),
+('Force accrue','+5% en force naturellement','Onilord','onikaosu succube affiliation onilord'),
+('Experimentation','+10% en experimentation pour la recherche','Kuroni','onikaosu succube affiliation kuroni'),
+('Savoir noir','+10% en analyse de magie noire','Kuroni','onikaosu succube affiliation kuroni'),
+('Sagesse','+5% en esprit naturellement','Kuroni','onikaosu succube affiliation kuroni'),
+('Asile','les pays controles par l''ordre Kibou vous accueilleront en cas de problement sauf si vous etes considere comme un criminel','Kibou','onikaosu succube affiliation kibou'),
+('Courage','la peur ne vous connait pas, meme en danger de mort','Kibou','onikaosu succube affiliation kibou'),
+('Influence','+5% en charisme naturellement','Kibou','onikaosu succube affiliation kibou'),
+('L''amour pas la guerre','aider les gens avec vos pouvoirs vous permet d''avoir un bonus de 10% en chance et 5% en charisme. si vous tuez deliberement une personne ou contribuez deliberement a sa mort, ces bonus seront perdus definitivement et vous obtiendrez un malus de 10% en chance','Disciple de Vitalia','mgirl affiliation vitalia'),
+('Guerison mentale','+5% en charisme pour tenter de liberer une cible d''un controle mental avec un beau discours','Disciple de Vitalia','mgirl affiliation vitalia'),
+('Miracle de la vie','soins emis accrus de 10%','Disciple de Vitalia','mgirl affiliation vitalia'),
+('Regime de la terreur','inspire la crainte aux autres magical girl non affiliees','Grand guerrier','mgirl affiliation grdguerriere'),
+('Victimisation','la violence augmente votre force de 10% tant que vous le restez. Le bonus s''annule egalement si vous prenez une raclee','Grand guerrier','mgirl affiliation grdguerriere'),
+('Devoir senatorial','vous avez votre place au senat et devez y sieger regulierement en fonction de l''importance de la convocation de l''assemblee','Senateur','mgirl affiliation senateur'),
+('L''union fait le charisme','lors de negociations, pour chaque magical girl dans votre groupe en accord avec vous, elles et vous obtiennent un bonus de 5x% jusqu''a un maximum de 20%','Senateur','mgirl affiliation senateur'),
+('Si vis pacem para bellum','+10% pour negocier la paix','Sunien','ningemono affiliation sunien'),
+('Heraut de guerre','Les Sunien sont pacifiques. Tout les autres Ningemono leur vouent un respect absolu','Sunien','ningemono affiliation sunien'),
+('Tribu','+10% sur toute action d''opportunite pour porter assistance a un autre Ningemono en danger et ayant la meme affiliation que vous','Unien','ningemono affiliation unien'),
+('High-tech','connaissances en mecanique Machina accrues, +5% sur les competences et jet en relation avec celle-ci','Unien','ningemono affiliation unien'),
+('Embuscade','+10% sur les actions d''opportunites avec effet de surprise','Rebelle','ningemono affiliation rebelle'),
+('Camouflage','+5% pour fuir ou se cacher dans la nature (hors zones degagees)','Rebelle','ningemono affiliation rebelle'),
+('Ni vu ni connu jt''embrouille','+5% pour tenter d''arnaquer quelqu''un','Rebelle','ningemono affiliation rebelle'),
+('Reseau generalise de partage de directives','vous recevez et pouvez transmettre vos evaluations personnelles pour ajouter des directives generales que vous pouvez suivre ou non','ROOT','machina affiliation root'),
+('Hardware','+10% en mecanique','ROOT','machina affiliation root'),
+('Software','+10% en programmation','ROOT','machina affiliation root'),
+('Hacker','+5% pour pirater un systeme technologique','Assassin/Criminel','machina affiliation assassin'),
+('Tir chirurgical','+5% sur les tirs a tres longue distance','Assassin/Criminel','machina affiliation assassin'),
+('Wanna cry','+5% en conception de virus informatique','Assassin/Criminel','machina affiliation assassin');
+
+DO $$
+<<rulesupdate>>
+DECLARE
+  sk RECORD;
+BEGIN
+	-- Elementaire
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Elementaire' ORDER BY id_skill LIMIT 2) LOOP
+		INSERT INTO RaceSkills
+		VALUES (2, sk.id_skill);
+	END LOOP;
+	-- Onikaosu
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Onikaosu' ORDER BY id_skill LIMIT 3) LOOP
+		INSERT INTO RaceSkills
+		VALUES (3, sk.id_skill);
+	END LOOP;
+	-- Succube
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Succube' ORDER BY id_skill LIMIT 4) LOOP
+		INSERT INTO RaceSkills
+		VALUES (4, sk.id_skill);
+	END LOOP;
+	-- Magical Girl
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Magical Girl' ORDER BY id_skill LIMIT 4) LOOP
+		INSERT INTO RaceSkills
+		VALUES (5, sk.id_skill);
+	END LOOP;
+	-- Gardien
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Gardien' ORDER BY id_skill LIMIT 3) LOOP
+		INSERT INTO RaceSkills
+		VALUES (6, sk.id_skill);
+	END LOOP;
+	-- Ningemono
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Ningemono' ORDER BY id_skill LIMIT 3) LOOP
+		INSERT INTO RaceSkills
+		VALUES (7, sk.id_skill);
+	END LOOP;
+	-- Machina
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Machina' ORDER BY id_skill LIMIT 6) LOOP
+		INSERT INTO RaceSkills
+		VALUES (8, sk.id_skill);
+	END LOOP;
+	-- Polymorphe
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Polymorphe') LOOP
+		INSERT INTO RaceSkills
+		VALUES (9, sk.id_skill);
+	END LOOP;
+  RAISE NOTICE 'RaceSkills table updated';
+	-- Fidele de la lumiere
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Fidele de la lumiere') LOOP
+		INSERT INTO OrgSkills
+		VALUES (1, sk.id_skill);
+	END LOOP;
+	-- Militaire
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Militaire') LOOP
+		INSERT INTO OrgSkills
+		VALUES (2, sk.id_skill);
+	END LOOP;
+	-- Ingenieur
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Ingenieur') LOOP
+		INSERT INTO OrgSkills
+		VALUES (3, sk.id_skill);
+	END LOOP;
+	-- Mafieux
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Mafieux') LOOP
+		INSERT INTO OrgSkills
+		VALUES (4, sk.id_skill);
+	END LOOP;
+	-- Marchand
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Marchand') LOOP
+		INSERT INTO OrgSkills
+		VALUES (5, sk.id_skill);
+	END LOOP;
+	-- Umbrinis
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Umbrinis') LOOP
+		INSERT INTO OrgSkills
+		VALUES (6, sk.id_skill);
+	END LOOP;
+	-- Faeliath
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Faeliath') LOOP
+		INSERT INTO OrgSkills
+		VALUES (7, sk.id_skill);
+	END LOOP;
+	-- Okane
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Okane') LOOP
+		INSERT INTO OrgSkills
+		VALUES (8, sk.id_skill);
+	END LOOP;
+	-- Guilde du savoir
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Guilde du Savoir') LOOP
+		INSERT INTO OrgSkills
+		VALUES (9, sk.id_skill);
+	END LOOP;
+	-- Onilord
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Onilord') LOOP
+		INSERT INTO OrgSkills
+		VALUES (10, sk.id_skill);
+	END LOOP;
+	-- Kuroni
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Kuroni') LOOP
+		INSERT INTO OrgSkills
+		VALUES (11, sk.id_skill);
+	END LOOP;
+	-- Kibou
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Kibou') LOOP
+		INSERT INTO OrgSkills
+		VALUES (12, sk.id_skill);
+	END LOOP;
+	-- Disciple de Vitalia
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Disciple de Vitalia') LOOP
+		INSERT INTO OrgSkills
+		VALUES (13, sk.id_skill);
+	END LOOP;
+	-- Grand guerrier
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Grand guerrier') LOOP
+		INSERT INTO OrgSkills
+		VALUES (14, sk.id_skill);
+	END LOOP;
+	-- Senateur
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Senateur') LOOP
+		INSERT INTO OrgSkills
+		VALUES (15, sk.id_skill);
+	END LOOP;
+	-- Sunien
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Sunien') LOOP
+		INSERT INTO OrgSkills
+		VALUES (16, sk.id_skill);
+	END LOOP;
+	-- Unien
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Unien') LOOP
+		INSERT INTO OrgSkills
+		VALUES (17, sk.id_skill);
+	END LOOP;
+	-- Rebelle
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Rebelle') LOOP
+		INSERT INTO OrgSkills
+		VALUES (18, sk.id_skill);
+	END LOOP;
+	-- ROOT
+	FOR sk IN (SELECT id_skill FROM Skills WHERE nom = 'Reseau generalise de partage de directives') LOOP
+		INSERT INTO OrgSkills
+		VALUES (19, sk.id_skill);
+	END LOOP;
+	-- Assassin/Criminel
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Assassin/Criminel') LOOP
+		INSERT INTO OrgSkills
+		VALUES (20, sk.id_skill);
+	END LOOP;
+	RAISE NOTICE 'OrgSkills table updated';
+END rulesupdate $$;
+
 
 -- Perform update of characterr
 UPDATE Characterr SET prec = 50, luck = 50;

@@ -6,10 +6,12 @@ UPDATE Classe SET nom = 'Ensorceleuse' WHERE id_race = 4 AND nom = 'Succube libr
 -- Add stats
 ALTER TABLE public.Characterr ADD COLUMN prec INT;
 ALTER TABLE public.Characterr ADD COLUMN luck INT;
+UPDATE Characterr SET prec = 50, luck = 50;
 ALTER TABLE public.Characterr ADD CONSTRAINT character_prec_check CHECK (prec > 0 AND prec <= 100);
 ALTER TABLE public.Characterr ADD CONSTRAINT character_luck_check CHECK (luck > 0 AND luck <= 100);
 ALTER TABLE public.Pet ADD COLUMN prec INT;
 ALTER TABLE public.Pet ADD COLUMN luck INT;
+UPDATE Pet SET prec = 50, luck = 50;
 ALTER TABLE public.Pet ADD CONSTRAINT pet_prec_check CHECK (prec > 0 AND prec <= 100);
 ALTER TABLE public.Pet ADD CONSTRAINT pet_luck_check CHECK (luck > 0 AND luck <= 100);
 

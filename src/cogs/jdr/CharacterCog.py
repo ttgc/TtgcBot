@@ -119,11 +119,10 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.message.channel.send(data.lang["charnotexist"].format(key))
 
     async def _charroll(self,ctx,data,char,stat,operator,expression):
-        modifier = 0
-        if expression is not None:
-            modifier,expr = ParseRoll(expression).resolv()
         if not char.dead:
-            await char.roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
+            parser = ParseCharacterRoll(data.lang,char,stat,operator,expression)
+            msg = parser.resolv()
+            await ctx.message.channel.send(msg,tts=parser.tts)
         else:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
 
@@ -180,6 +179,12 @@ class CharacterCog(commands.Cog, name="Characters"):
         elif key.lower() in ["agi","agilite","agility","furtivite"]:
             char = char.charset('agi',int(value))
             await ctx.message.channel.send(data.lang["charset"].format(data.lang["agilite"]))
+        elif key.lower() in ["prec","precision"]:
+            char = char.charset('prec',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["precision"]))
+        elif key.lower() in ["luck","chance"]:
+            char = char.charset('luck',int(value))
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["chance"]))
         elif key.lower() in ["lp","lightpt","lightpoint"]:
             if int(value) >= 0:
                 char = char.charset('lp',int(value))
@@ -346,7 +351,8 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def _charinfo(self,ctx,data,char):
         if char.mod == 0: modd = data.lang["offensive"]
         else: modd = data.lang["defensive"]
-        embd = discord.Embed(title=char.name,description="{} {}".format(char.race,char.classe),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None else ""
+        embd = discord.Embed(title=char.name,description="{} {}{}".format(char.race,char.classe,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -362,6 +368,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         if not char.dead: embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
         if not char.dead: embd.add_field(name=data.lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
         if not char.dead: embd.add_field(name=data.lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
+        if not char.dead: embd.add_field(name=data.lang["precision"].capitalize()+" :",value=str(char.precision),inline=True)
+        if not char.dead: embd.add_field(name=data.lang["chance"].capitalize()+" :",value=str(char.luck),inline=True)
         if not char.dead: embd.add_field(name=data.lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
         embd.add_field(name=data.lang["money"].capitalize()+" :",value=str(char.money),inline=True)
         if not char.dead: embd.add_field(name=data.lang["lp"]+" :",value=str(char.lp),inline=True)
@@ -638,3 +646,35 @@ class CharacterCog(commands.Cog, name="Characters"):
                 await asyncio.sleep(0.5)
                 char.lvlup()
                 await ctx.message.channel.send(embed=self._levelup_embed(ctx,data,char))
+
+    @commands.check(check_chanmj)
+    @character.command(name="affiliation",aliases=["organization","organisation","org"])
+    async def character_affiliation(self,ctx,char: CharacterConverter,affiliation: typing.Optional[AffiliationConverter] = None):
+        """**GM/MJ only**
+        Affiliate the character with the specified organization, the organization should exists.
+        This will automatically include all skills related to the organization.
+        If no organization is provided, then the current character's affiliation will be removed."""
+        data = GenericCommandParameters(ctx)
+        char.affiliate(affiliation)
+        self.logger.log(logging.DEBUG+1,"/char affiliate (%s with %s) in channel %d of server %d",char.key,affiliation,ctx.message.channel.id,ctx.message.guild.id)
+        if affiliation is None:
+            await ctx.channel.send(data.lang["unaffiliate"].format(char.name))
+        else:
+            await ctx.channel.send(data.lang["affiliate"].format(char.name,affiliation))
+
+    @commands.check(check_chanmj)
+    @character.command(name="list")
+    async def character_list(self,ctx):
+        """**GM/MJ only**
+        Display the list of all characters existing in the current game channel"""
+        data = GenericCommandParameters(ctx)
+        embd = discord.Embed(title=data.lang["charlist"],description=data.lang["charlist_descr"],colour=discord.Color(int('5B005B',16)))
+        embd.set_footer(text="The Tale of Great Cosmos")
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        for char in data.charbase:
+            alive = data.lang["dead"] if char.dead else data.lang["alive"]
+            linked = discord.utils.get(ctx.message.channel.members,id=int(char.linked)) if char.linked is not None else None
+            linked = ":no_entry_sign:" if linked is None else linked.mention
+            embd.add_field(name=char.key,value=data.lang["charlist_singlechar"].format(char.name,alive,linked),inline=True)
+        await ctx.message.channel.send(embed=embd)

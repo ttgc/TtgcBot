@@ -237,6 +237,8 @@ force/str/strength - (integer between 1 and 100) Set the strength
 esprit/spr/spirit - (integer between 1 and 100) Set the spirit
 charisme/cha/charisma - (integer between 1 and 100) Set the charisma
 agilite/furtivite/agi/agility - (integer between 1 and 100) Set the agility
+prec/precision - (integer between 1 and 100) Set the precision
+luck/chance - (integer between 1 and 100) Set the luck
 lp/lightpt/lightpoint - (integer) Set the number of light point of the character
 dp/darkpt/darkpoint - (integer) Same as lp but for the dark points
 defaultmod/dmod - (offensiv/defensiv) Set the default mod of the character
@@ -288,18 +290,26 @@ Export a character to PDF format using LaTeX technology, and send the generated 
 - `/(character|char) xp <charkey> <amount> [allowlevelup]` (MJ only and JDR channel only) <br/>
 Give XP to a character. XP is printed on exported PDF from the character, but it can also be used by the level system. if allowlevelup is true, then every 100 XP, the character will automatically earn one level. It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors. <br/>
 Alias : `exp`
+- `/(character|char) affiliate <charkey> [organization]` (MJ only and JDR channel only) <br/>
+Affiliate the character with the specified organization, the organization should exists. This will automatically include all skills related to the organization. If no organization is provided, then the current character's affiliation will be removed. <br/>
+Aliases : `organization`, `organisation`, `org`
+- `/(character|char) list` (MJ only and JDR channel only) <br/>
+Display the list of all characters existing in the current game channel
 
 #### Global commands
-- `/global damage <amount>` (MJ only and JDR channel only) <br/>
-Damage all the characters with the number of points given <br/>
+- `/global damage [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
+Damage all the characters precised (or everyone if no one is precised) with the number of points given <br/>
 Alias : `dmg`
-- `/global heal <amount>` (MJ only and JDR channel only) <br/>
-Heal all the characters with the number of points given
-- `/global getpm <amount>` (MJ only and JDR channel only) <br/>
-Add the given amount of mana points to all the characters, if the amount is negative, the characters will lose mana points <br/>
+- `/global heal [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
+Heal all the characters precised (or everyone if no one is precised) with the number of points given
+- `/global getpm [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
+Add the given amount of mana points to all the characters precised (or everyone if no one is precised), if the amount is negative, the characters will lose mana points. <br/>
 Alias : `getmp`
 - `/global stat` (JDR channel only) <br/>
 Display statistics about dice rolled for the group
+- `/global fight [char[,...]] [other_entities[,...]]` (MJ only and JDR channel only) <br/>
+Start a fight round, determine order of all actions for each entities depending on agility values. In case of equality between two entities, nothing special is made and those entities will be ordered following an arbitrary order. Chars is the list of characters to consider, if no one is precised, then all characters will be considered. Entities is an external entity list following the format : `tag:agility` (for example : `boss:75`). <br/>
+Alias : `battle`
 
 #### GM/MJ commands
 - `/mj transfer <member>` (MJ only and JDR channel only) <br/>

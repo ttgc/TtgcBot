@@ -249,3 +249,15 @@ finalize_notemptyqueue=The vocal queue is not empty. Please wait few seconds whi
 finalize_emptyqueue_timeout=This operation take too much time. Skipping it.
 #Character update v2.1
 xp=The character `{}` has earned {} xp !
+#Gamerule v4 update v2.2
+precision=precision
+advantage=advantage
+disadvantage=disadvantage
+affiliate=The character {} is now affiliated with {}
+unaffiliate=The character {} is now affiliated with nobody
+charlist=Characters list
+charlist_descr=List of all characters avalaible in the current game channel
+charlist_singlechar=Full name: `{}`\n{}\nLinked to: {}
+dead=Deceased
+alive=Alive
+fight_round=Battle fight round order

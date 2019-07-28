@@ -96,6 +96,12 @@ class PetCog(commands.Cog, name="Pets"):
             elif key.lower() in ["agi","agilite","agility","furtivite"]:
                 char = char.pet[petkey].petset('agi',int(value))
                 await ctx.message.channel.send(data.lang["petset"].format(data.lang["agilite"]))
+            elif key.lower() in ["prec","precision"]:
+                char = char.pet[petkey].petset('prec',int(value))
+                await ctx.message.channel.send(data.lang["petset"].format(data.lang["precision"]))
+            elif key.lower() in ["luck","chance"]:
+                char = char.pet[petkey].petset('luck',int(value))
+                await ctx.message.channel.send(data.lang["petset"].format(data.lang["chance"]))
             elif key.lower() in ["dmod","defaultmod"]:
                 if value in ["offensive","offensif","defensive","defensif"]:
                     ndm = 0
@@ -189,10 +195,9 @@ class PetCog(commands.Cog, name="Pets"):
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
-            modifier = 0
-            if expression is not None:
-                modifier,expr = ParseRoll(expression).resolv()
-            await char.pet[petkey].roll(ctx.message.channel,data.lang,stat,modifier*((-1)**(operator=="-")))
+            parser = ParsePetRoll(data.lang,char,char.pet[petkey],stat,operator,expression)
+            msg = parser.resolv()
+            await ctx.message.channel.send(msg,tts=parser.tts)
 
     @commands.check(check_haschar)
     @pet.command(name="roll",aliases=["r"])
@@ -221,6 +226,8 @@ class PetCog(commands.Cog, name="Pets"):
             embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(char.pet[petkey].esprit),inline=True)
             embd.add_field(name=data.lang["charisme"].capitalize()+" :",value=str(char.pet[petkey].charisme),inline=True)
             embd.add_field(name=data.lang["agilite"].capitalize()+" :",value=str(char.pet[petkey].agilite),inline=True)
+            embd.add_field(name=data.lang["precision"].capitalize()+" :",value=str(char.pet[petkey].precision),inline=True)
+            embd.add_field(name=data.lang["chance"].capitalize()+" :",value=str(char.pet[petkey].luck),inline=True)
             embd.add_field(name=data.lang["karma"].capitalize()+" :",value=str(char.pet[petkey].karma),inline=True)
             embd.add_field(name=data.lang["mod"].capitalize()+" :",value=modd,inline=True)
             await ctx.message.channel.send(embed=embd)

@@ -17,6 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import re
 import discord
 from discord.ext import commands
 from src.tools.Character import *
@@ -89,3 +90,17 @@ class MapEffectParameterConverter(commands.Converter):
                 value = int(value)
             data[tag] = value
         return data
+
+class AffiliationConverter(commands.Converter):
+    async def convert(self,ctx,arg):
+        if arg.lower() == "none": return None
+        if not organizationExists(arg):
+            raise commands.BadArgument("Unexisting organization provided")
+        return arg
+
+class BattleEntityConverter(commands.Converter):
+    async def convert(self,ctx,arg):
+        if re.match(r"\w+:\d\d?", arg):
+            tag, value = arg.split(":")
+            return tag, int(value)
+        raise commands.BadArgument("Invalid Battle Entity provided, cannot convert")

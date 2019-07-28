@@ -47,9 +47,10 @@ SET origine = 'Gardien Enchanteur',
 webclass = 'guardian enchanteur'
 WHERE nom IN ('Relance', 'Disparition', 'Force alliee');
 
-UPDATE classe
-SET nom = 'Enchanteur'
-WHERE id_race = 6;
+UPDATE skills
+SET origine = 'Succube Ensorceleuse',
+webclass = 'succube ensorceleuse'
+WHERE webclass = 'succube slibre';
 
 INSERT INTO Organizations(nom) VALUES
 ('Fidele de la lumiere'),

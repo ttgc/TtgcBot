@@ -173,7 +173,7 @@ def retrieveOrganization(orgid):
         return None
     row = cur.fetchone()
     db.close()
-    return row
+    return row[0]
 
 def organizationExists(orgname):
     db = Database()
@@ -181,7 +181,7 @@ def organizationExists(orgname):
     if cur is None:
         db.close(True)
         raise DatabaseException("Error when fetching organization table")
-    nbr = cur.fetchone()
+    nbr = cur.fetchone()[0]
     db.close()
     return nbr > 0
 

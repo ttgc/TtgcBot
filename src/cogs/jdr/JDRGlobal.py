@@ -136,7 +136,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     @commands.check(check_chanmj)
     @commands.cooldown(2,30,commands.BucketType.channel)
     @global_.command(name="fight",aliases=["battle"])
-    async def global_fight(self,ctx,chars: commands.Greedy[CharacterConverter], other: commands.Greedy[int]):
+    async def global_fight(self,ctx,chars: commands.Greedy[CharacterConverter], other: commands.Greedy[BattleEntityConverter]):
         """**GM/MJ only**
         Start a new fight's round. Use agility stat to determine order of actions.
         If chars is empty, then all characters will be selected.

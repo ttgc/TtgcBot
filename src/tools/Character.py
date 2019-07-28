@@ -210,8 +210,8 @@ class Character:
         return result[0]
 
     def affiliate(self,org):
-        if self.affiliated_with is not None:
-            raise AttributeError("Character {} is already affiliated with an (other) organization".format(self.key))
+        # if self.affiliated_with is not None:
+        #     raise AttributeError("Character {} is already affiliated with an (other) organization".format(self.key))
         db = Database()
         db.call("affiliate",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,org=org)
         db.close()

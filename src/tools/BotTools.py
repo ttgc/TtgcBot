@@ -406,7 +406,7 @@ class DBJDR:
                                     charisme=i[10],agilite=i[11],karma=i[12],
                                     stat=[i[14],i[19],i[17],i[15],i[16],i[18],i[20]],mod=gmpet,
                                     PV=i[4],PM=i[6],default_mod=gmpetdefault,
-                                    instinct=i[13],lvl=i[3],prec=rawchar[26],luck=rawchar[27])
+                                    instinct=i[13],lvl=i[3],prec=i[26],luck=i[27])
         db.close()
         db = Database()
         cur = db.call("get_skill",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)

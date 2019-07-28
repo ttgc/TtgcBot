@@ -299,7 +299,7 @@ BEGIN
 		UPDATE Characterr
 		SET affiliated_with = orgid
 		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
-		IF org <> NULL THEN
+		IF org IS NOT NULL THEN
 			FOR sk IN (SELECT * FROM get_orgskills(org)) LOOP
 				PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
 			END LOOP;

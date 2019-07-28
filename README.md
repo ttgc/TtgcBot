@@ -237,6 +237,8 @@ force/str/strength - (integer between 1 and 100) Set the strength
 esprit/spr/spirit - (integer between 1 and 100) Set the spirit
 charisme/cha/charisma - (integer between 1 and 100) Set the charisma
 agilite/furtivite/agi/agility - (integer between 1 and 100) Set the agility
+prec/precision - (integer between 1 and 100) Set the precision
+luck/chance - (integer between 1 and 100) Set the luck
 lp/lightpt/lightpoint - (integer) Set the number of light point of the character
 dp/darkpt/darkpoint - (integer) Same as lp but for the dark points
 defaultmod/dmod - (offensiv/defensiv) Set the default mod of the character

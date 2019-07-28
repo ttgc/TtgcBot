@@ -186,7 +186,7 @@ class ParseCharacterRoll:
         dice = randint(1,100)
         kar = randint(1,10)
         if self.expr is not None:
-            self.statval = self.statval + (self.expr.resolv()[0] * ((-1)**(operator=="-")))
+            self.statval = self.statval + (self.expr.resolv()[0] * ((-1)**(self.op=="-")))
         if self.char.karma <= -5:
             self.result = dice + kar
             self.msg = self.lang["result_test_karma"].format(self.strstat,self.result,dice,"+",kar,self.statval)

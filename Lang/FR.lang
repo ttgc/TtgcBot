@@ -260,3 +260,4 @@ charlist_descr=List de tous les personnages disponibles dans le channel de JDR a
 charlist_singlechar=Nom complet : `{}`\n{}\nLié à : {}
 dead=Décédé
 alive=En vie
+fight_round=Ordre du tour de combat

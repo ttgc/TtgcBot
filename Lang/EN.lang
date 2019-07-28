@@ -260,3 +260,4 @@ charlist_descr=List of all characters avalaible in the current game channel
 charlist_singlechar=Full name: `{}`\n{}\nLinked to: {}
 dead=Deceased
 alive=Alive
+fight_round=Battle fight round order

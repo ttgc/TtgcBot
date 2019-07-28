@@ -173,7 +173,7 @@ def retrieveOrganization(orgid):
         return None
     row = cur.fetchone()
     db.close()
-    return row[0]
+    return row[0] if row is not None else None
 
 def organizationExists(orgname):
     db = Database()

@@ -151,7 +151,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
             entities.append([i.name, i.agilite])
         for i in other:
             entities.append(list(i))
-        entities.sort(key=lambda entity: entity[1])
+        entities.sort(key=lambda entity: entity[1], reverse=True)
         embd = discord.Embed(title=data.lang["fight_round"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)

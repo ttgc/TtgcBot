@@ -218,7 +218,7 @@ class ParseCharacterRoll:
             self.karma = 10-self.char.karma#char.karma = 10
 
     def _apply_karma(self):
-        self.char.charset('kar',val)
+        self.char.charset('kar',self.karma)
         self.char.karma += self.karma
 
     def _parse_result(self):
@@ -275,7 +275,7 @@ class ParsePetRoll(ParseCharacterRoll):
     def _check_skills(self): pass
 
     def _apply_karma(self):
-        self.char.petset('kar',val)
+        self.char.petset('kar',self.karma)
         self.char.karma += self.karma
 
     def _hasroll(self):

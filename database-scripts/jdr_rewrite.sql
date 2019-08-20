@@ -1,5 +1,6 @@
 -- >> INVENTORY <<
 DROP TABLE Items CASCADE;
+DROP TABLE contient;
 
 CREATE TABLE public.Items(
 	id_inventory   INT,

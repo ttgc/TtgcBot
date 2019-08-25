@@ -453,7 +453,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Consume a dark point from your character and apply all consquences to you"""
         data = GenericCommandParameters(ctx)
-        if data.char.lp <= 0:
+        if data.char.dp <= 0:
             await ctx.message.channel.send(data.lang["no_more_dp"])
         else:
             await ctx.message.channel.send(data.lang["used_dp"].format(data.char.name))

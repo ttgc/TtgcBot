@@ -105,7 +105,7 @@ class PetCog(commands.Cog, name="Pets"):
             elif key.lower() in ["dmod","defaultmod"]:
                 if value in ["offensive","offensif","defensive","defensif"]:
                     ndm = 0
-                    if ndm in ["defensive","defensif"]: ndm = 1
+                    if value in ["defensive","defensif"]: ndm = 1
                     if ndm != char.pet[petkey].default_mod:
                         char = char.pet[petkey].switchmod(True)
                     await ctx.message.channel.send(data.lang["petset"].format(data.lang["default"]+" "+data.lang["mod"]))

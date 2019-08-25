@@ -105,7 +105,7 @@ class PetCog(commands.Cog, name="Pets"):
             elif key.lower() in ["dmod","defaultmod"]:
                 if value in ["offensive","offensif","defensive","defensif"]:
                     ndm = 0
-                    if ndm in ["defensive","defensif"]: ndm = 1
+                    if value in ["defensive","defensif"]: ndm = 1
                     if ndm != char.pet[petkey].default_mod:
                         char = char.pet[petkey].switchmod(True)
                     await ctx.message.channel.send(data.lang["petset"].format(data.lang["default"]+" "+data.lang["mod"]))
@@ -124,7 +124,7 @@ class PetCog(commands.Cog, name="Pets"):
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
             char = char.pet[petkey].switchmod()
-            data.lang["defensive"]
+            mod = data.lang["defensive"]
             if char.pet[petkey].mod == 0: mod = data.lang["offensive"]
             await ctx.message.channel.send(data.lang["switchmod"].format(petkey,mod))
 
@@ -212,7 +212,7 @@ class PetCog(commands.Cog, name="Pets"):
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
-            data.lang["defensive"]
+            modd = data.lang["defensive"]
             if char.pet[petkey].mod == 0: modd = data.lang["offensive"]
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["petbelong"].format(char.pet[petkey].espece,char.name),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")

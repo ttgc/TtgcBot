@@ -196,7 +196,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         elif key.lower() in ["dmod","defaultmod"]:
             if value in ["offensive","offensif","defensive","defensif"]:
                 ndm = 0
-                if ndm in ["defensive","defensif"]: ndm = 1
+                if value in ["defensive","defensif"]: ndm = 1
                 if ndm != char.default_mod:
                     char = char.switchmod(True)
                 await ctx.message.channel.send(data.lang["charset"].format(data.lang["default"]+" "+data.lang["mod"]))
@@ -440,12 +440,12 @@ class CharacterCog(commands.Cog, name="Characters"):
             data.char.uselp()
             result = randint(1,6)
             await ctx.message.channel.send(data.lang["result_test_nomax"].format(data.lang["chance"],str(result)))
-            if result == 1: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_1"])
-            elif result == 2: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_2"])
-            elif result == 3: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_3"])
-            elif result == 4: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_4"])
-            elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_5"])
-            elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["chance_1"])
+            if result == 1: await ctx.message.channel.send(data.lang["chance_1"])
+            elif result == 2: await ctx.message.channel.send(data.lang["chance_2"])
+            elif result == 3: await ctx.message.channel.send(data.lang["chance_3"])
+            elif result == 4: await ctx.message.channel.send(data.lang["chance_4"])
+            elif result == 5: await ctx.message.channel.send(data.lang["chance_5"])
+            elif result == 6: await ctx.message.channel.send(data.lang["chance_1"])
             self.logger.log(logging.DEBUG+1,"/charuselp (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
 
     @character_use.command(name="darkpt",aliases=["dp","darkpoint"])
@@ -453,19 +453,19 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Consume a dark point from your character and apply all consquences to you"""
         data = GenericCommandParameters(ctx)
-        if data.char.lp <= 0:
+        if data.char.dp <= 0:
             await ctx.message.channel.send(data.lang["no_more_dp"])
         else:
             await ctx.message.channel.send(data.lang["used_dp"].format(data.char.name))
             data.char.usedp()
             result = randint(1,6)
             await ctx.message.channel.send(data.lang["result_test_nomax"].format(data.lang["malchance"],str(result)))
-            if result == 1: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_1"])
-            elif result == 2: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_2"])
-            elif result == 3: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_3"])
-            elif result == 4: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_4"])
-            elif result == 5: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_5"])
-            elif result == 6: await ctx.message.channel.send(ctx.message.channel,data.lang["malchance_1"])
+            if result == 1: await ctx.message.channel.send(data.lang["malchance_1"])
+            elif result == 2: await ctx.message.channel.send(data.lang["malchance_2"])
+            elif result == 3: await ctx.message.channel.send(data.lang["malchance_3"])
+            elif result == 4: await ctx.message.channel.send(data.lang["malchance_4"])
+            elif result == 5: await ctx.message.channel.send(data.lang["malchance_5"])
+            elif result == 6: await ctx.message.channel.send(data.lang["malchance_1"])
             self.logger.log(logging.DEBUG+1,"/charusedp (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
 
     async def _switchmod(self,ctx,data,char):

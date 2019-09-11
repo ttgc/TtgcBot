@@ -77,7 +77,7 @@ class MainJDR(commands.Cog, name="JDR"):
             else:
                 for i in ls:
                     if str(i.id) in linked or i == ctx.message.author:
-                        if i in nomute or i == message.author:
+                        if i in nomute or i == ctx.message.author:
                             await i.edit(i,mute=False,deafen=False)
                         else:
                             await i.edit(i,mute=True,deafen=True)

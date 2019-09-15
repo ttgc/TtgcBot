@@ -161,9 +161,11 @@ class PetCog(commands.Cog, name="Pets"):
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.pet[petkey].esprit),inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.pet[petkey].charisme),inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.pet[petkey].agilite),inline=True)
+                embd.add_field(name=data.lang["lvlup_current"].format(data.lang["precision"]),value=str(char.pet[petkey].precision),inline=True)
+                embd.add_field(name=data.lang["lvlup_current"].format(data.lang["chance"]),value=str(char.pet[petkey].luck),inline=True)
             elif char.pet[petkey].lvl == 3:
                 dice = randint(1,10)
-                dic = {"force":char.pet[petkey].force,"esprit":char.pet[petkey].esprit,"charisme":char.pet[petkey].charisme,"agilite":char.pet[petkey].agilite}
+                dic = {"force":char.pet[petkey].force,"esprit":char.pet[petkey].esprit,"charisme":char.pet[petkey].charisme,"agilite":char.pet[petkey].agilite,"precision":char.pet[petkey].precision,"chance":char.pet[petkey].luck}
                 statmin = ("force",char.pet[petkey].force)
                 for i,k in dic.items():
                     if k < statmin[1]: statmin = (i,k)
@@ -181,6 +183,8 @@ class PetCog(commands.Cog, name="Pets"):
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.pet[petkey].esprit),inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.pet[petkey].charisme),inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.pet[petkey].agilite),inline=True)
+                embd.add_field(name=data.lang["lvlup_current"].format(data.lang["precision"]),value=str(char.pet[petkey].precision),inline=True)
+                embd.add_field(name=data.lang["lvlup_current"].format(data.lang["chance"]),value=str(char.pet[petkey].luck),inline=True)
             else:
                 embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_6"],inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["PV"]),value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
@@ -189,6 +193,8 @@ class PetCog(commands.Cog, name="Pets"):
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.pet[petkey].esprit),inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.pet[petkey].charisme),inline=True)
                 embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.pet[petkey].agilite),inline=True)
+                embd.add_field(name=data.lang["lvlup_current"].format(data.lang["precision"]),value=str(char.pet[petkey].precision),inline=True)
+                embd.add_field(name=data.lang["lvlup_current"].format(data.lang["chance"]),value=str(char.pet[petkey].luck),inline=True)
             await ctx.message.channel.send(embed=embd)
 
     async def _petroll(self,ctx,data,char,petkey,stat,operator,expression):

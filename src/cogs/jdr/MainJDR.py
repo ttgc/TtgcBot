@@ -78,9 +78,9 @@ class MainJDR(commands.Cog, name="JDR"):
                 for i in ls:
                     if str(i.id) in linked or i == ctx.message.author:
                         if i in nomute or i == ctx.message.author:
-                            await i.edit(i,mute=False,deafen=False)
+                            await i.edit(mute=False,deafen=False)
                         else:
-                            await i.edit(i,mute=True,deafen=True)
+                            await i.edit(mute=True,deafen=True)
 
     @commands.cooldown(1,1,commands.BucketType.channel)
     @commands.command()

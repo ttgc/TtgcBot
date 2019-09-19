@@ -145,7 +145,7 @@ class ParseCharacterRoll:
 
     def _resolv_intuition(self):
         self.result = randint(1,6)
-        self.msg = self.lang["result_test"].formatformat(self.strstat,self.result,self.statval)
+        self.msg = self.lang["result_test"].format(self.strstat,self.result,self.statval)
         self._check_karma()
         return self.msg
 

@@ -531,9 +531,11 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["precision"]),value=str(char.precision),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["chance"]),value=str(char.luck),inline=True)
         elif char.lvl == 3:
             dice = randint(1,10)
-            dic = {"force":char.force,"esprit":char.esprit,"charisme":char.charisme,"agilite":char.furtivite}
+            dic = {"force":char.force,"esprit":char.esprit,"charisme":char.charisme,"agilite":char.furtivite,"precision":char.precision,"chance":char.luck}
             statmin = ("force",char.force)
             for i,k in dic.items():
                 if k < statmin[1]: statmin = (i,k)
@@ -551,6 +553,8 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["precision"]),value=str(char.precision),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["chance"]),value=str(char.luck),inline=True)
         else:
             embd.add_field(name=data.lang["lvlup_bonus"],value=data.lang["lvlup_6"],inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["PV"]),value=str(char.PV)+"/"+str(char.PVmax),inline=True)
@@ -559,6 +563,8 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["esprit"]),value=str(char.esprit),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["charisme"]),value=str(char.charisme),inline=True)
             embd.add_field(name=data.lang["lvlup_current"].format(data.lang["agilite"]),value=str(char.furtivite),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["precision"]),value=str(char.precision),inline=True)
+            embd.add_field(name=data.lang["lvlup_current"].format(data.lang["chance"]),value=str(char.luck),inline=True)
         return embd
 
     @commands.check(check_chanmj)

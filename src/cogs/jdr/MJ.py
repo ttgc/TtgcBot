@@ -74,7 +74,7 @@ class MJ(commands.Cog):
         await self.charcog._setmental(ctx,data,char,op,amount)
 
     @mj.command(name="roll",aliases=["r"])
-    async def mj_roll(self,ctx,char,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
+    async def mj_roll(self,ctx,char: CharacterConverter,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         """**GM/MJ only**
         GM version of character roll command"""
         data = GenericCommandParameters(ctx)

@@ -63,7 +63,7 @@ class MJ(commands.Cog):
         GM version of character pay command"""
         data = GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpay (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
-        await self.charcog._pay(ctx,data,char,val)
+        await self.charcog._pay(ctx,data,char,amount)
 
     @mj.command(name="setmental")
     async def mj_setmental(self,ctx,char: CharacterConverter,op: typing.Optional[OperatorConverter],amount: int):

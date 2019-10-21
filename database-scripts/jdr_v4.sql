@@ -123,12 +123,14 @@ INSERT INTO Skills(nom,description,origine,webclass) VALUES
 ('Software','+10% en programmation','ROOT','machina affiliation root'),
 ('Hacker','+5% pour pirater un systeme technologique','Assassin/Criminel','machina affiliation assassin'),
 ('Tir chirurgical','+5% sur les tirs a tres longue distance','Assassin/Criminel','machina affiliation assassin'),
-('Wanna cry','+5% en conception de virus informatique','Assassin/Criminel','machina affiliation assassin');
+('Wanna cry','+5% en conception de virus informatique','Assassin/Criminel','machina affiliation assassin'),
+('Ma foi pas de foi sans foie','Impossible de faire partie d''une religion et donc de choisir une affiliation en lien avec la religon','Machina','machina');
 
 DO $$
 <<rulesupdate>>
 DECLARE
   sk RECORD;
+	idsk Skills.id_skill%TYPE;
 BEGIN
 	-- Elementaire
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Elementaire' ORDER BY id_skill LIMIT 2) LOOP
@@ -161,10 +163,12 @@ BEGIN
 		VALUES (7, sk.id_skill);
 	END LOOP;
 	-- Machina
-	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Machina' ORDER BY id_skill LIMIT 6) LOOP
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Machina' ORDER BY id_skill LIMIT 5) LOOP
 		INSERT INTO RaceSkills
 		VALUES (8, sk.id_skill);
 	END LOOP;
+	SELECT id_skill INTO idsk FROM Skills WHERE nom = 'Ma foi pas de foi sans foie';
+	INSERT INTO RaceSkills VALUES (8, idsk);
 	-- Polymorphe
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Polymorphe') LOOP
 		INSERT INTO RaceSkills

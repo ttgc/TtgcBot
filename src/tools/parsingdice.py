@@ -201,7 +201,7 @@ class ParseCharacterRoll:
     def _check_skills(self):
         if chutil.Skill.isskillin(self.char.skills,7): #chanceux
             self.karma *= 2
-        if chutil.Skill.isskillin(self.char.skills,7): #creature harmonieuse
+        if chutil.Skill.isskillin(self.char.skills,84): #creature harmonieuse
             if self.char.karma == 0 and self.karma < 0:
                 self.karma -= 5
             elif self.char.karma == 0 and self.karma > 0:

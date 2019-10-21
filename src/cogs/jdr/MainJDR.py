@@ -113,7 +113,7 @@ class MainJDR(commands.Cog, name="JDR"):
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query)
         embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
         if len(info.json()["parse"]["redirects"]) != 0:
-            embd.add_field(name=lang["wiki_redirect"],value=info.json()["parse"]["redirects"][0]["from"],inline=True)
+            embd.add_field(name=data.lang["wiki_redirect"],value=info.json()["parse"]["redirects"][0]["from"],inline=True)
         self.logger.log(logging.DEBUG+1,"wiki query (%s) in channel %d of server %d",query,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 

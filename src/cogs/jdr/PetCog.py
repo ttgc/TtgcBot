@@ -340,7 +340,7 @@ class PetCog(commands.Cog, name="Pets"):
         """**GM/MJ only**
         Set MP/PM for the given pet such as character getPM for characters does"""
         data = GenericCommandParameters(ctx)
-        if petkey not in data.char.pet:
+        if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
             if char.pet[petkey].PM + val < 0:

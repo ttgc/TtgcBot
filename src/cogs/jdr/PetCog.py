@@ -299,7 +299,7 @@ class PetCog(commands.Cog, name="Pets"):
         """**GM/MJ only**
         Inflict damage to a pet"""
         data = GenericCommandParameters(ctx)
-        if petkey not in data.char.pet:
+        if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
             val = abs(val)
@@ -319,7 +319,7 @@ class PetCog(commands.Cog, name="Pets"):
         """**GM/MJ only**
         Heal the given pet"""
         data = GenericCommandParameters(ctx)
-        if petkey not in data.char.pet:
+        if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
             val = abs(val)

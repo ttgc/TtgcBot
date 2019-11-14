@@ -129,7 +129,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
         vsys,vc = await self._finalizing_vocalstart(ctx,data)
         await asyncio.sleep(2)
         embd = discord.Embed(title="The Tale of Great Cosmos",colour=discord.Color(int("5B005B",16)))
-        embd.set_image(url="https://cdn.discordapp.com/attachments/254997041858478080/317324181542928395/The_Tale_of_Great_Cosmos.png")
+        embd.set_image(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Logo.jpg")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
         embd.set_footer(text=time.asctime())
         await ctx.message.channel.send(embed=embd)

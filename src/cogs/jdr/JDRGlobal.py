@@ -47,7 +47,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         embd = discord.Embed(title=data.lang["global_damage"],description=data.lang["damage_taken"]+" "+str(val),colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         deads = 0
         dead_ls = ""
         for i in chars:
@@ -74,7 +74,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         embd = discord.Embed(title=data.lang["global_heal"],description=data.lang["heal_amount"]+" "+str(val),colour=discord.Color(int('00ff00',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in chars:
             if i.dead: continue
             trueval = val
@@ -97,7 +97,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         embd = discord.Embed(title=data.lang["global_pm"],description=data.lang["pm_earn"].format(str(val)),colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in chars:
             if i.dead: continue
             trueval = val
@@ -122,7 +122,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         embd = discord.Embed(title=data.lang["stat"],description=data.lang["stat_all"],colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["dice_rolled"],value=str(ls[0]),inline=True)
         embd.add_field(name=data.lang["super_critic_success"],value=str(ls[1]),inline=True)
         embd.add_field(name=data.lang["critic_success"],value=str(ls[2]),inline=True)
@@ -155,7 +155,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         embd = discord.Embed(title=data.lang["fight_round"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in range(len(entities)):
             embd.add_field(name="#{} - {}".format(i+1, entities[i][0]),value=str(entities[i][1]),inline=False)
         self.logger.log(logging.DEBUG+1,"globalfight in channel %d of server %d",ctx.message.channel.id,ctx.message.guild.id)

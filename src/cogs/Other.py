@@ -70,7 +70,7 @@ class Other(commands.Cog):
         embd.set_footer(text=data.lang["invite_author"],icon_url=self.bot.user.avatar_url)
         embd.set_image(url=self.bot.user.avatar_url)
         embd.set_author(name="Ttgc",icon_url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/08/avatar-2-perso.png",url=url)
-        embd.set_thumbnail(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2017/06/cropped-The_Tale_of_Great_Cosmos.png")
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["invite_srv"],value=str(len(self.bot.guilds))+" servers",inline=True)
         await ctx.message.channel.send(embed=embd)
         self.logger.info("Invite generated on channel %d from server %d by %d",ctx.message.channel.id,ctx.message.guild.id,ctx.message.author.id)

@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging,os
+import logging, os
 
 class DebugFilter(logging.Filter):
     def filter(self,record):
@@ -63,7 +63,7 @@ def checkfiles(logger,argv):
         logger.critical("ffmpeg not found !")
         raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
 
-    if not os.access("arial.ttf",os.F_OK) and "--no-fontcheck" not in argv:
+    if not os.access("fonts/arial.ttf",os.F_OK) and "--no-fontcheck" not in argv:
         logger.error("Map management features need 'arial.ttf' font to work")
         raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
 

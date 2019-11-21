@@ -7,4 +7,5 @@ request==2018.11.20
 requests==2.21.0
 urllib3==1.24.2
 latex==0.7.0
+deepmerge==0.1.0
 #youtube-dl==2019.5.11

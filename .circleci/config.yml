@@ -73,16 +73,7 @@ jobs:
 
       - run:
           name: write config
-          command: |
-            echo '[TOKEN]' > token.ini
-            echo 'Bot='$token >> token.ini
-            echo '' >> token.ini
-            echo '[DATABASE]' >> token.ini
-            echo 'name=circle_test' >> token.ini
-            echo 'IP=localhost' >> token.ini
-            echo 'port=5432' >> token.ini
-            echo 'user=root' >> token.ini
-            echo 'pwd=' >> token.ini
+          command: echo '{"token": "'$token'", "database": {"name": "circle_test", "user": "root", "password": ""}}' > config.staging.json
 
       # run tests!
       # this example uses Django's built-in test-runner

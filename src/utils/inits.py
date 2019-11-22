@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import logging, os
+from src.utils.config import *
 
 class DebugFilter(logging.Filter):
     def filter(self,record):
@@ -63,9 +64,20 @@ def checkfiles(logger,argv):
         logger.critical("ffmpeg not found !")
         raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
 
-    if not os.access("fonts/arial.ttf",os.F_OK) and "--no-fontcheck" not in argv:
-        logger.error("Map management features need 'arial.ttf' font to work")
-        raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
+    if "--no-fontcheck" not in argv: return
+    config = Config()
+    if not os.access(config["fonts"]["directory"], os.F_OK):
+        logger.error("Fonts directory not found")
+        raise RuntimeError("Fonts directory not found")
+    for key, font in config["fonts"].items():
+        if key == "directory": continue
+        if not os.access("{}/{}".format(config["fonts"]["directory"], font), os.F_OK):
+            logger.error("Font '%s' for key '%s' was not found in the font directory", font, key)
+            raise RuntimeError("Font not found ! Check 'errors.log'")
+
+    # if not os.access("{}/{}".format(config["fonts"]["directory"], config["fonts"]["map"]),os.F_OK) and "--no-fontcheck" not in argv:
+    #     logger.error("Map management features need 'arial.ttf' font to work")
+    #     raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
 
 def checktest(logger,argv):
     for i in argv:

@@ -20,6 +20,7 @@
 from enum import Enum
 from PIL import Image,ImageDraw,ImageFont
 from src.utils.DatabaseManager import *
+from src.utils.config import *
 import io,asyncio,discord
 
 class Shape(Enum):
@@ -202,7 +203,7 @@ class Token:
 class Map:
     colorscale = [(255,0,0,128),(192,192,192,128),(255,255,0,128),(128,128,0,128),(0,128,0,128),
         (0,255,255,128),(0,0,255,128),(255,0,255,128),(128,0,128,128),(23,165,137,128),(211,84,0,128)]
-    try: font = ImageFont.truetype("fonts/arial.ttf",20)
+    try: font = ImageFont.truetype("{}/{}".format(Config()["fonts"]["directory"], Config()["fonts"]["map"]),20)
     except: font = ImageFont.load_default()
 
     def __init__(self,cols,rows,servid,chanid):

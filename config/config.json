@@ -14,5 +14,28 @@
             "map": "arial.ttf"
         }
     },
-    "vocal": false
+    "vocal": false,
+    "logs": {
+        "directory": "Logs",
+        "all": {
+            "filename": "all.log",
+            "enabled": true,
+            "stacking": true
+        },
+        "latest": {
+            "filename": "latest.log",
+            "enabled": true,
+            "stacking": false
+        },
+        "errors": {
+            "filename": "errors.log",
+            "enabled": true,
+            "stacking": false
+        },
+        "debug": {
+            "filename": "debug.log",
+            "enabled": true,
+            "stacking": false
+        }
+    }
 }

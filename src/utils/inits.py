@@ -25,29 +25,47 @@ class DebugFilter(logging.Filter):
         return record.levelno == logging.DEBUG+1
 
 def initlogs():
-    if not os.access("Logs",os.F_OK):
-        os.mkdir("Logs")
+    config = Config()["logs"]
+    if not os.access(config["directory"], os.F_OK):
+        os.mkdir(config["directory"])
     logger = logging.getLogger('discord')
-    # basic handler (all)
     logging.basicConfig(level=logging.DEBUG+1)
-    handler = logging.FileHandler(filename='Logs/all.log', encoding='utf-8', mode='a')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    logger.addHandler(handler)
+
+    # basic handler (all)
+    if config["all"]["enabled"]:
+        logmode = 'a' if config["all"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["all"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        logger.addHandler(handler)
+
     # latest logs
-    handler = logging.FileHandler(filename='Logs/latest.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    handler.setLevel(logging.INFO)
-    logger.addHandler(handler)
+    if config["latest"]["enabled"]:
+        logmode = 'a' if config["latest"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["latest"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        handler.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
     # error logs
-    handler = logging.FileHandler(filename='Logs/errors.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    handler.setLevel(logging.ERROR)
-    logger.addHandler(handler)
+    if config["errors"]["enabled"]:
+        logmode = 'a' if config["errors"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["errors"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        handler.setLevel(logging.ERROR)
+        logger.addHandler(handler)
+
     # debug logs
-    handler = logging.FileHandler(filename='Logs/debug.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    handler.addFilter(DebugFilter())
-    logger.addHandler(handler)
+    if config["debug"]["enabled"]:
+        logmode = 'a' if config["debug"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["debug"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        handler.addFilter(DebugFilter())
+        logger.addHandler(handler)
+
     return logger
 
 def initdirs(logger):
@@ -74,14 +92,3 @@ def checkfiles(logger):
             if not os.access("{}/{}".format(config["fonts"]["directory"], font), os.F_OK):
                 logger.error("Font '%s' for key '%s' was not found in the font directory", font, key)
                 raise RuntimeError("Font not found ! Check 'errors.log'")
-
-    # if not os.access("{}/{}".format(config["fonts"]["directory"], config["fonts"]["map"]),os.F_OK) and "--no-fontcheck" not in argv:
-    #     logger.error("Map management features need 'arial.ttf' font to work")
-    #     raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
-
-# def checktest(logger,argv):
-#     for i in argv:
-#         if i.startswith("-") and not i.startswith("--") and 't' in i:
-#             logger.info("Test mod enabled, launching tests")
-#             return True
-#     return False

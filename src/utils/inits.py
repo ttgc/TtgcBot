@@ -59,29 +59,29 @@ def initdirs(logger):
         os.mkdir("Music")
         logger.info("Create Music directory")
 
-def checkfiles(logger,argv):
-    if not os.access("ffmpeg.exe",os.F_OK) and "--no-vocal" not in argv:
+def checkfiles(logger):
+    config = Config()
+
+    if not os.access("ffmpeg.exe",os.F_OK) and config["vocal"]:
         logger.critical("ffmpeg not found !")
         raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
 
-    if "--no-fontcheck" not in argv: return
-    config = Config()
-    if not os.access(config["fonts"]["directory"], os.F_OK):
-        logger.error("Fonts directory not found")
-        raise RuntimeError("Fonts directory not found")
-    for key, font in config["fonts"].items():
-        if key == "directory": continue
-        if not os.access("{}/{}".format(config["fonts"]["directory"], font), os.F_OK):
-            logger.error("Font '%s' for key '%s' was not found in the font directory", font, key)
-            raise RuntimeError("Font not found ! Check 'errors.log'")
+    if config["fonts"]["check"]:
+        if not os.access(config["fonts"]["directory"], os.F_OK):
+            logger.error("Fonts directory not found")
+            raise RuntimeError("Fonts directory not found")
+        for key, font in config["fonts"]["list"].items():
+            if not os.access("{}/{}".format(config["fonts"]["directory"], font), os.F_OK):
+                logger.error("Font '%s' for key '%s' was not found in the font directory", font, key)
+                raise RuntimeError("Font not found ! Check 'errors.log'")
 
     # if not os.access("{}/{}".format(config["fonts"]["directory"], config["fonts"]["map"]),os.F_OK) and "--no-fontcheck" not in argv:
     #     logger.error("Map management features need 'arial.ttf' font to work")
     #     raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
 
-def checktest(logger,argv):
-    for i in argv:
-        if i.startswith("-") and not i.startswith("--") and 't' in i:
-            logger.info("Test mod enabled, launching tests")
-            return True
-    return False
+# def checktest(logger,argv):
+#     for i in argv:
+#         if i.startswith("-") and not i.startswith("--") and 't' in i:
+#             logger.info("Test mod enabled, launching tests")
+#             return True
+#     return False

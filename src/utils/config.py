@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import json, os
+import json, os, sys
 from deepmerge import always_merger
 
 class Config:
@@ -40,10 +40,18 @@ class Config:
         if os.access("config/config.production.json", os.R_OK):
             with open("config/config.production.json", "r") as f:
                 self.prod = json.load(f)
+
+        self.environment = None
+        if len(sys.argv) > 1 and sys.argv in ["development", "staging", "production"]:
+            self.environment = sys.argv[1]
+
         self.merged = dict(self.base)
-        always_merger.merge(self.merged, self.dev)
-        always_merger.merge(self.merged, self.staging)
-        always_merger.merge(self.merged, self.prod)
+        if self.environment is None or self.environment == "development":
+            always_merger.merge(self.merged, self.dev)
+        if self.environment is None or self.environment == "staging":
+            always_merger.merge(self.merged, self.staging)
+        if self.environment is None or self.environment == "production":
+            always_merger.merge(self.merged, self.prod)
 
     def __getitem__(self, key):
         return self.merged[key]

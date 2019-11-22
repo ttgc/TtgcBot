@@ -74,7 +74,7 @@ checkfiles(logger,sys.argv)
 
 # Initialize bot status
 global statut
-statut = discord.Game(name="Ohayo !")
+statut = discord.Game(name=Config()["discord"]["default-game"])
 
 # Get bot Token
 global TOKEN
@@ -85,7 +85,7 @@ def get_prefix(bot,message):
     try:
         srv = DBServer(str(message.guild.id))
         return srv.prefix
-    except (AttributeError,DatabaseException): return '/'
+    except (AttributeError,DatabaseException): return Config()["discord"]["default-prefix"]
 
 # Initialize client
 global client

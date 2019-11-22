@@ -24,6 +24,7 @@ import logging,asyncio,time
 import discord
 from random import randint,choice
 from src.tools.Translator import *
+from src.utils.config import *
 
 class Other(commands.Cog):
     def __init__(self,bot,logger):
@@ -67,7 +68,7 @@ class Other(commands.Cog):
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
         url = discord.utils.oauth_url(str(self.bot.user.id),botaskperm)
         embd = discord.Embed(title="TtgcBot",description=data.lang["invite"],colour=discord.Color(randint(0,int('ffffff',16))),url=url)
-        embd.set_footer(text=data.lang["invite_author"],icon_url=self.bot.user.avatar_url)
+        embd.set_footer(text=data.lang["invite_author"].format(Config()["version"]),icon_url=self.bot.user.avatar_url)
         embd.set_image(url=self.bot.user.avatar_url)
         embd.set_author(name="Ttgc",icon_url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/08/avatar-2-perso.png",url=url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")

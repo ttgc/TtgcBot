@@ -261,3 +261,5 @@ charlist_singlechar=Full name: `{}`\n{}\nLinked to: {}
 dead=Deceased
 alive=Alive
 fight_round=Battle fight round order
+max_karma_reach={} has reached 10 karma points
+min_karma_reach={} has reached -10 karma points

@@ -120,9 +120,14 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     async def _charroll(self,ctx,data,char,stat,operator,expression):
         if not char.dead:
+            oldkar = char.karma
             parser = ParseCharacterRoll(data.lang,char,stat,operator,expression)
             msg = parser.resolv()
             await ctx.message.channel.send(msg,tts=parser.tts)
+            if char.karma != oldkar and char.karma == 10:
+                await ctx.message.channel.send(data.lang["max_karma_reach"].format(char.name))
+            elif char.karma != oldkar and char.karma == -10:
+                await ctx.message.channel.send(data.lang["min_karma_reach"].format(char.name))
         else:
             await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
 

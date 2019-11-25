@@ -70,7 +70,7 @@ logger = initlogs()
 
 # Check bot directories and files
 initdirs(logger)
-checkfiles(logger,sys.argv)
+checkfiles(logger)
 
 # Initialize bot status
 global statut

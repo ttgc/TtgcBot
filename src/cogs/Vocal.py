@@ -24,7 +24,7 @@ import logging,asyncio
 import discord
 from src.tools.Translator import *
 from src.tools.VocalUtilities import *
-from src.tools.config import *
+from src.utils.config import *
 import os
 
 class Vocal(commands.Cog, command_attrs=dict(enabled=Config()["vocal"])):

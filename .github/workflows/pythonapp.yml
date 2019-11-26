@@ -69,3 +69,9 @@ jobs:
     - name: Launch application
       run: |
         timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
+    
+    - name: Approve pull request
+      if: github.event_name == 'pull_request'
+      uses: andrewmusgrave/automatic-pull-request-review@0.0.2
+      with:
+        repo-token: '${{ secrets.GITHUB_TOKEN }}'

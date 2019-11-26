@@ -40,10 +40,12 @@ jobs:
         sudo service postgresql start
 
     - name: Setup database
+      env: 
+        dbpwd: ${{ secrets.localdb_password }}
       run: |
         user=$(id -u -n)
         sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE ttgcbot"
-        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE USER "$user";"
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE USER "$user" ENCRYPTED PASSWORD '"$dbpwd"';"
         sudo -u postgres psql -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE ttgcbot TO "$user";"
         psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/tables.sql
         psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/triggers.sql
@@ -60,8 +62,9 @@ jobs:
     - name: Create config file
       env: 
         token: ${{ secrets.token }}
+        dbpwd: ${{ secrets.localdb_password }}
       run: |
-        echo '{"token": "'$token'", "database": {"name": "ttgcbot", "user": "'$(id -u -n)'", "password": ""}}' > config/config.staging.json
+        echo '{"token": "'$token'", "database": {"name": "ttgcbot", "user": "'$(id -u -n)'", "password": "'$dbpwd'"}}' > config/config.staging.json
     
     - name: Launch application
       run: |

@@ -32,3 +32,37 @@ jobs:
 #      run: |
 #        pip install pytest
 #        pytest
+
+    - name: Install PostgreSQL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qy postgresql postgresql-server-dev-10 sudo
+        sudo service postgresql start
+
+    - name: Setup database
+      run: |
+        user=$(id -u -n)
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE ttgcbot"
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE USER "$user";"
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE ttgcbot TO "$user";"
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/tables.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/triggers.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/procedures.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/lang_features.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/userblock_features.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/pet.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/skill_and_kill_features.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/map.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/swap.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_rewrite.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_v4.sql
+
+    - name: Create config file
+      env: 
+        token: ${{ secrets.token }}
+      run: |
+        echo '{"token": "'$token'", "database": {"name": "ttgcbot", "user": "'$(id -u -n)'", "password": ""}}' > config/config.staging.json
+    
+    - name: Launch application
+      run: |
+        timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging

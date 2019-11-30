@@ -69,13 +69,23 @@ def initlogs():
     return logger
 
 def initdirs(logger):
-    if not os.access("Hentai/",os.F_OK):
-        os.mkdir("Hentai")
-        logger.info("Create Hentai directory")
+    config = Config()["directories"]
 
-    if not os.access("Music/",os.F_OK):
-        os.mkdir("Music")
+    if not os.access(config["nsfw"],os.F_OK):
+        os.mkdir(config["nsfw"])
+        logger.info("Create NSFW directory")
+
+    if not os.access(config["music"],os.F_OK):
+        os.mkdir(config["music"])
         logger.info("Create Music directory")
+
+    if not os.access(config["jokes"], os.F_OK):
+        os.mkdir(config["jokes"])
+        with open("{}/joke-FR.txt".format(config["jokes"]), "w"): pass
+        with open("{}/joke-EN.txt".format(config["jokes"]), "w"): pass
+        with open("{}/nsfw-FR.txt".format(config["jokes"]), "w"): pass
+        with open("{}/nsfw-EN.txt".format(config["jokes"]), "w"): pass
+        logger.info("Create Jokes directory and files")
 
 def checkfiles(logger):
     config = Config()

@@ -22,6 +22,7 @@ from src.tools.BotTools import *
 from discord.ext import commands
 import logging,asyncio,time
 import discord
+import typing
 from random import randint,choice
 from src.tools.Translator import *
 from src.utils.config import *
@@ -129,7 +130,16 @@ class Other(commands.Cog):
     @commands.cooldown(5,30,commands.BucketType.channel)
     @commands.cooldown(1,10,commands.BucketType.user)
     @commands.command()
-    async def joke(self,ctx):
+    async def joke(self,ctx,lang: typing.Optional[str] = "FR"):
         """Funny jokes (only in french currently)"""
-        with open("Jokes/joke-fr.txt",encoding="utf-8") as f:
-            await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))
+        if lang in ["FR", "EN"]:
+            with open("{}/joke-{}.txt".format(Config()["directories"]["jokes"], lang),encoding="utf-8") as f:
+                jokelist = f.readlines()
+                if len(jokelist) > 0:
+                    await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
+                else:
+                    data = GenericCommandParameters(ctx)
+                    await ctx.message.channel.send(data.lang["nojoke"].format(lang))
+        else:
+            data = GenericCommandParameters(ctx)
+            await ctx.message.channel.send(data.lang["nojoke"].format(lang))

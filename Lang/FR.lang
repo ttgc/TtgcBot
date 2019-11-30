@@ -261,5 +261,7 @@ charlist_singlechar=Nom complet : `{}`\n{}\nLié à : {}
 dead=Décédé
 alive=En vie
 fight_round=Ordre du tour de combat
+#Config update v2.3
 max_karma_reach={} vient d'atteindre les 10 de karma
 min_karma_reach={} vient d'atteindre les -10 de karma
+nojoke=Aucune blague trouvée dans la langue choisie

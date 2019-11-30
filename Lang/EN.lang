@@ -261,5 +261,7 @@ charlist_singlechar=Full name: `{}`\n{}\nLinked to: {}
 dead=Deceased
 alive=Alive
 fight_round=Battle fight round order
+#Config update v2.3
 max_karma_reach={} has reached 10 karma points
 min_karma_reach={} has reached -10 karma points
+nojoke=No joke found for selected language

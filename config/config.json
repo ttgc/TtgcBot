@@ -42,5 +42,10 @@
     "discord": {
         "default-prefix": "/",
         "default-game": "Ohayo !"
+    },
+    "directories": {
+        "music": "Music",
+        "nsfw": "NSFW",
+        "jokes": "Jokes"
     }
 }

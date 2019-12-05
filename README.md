@@ -89,8 +89,8 @@ pong ! :ping_pong:
 ### Fun commands
 - `/pi` <br/>
 Display the first decimals of pi
-- `/joke` <br/>
-Display a joke (Jokes are only in french)
+- `/joke [language]` <br/>
+Display a joke in the requested language (by default in French)
 - `/yay` <br/>
 Use the power of yay
 - `/choquedecu` <br/>
@@ -168,7 +168,7 @@ Resume the previously paused song
 Instant leave all the vocal channels where the bot is connected
 
 ### NSFW commands (NSFW channels only)
-- `/nsfwjoke` <br/>
+- `/nsfwjoke [language]` <br/>
 Same as joke, but will display a nsfw joke (always in french)
 - `/hentai` <br/>
 Do I need to explain what it does ?
@@ -223,7 +223,8 @@ Alias : `assign`
 Unlink a character previously linked with character link command, if not provided, unlink the character linked to you (and selected) <br/>
 Alias : `unassign`
 - `/(character|char) select <charkey>` (PJ only) <br/>
-Select an other character. For selecting a character, you'll need to be linked first to this character with the `link` command. `character select` allow you to switch from a character to an other.
+Select an other character. For selecting a character, you'll need to be linked first to this character with the `link` command. `character select` allow you to switch from a character to an other. <br/>
+Alias : `switch`
 - `/(character|char) roll <stat> [<+|-> <expression>]` (PJ only) <br/>
 Roll a dice in the given statistic and adding bonus or substracting malus if provided, the bonus/malus is formatted as for classical roll command and can be a complex expression such as `1d10-1d8+...`. The result will tell you if the action is a success or not, according to the rules of TTGC game. <br/>
 Alias : `r`

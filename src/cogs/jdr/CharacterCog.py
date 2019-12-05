@@ -105,7 +105,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_haschar)
     @commands.cooldown(1,5,commands.BucketType.user)
-    @character.command(name="select")
+    @character.command(name="select", aliases=["switch"])
     async def character_select(self,ctx,key):
         """**PC/PJ only**
         Select a character from all characters linked to you"""

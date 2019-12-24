@@ -18,17 +18,16 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import psycopg2 as sql
-from src.utils.INIfiles import *
+from src.utils.config import *
 
 class Database:
     def __init__(self):
-        configfile = INI()
-        configfile.load("token")
-        self.connection = sql.connect(dbname=configfile.section["DATABASE"]["name"],
-                                      user=configfile.section["DATABASE"]["user"],
-                                      password=configfile.section["DATABASE"]["pwd"],
-                                      host=configfile.section["DATABASE"]["IP"],
-                                      port=configfile.section["DATABASE"]["port"])
+        config = Config()
+        self.connection = sql.connect(dbname=config["database"]["name"],
+                                      user=config["database"]["user"],
+                                      password=config["database"]["password"],
+                                      host=config["database"]["host"],
+                                      port=config["database"]["port"])
         self.cur = None
 
     def execute(self,command,**kwargs):

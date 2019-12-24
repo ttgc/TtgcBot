@@ -1,0 +1,51 @@
+{
+    "token": "put your discord token here",
+    "database": {
+        "name": "TtgcBot",
+        "host": "localhost",
+        "port": 5432,
+        "user": "postgres",
+        "password": "postgres"
+    },
+    "version": "2.3.0",
+    "fonts": {
+        "check": false,
+        "directory": "fonts",
+        "list": {
+            "map": "arial.ttf"
+        }
+    },
+    "vocal": false,
+    "logs": {
+        "directory": "Logs",
+        "all": {
+            "filename": "all.log",
+            "enabled": true,
+            "stacking": true
+        },
+        "latest": {
+            "filename": "latest.log",
+            "enabled": true,
+            "stacking": false
+        },
+        "errors": {
+            "filename": "errors.log",
+            "enabled": true,
+            "stacking": false
+        },
+        "debug": {
+            "filename": "debug.log",
+            "enabled": true,
+            "stacking": false
+        }
+    },
+    "discord": {
+        "default-prefix": "/",
+        "default-game": "Ohayo !"
+    },
+    "directories": {
+        "music": "Music",
+        "nsfw": "NSFW",
+        "jokes": "Jokes"
+    }
+}

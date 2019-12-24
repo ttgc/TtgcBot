@@ -1,0 +1,77 @@
+name: Python application
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+#    - name: Test with pytest
+#      run: |
+#        pip install pytest
+#        pytest
+
+    - name: Install PostgreSQL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qy postgresql postgresql-server-dev-10 sudo
+        sudo service postgresql start
+
+    - name: Setup database
+      env: 
+        dbpwd: ${{ secrets.localdb_password }}
+      run: |
+        user=$(id -u -n)
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE ttgcbot"
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE USER "$user" ENCRYPTED PASSWORD '"$dbpwd"';"
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE ttgcbot TO "$user";"
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/tables.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/triggers.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/procedures.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/lang_features.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/userblock_features.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/pet.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/skill_and_kill_features.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/map.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/swap.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_rewrite.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_v4.sql
+
+    - name: Create config file
+      env: 
+        token: ${{ secrets.token }}
+        dbpwd: ${{ secrets.localdb_password }}
+      run: |
+        echo '{"token": "'$token'", "database": {"name": "ttgcbot", "user": "'$(id -u -n)'", "password": "'$dbpwd'"}}' > config/config.staging.json
+    
+    - name: Launch application
+      run: |
+        timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
+    
+    - name: Approve pull request
+      if: github.event_name == 'pull_request'
+      uses: andrewmusgrave/automatic-pull-request-review@0.0.2
+      with:
+        repo-token: '${{ secrets.GITHUB_TOKEN }}'

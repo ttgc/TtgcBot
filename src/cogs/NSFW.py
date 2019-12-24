@@ -23,8 +23,10 @@ from discord.ext import commands
 import logging,asyncio
 import discord
 import os
+import typing
 from random import choice
 from src.tools.Translator import *
+from src.utils.config import *
 
 class NSFW(commands.Cog):
     def __init__(self,bot,logger):
@@ -35,11 +37,20 @@ class NSFW(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.user)
     @commands.is_nsfw()
     @commands.command()
-    async def nsfwjoke(self,ctx):
+    async def nsfwjoke(self,ctx,lang: typing.Optional[str] = "FR"):
         """**NSFW channel required**
         Display a NSFW joke (only in french currently)"""
-        with open("Jokes/nsfw-fr.txt",encoding="utf-8") as f:
-            await ctx.message.channel.send(choice(f.readlines()).replace("\\n","\n"))
+        if lang in ["FR", "EN"]:
+            with open("{}/nsfw-{}.txt".format(Config()["directories"]["jokes"], lang),encoding="utf-8") as f:
+                jokelist = f.readlines()
+                if len(jokelist) > 0:
+                    await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
+                else:
+                    data = GenericCommandParameters(ctx)
+                    await ctx.message.channel.send(data.lang["nojoke"].format(lang))
+        else:
+            data = GenericCommandParameters(ctx)
+            await ctx.message.channel.send(data.lang["nojoke"].format(lang))
 
     @commands.cooldown(5,30,commands.BucketType.channel)
     @commands.cooldown(3,5,commands.BucketType.user)

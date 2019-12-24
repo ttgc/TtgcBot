@@ -181,7 +181,7 @@ musicskip=:fast_forward: Skipping song
 playlocal_notfound=file not found
 invite=Invite TtgcBot to your server !
 invite_srv=TtgcBot is currently on :
-invite_author=TtgcBot version 1.0 developed by Ttgc
+invite_author=TtgcBot version {} developed by Ttgc
 ping=ping value is currently : `{} ms`
 error=Your command throw the following error :\n```python\n{}\n```
 setlang=Language updated to {}
@@ -261,3 +261,7 @@ charlist_singlechar=Full name: `{}`\n{}\nLinked to: {}
 dead=Deceased
 alive=Alive
 fight_round=Battle fight round order
+#Config update v2.3
+max_karma_reach={} has reached 10 karma points
+min_karma_reach={} has reached -10 karma points
+nojoke=No joke found for selected language

@@ -17,59 +17,88 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging,os
+import logging, os
+from src.utils.config import *
 
 class DebugFilter(logging.Filter):
     def filter(self,record):
         return record.levelno == logging.DEBUG+1
 
 def initlogs():
-    if not os.access("Logs",os.F_OK):
-        os.mkdir("Logs")
+    config = Config()["logs"]
+    if not os.access(config["directory"], os.F_OK):
+        os.mkdir(config["directory"])
     logger = logging.getLogger('discord')
-    # basic handler (all)
     logging.basicConfig(level=logging.DEBUG+1)
-    handler = logging.FileHandler(filename='Logs/all.log', encoding='utf-8', mode='a')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    logger.addHandler(handler)
+
+    # basic handler (all)
+    if config["all"]["enabled"]:
+        logmode = 'a' if config["all"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["all"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        logger.addHandler(handler)
+
     # latest logs
-    handler = logging.FileHandler(filename='Logs/latest.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    handler.setLevel(logging.INFO)
-    logger.addHandler(handler)
+    if config["latest"]["enabled"]:
+        logmode = 'a' if config["latest"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["latest"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        handler.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
     # error logs
-    handler = logging.FileHandler(filename='Logs/errors.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    handler.setLevel(logging.ERROR)
-    logger.addHandler(handler)
+    if config["errors"]["enabled"]:
+        logmode = 'a' if config["errors"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["errors"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        handler.setLevel(logging.ERROR)
+        logger.addHandler(handler)
+
     # debug logs
-    handler = logging.FileHandler(filename='Logs/debug.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    handler.addFilter(DebugFilter())
-    logger.addHandler(handler)
+    if config["debug"]["enabled"]:
+        logmode = 'a' if config["debug"]["stacking"] else 'w'
+        logfile = "{}/{}".format(config["directory"], config["debug"]["filename"])
+        handler = logging.FileHandler(filename=logfile, encoding='utf-8', mode=logmode)
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        handler.addFilter(DebugFilter())
+        logger.addHandler(handler)
+
     return logger
 
 def initdirs(logger):
-    if not os.access("Hentai/",os.F_OK):
-        os.mkdir("Hentai")
-        logger.info("Create Hentai directory")
+    config = Config()["directories"]
 
-    if not os.access("Music/",os.F_OK):
-        os.mkdir("Music")
+    if not os.access(config["nsfw"],os.F_OK):
+        os.mkdir(config["nsfw"])
+        logger.info("Create NSFW directory")
+
+    if not os.access(config["music"],os.F_OK):
+        os.mkdir(config["music"])
         logger.info("Create Music directory")
 
-def checkfiles(logger,argv):
-    if not os.access("ffmpeg.exe",os.F_OK) and "--no-vocal" not in argv:
+    if not os.access(config["jokes"], os.F_OK):
+        os.mkdir(config["jokes"])
+        with open("{}/joke-FR.txt".format(config["jokes"]), "w"): pass
+        with open("{}/joke-EN.txt".format(config["jokes"]), "w"): pass
+        with open("{}/nsfw-FR.txt".format(config["jokes"]), "w"): pass
+        with open("{}/nsfw-EN.txt".format(config["jokes"]), "w"): pass
+        logger.info("Create Jokes directory and files")
+
+def checkfiles(logger):
+    config = Config()
+
+    if not os.access("ffmpeg.exe",os.F_OK) and config["vocal"]:
         logger.critical("ffmpeg not found !")
         raise RuntimeError("ffmpeg not found !\nDonwload here : https://ffmpeg.org/")
 
-    if not os.access("arial.ttf",os.F_OK) and "--no-fontcheck" not in argv:
-        logger.error("Map management features need 'arial.ttf' font to work")
-        raise RuntimeError("'arial.ttf' font missing\nDonwload here : https://fr.ffonts.net/Arial.font.download")
-
-def checktest(logger,argv):
-    for i in argv:
-        if i.startswith("-") and not i.startswith("--") and 't' in i:
-            logger.info("Test mod enabled, launching tests")
-            return True
-    return False
+    if config["fonts"]["check"]:
+        if not os.access(config["fonts"]["directory"], os.F_OK):
+            logger.error("Fonts directory not found")
+            raise RuntimeError("Fonts directory not found")
+        for key, font in config["fonts"]["list"].items():
+            if not os.access("{}/{}".format(config["fonts"]["directory"], font), os.F_OK):
+                logger.error("Font '%s' for key '%s' was not found in the font directory", font, key)
+                raise RuntimeError("Font not found ! Check 'errors.log'")

@@ -1,8 +1,8 @@
 # TtgcBot
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 
-![Generic badge](https://img.shields.io/badge/Bot Version-2.1.2-blue.svg) [![GitHub license](https://img.shields.io/github/license/ttgc/TtgcBot.svg)](https://github.com/ttgc/TtgcBot/blob/master/LICENSE) ![Generic badge](https://img.shields.io/badge/Python Version-3.5 | 3.6 | 3.7-blue.svg) [![Generic badge](https://img.shields.io/badge/Languages-EN | FR-green.svg)](https://github.com/ttgc/TtgcBot/tree/master/Lang) ![CircleCI](https://circleci.com/gh/ttgc/TtgcBot/tree/master.svg?style=svg) <br/>
-[![Generic badge](https://img.shields.io/badge/discord.py-1.2.3-blue.svg)](https://pypi.python.org/pypi/discord.py/) [![Generic badge](https://img.shields.io/badge/asyncio-3.4.3-blue.svg)](https://pypi.org/project/asyncio/) [![Generic badge](https://img.shields.io/badge/Pillow-5.4.1-blue.svg)](https://pypi.org/project/Pillow/) [![Generic badge](https://img.shields.io/badge/psycopg2-2.8.1-blue.svg)](https://pypi.org/project/psycopg2/) [![Generic badge](https://img.shields.io/badge/PyNaCl-1.3.0-blue.svg)](https://pypi.org/project/PyNaCl/) [![Generic badge](https://img.shields.io/badge/request-2018.11.20-blue.svg)](https://pypi.org/project/request/) [![Generic badge](https://img.shields.io/badge/requests-2.21.0-blue.svg)](https://pypi.org/project/requests/) [![Generic badge](https://img.shields.io/badge/urllib3-1.24.2-blue.svg)](https://pypi.org/project/urllib3/) [![Generic badge](https://img.shields.io/badge/latex-0.7.0-blue.svg)](https://pypi.org/project/latex/)
+![Generic badge](https://img.shields.io/badge/Bot&nbsp;Version-2.1.2-blue.svg) [![GitHub license](https://img.shields.io/github/license/ttgc/TtgcBot.svg)](https://github.com/ttgc/TtgcBot/blob/master/LICENSE) ![Generic badge](https://img.shields.io/badge/Python&nbsp;Version-3.5&nbsp;|&nbsp;3.6&nbsp;|&nbsp;3.7-blue.svg) [![Generic badge](https://img.shields.io/badge/Languages-EN&nbsp;|&nbsp;FR-green.svg)](https://github.com/ttgc/TtgcBot/tree/master/Lang) <br/>
+[![Generic badge](https://img.shields.io/badge/discord.py-1.2.5-blue.svg)](https://pypi.python.org/pypi/discord.py/) [![Generic badge](https://img.shields.io/badge/asyncio-3.4.3-blue.svg)](https://pypi.org/project/asyncio/) [![Generic badge](https://img.shields.io/badge/Pillow-6.2.0-blue.svg)](https://pypi.org/project/Pillow/) [![Generic badge](https://img.shields.io/badge/psycopg2-2.8.1-blue.svg)](https://pypi.org/project/psycopg2/) [![Generic badge](https://img.shields.io/badge/PyNaCl-1.3.0-blue.svg)](https://pypi.org/project/PyNaCl/) [![Generic badge](https://img.shields.io/badge/request-2018.11.20-blue.svg)](https://pypi.org/project/request/) [![Generic badge](https://img.shields.io/badge/requests-2.21.0-blue.svg)](https://pypi.org/project/requests/) [![Generic badge](https://img.shields.io/badge/urllib3-1.24.2-blue.svg)](https://pypi.org/project/urllib3/) [![Generic badge](https://img.shields.io/badge/latex-0.7.0-blue.svg)](https://pypi.org/project/latex/) [![Generic badge](https://img.shields.io/badge/deepmerge-0.1.0-blue.svg)](https://pypi.org/project/deepmerge/)
 
 TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of Great Cosmos universe ([French Website here](http://thetaleofgreatcosmos.fr)). But, today the bot is having many useful tools and features such as Keeprole system that allow leaving member to keep their roles after joining again your server, warn users that doesn't follow your rules, and more things (list of commands below). The bot is developed in Python 3 using [discord.py](https://github.com/Rapptz/discord.py/tree/async) lib and use also a postgresql 9 database.
 
@@ -89,8 +89,8 @@ pong ! :ping_pong:
 ### Fun commands
 - `/pi` <br/>
 Display the first decimals of pi
-- `/joke` <br/>
-Display a joke (Jokes are only in french)
+- `/joke [language]` <br/>
+Display a joke in the requested language (by default in French)
 - `/yay` <br/>
 Use the power of yay
 - `/choquedecu` <br/>
@@ -168,7 +168,7 @@ Resume the previously paused song
 Instant leave all the vocal channels where the bot is connected
 
 ### NSFW commands (NSFW channels only)
-- `/nsfwjoke` <br/>
+- `/nsfwjoke [language]` <br/>
 Same as joke, but will display a nsfw joke (always in french)
 - `/hentai` <br/>
 Do I need to explain what it does ?
@@ -223,7 +223,8 @@ Alias : `assign`
 Unlink a character previously linked with character link command, if not provided, unlink the character linked to you (and selected) <br/>
 Alias : `unassign`
 - `/(character|char) select <charkey>` (PJ only) <br/>
-Select an other character. For selecting a character, you'll need to be linked first to this character with the `link` command. `character select` allow you to switch from a character to an other.
+Select an other character. For selecting a character, you'll need to be linked first to this character with the `link` command. `character select` allow you to switch from a character to an other. <br/>
+Alias : `switch`
 - `/(character|char) roll <stat> [<+|-> <expression>]` (PJ only) <br/>
 Roll a dice in the given statistic and adding bonus or substracting malus if provided, the bonus/malus is formatted as for classical roll command and can be a complex expression such as `1d10-1d8+...`. The result will tell you if the action is a success or not, according to the rules of TTGC game. <br/>
 Alias : `r`

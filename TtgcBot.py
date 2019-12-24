@@ -34,7 +34,8 @@ import sys
 
 # import custom libs
 from src.utils.inits import *
-from src.utils.INIfiles import *
+# from src.utils.INIfiles import *
+from src.utils.config import *
 from src.tools.BotTools import *
 from src.tools.Translator import *
 from src.utils.checks import *
@@ -69,25 +70,22 @@ logger = initlogs()
 
 # Check bot directories and files
 initdirs(logger)
-checkfiles(logger,sys.argv)
+checkfiles(logger)
 
 # Initialize bot status
 global statut
-statut = discord.Game(name="Ohayo !")
+statut = discord.Game(name=Config()["discord"]["default-game"])
 
 # Get bot Token
 global TOKEN
-tokenf = INI()
-tokenf.load("token")
-TOKEN = tokenf.section["TOKEN"]["Bot"]
-del(tokenf)
+TOKEN = Config()["token"]
 
 # Get prefix function
 def get_prefix(bot,message):
     try:
         srv = DBServer(str(message.guild.id))
         return srv.prefix
-    except (AttributeError,DatabaseException): return '/'
+    except (AttributeError,DatabaseException): return Config()["discord"]["default-prefix"]
 
 # Initialize client
 global client

@@ -108,14 +108,16 @@ ENV/
 # Token and cache files
 __cache__/
 token.ini
-arial.ttf
+config.*.json
+fonts/
 __deprecated__/
 
 # Custom files
-Hentai/
+NSFW/
 ffmpeg-*/
 ffmpeg.exe
 Music/
+Jokes/
 Backup.*
 nogit-*
 *.zip

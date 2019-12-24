@@ -24,9 +24,10 @@ import logging,asyncio
 import discord
 from src.tools.Translator import *
 from src.tools.VocalUtilities import *
-import os,sys
+from src.utils.config import *
+import os
 
-class Vocal(commands.Cog, command_attrs=dict(enabled="--no-vocal" not in sys.argv)):
+class Vocal(commands.Cog, command_attrs=dict(enabled=Config()["vocal"])):
     def __init__(self,bot,logger):
         self.bot = bot
         self.logger = logger

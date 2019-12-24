@@ -181,7 +181,7 @@ musicskip=:fast_forward: Passage à la chanson suivante
 playlocal_notfound=fichier introuvable
 invite=Invite TtgcBot sur ton serveur !
 invite_srv=TtgcBot est actuellement sur :
-invite_author=TtgcBot version 1.0 développé par Ttgc
+invite_author=TtgcBot version {} développé par Ttgc
 ping=ping actuel : `{} ms`
 error=Votre commande à provoqué l'exception suivante :\n```python\n{}\n```
 setlang=Langue mise à jour vers {}
@@ -261,3 +261,7 @@ charlist_singlechar=Nom complet : `{}`\n{}\nLié à : {}
 dead=Décédé
 alive=En vie
 fight_round=Ordre du tour de combat
+#Config update v2.3
+max_karma_reach={} vient d'atteindre les 10 de karma
+min_karma_reach={} vient d'atteindre les -10 de karma
+nojoke=Aucune blague trouvée dans la langue choisie

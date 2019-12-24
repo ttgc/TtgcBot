@@ -37,7 +37,7 @@ class NSFW(commands.Cog):
     @commands.cooldown(1,5,commands.BucketType.user)
     @commands.is_nsfw()
     @commands.command()
-    async def nsfwjoke(self,ctx):
+    async def nsfwjoke(self,ctx,lang: typing.Optional[str] = "FR"):
         """**NSFW channel required**
         Display a NSFW joke (only in french currently)"""
         if lang in ["FR", "EN"]:

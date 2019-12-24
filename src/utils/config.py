@@ -42,7 +42,7 @@ class Config:
                 self.prod = json.load(f)
 
         self.environment = None
-        if len(sys.argv) > 1 and sys.argv in ["development", "staging", "production"]:
+        if len(sys.argv) > 1 and sys.argv[1] in ["development", "staging", "production"]:
             self.environment = sys.argv[1]
 
         self.merged = dict(self.base)

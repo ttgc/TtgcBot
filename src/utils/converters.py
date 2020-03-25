@@ -104,3 +104,10 @@ class BattleEntityConverter(commands.Converter):
             tag, value = arg.split(":")
             return tag, int(value)
         raise commands.BadArgument("Invalid Battle Entity provided, cannot convert")
+
+class JDRGroupConverter(commands.Converter):
+    async def convert(self, ctx, arg):
+        data = GenericCommandParameters(ctx)
+        if not data.jdr.group_exists(arg):
+            raise commands.BadArgument("Unexisting group")
+        return data.jdr.get_group(arg)

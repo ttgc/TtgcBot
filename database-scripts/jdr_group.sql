@@ -84,7 +84,7 @@ CREATE OR REPLACE FUNCTION update_group
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE,
   overrideMJ JDR_Groupe.localMJ%TYPE,
-  groupisjoinable JDR_Groupe.joinable%TYPE,
+  groupisjoinable JDR_Groupe.joinable%TYPE
 ) RETURNS void AS $$
 BEGIN
 	UPDATE JDR_Groupe
@@ -100,6 +100,8 @@ CREATE OR REPLACE FUNCTION delete_group
 	idchan JDR.id_channel%TYPE
 ) RETURNS void AS $$
 BEGIN
+  DELETE FROM JDR_Groupe_Member
+  WHERE grkey = dbkey AND id_server = idserv AND id_channel = idchan;
 	DELETE FROM JDR_Groupe
   WHERE grkey = dbkey AND id_server = idserv AND id_channel = idchan;
 END;
@@ -110,7 +112,7 @@ CREATE OR REPLACE FUNCTION join_group
 	grp JDR_Groupe.grkey%TYPE,
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE,
-  charact Characterr.characterr%TYPE
+  charact Characterr.charkey%TYPE
 ) RETURNS void AS $$
 BEGIN
 	INSERT INTO JDR_Groupe_Member
@@ -123,7 +125,7 @@ CREATE OR REPLACE FUNCTION leave_group
 	grp JDR_Groupe.grkey%TYPE,
 	idserv JDR.id_server%TYPE,
 	idchan JDR.id_channel%TYPE,
-  charact Characterr.characterr%TYPE
+  charact Characterr.charkey%TYPE
 ) RETURNS void AS $$
 BEGIN
   DELETE FROM JDR_Groupe_Member

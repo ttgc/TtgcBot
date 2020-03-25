@@ -298,18 +298,18 @@ Aliases : `organization`, `organisation`, `org`
 Display the list of all characters existing in the current game channel
 
 #### Global commands
-- `/global damage [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
-Damage all the characters precised (or everyone if no one is precised) with the number of points given <br/>
+- `/global damage [group[,...]] [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
+Damage all the characters and groups precised (or everyone if no one is precised) with the number of points given <br/>
 Alias : `dmg`
-- `/global heal [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
-Heal all the characters precised (or everyone if no one is precised) with the number of points given
-- `/global getpm [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
-Add the given amount of mana points to all the characters precised (or everyone if no one is precised), if the amount is negative, the characters will lose mana points. <br/>
+- `/global heal [group[,...]] [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
+Heal all the characters and groups precised (or everyone if no one is precised) with the number of points given
+- `/global getpm [group[,...]] [char[,...]] <amount>` (MJ only and JDR channel only) <br/>
+Add the given amount of mana points to all the characters and groups precised (or everyone if no one is precised), if the amount is negative, the characters will lose mana points. <br/>
 Alias : `getmp`
 - `/global stat` (JDR channel only) <br/>
 Display statistics about dice rolled for the group
-- `/global fight [char[,...]] [other_entities[,...]]` (MJ only and JDR channel only) <br/>
-Start a fight round, determine order of all actions for each entities depending on agility values. In case of equality between two entities, nothing special is made and those entities will be ordered following an arbitrary order. Chars is the list of characters to consider, if no one is precised, then all characters will be considered. Entities is an external entity list following the format : `tag:agility` (for example : `boss:75`). <br/>
+- `/global fight [group[,...]] [char[,...]] [other_entities[,...]]` (MJ only and JDR channel only) <br/>
+Start a fight round, determine order of all actions for each entities depending on agility values. In case of equality between two entities, nothing special is made and those entities will be ordered following an arbitrary order. Groups is the list of groups and Chars is the list of characters to consider, if no one is precised, then all characters will be considered. Entities is an external entity list following the format : `tag:agility` (for example : `boss:75`). <br/>
 Alias : `battle`
 
 #### GM/MJ commands

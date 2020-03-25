@@ -37,10 +37,13 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
 
     @commands.check(check_chanmj)
     @global_.command(name="damage",aliases=["dmg"])
-    async def global_damage(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
+    async def global_damage(self,ctx,groups: commands.Greedy[JDRGroupConverter],chars: commands.Greedy[CharacterConverter],val: int):
         """**GM/MJ only**
         Inflict damages to the specified characters or to everyone if not specified"""
         data = GenericCommandParameters(ctx)
+        for grp in groups:
+            for i in grp.fetch_members():
+                chars.append(data.jdr.get_character(i))
         if len(chars) == 0:
             chars = data.charbase
         val = abs(val)
@@ -64,10 +67,13 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
 
     @commands.check(check_chanmj)
     @global_.command(name="heal")
-    async def global_heal(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
+    async def global_heal(self,ctx,groups: commands.Greedy[JDRGroupConverter],chars: commands.Greedy[CharacterConverter],val: int):
         """**GM/MJ only**
         Heal the specified characters or everyone if not specified"""
         data = GenericCommandParameters(ctx)
+        for grp in groups:
+            for i in grp.fetch_members():
+                chars.append(data.jdr.get_character(i))
         if len(chars) == 0:
             chars = data.charbase
         val = abs(val)
@@ -87,11 +93,14 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
 
     @commands.check(check_chanmj)
     @global_.command(name="getpm",aliases=["getmp"])
-    async def global_getpm(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
+    async def global_getpm(self,ctx,groups: commands.Greedy[JDRGroupConverter],chars: commands.Greedy[CharacterConverter],val: int):
         """**GM/MJ only**
         Give to or take MP/PM from the specified characters or everyone if not specified.
         The command follow the same rules as for `character getpm` command."""
         data = GenericCommandParameters(ctx)
+        for grp in groups:
+            for i in grp.fetch_members():
+                chars.append(data.jdr.get_character(i))
         if len(chars) == 0:
             chars = data.charbase
         embd = discord.Embed(title=data.lang["global_pm"],description=data.lang["pm_earn"].format(str(val)),colour=discord.Color(int('0000ff',16)))
@@ -136,7 +145,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     @commands.check(check_chanmj)
     @commands.cooldown(2,30,commands.BucketType.channel)
     @global_.command(name="fight",aliases=["battle"])
-    async def global_fight(self,ctx,chars: commands.Greedy[CharacterConverter], other: commands.Greedy[BattleEntityConverter]):
+    async def global_fight(self,ctx,groups: commands.Greedy[JDRGroupConverter],chars: commands.Greedy[CharacterConverter], other: commands.Greedy[BattleEntityConverter]):
         """**GM/MJ only**
         Start a new fight's round. Use agility stat to determine order of actions.
         If chars is empty, then all characters will be selected.
@@ -144,6 +153,9 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         Format for other items follow the rule : `tag:agility` (for example : `boss:70`)
         In case of equality between two entities nothing specific will be done and an arbitrary order will be given to each of them"""
         data = GenericCommandParameters(ctx)
+        for grp in groups:
+            for i in grp.fetch_members():
+                chars.append(data.jdr.get_character(i))
         if len(chars) == 0:
             chars = data.charbase
         entities = []

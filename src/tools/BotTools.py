@@ -473,6 +473,83 @@ class DBJDR:
         db.close()
         return ls
 
+    def get_group(self, name):
+        return DBJDRGroup(name, self.server, self.channel)
+
+    def add_group(self, name):
+        db = Database()
+        db.call("add_group", dbkey=name, idserv=self.server, idchan=self.channel)
+        db.close()
+        return self.get_group(name)
+
+    def group_exists(self, name):
+        db = Database()
+        cur = db.execute("SELECT COUNT(*) FROM JDR_Groupe WHERE grkey = %(key)s AND id_server = %(idsrv)s AND id_channel = %(idchan)s;", key=name, idsrv=self.server, idchan=self.channel)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("Unable to check if the JDR group exists or not")
+        nbr = int(cur.fetchone())
+        return nbr > 0
+
+class DBJDRGroup:
+    def __init__(self, name, srvid, channelid):
+        self.server = srvid
+        self.channel = channelid
+        self.name = name
+        db = Database()
+        cur = db.execute("SELECT localMJ, joinable FROM JDR_Groupe WHERE grkey = %(key)s AND id_server = %(idsrv)s AND id_channel = %(idchan)s;", key=name, idsrv=srvid, idchan=channelid)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to find the JDR Group")
+        info = cur.fetchone()
+        db.close()
+        self.localMJ = info[0]
+        self.joinable = info[1]
+        self._member_cache = []
+        self._should_reload_cache = True
+
+    def edit(self, localMJ = None, joinable = None):
+        localMJ = self.localMJ if localMJ is None else localMJ
+        joinable = self.joinable if joinable is None else joinable
+        db = Database()
+        db.call("update_group", dbkey=self.name, idserv=self.server, idchan=self.channel, overrideMJ=localMJ, groupisjoinable=joinable)
+        db.close()
+
+    def delete(self):
+        db = Database()
+        db.call("delete_group", dbkey=self.name, idserv=self.server, idchan=self.channel)
+        db.close()
+
+    def join(self, charkey):
+        db = Database()
+        db.call("join_group", grp=self.name, idserv=self.server, idchan=self.channel, charact=charkey)
+        db.close()
+        self._should_reload_cache = True
+
+    def leave(self, charkey):
+        db = Database()
+        db.call("leave_group", grp=self.name, idserv=self.server, idchan=self.channel, charact=charkey)
+        db.close()
+        self._should_reload_cache = True
+
+    def fetch_members(self, force=False):
+        if not self._should_reload_cache and not force: return self._member_cache
+        db = Database()
+        cur = db.execute("SELECT charkey FROM JDR_Groupe_Member WHERE grkey = %(key)s AND id_server = %(idsrv)s AND id_channel = %(idchan)s;", key=self.name, idsrv=self.server, idchan=self.channel)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to fetch members of the JDR Group")
+        self._member_cache = []
+        for i in cur:
+            self._member_cache.append(i[0])
+        db.close()
+        self._should_reload_cache = False
+        return self._member_cache
+
+    def is_member(self, charkey, force_reload=False):
+        members = self.fetch_members(force_reload)
+        return charkey in members
+
 class DBMember:
     def __init__(self,ID):
         self.ID = ID

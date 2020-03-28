@@ -250,3 +250,37 @@ class MainJDR(commands.Cog, name="JDR"):
             embd.add_field(name="#{} :".format(str(discord.utils.get(ctx.message.guild.channels,id=int(i[0])))),value=info,inline=True)
         self.logger.log(logging.DEBUG+1,"JDR list shown in channel %d in server %d",ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(1,10,commands.BucketType.channel)
+    @jdr.group(name="group",invoke_without_command=True,aliases=["grp"])
+    async def jdr_group(self,ctx):
+        """**GM/MJ only**
+        Show the list of all groups for your RP/JDR"""
+        data = GenericCommandParameters(ctx)
+        ls = data.jdr.get_all_groups()
+        embd = discord.Embed(title=data.lang["jdrgrplist_title"],description=data.lang["jdrgrplist"],colour=discord.Color(int('0000ff',16)))
+        embd.set_footer(text=str(ctx.message.created_at))
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
+        for i in ls:
+            mj = ctx.jdr.mj if i.localMJ is None else i.localMJ
+            joinable = data.lang["jdrgrp_joinable"] if i.joinable else data.lang["jdrgrp_notjoinable"]
+            info = data.lang["jdrgrplist_info"].format(discord.utils.get(ctx.message.guild.members,id=int(mj)).mention,joinable)
+            embd.add_field(name=i.name,value=info,inline=True)
+        self.logger.log(logging.DEBUG+1,"JDR groups list shown in channel %d in server %d",ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(1,5,commands.BucketType.channel)
+    @jdr_group.command(name="create")
+    async def jdr_group_create(self,ctx,name):
+        """**GM/MJ only**
+        Create a new group of characters. Groups can have a different MJ and allow to have shortcuts when using global commands"""
+        data = GenericCommandParameters(ctx)
+        if data.jdr.group_exists(name):
+            await ctx.message.channel.send(data.lang["jdrgrp_existing"].format(name))
+        else:
+            data.jdr.add_group(name)
+            await ctx.message.channel.send(data.lang["jdrgrp_create"].format(name))
+            self.logger.log(logging.DEBUG+1,"JDR group %s created in channel %d in server %d",name,ctx.message.channel.id,ctx.message.guild.id)

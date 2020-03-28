@@ -265,3 +265,11 @@ fight_round=Battle fight round order
 max_karma_reach={} has reached 10 karma points
 min_karma_reach={} has reached -10 karma points
 nojoke=No joke found for selected language
+#RP Group update v2.4
+jdrgrplist_title=Group list
+jdrgrplist=List of groups in your RPG
+jdrgrp_joinable=Group Joinable
+jdrgrp_notjoinable=Group Not Joinable
+jdrgrplist_info=Group's GM : {}\n{}
+jdrgrp_existing=The group {} already exists
+jdrgrp_create=The group {} has been created successfuly

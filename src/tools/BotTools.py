@@ -476,6 +476,25 @@ class DBJDR:
     def get_group(self, name):
         return DBJDRGroup(name, self.server, self.channel)
 
+    def get_all_groupkeys(self):
+        db = Database()
+        cur = db.execute("SELECT grkey WHERE id_server = %(idsrv)s AND id_channel = %(idchan)s;", idsrv=self.server, idchan=self.channel)
+        if cur is None:
+            db.close(True)
+            raise DatabaseException("unable to fetch all groups keys")
+        ls = []
+        for i in cur:
+            ls.append(i[0])
+        db.close()
+        return ls
+
+    def get_all_groups(self):
+        keys = self.get_all_groupkeys()
+        ls = []
+        for i in keys:
+            ls.append(self.get_group(i))
+        return ls
+
     def add_group(self, name):
         db = Database()
         db.call("add_group", dbkey=name, idserv=self.server, idchan=self.channel)

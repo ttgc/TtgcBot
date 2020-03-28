@@ -265,3 +265,11 @@ fight_round=Ordre du tour de combat
 max_karma_reach={} vient d'atteindre les 10 de karma
 min_karma_reach={} vient d'atteindre les -10 de karma
 nojoke=Aucune blague trouvée dans la langue choisie
+#RP Group update v2.4
+jdrgrplist_title=Groupes de personnages
+jdrgrplist=Liste des groupes de personnage de ce JDR
+jdrgrp_joinable=Groupe Ouvert
+jdrgrp_notjoinable=Groupe Fermé
+jdrgrplist_info=MJ du groupe : {}\n{}
+jdrgrp_existing=Le groupe {} existe déjà
+jdrgrp_create=Le groupe {} a été créée avec succès

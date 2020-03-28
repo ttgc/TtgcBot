@@ -273,3 +273,5 @@ jdrgrp_notjoinable=Group Not Joinable
 jdrgrplist_info=Group's GM : {}\n{}
 jdrgrp_existing=The group {} already exists
 jdrgrp_create=The group {} has been created successfuly
+jdrgrp_confirm=Are you sure you want to delete the group {} ? This cannot be undone.\nType `confirm` to delete the group
+jdrgrp_delete=The group {} has been deleted

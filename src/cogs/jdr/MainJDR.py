@@ -272,8 +272,8 @@ class MainJDR(commands.Cog, name="JDR"):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
-    @commands.cooldown(1,5,commands.BucketType.channel)
-    @jdr_group.command(name="create")
+    @commands.cooldown(3,5,commands.BucketType.channel)
+    @jdr_group.command(name="create", aliases=["add","+"])
     async def jdr_group_create(self,ctx,name):
         """**GM/MJ only**
         Create a new group of characters. Groups can have a different MJ and allow to have shortcuts when using global commands"""
@@ -284,3 +284,21 @@ class MainJDR(commands.Cog, name="JDR"):
             data.jdr.add_group(name)
             await ctx.message.channel.send(data.lang["jdrgrp_create"].format(name))
             self.logger.log(logging.DEBUG+1,"JDR group %s created in channel %d in server %d",name,ctx.message.channel.id,ctx.message.guild.id)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(1,5,commands.BucketType.channel)
+    @jdr_group.command(name="delete", aliases=["del","-"])
+    async def jdr_group_delete(self,ctx,group: JDRGroupConverter):
+        """**GM/MJ only**
+        Delete an existing group of characters."""
+        data = GenericCommandParameters(ctx)
+        await ctx.message.channel.send(data.lang["jdrgrp_confirm"].format(group.name))
+        chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
+        try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+        except asyncio.TimeoutError: answer = None
+        if answer is None:
+            await ctx.message.channel.send(data.lang["timeout"])
+        else:
+            data.jdr.get_group(name).delete()
+            await ctx.message.channel.send(data.lang["jdrgrp_delete"].format(group.name))
+            self.logger.log(logging.DEBUG+1,"JDR group %s deleted in channel %d in server %d",group.name,ctx.message.channel.id,ctx.message.guild.id)

@@ -273,3 +273,5 @@ jdrgrp_notjoinable=Groupe Fermé
 jdrgrplist_info=MJ du groupe : {}\n{}
 jdrgrp_existing=Le groupe {} existe déjà
 jdrgrp_create=Le groupe {} a été créée avec succès
+jdrgrp_confirm=Êtes vous sûr de vouloir supprimer le groupe {} ? Ceci ne peut pas être annulé. Tappez `confirm` pour valider
+jdrgrp_delete=Le groupe {} a été supprimé

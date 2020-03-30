@@ -317,7 +317,7 @@ class MainJDR(commands.Cog, name="JDR"):
             self.logger.log(logging.DEBUG+1,"JDR group %s disbanded in channel %d in server %d",group.name,ctx.message.channel.id,ctx.message.guild.id)
 
     @commands.check(check_chanmj)
-    @commands.cooldown(1,5,commands.BucketType.user)
+    @commands.cooldown(1,5,commands.BucketType.channel)
     @jdr_group.command(name="ownership", aliases=["owner"])
     async def jdr_group_ownership(self, ctx, group: JDRGroupConverter, *, owner: discord.Member = None):
         """**GM/MJ only**
@@ -330,7 +330,7 @@ class MainJDR(commands.Cog, name="JDR"):
         self.logger.log(logging.DEBUG+1,"JDR group %s transfer ownership to %s in channel %d in server %d",group.name,str(owner.id) if owner is not None else "None",ctx.message.channel.id,ctx.message.guild.id)
 
     @commands.check(check_chanmj_or_grpmj)
-    @commands.cooldown(1,5,commands.BucketType.user)
+    @commands.cooldown(1,5,commands.BucketType.channel)
     @jdr_group.command(name="joinable")
     async def jdr_group_joinable(self, ctx, group: JDRGroupConverter, isjoinable):
         """**GM/MJ or Group owner only**
@@ -340,3 +340,27 @@ class MainJDR(commands.Cog, name="JDR"):
             group.edit(joinable=isjoinable)
             await ctx.message.channel.send(data.lang["jdrgrp_joinable"].format(group.name, data.lang["jdrgrp_joinable"].lower() if isjoinable else data.lang["jdrgrp_notjoinable"].lower()))
             self.logger.log(logging.DEBUG+1,"JDR group %s set isjoinable to %s in channel %d in server %d",group.name,isjoinable,ctx.message.channel.id,ctx.message.guild.id)
+
+    @commands.check(check_chanmj_or_grpmj)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @jdr_group.command(name="append")
+    async def jdr_group_append(self, ctx, group: JDRGroupConverter, characters: commands.Greedy[CharacterConverter]):
+        """**GM/MJ or Group owner only**
+        Append characters to a given group"""
+        data = GenericCommandParameters(ctx)
+        if RuntimeChecks.check_mjright_on_group(group):
+            for i in characters:
+                group.join(i.key)
+            await ctx.message.channel.send(data.lang["jdrgrp_append"].format(group.name))
+            self.logger.log(logging.DEBUG+1,"JDR group %s append characters in channel %d in server %d", group.name, ctx.message.channel.id, ctx.message.guild.id)
+
+    @commands.check(check_haschar)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @jdr_group.command(name="join")
+    async def jdr_group_join(self, ctx, group: JDRGroupConverter):
+        """**GM/MJ or Group owner only**
+        Join the given group"""
+        data = GenericCommandParameters(ctx)
+        if not group.is_member(data.char.key): group.join(data.char.key)
+        await ctx.message.channel.send(data.lang["jdrgrp_join"].format(group.name))
+        self.logger.log(logging.DEBUG+1,"JDR group %s joined by %s in channel %d in server %d", group.name, data.char.key, ctx.message.channel.id, ctx.message.guild.id)

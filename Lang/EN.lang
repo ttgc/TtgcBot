@@ -277,3 +277,5 @@ jdrgrp_confirm=Are you sure you want to delete the group {} ? This cannot be und
 jdrgrp_delete=The group {} has been deleted
 jdrgrp_owner=The group {} is now owned by {}
 jdrgrp_joinable=The group {} is now a {}
+jdrgrp_append=The characters have been successfuly added to the group {}
+jdrgrp_join=You have joined the group {}

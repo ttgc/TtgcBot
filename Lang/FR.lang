@@ -277,3 +277,5 @@ jdrgrp_confirm=Êtes vous sûr de vouloir supprimer le groupe {} ? Ceci ne peut 
 jdrgrp_delete=Le groupe {} a été supprimé
 jdrgrp_owner=Le groupe {} appartient désormais à {}
 jdrgrp_joinable=Le groupe {} est désormé un {}
+jdrgrp_append=Les personnages ont bien été ajouté au groupe {}
+jdrgrp_join=Vous avez rejoint le groupe {} avec succès !

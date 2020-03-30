@@ -276,3 +276,4 @@ jdrgrp_create=Le groupe {} a été créée avec succès
 jdrgrp_confirm=Êtes vous sûr de vouloir supprimer le groupe {} ? Ceci ne peut pas être annulé. Tappez `confirm` pour valider
 jdrgrp_delete=Le groupe {} a été supprimé
 jdrgrp_owner=Le groupe {} appartient désormais à {}
+jdrgrp_joinable=Le groupe {} est désormé un {}

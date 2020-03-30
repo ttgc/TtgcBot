@@ -328,3 +328,15 @@ class MainJDR(commands.Cog, name="JDR"):
         group.edit(localMJ=owner)
         await ctx.message.channel.send(data.lang["jdrgrp_owner"].format(group.name, owner.mention if owner is not None else ctx.message.author.mention))
         self.logger.log(logging.DEBUG+1,"JDR group %s transfer ownership to %s in channel %d in server %d",group.name,str(owner.id) if owner is not None else "None",ctx.message.channel.id,ctx.message.guild.id)
+
+    @commands.check(check_chanmj_or_grpmj)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @jdr_group.command(name="joinable")
+    async def jdr_group_joinable(self, ctx, group: JDRGroupConverter, isjoinable):
+        """**GM/MJ or Group owner only**
+        Enable or disable the ability for PC/PJ to join or not a group by themselves"""
+        data = GenericCommandParameters(ctx)
+        if RuntimeChecks.check_mjright_on_group(group):
+            group.edit(joinable=isjoinable)
+            await ctx.message.channel.send(data.lang["jdrgrp_joinable"].format(group.name, data.lang["jdrgrp_joinable"].lower() if isjoinable else data.lang["jdrgrp_notjoinable"].lower()))
+            self.logger.log(logging.DEBUG+1,"JDR group %s set isjoinable to %s in channel %d in server %d",group.name,isjoinable,ctx.message.channel.id,ctx.message.guild.id)

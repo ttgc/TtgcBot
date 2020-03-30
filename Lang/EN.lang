@@ -268,11 +268,12 @@ nojoke=No joke found for selected language
 #RP Group update v2.4
 jdrgrplist_title=Group list
 jdrgrplist=List of groups in your RPG
-jdrgrp_joinable=Group Joinable
-jdrgrp_notjoinable=Group Not Joinable
+jdrgrp_joinable=Joinable Group
+jdrgrp_notjoinable=Not Joinable Group
 jdrgrplist_info=Group's GM : {}\n{}
 jdrgrp_existing=The group {} already exists
 jdrgrp_create=The group {} has been created successfuly
 jdrgrp_confirm=Are you sure you want to delete the group {} ? This cannot be undone.\nType `confirm` to delete the group
 jdrgrp_delete=The group {} has been deleted
 jdrgrp_owner=The group {} is now owned by {}
+jdrgrp_joinable=The group {} is now a {}

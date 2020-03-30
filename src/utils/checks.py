@@ -19,6 +19,7 @@
 
 from src.tools.BotTools import *
 from src.tools.Translator import *
+from discord.ext import commands
 import discord.utils
 
 def is_blacklisted(ID):
@@ -88,3 +89,29 @@ class GenericCommandParameters:
 def check_haschar(ctx):
     data = GenericCommandParameters(ctx)
     return data.char is not None
+
+def check_chanmj_or_grpmj(ctx):
+    if not check_jdrchannel(ctx): return False
+    if check_chanmj(ctx): return True
+    data = GenericCommandParameters(ctx)
+    for i in data.jdr.get_all_groups():
+        if i.localMJ == str(ctx.message.author.id): return True
+    return False
+
+class RuntimeChecks:
+    @staticmethod
+    def check_mjright_on_group(ctx, grp):
+        data = GenericCommandParameters(ctx)
+        return data.jdr.mj == str(ctx.message.author.id) or grp.localMJ == str(ctx.message.author.id)
+
+    @staticmethod
+    def check_exclusive_mjright_on_group(ctx, grp):
+        return grp.localMJ == str(ctx.message.author.id)
+
+    @staticmethod
+    def check_mjright_on_char(ctx, char):
+        data = GenericCommandParameters(ctx)
+        if data.jdr.mj == str(ctx.message.author.id): return True
+        for grp in data.jdr.get_all_groups():
+            if RuntimeChecks.check_mjright_on_group(ctx, grp) and grp.is_member(char.key): return True
+        return False

@@ -315,3 +315,16 @@ class MainJDR(commands.Cog, name="JDR"):
             group.delete()
             await ctx.message.channel.send(data.lang["jdrgrp_delete"].format(group.name))
             self.logger.log(logging.DEBUG+1,"JDR group %s disbanded in channel %d in server %d",group.name,ctx.message.channel.id,ctx.message.guild.id)
+
+    @commands.check(check_chanmj)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @jdr_group.command(name="ownership", aliases=["owner"])
+    async def jdr_group_ownership(self, ctx, group: JDRGroupConverter, *, owner: discord.Member = None):
+        """**GM/MJ only**
+        Set ownership for this group to a different user.
+        If no user is provided, this command reset and give you the ownership.
+        Group's owner can use some GM/MJ commands on the group or on characters belonging to the group, be carefull by giving ownership to someone else."""
+        data = GenericCommandParameters(ctx)
+        group.edit(localMJ=owner)
+        await ctx.message.channel.send(data.lang["jdrgrp_owner"].format(group.name, owner.mention if owner is not None else ctx.message.author.mention))
+        self.logger.log(logging.DEBUG+1,"JDR group %s transfer ownership to %s in channel %d in server %d",group.name,str(owner.id) if owner is not None else "None",ctx.message.channel.id,ctx.message.guild.id)

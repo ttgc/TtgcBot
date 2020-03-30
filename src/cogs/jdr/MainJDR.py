@@ -24,6 +24,7 @@ import logging,asyncio
 import discord
 from src.tools.Translator import *
 from src.tools.parsingdice import *
+from src.utils.converters import *
 import requests
 
 class MainJDR(commands.Cog, name="JDR"):
@@ -272,7 +273,7 @@ class MainJDR(commands.Cog, name="JDR"):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_chanmj)
-    @commands.cooldown(3,5,commands.BucketType.channel)
+    @commands.cooldown(3,5,commands.BucketType.user)
     @jdr_group.command(name="create", aliases=["add","+"])
     async def jdr_group_create(self,ctx,name):
         """**GM/MJ only**
@@ -286,7 +287,7 @@ class MainJDR(commands.Cog, name="JDR"):
             self.logger.log(logging.DEBUG+1,"JDR group %s created in channel %d in server %d",name,ctx.message.channel.id,ctx.message.guild.id)
 
     @commands.check(check_chanmj)
-    @commands.cooldown(1,5,commands.BucketType.channel)
+    @commands.cooldown(1,5,commands.BucketType.user)
     @jdr_group.command(name="delete", aliases=["del","-"])
     async def jdr_group_delete(self,ctx,group: JDRGroupConverter):
         """**GM/MJ only**
@@ -299,6 +300,18 @@ class MainJDR(commands.Cog, name="JDR"):
         if answer is None:
             await ctx.message.channel.send(data.lang["timeout"])
         else:
-            data.jdr.get_group(name).delete()
+            group.delete()
             await ctx.message.channel.send(data.lang["jdrgrp_delete"].format(group.name))
             self.logger.log(logging.DEBUG+1,"JDR group %s deleted in channel %d in server %d",group.name,ctx.message.channel.id,ctx.message.guild.id)
+
+    @commands.check(check_chanmj_or_grpmj)
+    @commands.cooldown(1,5,commands.BucketType.user)
+    @jdr_group.command(name="disband")
+    async def jdr_group_disband(self, ctx, group: JDRGroupConverter):
+        """**Group owner only**
+        Disband an existing group of characters belonging to you."""
+        data = GenericCommandParameters(ctx)
+        if RuntimeChecks.check_exclusive_mjright_on_group(group):
+            group.delete()
+            await ctx.message.channel.send(data.lang["jdrgrp_delete"].format(group.name))
+            self.logger.log(logging.DEBUG+1,"JDR group %s disbanded in channel %d in server %d",group.name,ctx.message.channel.id,ctx.message.guild.id)

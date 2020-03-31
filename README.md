@@ -208,6 +208,30 @@ Unextend a RP/JDR through the precised channel, only source channel will contain
 Unextend the RP/JDR in all the channel where there were extended, only source channel will contain data after using that
 - `/(jdr|rp) list` (Administrator only) <br/>
 Show the list of all RP/JDR existing in your server (extension won't be shown)
+- `/(jdr|rp) group` (GM/MJ only) <br/>
+Show the list of groups existing for your current RP/JDR <br/>
+Aliases : `grp`
+- `/(jdr|rp) (group|grp) create <name>` (GM/MJ only) <br/>
+Create a new group of characters in your RP/JDR. Groups can have a different MJ and allow to have shortcuts when using global commands. <br/>
+Aliases : `add`, `+`
+- `/(jdr|rp) (group|grp) delete <group>` (GM/MJ only) <br/>
+Delete an existing group of characters from your RP/JDR. <br/>
+Aliases : `del`, `-`
+- `/(jdr|rp) (group|grp) disband <group>` (Group owner only) <br/>
+Disband a RP/JDR group you are owning. This is equivalent to delete except this command can only be used gy a group owner and won't ask any confirmation.
+- `/(jdr|rp) (group|grp) ownership <group> [owner]` (GM/MJ only) <br/>
+Give ownership to another member wich is able to use some of GM/MJ commands on this group and its included characters. If no owner is provided, then the ownership is reset to you. <br/>
+Aliases : `owner`
+- `/(jdr|rp) (group|grp) joinable <group> <isjoinable>` (GM/MJ or group owner only) <br/>
+Enable or disable the possibility for any player to join the group by himself.
+- `/(jdr|rp) (group|rp) append <group> <characters[,...]>` (GM/MJ only) <br/>
+Append given character(s) to the given group.
+- `/(jdr|rp) (group|rp) join <group>` (PC/PJ only) <br/>
+Join a RP/JDR group. The group should be joinable.
+- `/(jdr|rp) (group|rp) kick <group> <characters[,...]>` (GM/MJ or group owner only) <br/>
+Kick given character(s) from the given group.
+- `/(jdr|rp) (group|rp) leave <group>` (PC/PJ only) <br/>
+Leave a RP/JDR group.
 
 #### Character commands
 - `/(character|char) create <race> <class> <namekey>` (MJ only and JDR channel only) <br/>

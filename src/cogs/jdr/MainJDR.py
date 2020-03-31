@@ -341,18 +341,17 @@ class MainJDR(commands.Cog, name="JDR"):
             await ctx.message.channel.send(data.lang["jdrgrp_joinable"].format(group.name, data.lang["jdrgrp_joinable"].lower() if isjoinable else data.lang["jdrgrp_notjoinable"].lower()))
             self.logger.log(logging.DEBUG+1,"JDR group %s set isjoinable to %s in channel %d in server %d",group.name,isjoinable,ctx.message.channel.id,ctx.message.guild.id)
 
-    @commands.check(check_chanmj_or_grpmj)
+    @commands.check(check_chanmj)
     @commands.cooldown(1,5,commands.BucketType.user)
     @jdr_group.command(name="append")
     async def jdr_group_append(self, ctx, group: JDRGroupConverter, characters: commands.Greedy[CharacterConverter]):
         """**GM/MJ or Group owner only**
         Append characters to a given group"""
         data = GenericCommandParameters(ctx)
-        if RuntimeChecks.check_mjright_on_group(group):
-            for i in characters:
-                if not group.is_member(i.key): group.join(i.key)
-            await ctx.message.channel.send(data.lang["jdrgrp_append"].format(group.name))
-            self.logger.log(logging.DEBUG+1,"JDR group %s append characters in channel %d in server %d", group.name, ctx.message.channel.id, ctx.message.guild.id)
+        for i in characters:
+            if not group.is_member(i.key): group.join(i.key)
+        await ctx.message.channel.send(data.lang["jdrgrp_append"].format(group.name))
+        self.logger.log(logging.DEBUG+1,"JDR group %s append characters in channel %d in server %d", group.name, ctx.message.channel.id, ctx.message.guild.id)
 
     @commands.check(check_haschar)
     @commands.cooldown(1,5,commands.BucketType.user)
@@ -361,9 +360,12 @@ class MainJDR(commands.Cog, name="JDR"):
         """**PC/PJ only**
         Join the given group"""
         data = GenericCommandParameters(ctx)
-        if not group.is_member(data.char.key): group.join(data.char.key)
-        await ctx.message.channel.send(data.lang["jdrgrp_join"].format(group.name))
-        self.logger.log(logging.DEBUG+1,"JDR group %s joined by %s in channel %d in server %d", group.name, data.char.key, ctx.message.channel.id, ctx.message.guild.id)
+        if group.joinable:
+            if not group.is_member(data.char.key): group.join(data.char.key)
+            await ctx.message.channel.send(data.lang["jdrgrp_join"].format(group.name))
+            self.logger.log(logging.DEBUG+1,"JDR group %s joined by %s in channel %d in server %d", group.name, data.char.key, ctx.message.channel.id, ctx.message.guild.id)
+        else:
+            await ctx.message.channel.send(data.lang["jdrgrp_join_notjoinable"].format(group.name))
 
     @commands.check(check_chanmj_or_grpmj)
     @commands.cooldown(1,5,commands.BucketType.user)

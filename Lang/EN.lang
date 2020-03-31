@@ -281,3 +281,4 @@ jdrgrp_append=The characters have been successfuly added to the group {}
 jdrgrp_join=You have joined the group {}
 jdrgrp_kick=The characters have been kicked away from group {}
 jdrgrp_leave=You have left the group {}
+jdrgrp_join_notjoinable=The group {} is not joinable. You can't join it.

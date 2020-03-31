@@ -281,3 +281,4 @@ jdrgrp_append=Les personnages ont bien été ajouté au groupe {}
 jdrgrp_join=Vous avez rejoint le groupe {} avec succès !
 jdrgrp_kick=Les personnages ont bien été retirés du groupe {}
 jdrgrp_leave=Vous avez bien quitté le groupe {}
+jdrgrp_join_notjoinable=Le groupe {} n'est pas un group ouvert. Vous ne pouvez donc pas le rejoindre

@@ -279,3 +279,5 @@ jdrgrp_owner=Le groupe {} appartient désormais à {}
 jdrgrp_joinable=Le groupe {} est désormé un {}
 jdrgrp_append=Les personnages ont bien été ajouté au groupe {}
 jdrgrp_join=Vous avez rejoint le groupe {} avec succès !
+jdrgrp_kick=Les personnages ont bien été retirés du groupe {}
+jdrgrp_leave=Vous avez bien quitté le groupe {}

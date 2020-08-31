@@ -354,8 +354,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.message.channel.send(embed=embd)
 
     async def _charinfo(self,ctx,data,char):
-        if char.mod == 0: modd = data.lang["offensive"]
-        else: modd = data.lang["defensive"]
+        modd = Character.gm_map_inttostr[char.mod]
         affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None else ""
         embd = discord.Embed(title=char.name,description="{} {}{}".format(char.race,char.classe,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")

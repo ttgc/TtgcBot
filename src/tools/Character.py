@@ -29,6 +29,9 @@ from src.tools.CharacterUtils import *
 class Character:
     """Character class"""
     lvlcolor = ["00FF00","FFFF00","FF00FF","FF0000"]
+    gm_map_chartoint = {'O': 0, 'D': 1, 'I': 2, 'S': 3}
+    gm_map_inttochar = ['O', 'D', 'I', 'S']
+    gm_map_inttostr = ['offensive', 'defensive', 'illumination', 'sepulchral']
 
     def __init__(self,**kwargs):
         self.key = kwargs.get("charkey","unknown")
@@ -158,7 +161,7 @@ class Character:
         db.close()
         self.lp -= 1
         self.karma = 10
-        self.mod = 1
+        self.mod = 2
 
     def usedp(self):
         db = Database()
@@ -166,7 +169,13 @@ class Character:
         db.close()
         self.dp -= 1
         self.karma = -10
-        self.mod = 0
+        self.mod = 3
+
+    def reset_lpdp(self):
+        db = Database()
+        db.call("end_lpdp_gamemod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
+        db.close()
+        self.mod = self.default_mod
 
     def pet_add(self,key):
         if key in self.pet: return False

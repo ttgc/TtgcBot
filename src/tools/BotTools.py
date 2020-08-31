@@ -378,14 +378,8 @@ class DBJDR:
         rawchar = cur.fetchone()
         db.close()
         stat = [rawchar[19],rawchar[24],rawchar[22],rawchar[20],rawchar[21],rawchar[23],rawchar[25]]
-        if rawchar[28].upper() == "O":
-            gm = 0
-        else:
-            gm = 1
-        if rawchar[29].upper() == "O":
-            gmdefault = 0
-        else:
-            gmdefault = 1
+        gm = ch.Character.gm_map_chartoint[rawchar[28].upper()]
+        gmdefault = ch.Character.gm_map_chartoint[rawchar[29].upper()]
         inv = chutil.Inventory()
         inv.loadfromdb(rawchar[30])
         pets = {}
@@ -393,14 +387,8 @@ class DBJDR:
         cur = db.call("get_pets",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)
         if cur is not None:
             for i in cur:
-                if i[24].upper() == "O":
-                    gmpet = 0
-                else:
-                    gmpet = 1
-                if i[25].upper() == "O":
-                    gmpetdefault = 0
-                else:
-                    gmpetdefault = 1
+                gmpet = ch.Character.gm_map_chartoint[i[24].upper()]
+                gmpetdefault = ch.Character.gm_map_chartoint[i[25].upper()]
                 pets[i[0]] = ch.Pet(petkey=i[0],charkey=rawchar[0],name=i[1],espece=i[2],
                                     PVm=i[5],PMm=i[7],force=i[8],esprit=i[9],
                                     charisme=i[10],agilite=i[11],karma=i[12],

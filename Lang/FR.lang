@@ -265,3 +265,6 @@ fight_round=Ordre du tour de combat
 max_karma_reach={} vient d'atteindre les 10 de karma
 min_karma_reach={} vient d'atteindre les -10 de karma
 nojoke=Aucune blague trouvée dans la langue choisie
+#Orianis update (Gamerule v5) v2.4
+illumination=illumination
+sepulchral=sépulcrale

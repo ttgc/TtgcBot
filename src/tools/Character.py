@@ -175,7 +175,7 @@ class Character:
         db = Database()
         db.call("end_lpdp_gamemod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
-        self.mod = self.default_mod
+        if Character.gm_map_inttochar[self.mod] in ['I', 'S']: self.mod = self.default_mod
 
     def pet_add(self,key):
         if key in self.pet: return False

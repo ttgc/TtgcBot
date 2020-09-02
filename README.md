@@ -259,6 +259,9 @@ Add or substract karma points to the current karma of the character <br/>
 Aliases : `addkarma`, `getkarma`
 - `/(character|char) reset <charkey>` (MJ only and JDR channel only) <br/>
 Restore fully Health and Mana points, set the karma to its default value and set the mod to its default value for a character
+- `/(character|char) clear <charkey>` (MJ only and JDR channel only) <br/>
+Clear current gamemod when currently using light or dark point. This will restore default gamemod and won't reset anything else. <br/>
+Alias : `clr`
 - `/(character|char) pay <amount>` (PJ only) <br/>
 Pay the amount given
 - `/(character|char) earnmoney <charkey> <amount>` (MJ only and JDR channel only) <br/>

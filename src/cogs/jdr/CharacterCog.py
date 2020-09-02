@@ -311,6 +311,19 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/charreset (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
 
+    @commands.check(check_chanmj)
+    @character.command(name="clear", aliases=['clr'])
+    async def character_clear(self,ctx,char: CharacterConverter):
+        """**GM/MJ only
+        Clear current gamemod when currently using light or dark point. This will restore default gamemod and won't reset anything else."""
+        data = GenericCommandParameters(ctx)
+        if Character.gm_map_inttochar[char.mod] in ['I', 'S']:
+            char.reset_lpdp()
+            self.logger.log(logging.DEBUG+1,"/charclear (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
+            await ctx.message.channel.send(data.lang["clearchar"].format(char.name))
+        else:
+            await ctx.message.channel.send(data.lang["clearchar_notpossible"].format(char.name))
+
     async def _pay(self,ctx,data,char,val):
         val = abs(val)
         if char.money-val < 0:

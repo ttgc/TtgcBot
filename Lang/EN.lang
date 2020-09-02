@@ -268,3 +268,5 @@ nojoke=No joke found for selected language
 #Orianis update (Gamerule v5) v2.4
 illumination=illumination
 sepulchral=sepulchral
+clearchar=Current gamemod of {} has been cleared to its default state successfuly
+clearchar_notpossible=The character {} has neither used LP nor DP. Clear cannot be performed

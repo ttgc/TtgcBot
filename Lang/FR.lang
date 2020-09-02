@@ -268,3 +268,5 @@ nojoke=Aucune blague trouvée dans la langue choisie
 #Orianis update (Gamerule v5) v2.4
 illumination=illumination
 sepulchral=sépulcrale
+clearchar=La posture de combat de {} a été réinitialisé à sa valeur par défaut avec succès
+clearchar_notpossible=Le personnage {} n'a fait usage d'aucun LP ou DP. Impossible de poursuivre l'opération

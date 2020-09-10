@@ -182,7 +182,7 @@ playlocal_notfound=fichier introuvable
 invite=Invite TtgcBot sur ton serveur !
 invite_srv=TtgcBot est actuellement sur :
 invite_author=TtgcBot version {} développé par Ttgc
-ping=ping actuel : `{} ms`
+ping=:ping_pong: pong ! :ping_pong:\nping actuel : `{} ms`
 error=Votre commande à provoqué l'exception suivante :\n```python\n{}\n```
 setlang=Langue mise à jour vers {}
 #Pet update v1.2

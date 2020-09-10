@@ -182,7 +182,7 @@ playlocal_notfound=file not found
 invite=Invite TtgcBot to your server !
 invite_srv=TtgcBot is currently on :
 invite_author=TtgcBot version {} developed by Ttgc
-ping=ping value is currently : `{} ms`
+ping=:ping_pong: pong ! :ping_pong:\nping value is currently : `{} ms`
 error=Your command throw the following error :\n```python\n{}\n```
 setlang=Language updated to {}
 #Pet update v1.2

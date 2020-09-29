@@ -89,7 +89,7 @@ def get_prefix(bot,message):
 
 # Initialize client
 global client
-client = discord.ext.commands.Bot(get_prefix,case_insensitive=True,activity=statut,help_command=Help())
+client = discord.ext.commands.Bot(get_prefix, case_insensitive=True, activity=statut, help_command=Help(), intents=discord.Intents.all())
 
 # Global checks
 @client.check

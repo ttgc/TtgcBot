@@ -141,6 +141,41 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/charroll (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._charroll(ctx,data,data.char,stat,operator,expression)
 
+    @commands.check(check_haschar)
+    @character.group(name="pilot", aliases=["p", "piloting", "pilotage"], invoke_without_command=False)
+    async def character_pilot(self, ctx): pass
+
+    async def _charpilot(self, ctx, rolltype, data, dice, chars, operator, expression):
+        for i in chars:
+            if i.dead:
+                await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
+                return
+        parser = ParsePilotRoll(data.lang, chars, rolltype, dice, operator, expression)
+        msg = parser.resolv()
+        await ctx.message.channel.send(msg)
+
+    @character_pilot.command(name="astral", aliases=["interplanetaire", "a"])
+    async def character_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+        """**PC/PJ only**
+        Roll astral piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
+        According the rules, the result will also tell you if the action is a success or not.
+        Finally bonus and malus can also be dices expression (see help of roll for more information)"""
+        data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charpilot astral (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        allchars = [data.char] + chars
+        await self._charpilot(ctx, PiloteRollType.ASTRAL, data, dice, allchars, operator, expression)
+
+    @character_pilot.command(name="planet", aliases=["planetaire", "p"])
+    async def character_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+        """**PC/PJ only**
+        Roll planet piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
+        According the rules, the result will also tell you if the action is a success or not.
+        Finally bonus and malus can also be dices expression (see help of roll for more information)"""
+        data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charpilot planet (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        allchars = [data.char] + chars
+        await self._charpilot(ctx, PiloteRollType.PLANET, data, dice, allchars, operator, expression)
+
     @commands.check(check_chanmj)
     @character.command(name="set")
     async def character_set(self,ctx,key,char: CharacterConverter,*,value):

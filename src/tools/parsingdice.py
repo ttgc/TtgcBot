@@ -19,9 +19,35 @@
 
 from src.utils.DatabaseManager import *
 from random import *
+from enum import Enum, unique
 import src.tools.Character as char
 import src.tools.CharacterUtils as chutil
 import discord.ext import commands
+
+@unique
+class PiloteRollType(Enum):
+    ASTRAL = "astral"
+    PLANET = "planet"
+
+    def translate(lang):
+        return lang[self.value]
+
+    def get_character_value(char):
+        if self.name == PiloteRollType.ASTRAL:
+            return char.pilot_a
+        elif self.name == PiloteRollType.PLANET:
+            return char.pilot_p
+        return
+
+@unique
+class DiceType(Enum):
+    D4 = 4
+    D6 = 6
+    D8 = 8
+    D10 = 10
+    D12 = 12
+    D20 = 20
+    D100 = 100
 
 class ParseRoll:
     def __init__(self,expr):
@@ -130,14 +156,6 @@ class ParseCharacterRoll:
             self.statval = self.char.intuition
             self.strstat = self.lang["instinct" if self.stat == "instinct" else "intuition"]
             return self._resolv_intuition()
-        if self.stat in ["astral","pilotage astral","pilotage interplanetaire","astral piloting","pa"]:
-            self.statval = self.char.astral_pilot
-            self.strstat = self.lang["pilot_a"]
-            return self._resolv_pilot(self)
-        if self.stat in ["planet","pilotage planetaire","planet piloting","pp"]:
-            self.statval = self.char.planet_pilot
-            self.strstat = self.lang["pilot_p"]
-            return self._resolv_pilot(self)
         # if self.stat in ["opportunite","op","opportunity"]:
         #     return self._resolv_opportunity()
         raise discord.ext.BadArgument("Invalid stat {} in parsing roll".format(self.stat))
@@ -156,18 +174,6 @@ class ParseCharacterRoll:
         self.result = randint(1,6)
         self.msg = self.lang["result_test"].format(self.strstat,self.result,self.statval)
         self._check_karma()
-        return self.msg
-
-    def _resolv_pilot(self):
-        if self.statval < 0:
-            raise discord.ext.BadArgument("Invalid stat {} in parsing roll, stat value is negative".format(self.strstat))
-        if self.expr is None:
-            raise discord.ext.MissingRequiredArgument("Expression is required for piloting rolls")
-        maximalValue = int(self.expr.resolv()[0])
-        if maximalValue not in [4, 6, 8, 10, 12, 20, 100]:
-            raise discord.ext.BadArgument("Invalid value {} for expression in parsing piloting roll".format(maximalValue))
-        self.result = randint(1, maximalValue)
-        self.msg = self.lang["result_test"].format(self.strstat,self.result,self.statval)
         return self.msg
 
     # def _resolv_opportunity(self):
@@ -303,3 +309,28 @@ class ParsePetRoll(ParseCharacterRoll):
         db = Database()
         db.call("pethasroll",dbkey=self.char.key,charact=self.char.charkey,idserv=self.char.jdr.server,idchan=self.char.jdr.channel,valmax=self.statval,val=self.result)
         db.close()
+
+class ParsePilotRoll:
+    def __init__(self, lang, chars, ptype, dice, operator="+", expression=None):
+        self.lang = lang
+        self.chars = chars
+        self.ptype = ptype
+        self.dice = dice
+        self.op = operator
+        self.expr = None if expression is None else ParseRoll(expression)
+
+        self.msg = ""
+        self.result = 0
+        self.statval = 0
+        self.strstat = self.ptype.translate(self.lang)
+
+        for i in self.chars:
+            charval = self.ptype.get_character_value(i)
+            if charval < 0:
+                raise discord.ext.BadArgument("Invalid stat {} in parsing pilot roll, stat value is negative for character {}".format(self.ptype.value, self.char.key))
+            self.statval += charval
+
+    def resolv(self):
+        self.result = randint(1, self.dice.value)
+        self.msg = self.lang["result_test"].format(self.strstat,self.result,self.statval)
+        return self.msg

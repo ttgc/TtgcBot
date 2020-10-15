@@ -81,6 +81,29 @@ class MJ(commands.Cog):
         self.logger.log(logging.DEBUG+1,"/mjroll (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._charroll(ctx,data,char,stat,operator,expression)
 
+    @mj.group(name="pilot",aliases=["p", "piloting", "pilotage"],invoke_without_command=False)
+    async def mj_pilot(self,ctx): pass
+
+    @mj_pilot.command(name="astral",aliases=["interplanetaire", "a"])
+    async def mj_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+        """**GM/MJ only**
+        GM version of character pilot astral command"""
+        data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/mjpilot astral (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
+        if len(chars) == 0:
+            raise commands.MissingRequiredArgument(chars)
+        await self.charcog._charpilot(ctx, PiloteRollType.ASTRAL, data, dice, chars, operator, expression)
+
+    @mj_pilot.command(name="planet", aliases=["planetaire", "p"])
+    async def mj_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+        """**GM/MJ only**
+        GM version of character pilot planet command"""
+        data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/mjpilot planet (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
+        if len(chars) == 0:
+            raise commands.MissingRequiredArgument(chars)
+        await self.charcog._charpilot(ctx, PiloteRollType.PLANET, data, dice, chars, operator, expression)
+
     @mj.command(name="transfer")
     async def mj_transfer(self,ctx,newMJ: discord.Member):
         """**GM/MJ only**

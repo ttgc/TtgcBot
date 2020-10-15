@@ -50,7 +50,6 @@ class Character:
         self.stat = kwargs.get("stat",[0,0,0,0,0,0,0])
         self.lp = kwargs.get("lp",0)
         self.dp = kwargs.get("dp",0)
-        #self.regenkarm = [0,kwargs.get("regenkarma",None)]
         self.mod = kwargs.get("mod",0)
         self.default_mod = kwargs.get("default_mod",0)
         self.default_karma = kwargs.get("default_karma",0)
@@ -70,7 +69,10 @@ class Character:
         self.precision = kwargs.get("prec",50)
         self.luck = kwargs.get("luck",50)
         self.affiliated_with = kwargs.get("org",None)
-        #mod 0 = offensiv / mod 1 = defensiv
+        self.hybrid_race = retrieveRaceName(kwargs.get("hybrid", None))
+        self.symbiont = retrieveSymbiontName(kwargs.get("symbiont", None))
+        self.planet_pilot = kwargs.get("planet_pilot", -1)
+        self.astral_pilot = kwargs.get("astral_pilot", -1)
 
     def __str__(self):
         return self.name

@@ -165,6 +165,28 @@ def retrieveRaceID(rcname):
     db.close()
     return row
 
+def retrieveRaceName(rcid):
+    if rcid is None: return None
+    db = Database()
+    cur = db.execute("SELECT nom FROM race WHERE id_race = %(rc)s",rc=rcid)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Race Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row
+
+def retrieveSymbiontName(sbid):
+    if sbid is None: return None
+    db = Database()
+    cur = db.execute("SELECT nom FROM symbiont WHERE id_symbiont = %(sb)s",sb=sbid)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Race Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row
+
 def retrieveOrganization(orgid):
     db = Database()
     cur = db.execute("SELECT nom FROM organizations WHERE id_org = %(id)s",id=orgid)

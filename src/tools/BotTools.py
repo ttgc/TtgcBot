@@ -413,7 +413,9 @@ class DBJDR:
                             linked=rawchar[31],pet=pets,skills=skls,dead=rawchar[32],
                             classe=rawchar[33],selected=rawchar[34],xp=rawchar[35],
                             prec=rawchar[36],luck=rawchar[37],
-                            org=chutil.retrieveOrganization(rawchar[38]))
+                            org=chutil.retrieveOrganization(rawchar[38]),
+                            hybrid=rawchar[39], symbiont=rawchar[40],
+                            planet_pilot=rawchar[41], astral_pilot=rawchar[42])
         char.bind(self)
         return char
 

@@ -369,7 +369,9 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def _charinfo(self,ctx,data,char):
         modd = data.lang[Character.gm_map_inttostr[char.mod]]
         affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None else ""
-        embd = discord.Embed(title=char.name,description="{} {}{}".format(char.race,char.classe,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        fullrace = "{} / {}".format(char.race, char.hybrid) if char.hybrid is not None else char.race
+        symbiont = "\n{} : ".format(data.lang["symbiont"].capitalize(), char.symbiont) if char.symbiont is not None else ""
+        embd = discord.Embed(title=char.name,description="{} {}{}{}".format(fullrace,char.classe,symbiont,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -380,19 +382,23 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
         if not char.dead: embd.add_field(name=data.lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
         embd.add_field(name=data.lang["lvl"].capitalize()+" :",value="{} ({} XP)".format(char.lvl, char.xp),inline=True)
-        if not char.dead: embd.add_field(name=data.lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
         if not char.dead: embd.add_field(name=data.lang["force"].capitalize()+" :",value=str(char.force),inline=True)
         if not char.dead: embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
         if not char.dead: embd.add_field(name=data.lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
         if not char.dead: embd.add_field(name=data.lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
         if not char.dead: embd.add_field(name=data.lang["precision"].capitalize()+" :",value=str(char.precision),inline=True)
         if not char.dead: embd.add_field(name=data.lang["chance"].capitalize()+" :",value=str(char.luck),inline=True)
+        if not char.dead: embd.add_field(name=data.lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
         if not char.dead: embd.add_field(name=data.lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
         embd.add_field(name=data.lang["money"].capitalize()+" :",value=str(char.money),inline=True)
         if not char.dead: embd.add_field(name=data.lang["lp"]+" :",value=str(char.lp),inline=True)
         if not char.dead: embd.add_field(name=data.lang["dp"]+" :",value=str(char.dp),inline=True)
         if not char.dead: embd.add_field(name=data.lang["mod"].capitalize()+" :",value=modd,inline=True)
         embd.add_field(name=data.lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
+        if not char.dead and char.astral_pilot >= 0:
+            embd.add_field(name=data.lang["pilot_a"].capitalize()+" :",value=str(char.astral_pilot),inline=True)
+        if not char.dead and char.planet_pilot >= 0:
+            embd.add_field(name=data.lang["pilot_p"].capitalize()+" :",value=str(char.planet_pilot),inline=True)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_haschar)

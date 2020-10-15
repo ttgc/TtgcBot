@@ -21,6 +21,7 @@ from src.utils.DatabaseManager import *
 from random import *
 import src.tools.Character as char
 import src.tools.CharacterUtils as chutil
+import discord.ext import commands
 
 class ParseRoll:
     def __init__(self,expr):
@@ -129,9 +130,17 @@ class ParseCharacterRoll:
             self.statval = self.char.intuition
             self.strstat = self.lang["instinct" if self.stat == "instinct" else "intuition"]
             return self._resolv_intuition()
-        if self.stat in ["opportunite","op","opportunity"]:
-            return self._resolv_opportunity()
-        raise AttributeError("Invalid stat {} in parsing roll".format(self.stat))
+        if self.stat in ["astral","pilotage astral","pilotage interplanetaire","astral piloting","pa"]:
+            self.statval = self.char.astral_pilot
+            self.strstat = self.lang["pilot_a"]
+            return self._resolv_pilot(self)
+        if self.stat in ["planet","pilotage planetaire","planet piloting","pp"]:
+            self.statval = self.char.planet_pilot
+            self.strstat = self.lang["pilot_p"]
+            return self._resolv_pilot(self)
+        # if self.stat in ["opportunite","op","opportunity"]:
+        #     return self._resolv_opportunity()
+        raise discord.ext.BadArgument("Invalid stat {} in parsing roll".format(self.stat))
 
     def _resolv_force(self):
         self._roll()
@@ -149,38 +158,50 @@ class ParseCharacterRoll:
         self._check_karma()
         return self.msg
 
-    def _resolv_opportunity(self):
-        self.result = (randint(1,6), randint(1,6))
-        resultc, resultm = self.result
-        msgc = self.lang["result_test_nomax"].format(self.lang["advantage"],str(resultc))+"\n"
-        if resultc == 1: msgc += self.lang["chance_1"]
-        elif resultc == 2: msgc += self.lang["chance_2"]
-        elif resultc == 3: msgc += self.lang["chance_3"]
-        elif resultc == 4: msgc += self.lang["chance_4"]
-        elif resultc == 5: msgc += self.lang["chance_5"]
-        elif resultc == 6: msgc += self.lang["chance_6"]
-        msgm = self.lang["result_test_nomax"].format(self.lang["disadvantage"],str(resultm))
-        if resultm == 1: msgm += self.lang["malchance_1"]
-        elif resultm == 2: msgm += self.lang["malchance_2"]
-        elif resultm == 3: msgm += self.lang["malchance_3"]
-        elif resultm == 4: msgm += self.lang["malchance_4"]
-        elif resultm == 5: msgm += self.lang["malchance_5"]
-        elif resultm == 6: msgm += self.lang["malchance_6"]
-        self.msg = "\n".join([msgc, msgm])
-        if resultc < resultm: self.karma = 1
-        else: self.karma = -1
-        self._check_skills()
-        self._check_karma()
-        self._apply_karma()
-        if resultc == resultm:
-            if resultc == 1: msgsuper = self.lang["superchance_1"]
-            elif resultc == 2: msgsuper = self.lang["superchance_2"]
-            elif resultc == 3: msgsuper = self.lang["superchance_3"]
-            elif resultc == 4: msgsuper = self.lang["superchance_4"]
-            elif resultc == 5: msgsuper = self.lang["superchance_5"]
-            elif resultc == 6: msgsuper = self.lang["superchance_6"]
-            self.msg = "\n".join([msgc, msgm, self.lang["superchance"], msgsuper])
+    def _resolv_pilot(self):
+        if self.statval < 0:
+            raise discord.ext.BadArgument("Invalid stat {} in parsing roll, stat value is negative".format(self.strstat))
+        if self.expr is None:
+            raise discord.ext.MissingRequiredArgument("Expression is required for piloting rolls")
+        maximalValue = int(self.expr.resolv()[0])
+        if maximalValue not in [4, 6, 8, 10, 12, 20, 100]:
+            raise discord.ext.BadArgument("Invalid value {} for expression in parsing piloting roll".format(maximalValue))
+        self.result = randint(1, maximalValue)
+        self.msg = self.lang["result_test"].format(self.strstat,self.result,self.statval)
         return self.msg
+
+    # def _resolv_opportunity(self):
+    #     self.result = (randint(1,6), randint(1,6))
+    #     resultc, resultm = self.result
+    #     msgc = self.lang["result_test_nomax"].format(self.lang["advantage"],str(resultc))+"\n"
+    #     if resultc == 1: msgc += self.lang["chance_1"]
+    #     elif resultc == 2: msgc += self.lang["chance_2"]
+    #     elif resultc == 3: msgc += self.lang["chance_3"]
+    #     elif resultc == 4: msgc += self.lang["chance_4"]
+    #     elif resultc == 5: msgc += self.lang["chance_5"]
+    #     elif resultc == 6: msgc += self.lang["chance_6"]
+    #     msgm = self.lang["result_test_nomax"].format(self.lang["disadvantage"],str(resultm))
+    #     if resultm == 1: msgm += self.lang["malchance_1"]
+    #     elif resultm == 2: msgm += self.lang["malchance_2"]
+    #     elif resultm == 3: msgm += self.lang["malchance_3"]
+    #     elif resultm == 4: msgm += self.lang["malchance_4"]
+    #     elif resultm == 5: msgm += self.lang["malchance_5"]
+    #     elif resultm == 6: msgm += self.lang["malchance_6"]
+    #     self.msg = "\n".join([msgc, msgm])
+    #     if resultc < resultm: self.karma = 1
+    #     else: self.karma = -1
+    #     self._check_skills()
+    #     self._check_karma()
+    #     self._apply_karma()
+    #     if resultc == resultm:
+    #         if resultc == 1: msgsuper = self.lang["superchance_1"]
+    #         elif resultc == 2: msgsuper = self.lang["superchance_2"]
+    #         elif resultc == 3: msgsuper = self.lang["superchance_3"]
+    #         elif resultc == 4: msgsuper = self.lang["superchance_4"]
+    #         elif resultc == 5: msgsuper = self.lang["superchance_5"]
+    #         elif resultc == 6: msgsuper = self.lang["superchance_6"]
+    #         self.msg = "\n".join([msgc, msgm, self.lang["superchance"], msgsuper])
+    #     return self.msg
 
     def _roll(self):
         dice = randint(1,100)

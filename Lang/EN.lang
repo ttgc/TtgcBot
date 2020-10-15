@@ -270,3 +270,6 @@ illumination=Illumination
 sepulchral=Sepulchral
 clearchar=Current gamemod of {} has been cleared to its default state successfuly
 clearchar_notpossible=The character {} has neither used LP nor DP. Clear cannot be performed
+symbiont=symbiont
+pilot_a=astral piloting
+pilot_p=planet piloting

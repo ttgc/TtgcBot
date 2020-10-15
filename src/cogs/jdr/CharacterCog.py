@@ -177,6 +177,17 @@ class CharacterCog(commands.Cog, name="Characters"):
         await self._charpilot(ctx, PiloteRollType.PLANET, data, dice, allchars, operator, expression)
 
     @commands.check(check_chanmj)
+    @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])
+    async def character_hybrid(self, ctx, char: CharacterConverter, *, race: RaceConverter):
+        """**GM/MJ only**
+        Set a character as an hybrid, give him a second race and inherit all race's skills.
+        This won't work if the character is already an hybrid"""
+        data = GenericCommandParameters(ctx)
+        char = char.makehybrid(race)
+        self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
+        await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
+
+    @commands.check(check_chanmj)
     @character.command(name="set")
     async def character_set(self,ctx,key,char: CharacterConverter,*,value):
         """**GM/MJ only**

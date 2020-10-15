@@ -221,3 +221,22 @@ BEGIN
 	--END OF UPDATE
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION charhybrid
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	rc Race.id_race%TYPE
+) RETURNS void AS $$
+DECLARE
+	sk RECORD;
+BEGIN
+	UPDATE characterr
+	SET hybrid_race = rc
+	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	FOR sk IN (SELECT id_skill FROM RaceSkills WHERE id_race = rc) LOOP
+		PERFORM assign_skill(dbkey, idserv, idchan, sk.id_skill);
+	END LOOP;
+END;
+$$ LANGUAGE plpgsql;

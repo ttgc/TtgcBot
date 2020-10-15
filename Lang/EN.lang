@@ -273,3 +273,4 @@ clearchar_notpossible=The character {} has neither used LP nor DP. Clear cannot 
 symbiont=symbiont
 pilot_a=astral piloting
 pilot_p=planet piloting
+char_hybrid=Character {} is now an hybrid of {} / {}

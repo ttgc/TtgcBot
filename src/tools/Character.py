@@ -114,6 +114,14 @@ class Character:
         db.close()
         return self.jdr.get_character(self.key)
 
+    def makehybrid(self, race, allowOverride=False):
+        if allowOverride or self.hybrid_race is None:
+            db = Database()
+            db.call("charhybrid", dbkey=self.key, idserv=self.jdr.server, idchan=self.jdr.channel, rc=race)
+            db.close()
+            return self.jdr.get_character(self.key)
+        return self
+
     def setlore(self,lore):
         db = Database()
         db.call("charsetlore",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,lor=lore)

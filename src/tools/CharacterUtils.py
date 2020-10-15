@@ -176,6 +176,16 @@ def retrieveRaceName(rcid):
     db.close()
     return row
 
+def retrieveSymbiontID(sbname):
+    db = Database()
+    cur = db.execute("SELECT id_symbiont FROM symbiont WHERE lower(nom) = %(name)s",name=sbname.lower())
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Symbiont Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row
+
 def retrieveSymbiontName(sbid):
     if sbid is None: return None
     db = Database()

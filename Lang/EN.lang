@@ -274,3 +274,5 @@ symbiont=symbiont
 pilot_a=astral piloting
 pilot_p=planet piloting
 char_hybrid=Character {} is now an hybrid of {} / {}
+char_nosymbiont=Character {} doesn't have symbiont anymore
+char_symbiont=Character {} has now a symbiont of {} type

@@ -122,6 +122,12 @@ class Character:
             return self.jdr.get_character(self.key)
         return self
 
+    def setsymbiont(self, symbiont):
+        db = Database()
+        db.call("charsb", dbkey=self.key, idserv=self.jdr.server, idchan=self.jdr.channel, sb=symbiont)
+        db.close()
+        return self.jdr.get_character(self.key)
+
     def setlore(self,lore):
         db = Database()
         db.call("charsetlore",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,lor=lore)

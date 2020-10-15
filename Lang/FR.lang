@@ -274,3 +274,5 @@ symbiont=symbiote
 pilot_a=pilotage astral
 pilot_p=pilotage planétaire
 char_hybrid=Le personnage {} est désormais un hybride {} / {}
+char_nosymbiont=Le personnage {} ne possède plus aucun symbiote
+char_symbiont=Le personnage {} possède désormais le symbiote {}

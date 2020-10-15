@@ -240,3 +240,31 @@ BEGIN
 	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION charsb
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	sb Symbiont.id_symbiont%TYPE
+) RETURNS void AS $$
+DECLARE
+	prevsb Symbiont.id_symbiont%TYPE;
+	sk RECORD;
+BEGIN
+	SELECT id_symbiont INTO prevsb FROM Characterr
+	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	IF prevsb <> NULL THEN
+		DELETE FROM havingskill
+		WHERE id_skill IN (SELECT id_skill FROM SymbiontSkills WHERE id_symbiont = prevsb);
+	END IF;
+	UPDATE characterr
+	SET id_symbiont = sb
+	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	IF sb <> NULL THEN
+		FOR sk IN (SELECT id_skill FROM SymbiontSkills WHERE id_symbiont = sb) LOOP
+			PERFORM assign_skill(dbkey, idserv, idchan, sk.id_skill);
+		END LOOP;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;

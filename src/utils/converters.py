@@ -35,6 +35,10 @@ class RaceConverter(commands.Converter):
     async def convert(self,ctx,arg):
         return retrieveRaceID(arg.replace("_"," "))
 
+class SymbiontConverter(commands.Converter):
+    async def convert(self,ctx,arg):
+        return retrieveSymbiontID(arg.replace("_"," "))
+
 class SkillConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if arg.isdecimal():

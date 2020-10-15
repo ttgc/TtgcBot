@@ -188,6 +188,19 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
 
     @commands.check(check_chanmj)
+    @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])
+    async def character_symbiont(self, ctx, char: CharacterConverter, *, symbiont: typing.Optional[SymbiontConverter] = None):
+        """**GM/MJ only**
+        Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character."""
+        data = GenericCommandParameters(ctx)
+        char = char.setsymbiont(symbiont)
+        self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
+        if char.symbiont is None:
+            await ctx.message.channel.send(data.lang["char_nosymbiont"].format(char.name))
+        else:
+            await ctx.message.channel.send(data.lang["char_symbiont"].format(char.name, char.symbiont))
+
+    @commands.check(check_chanmj)
     @character.command(name="set")
     async def character_set(self,ctx,key,char: CharacterConverter,*,value):
         """**GM/MJ only**

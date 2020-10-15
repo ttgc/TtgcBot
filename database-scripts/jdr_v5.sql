@@ -153,3 +153,71 @@ BEGIN
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_raceskills
+(
+	racename Race.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	raceid Race.id_race%TYPE;
+BEGIN
+	SELECT id_race INTO raceid FROM Race
+	WHERE (nom = racename);
+	--UPDATE HERE
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, origine, webclass, id_extension FROM Skills
+	INNER JOIN RaceSkills ON (Skills.id_skill = RaceSkills.id_skill)
+	WHERE id_race = raceid;
+	--UPDATE HERE
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_orgskills
+(
+	org Organizations.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	orgid Organizations.id_org%TYPE;
+BEGIN
+	SELECT id_org INTO orgid FROM Organizations
+	WHERE (nom = org);
+	--UPDATE HERE
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, origine, webclass, id_extension FROM Skills
+	INNER JOIN OrgSkills ON (Skills.id_skill = OrgSkills.id_skill)
+	WHERE id_org = orgid;
+	--UPDATE HERE
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_symbiontskills
+(
+	sb Symbiont.nom%TYPE
+) RETURNS SETOF Skills AS $$
+DECLARE
+	sbid Symbiont.id_symbiont%TYPE;
+BEGIN
+	SELECT id_symbiont INTO sbid FROM Symbiont
+	WHERE (nom = sb);
+	RETURN QUERY
+	SELECT Skills.id_skill, nom, description, origine, webclass, id_extension FROM Skills
+	INNER JOIN SymbiontSkills ON (Skills.id_skill = SymbiontSkills.id_skill)
+	WHERE id_symbiont = sbid;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_skill
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE
+) RETURNS SETOF skills AS $$
+BEGIN
+	--UPDATE HERE
+	RETURN QUERY
+	SELECT skills.id_skill,nom,description,origine,webclass,id_extension FROM skills
+	INNER JOIN havingskill ON (skills.id_skill = havingskill.id_skill)
+	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	--END OF UPDATE
+END;
+$$ LANGUAGE plpgsql;

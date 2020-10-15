@@ -141,6 +141,7 @@ class Character:
         self.name = name_
 
     def switchmod(self,default=False):
+        if not default and self.mod > 1: return self
         db = Database()
         db.call("switchmod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,def_=default)
         db.close()

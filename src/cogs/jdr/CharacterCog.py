@@ -552,9 +552,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     async def _switchmod(self,ctx,data,char):
         char = char.switchmod()
-        strmod = data.lang["offensive"]
-        if char.mod == 1:
-            strmod = data.lang["defensive"]
+        strmod = Character.gm_map_inttostr[char.mod]
         await ctx.message.channel.send(data.lang["switchmod"].format(char.name,strmod))
 
     @commands.check(check_haschar)

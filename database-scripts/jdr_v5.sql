@@ -33,13 +33,15 @@ ALTER TABLE public.SymbiontSkills ADD CONSTRAINT FK_skills_id_skill FOREIGN KEY 
 -- Add columns required by Orianis update
 ALTER TABLE public.Skills ADD COLUMN id_extension INT;
 ALTER TABLE public.Organizations ADD COLUMN id_extension INT;
+ALTER TABLE public.Organizations ADD COLUMN hidden BOOLEAN CONSTRAINT organization_hidden_notnull NOT NULL CONSTRAINT organization_hidden_default DEFAULT false;
 ALTER TABLE public.Race ADD COLUMN id_extension INT;
 UPDATE Skills SET id_extension = (SELECT id_extension FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Terae');
-UPDATE Organizations SET id_extension = (SELECT id_extension FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Terae');
+UPDATE Organizations SET id_extension = (SELECT id_extension FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Terae'), hidden = false;
+UPDATE Organizations SET hidden = true WHERE nom = 'Onilord';
 UPDATE Race SET id_extension = (SELECT id_extension FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Terae');
 ALTER TABLE public.Skills ADD CONSTRAINT FK_skills_id_ext FOREIGN KEY (id_extension) REFERENCES public.Extensions(id_extension);
-ALTER TABLE public.Organizations ADD CONSTRAINT FK_skills_id_ext FOREIGN KEY (id_extension) REFERENCES public.Extensions(id_extension);
-ALTER TABLE public.Race ADD CONSTRAINT FK_skills_id_ext FOREIGN KEY (id_extension) REFERENCES public.Extensions(id_extension);
+ALTER TABLE public.Organizations ADD CONSTRAINT FK_organization_id_ext FOREIGN KEY (id_extension) REFERENCES public.Extensions(id_extension);
+ALTER TABLE public.Race ADD CONSTRAINT FK_race_id_ext FOREIGN KEY (id_extension) REFERENCES public.Extensions(id_extension);
 
 
 -- Add race, class, symbionts, organizations, and skills for Orianis

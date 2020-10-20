@@ -207,6 +207,16 @@ def retrieveOrganization(orgid):
     db.close()
     return row[0] if row is not None else None
 
+def isOrganizationHidden(orgname):
+    db = Database()
+    cur = db.execute("SELECT hidden FROM organization WHERE nom = %(org)s", org=orgname)
+    if cur is None:
+        db.close()
+        return False
+    row = cur.fetchone()
+    db.close()
+    return row[0] if row is not None else False
+
 def organizationExists(orgname):
     db = Database()
     cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname)

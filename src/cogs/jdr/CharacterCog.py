@@ -427,7 +427,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     async def _charinfo(self,ctx,data,char):
         modd = data.lang[Character.gm_map_inttostr[char.mod]]
-        affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None else ""
+        affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None and not isOrganizationHidden(char.affiliated_with) else ""
         fullrace = "{} / {}".format(char.race, char.hybrid) if char.hybrid is not None else char.race
         symbiont = "\n{} : ".format(data.lang["symbiont"].capitalize(), char.symbiont) if char.symbiont is not None else ""
         embd = discord.Embed(title=char.name,description="{} {}{}{}".format(fullrace,char.classe,symbiont,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))

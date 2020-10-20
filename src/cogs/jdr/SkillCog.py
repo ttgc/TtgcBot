@@ -43,7 +43,8 @@ class SkillCog(commands.Cog, name="Skills"):
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in data.char.skills:
-            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+            if not organizationExists(i.origine) or not isOrganizationHidden(i.origine):
+                embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
         self.logger.log(logging.DEBUG+1,"skill list requested for character %s in channel %d on server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 

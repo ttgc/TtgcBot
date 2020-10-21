@@ -190,6 +190,9 @@ Aliases : `setgmrole`
 Mute and deafen all the players that are not mentionned by the command. If there is no single mention, the bot will unmute and undeafen all the players. (Spectators and GM/MJ will not be affected by this)
 - `/wiki <topic>` <br/>
 Search on the wiki the given topic, if found a summary will be displayed with the link to the page
+- `/randomfact` <br/>
+Get a random fact about TTGC <br/>
+Aliases : `rf`, `rdmfact`, `randomwiki`, `rw`, `rdmwiki`
 - `/jointhegame` <br/>
 provide an invite link to the official discord of TTGC game (French discord) <br/>
 Aliases : `jointtgc`, `ttgc`

@@ -22,7 +22,7 @@ from random import *
 from enum import Enum, unique
 import src.tools.Character as char
 import src.tools.CharacterUtils as chutil
-import discord.ext import commands
+from discord.ext import commands
 
 @unique
 class PiloteRollType(Enum):

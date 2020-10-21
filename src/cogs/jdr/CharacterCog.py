@@ -155,7 +155,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.message.channel.send(msg)
 
     @character_pilot.command(name="astral", aliases=["interplanetaire", "a"])
-    async def character_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+    async def character_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
         """**PC/PJ only**
         Roll astral piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
         According the rules, the result will also tell you if the action is a success or not.
@@ -166,7 +166,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         await self._charpilot(ctx, PiloteRollType.ASTRAL, data, dice, allchars, operator, expression)
 
     @character_pilot.command(name="planet", aliases=["planetaire", "p"])
-    async def character_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+    async def character_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
         """**PC/PJ only**
         Roll planet piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
         According the rules, the result will also tell you if the action is a success or not.

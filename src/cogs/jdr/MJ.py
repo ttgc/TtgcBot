@@ -85,7 +85,7 @@ class MJ(commands.Cog):
     async def mj_pilot(self,ctx): pass
 
     @mj_pilot.command(name="astral",aliases=["interplanetaire", "a"])
-    async def mj_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+    async def mj_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
         """**GM/MJ only**
         GM version of character pilot astral command"""
         data = GenericCommandParameters(ctx)
@@ -95,7 +95,7 @@ class MJ(commands.Cog):
         await self.charcog._charpilot(ctx, PiloteRollType.ASTRAL, data, dice, chars, operator, expression)
 
     @mj_pilot.command(name="planet", aliases=["planetaire", "p"])
-    async def mj_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], typing.Optional[OperatorConverter] = "+", *, expression=None):
+    async def mj_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
         """**GM/MJ only**
         GM version of character pilot planet command"""
         data = GenericCommandParameters(ctx)

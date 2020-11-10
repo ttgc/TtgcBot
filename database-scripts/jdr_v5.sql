@@ -266,15 +266,15 @@ BEGIN
 	-- OrgSkills
 	RAISE NOTICE 'Inserts in OrgSkills completed';
 	-- SymbiontSkills
-	SELECT id_race INTO ids FROM Symbiont WHERE nom = 'Azort' AND id_extension = orianis;
+	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Azort' AND id_extension = orianis;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Azort' ORDER BY id_skill) LOOP
 		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
 	END LOOP;
-	SELECT id_race INTO ids FROM Symbiont WHERE nom = 'Iridyanis' AND id_extension = orianis;
+	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Iridyanis' AND id_extension = orianis;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Iridyanis' ORDER BY id_skill) LOOP
 		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
 	END LOOP;
-	SELECT id_race INTO ids FROM Symbiont WHERE nom = 'Enairo' AND id_extension = orianis;
+	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Enairo' AND id_extension = orianis;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Enairo' ORDER BY id_skill) LOOP
 		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
 	END LOOP;

@@ -165,27 +165,27 @@ BEGIN
 	('Dos crawle','Obtient un bonus de deplacement de +2 dans l''eau','Idylis','idylis',orianis),
 	('Hydro-regen','Regenere des PV regulierement en etant dans l''eau (10 PV / tour)','Idylis','idylis',orianis),
 	('Hydro-purge','En etant dans l''eau, reduit de moitie la duree de tous les effets nefastes et entravants qui ne sont pas lies a une faiblesse elementaire de l''eau','Idylis','idylis',orianis),
-	('Peau rocheuse','Les degats physiques subits sont reduits de 20 points','Lithys','Lithys',orianis),
-	('Exhibitionniste','Porter des vetements (ou armures) est un deshonneur pour vous','Lithys','Lithys',orianis),
-	('Erosion','Beneficie des forces et faiblesses elementaires liees a la terre','Lithys','Lithys',orianis),
+	('Peau rocheuse','Les degats physiques subits sont reduits de 20 points','Lythis','lythis',orianis),
+	('Exhibitionniste','Porter des vetements (ou armures) est un deshonneur pour vous','Lythis','lythis',orianis),
+	('Erosion','Beneficie des forces et faiblesses elementaires liees a la terre','Lythis','lythis',orianis),
 	('Maboule','Permet de se mettre en boule ou de sortir de cette forme au debut de votre tour. En boule, vous devenez incapable d''agir ou parer','Lythis','lythis',orianis),
-	('Technophobe','Ne peut utiliser aucun outil technologique','Lithys','Lithys',orianis),
-	('Solide comme un roc','Les degats physique subits sont reduits de 50%','Lithys','Lithys',orianis),
-	('Blocage','+10% en parade','Lithys','Lithys',orianis),
-	('Bouboule','En boule, octroie une reduction de 25% supplementaire contre les degats physiques subits','Lithys','Lithys',orianis),
-	('Roule ma poule','En boule, octroie +2 de deplacement','Lithys','Lithys',orianis),
-	('Initiative','Si vous n''avez pas encore agis ce tour-ci, permet d''intervenir pour tenter de parer ou encaisser une attaque contre une cible a proximite. Apres cette intervention, vous agissez immediatement','Lithys','Lithys',orianis),
+	('Technophobe','Ne peut utiliser aucun outil technologique','Lythis','lythis',orianis),
+	('Solide comme un roc','Les degats physique subits sont reduits de 50%','Lythis','lythis',orianis),
+	('Blocage','+10% en parade','Lythis','lythis',orianis),
+	('Bouboule','En boule, octroie une reduction de 25% supplementaire contre les degats physiques subits','Lythis','lythis',orianis),
+	('Roule ma poule','En boule, octroie +2 de deplacement','Lythis','lythis',orianis),
+	('Initiative','Si vous n''avez pas encore agis ce tour-ci, permet d''intervenir pour tenter de parer ou encaisser une attaque contre une cible a proximite. Apres cette intervention, vous agissez immediatement','Lythis','lythis',orianis),
 	('Intelligence artificielle','Les Itys sont incapable de faire appel a l''intuition, en contre-partie leur intelligence est bien plus developpee (esprit)','Itys','Itys',orianis),
-	('Corps metallique','Les robots ne possedent pas de sang et son insensible a la douleur','Itys','Itys',orianis),
-	('Ma foi pas de foi sans foie','Impossible de faire partie d''une religion ou de choisir une affiliation en lien avec celle-ci','Itys','Itys',orianis),
-	('Mental d''acier','Ne possede pas de sante mentale','Itys','Itys',orianis),
-	('Non-organique','Interdit la creation de races transgenique et symbiotique a partir des Itys','Itys','Itys',orianis),
-	('Relax','Les Itys ne ressentent pas le stress','Itys','Itys',orianis),
-	('Interprete','Permet de dechiffrer et de traduire n''importe quel langage alien evolue','Itys','Itys',orianis),
-	('Communication sans fil','Permet de communiquer a la vitesse de la lumiere avec d''autres Itys peu importe la distance','Itys','Itys',orianis),
-	('Pare-feu','Bloque la plupart des intrusions informatiques et des malwares','Itys','Itys',orianis),
-	('Intrusion','+10% pour pirater un systeme informatique ou concevoir un malware','Itys','Itys',orianis),
-	('Auto-reparation','Permet de se reparer automatiquement, octroyant la regeneration naturelle de PV','Itys','Itys',orianis),
+	('Corps metallique','Les robots ne possedent pas de sang et son insensible a la douleur','Itys','itys',orianis),
+	('Ma foi pas de foi sans foie','Impossible de faire partie d''une religion ou de choisir une affiliation en lien avec celle-ci','Itys','itys',orianis),
+	('Mental d''acier','Ne possede pas de sante mentale','Itys','itys',orianis),
+	('Non-organique','Interdit la creation de races transgenique et symbiotique a partir des Itys','Itys','itys',orianis),
+	('Relax','Les Itys ne ressentent pas le stress','Itys','itys',orianis),
+	('Interprete','Permet de dechiffrer et de traduire n''importe quel langage alien evolue','Itys','itys',orianis),
+	('Communication sans fil','Permet de communiquer a la vitesse de la lumiere avec d''autres Itys peu importe la distance','Itys','itys',orianis),
+	('Pare-feu','Bloque la plupart des intrusions informatiques et des malwares','Itys','itys',orianis),
+	('Intrusion','+10% pour pirater un systeme informatique ou concevoir un malware','Itys','itys',orianis),
+	('Auto-reparation','Permet de se reparer automatiquement, octroyant la regeneration naturelle de PV','Itys','itys',orianis),
 	('Phytotherapie','Beneficie des forces et faiblesses elementaires liees aux plantes','Alwenys','alwenys',orianis),
 	('Contre nature','Limite l''utilisation de technologie au strict necessaire','Alwenys','alwenys',orianis),
 	('Xenophobie','-10% pour negocier avec des representants d''autres especes (charisme)','Alwenys','alwenys',orianis),
@@ -233,8 +233,8 @@ BEGIN
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Idylis' ORDER BY id_skill LIMIT 4) LOOP
 		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
 	END LOOP;
-	SELECT id_race INTO idr FROM Race WHERE nom = 'Lithys' AND id_extension = orianis;
-	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Lithys' ORDER BY id_skill LIMIT 5) LOOP
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Lythis' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Lythis' ORDER BY id_skill LIMIT 5) LOOP
 		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
 	END LOOP;
 	SELECT id_race INTO idr FROM Race WHERE nom = 'Itys' AND id_extension = orianis;

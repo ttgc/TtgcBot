@@ -93,7 +93,7 @@ BEGIN
 	RAISE NOTICE 'Inserts in Organizations completed';
 	-- Skills
 	INSERT INTO Skills(nom, description, origine, webclass, id_extension) VALUES
-	('Sniper','Si le personnage passe son tour a viser sans se deplacer, il obtient un bonus de 10% en precision','Nigemono Umahin','ningemono umahin',terae);
+	('Sniper','Si le personnage passe son tour a viser sans se deplacer, il obtient un bonus de 10% en precision','Nigemono Umahin','ningemono umahin',terae),
 	('Mecano','Autorise et octroie +10% en mecanique (force)','General','general',orianis),
 	('Negociateur','+5% en negociation (charisme)','General','general',orianis),
 	('Charmeur','+5% en seduction (charisme)','General','general',orianis),

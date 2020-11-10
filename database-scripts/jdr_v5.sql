@@ -51,6 +51,7 @@ DECLARE
 	terae Extensions.id_extension%TYPE;
 	orianis Extensions.id_extension%TYPE;
 	idr Race.id_race%TYPE;
+	ids Symbiont.id_symbiont%TYPE;
 	sk RECORD;
 BEGIN
 	SELECT id_extension INTO terae FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Terae';
@@ -206,7 +207,19 @@ BEGIN
 	('Vampirisme','Blesser une cible regenere 10% des degats infliges','Vampyris','vampyris',orianis),
 	('Appropriation','Boire le sang d''une cible permet de s''approprier temporairement un de ses talents (non cumulable)','Vampyris','vampyris',orianis),
 	('Chauve-souris','Permetde se transformer en chauve-souris a volonte. En chauve-souris vous obtenez :\n+30% en agilite\nReussite critique ou super-critique uniquement en force','Vampyris','vampyris',orianis),
-	('Poids plume','Augmente le poids max de l''inventaire de 50%','Vampyris','vampyris',orianis);
+	('Poids plume','Augmente le poids max de l''inventaire de 50%','Vampyris','vampyris',orianis),
+	('Regeneration','Le corps de l''hote se regenere de 20 PV / tour en permanence et les blessures se referment plus rapidement','Azort','symbiont azort',orianis),
+	('Increvable','meme a moins de 0 PV, le corps se regenere et l''hote peut continuer a agir, cependant cela impact sa sante mentale','Azort','symbiont azort',orianis),
+	('Force dementielle','chaque reussite critique en force octroie 1 point de force definitif et les super-critiques en octroient 2','Azort','symbiont azort',orianis),
+	('Adaptabilite','L''hote est protege de toutes les variations climatique et d''environnement. Un temps d''adaptation est cependandant necessaire pour s''acclimater a un nouvel environnement','Iridyanis','symbiont iridyanis',orianis),
+	('Defense mutante','Apres avoir subit une attaque, il est possible de reduire de moitie les degats des prochaines attaques similaires. La reduction met 1 tour complet a se mettre en place et rend l''hote deux fois plus vulnerables a tout type d''attaque.','Iridyanis','symbiont iridyanis',orianis),
+	('Boucle adaptative','Apres avoir subit une attaque, les prochaines attaques du meme type sont reduites de 10% (jusqu''a 100%, cumulable). Si un autre type d''attaque est subit entre temps, l''effet est reinitialise','Iridyanis','symbiont iridyanis',orianis),
+	('Butin','Permet d''engranger des PV et PM supplementaires dans des cagnottes speciales qui s''ajoutent aux totaux de PV max et PM max','Enairo','symbiont enairo',orianis),
+	('Gout du sang','En blessant une cible, vous gagnez 1d10 dans la cagnotte ayant la valeur la plus faible (jusqu''a 3 fois par cible). Si vous tuez une cible avec les 3 charges cumulees, vous obtenez 1d20 bonus dans les deux cagnottes','Enairo','symbiont enairo',orianis),
+	('Bonne etoile','En cas de reussite, votre cagnotte la plus faible gagne autant que le chiffre des unites de votre jet (0 = +10 pts)','Enairo','symbiont enairo',orianis),
+	('Mauvaise fortune','En cas d''echec, votre cagnotte la plus elevee perd autant que le chiffre des unites de votre jet (0 = -10 pts)','Enairo','symbiont enairo',orianis),
+	('Defaite ineluctable','Chaque fois que vous encaissez des degats, vous perdez 10% des degats subits dans vos deux cagnottes','Enairo','symbiont enairo',orianis),
+	('Dette','Si une cagnotte est negative, chaque gain dessus est divise par 2','Enairo','symbiont enairo',orianis);
 	RAISE NOTICE 'Inserts in Skills completed';
 	-- RaceSkills
 	SELECT id_race INTO idr FROM Race WHERE nom = 'Grits' AND id_extension = orianis;
@@ -253,6 +266,18 @@ BEGIN
 	-- OrgSkills
 	RAISE NOTICE 'Inserts in OrgSkills completed';
 	-- SymbiontSkills
+	SELECT id_race INTO ids FROM Symbiont WHERE nom = 'Azort' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Azort' ORDER BY id_skill) LOOP
+		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
+	END LOOP;
+	SELECT id_race INTO ids FROM Symbiont WHERE nom = 'Iridyanis' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Iridyanis' ORDER BY id_skill) LOOP
+		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
+	END LOOP;
+	SELECT id_race INTO ids FROM Symbiont WHERE nom = 'Enairo' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Enairo' ORDER BY id_skill) LOOP
+		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
+	END LOOP;
 	RAISE NOTICE 'Inserts in SymbiontSkills completed';
 END orianisupdate $$;
 

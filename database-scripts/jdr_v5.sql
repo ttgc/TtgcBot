@@ -51,6 +51,7 @@ DECLARE
 	terae Extensions.id_extension%TYPE;
 	orianis Extensions.id_extension%TYPE;
 	idr Race.id_race%TYPE;
+	ido Organizations.id_org%TYPE;
 	ids Symbiont.id_symbiont%TYPE;
 	sk RECORD;
 BEGIN
@@ -88,9 +89,9 @@ BEGIN
 	INSERT INTO Symbiont (nom, id_extension) VALUES ('Azort', orianis), ('Iridyanis', orianis), ('Enairo', orianis);
 	RAISE NOTICE 'Inserts in Symbionts completed';
 	-- Organizations
-	INSERT INTO Organizations(nom, id_extension) VALUES
-	('Espion', orianis), ('Religieux', orianis), ('Federation du commerce', orianis), ('Scientifique', orianis),
-	('Contrebandier', orianis), ('Militaire', orianis), ('Bureaucrate', orianis);
+	INSERT INTO Organizations(nom, id_extension, hidden) VALUES
+	('Espion', orianis, true), ('Religieux', orianis, false), ('Federation du commerce', orianis, false), ('Scientifique', orianis, false),
+	('Contrebandier', orianis, false), ('Militaire', orianis, false), ('Bureaucrate', orianis, false);
 	RAISE NOTICE 'Inserts in Organizations completed';
 	-- Skills
 	INSERT INTO Skills(nom, description, origine, webclass, id_extension) VALUES
@@ -219,7 +220,27 @@ BEGIN
 	('Bonne etoile','En cas de reussite, votre cagnotte la plus faible gagne autant que le chiffre des unites de votre jet (0 = +10 pts)','Enairo','symbiont enairo',orianis),
 	('Mauvaise fortune','En cas d''echec, votre cagnotte la plus elevee perd autant que le chiffre des unites de votre jet (0 = -10 pts)','Enairo','symbiont enairo',orianis),
 	('Defaite ineluctable','Chaque fois que vous encaissez des degats, vous perdez 10% des degats subits dans vos deux cagnottes','Enairo','symbiont enairo',orianis),
-	('Dette','Si une cagnotte est negative, chaque gain dessus est divise par 2','Enairo','symbiont enairo',orianis);
+	('Dette','Si une cagnotte est negative, chaque gain dessus est divise par 2','Enairo','symbiont enairo',orianis),
+	('Discretion','+10% en infiltration et camouflage','Espion','affiliation espion',orianis),
+	('Spectre de l''ombre','deplacements x2 quand aucune cible ennemie n''a la vision sur vous','Espion','affiliation espion',orianis),
+	('Frappe preventive','En etant camoufle, permet de beneficier d''une attaque d''opportunite avec un bonus de 20%','Espion','affiliation espion',orianis),
+	('Loi du silence','Votre affiliation est secrète, si elle devait etre decouverte votre seule option serait le suicide volontaire ou non','Espion','affiliation espion',orianis),
+	('Dualite energetique','Permet de puiser directement dans les PV pour utiliser des competences lorsque les PM viennent a manquer','Religieux','affiliation religieux',orianis),
+	('Karma ascendant','Vous demarrez a -10 de Karma, mais celui-ci ne peut qu''augmenter et et ne peut pas diminuer','Religieux','affiliation religieux',orianis),
+	('Pacifiste','Retire tous les bonus et inflige -20% sur toutes les actions offensives. Le mode offensif est egalement interdit','Religieux','affiliation religieux',orianis),
+	('Taxe universelle','Pour toute somme d''argent percue, celle-ci est augmentee de 10%','Federation du commerce','orianis-main affiliation federation-commerce',orianis),
+	('Hors taxe','Pour toute depende d''argent avec une entite rattachee a la federation, vous versez 10% de moins de la somme totale','Federation du commerce','orianis-main affiliation federation-commerce',orianis),
+	('Trader','Autoriser a realiser n''importe quelle action legale en lien avec la bourse. Il est possible d''acheter / vendre des actions','Federation du commerce','orianis-main affiliation federation-commerce',orianis),
+	('Mutation spontanee','Tous les 2 niveaux, sur un jet de chance reussi, permet d''obtenir une mutation qui permet de de rajouter ou changer vos talents (5 max au total)','Scientifique','orianis-main affiliation scientifique',orianis),
+	('Evolution personnelle','Octroie l''access aux technologies permettant l''hybridation transgenique et/ou l''obtention d''un symbiote legal','Scientifique','orianis-main affiliation scientifique',orianis),
+	('Diamants eternels','Permet de posseder les cryptodevises ainsi que le devise physique de contrebande','Contrebandier','orianis-main affiliation contrebandier',orianis),
+	('Marches parallele','Permet d''acheter les technologies et autres avantages lies aux autres factions via la contrebande et ses devises','Contrebandier','orianis-main affiliation contrebandier',orianis),
+	('Vaurien','+10% en piratage','Contrebandier','orianis-main affiliation contrebandier',orianis),
+	('Armemement adaptatif','Octroie un equipement militaire de classe F','Militaire','orianis-main affiliation militaire',orianis),
+	('Protocoles restrictifs','Les equipements de classes S sont reserves aux sous-lieutenant de niveau 5 minimum, la classe X aux commandants niveau 8 minimum et Omega aux generaux de niveau 10 minimum','Militaire','orianis-main affiliation militaire',orianis),
+	('Laissez-passer A-38','Octroie une immunite diplomatique','Bureaucrate','orianis-main affiliation bureaucrate',orianis),
+	('Suffrage universel','Les decisions importantes de groupe doivent etre votees par tous ses membres, ceux qui refusent de suivre le resultat auront un malus de 20% pour agi a l''encontre de cette decision.','Bureaucrate','orianis-main affiliation bureaucrate',orianis),
+	('Prelevement a la source','Vous percevez toutes les recompenses de groupes, en versant aux autres membres leur part, vous les taxez a hauteur de 10% sur leurs revenus.','Bureaucrate','orianis-main affiliation bureaucrate',orianis);
 	RAISE NOTICE 'Inserts in Skills completed';
 	-- RaceSkills
 	SELECT id_race INTO idr FROM Race WHERE nom = 'Grits' AND id_extension = orianis;
@@ -264,6 +285,34 @@ BEGIN
 	END LOOP;
 	RAISE NOTICE 'Inserts in RaceSkills completed';
 	-- OrgSkills
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Espion' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Espion' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Religieux' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Religieux' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Federation du commerce' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Federation du commerce' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Scientifique' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Scientifique' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Contrebandier' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Contrebandier' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Militaire' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Militaire' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
+	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Bureaucrate' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Bureaucrate' AND id_extension = orianis ORDER BY id_skill) LOOP
+		INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
+	END LOOP;
 	RAISE NOTICE 'Inserts in OrgSkills completed';
 	-- SymbiontSkills
 	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Azort' AND id_extension = orianis;

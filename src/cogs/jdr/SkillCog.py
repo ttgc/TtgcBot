@@ -61,7 +61,7 @@ class SkillCog(commands.Cog, name="Skills"):
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for sklist in search:
             for i in sklist:
-                embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+                embd.add_field(name="{}#{} ({})\n[{}]".format(i.ID,i.name,i.origine,i.extension),value=i.description.replace("\\n","\n"),inline=True)
         self.logger.log(logging.DEBUG+1,"skill search by %d in channel %d on server %d",ctx.message.author.id,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 

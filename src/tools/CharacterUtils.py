@@ -115,6 +115,7 @@ class Skill:
         self.name = row[1]
         self.description = row[2]
         self.origine = row[3]
+        self.extension = Extension(row[5])
 
     def skillsearch(skname):
         db = Database()
@@ -134,6 +135,22 @@ class Skill:
             if i.ID == skid: return True
         return False
     isskillin = staticmethod(isskillin)
+
+class Extension:
+    def __init__(self,ID):
+        self.ID = ID
+        db = Database()
+        rows = db.execute("SELECT universe, world FROM Extensions WHERE id_extension = %(ext)s",ext=self.ID)
+        if rows is None:
+            db.close(True)
+            raise DatabaseException("Extension ID not found")
+        row = rows.fetchone()
+        db.close()
+        self.universe = row[0]
+        self.world = row[1]
+
+    def __str__(self):
+        return "{} : {}".format(self.universe, self.world)
 
 def retrieveCharacterOrigins(cl):
     db = Database()

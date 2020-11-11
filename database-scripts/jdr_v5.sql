@@ -95,6 +95,7 @@ BEGIN
 	RAISE NOTICE 'Inserts in Organizations completed';
 	-- Skills
 	INSERT INTO Skills(nom, description, origine, webclass, id_extension) VALUES
+	('Mental d''acier','Ne possede pas de sante mentale','Machina','machina',terae),
 	('Sniper','Si le personnage passe son tour a viser sans se deplacer, il obtient un bonus de 10% en precision','Nigemono Umahin','ningemono umahin',terae),
 	('Mecano','Autorise et octroie +10% en mecanique (force)','General','general',orianis),
 	('Negociateur','+5% en negociation (charisme)','General','general',orianis),
@@ -283,6 +284,10 @@ BEGIN
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Vampyris' ORDER BY id_skill LIMIT 5) LOOP
 		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
 	END LOOP;
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Machina' AND id_extension = terae;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Machina' AND nom = 'Mental d''acier' ORDER BY id_skill LIMIT 1) LOOP
+		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
+	END LOOP;
 	RAISE NOTICE 'Inserts in RaceSkills completed';
 	-- OrgSkills
 	SELECT id_org INTO ido FROM Organizations WHERE nom = 'Espion' AND id_extension = orianis;
@@ -328,6 +333,11 @@ BEGIN
 		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
 	END LOOP;
 	RAISE NOTICE 'Inserts in SymbiontSkills completed';
+	-- Terae update
+	UPDATE Skills
+	SET origine = 'ROOT', webclass = 'machina affiliation root'
+	WHERE nom = 'Cloud' AND origine = 'Machina' AND id_extension = terae;
+	RAISE NOTICE 'Updates for Terae completed';
 END orianisupdate $$;
 
 

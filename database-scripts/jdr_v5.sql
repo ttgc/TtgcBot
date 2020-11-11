@@ -349,6 +349,7 @@ ALTER TABLE public.Characterr ADD COLUMN pilot_a INT CONSTRAINT character_pilota
 UPDATE Characterr SET hybrid_race = NULL, id_symbiont = NULL, pilot_p = -1, pilot_a = -1;
 ALTER TABLE public.Characterr ADD CONSTRAINT FK_character_hybrid FOREIGN KEY (hybrid_race) REFERENCES public.Race(id_race);
 ALTER TABLE public.Characterr ADD CONSTRAINT FK_character_symbiont FOREIGN KEY (id_symbiont) REFERENCES public.Symbiont(id_symbiont);
+ALTER TABLE public.Characterr DROP CONSTRAINT character_kardef_check;
 
 
 -- new fonctions

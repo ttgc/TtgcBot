@@ -79,7 +79,7 @@ class SkillCog(commands.Cog, name="Skills"):
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             for i in skill:
-                embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+                embd.add_field(name="{}#{} ({})\n[{}]".format(i.ID,i.name,i.origine,i.extension),value=i.description.replace("\\n","\n"),inline=True)
             botmsg = await ctx.message.channel.send(embed=embd)
             chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.isdecimal()
             try: answer = await self.bot.wait_for('message',check=chk,timeout=60)

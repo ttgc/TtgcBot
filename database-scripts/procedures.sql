@@ -767,6 +767,12 @@ BEGIN
 		WHERE (id_server = line.id_server);
 		DELETE FROM purge
 		WHERE (id_server = line.id_server);
+		DELETE FROM warnconfig
+		WHERE (id_server = line.id_server);
+		DELETE FROM warn
+		WHERE (id_server = line.id_server);
+		DELETE FROM user_blocklist
+		WHERE (id_server = line.id_server);
 		DELETE FROM serveur
 		WHERE (id_server = line.id_server);
 		nbr := nbr + 1;

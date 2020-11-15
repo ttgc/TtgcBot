@@ -515,3 +515,152 @@ BEGIN
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION charset
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	stat VARCHAR(5),
+	val INT
+) RETURNS void AS $$
+DECLARE
+	curp INT;
+	idinv INT;
+	cpymoney INT;
+BEGIN
+	IF LOWER(stat) = 'str' THEN
+		UPDATE Characterr
+		SET strength = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'spr' THEN
+		UPDATE Characterr
+		SET spirit = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'cha' THEN
+		UPDATE Characterr
+		SET charisma = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'agi' THEN
+		UPDATE Characterr
+		SET agility = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'prec' THEN
+		UPDATE Characterr
+		SET prec = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'luck' THEN
+		UPDATE Characterr
+		SET luck = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	-- update here
+	IF LOWER(stat) = 'pa' THEN
+		UPDATE Characterr
+		SET pilot_a = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pp' THEN
+		UPDATE Characterr
+		SET pilot_p = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	-- end of update
+	IF LOWER(stat) = 'kar' THEN
+		UPDATE Characterr
+		SET karma = karma + val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'dkar' THEN
+		UPDATE Characterr
+		SET defaultkarma = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pvmax' THEN
+		SELECT PV INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		IF (curp > val) THEN
+			UPDATE Characterr
+			SET PV = val
+			WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		END IF;
+		UPDATE Characterr
+		SET PVmax = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pmmax' THEN
+		SELECT PM INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		IF (curp > val) THEN
+			UPDATE Characterr
+			SET PM = val
+			WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		END IF;
+		UPDATE Characterr
+		SET PMmax = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pv' THEN
+		UPDATE Characterr
+		SET PV = PV + val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'pm' THEN
+		UPDATE Characterr
+		SET PM = PM + val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'lp' THEN
+		UPDATE Characterr
+		SET light_points = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'dp' THEN
+		UPDATE Characterr
+		SET dark_points = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'po' THEN
+		SELECT id_inventory INTO idinv FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		SELECT argent INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		cpymoney := curp;
+		curp := curp / 5000;
+		IF cpymoney > 0 THEN
+			curp := curp + 1;
+		END IF;
+		UPDATE inventaire
+		SET size_ = size_ - curp
+		WHERE id_inventory = idinv;
+		UPDATE Characterr
+		SET argent = argent + val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		SELECT argent INTO curp FROM Characterr
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		cpymoney := curp;
+		curp := curp / 5000;
+		IF cpymoney > 0 THEN
+			curp := curp + 1;
+		END IF;
+		UPDATE inventaire
+		SET size_ = size_ + curp
+		WHERE id_inventory = idinv;
+	END IF;
+	IF LOWER(stat) = 'int' THEN
+		UPDATE Characterr
+		SET intuition = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+	IF LOWER(stat) = 'ment' THEN
+		UPDATE Characterr
+		SET mental = val
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;

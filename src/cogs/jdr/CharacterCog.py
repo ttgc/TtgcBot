@@ -219,6 +219,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         defaultmod/dmod
         defaultkarma/dkar/dkarma
         intuition/int/instinct
+        pilotastral/pa
+        pilotplanet/pp
         ```"""
         data = GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charset %s for %s in channel %d of server %d",key,char.key,ctx.message.channel.id,ctx.message.guild.id)
@@ -272,6 +274,12 @@ class CharacterCog(commands.Cog, name="Characters"):
             if int(value) >= 1 and int(value) <= 6:
                 char = char.charset('int',int(value))
                 await ctx.message.channel.send(data.lang["charset"].format(data.lang["intuition"]))
+        elif key.lower() in ["pilotastral","pa"]:
+            char = char.charset('pa',int(value) if int(value) >= 0 else -1)
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["pilot_a"]))
+        elif key.lower() in ["pilotplanet","pp"]:
+            char = char.charset('pp',int(value) if int(value) >= 0 else -1)
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["pilot_p"]))
         else:
             await ctx.message.channel.send(data.lang["charset_invalid"].format(key))
 

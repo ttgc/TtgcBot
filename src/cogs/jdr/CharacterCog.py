@@ -146,9 +146,12 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_pilot(self, ctx): pass
 
     async def _charpilot(self, ctx, rolltype, data, dice, chars, operator, expression):
+        if rolltype.get_character_value(chars[0]) < 0:
+            await ctx.message.channel.send(data.lang["not_pilot"].format(chars[0].name))
+            return
         for i in chars:
             if i.dead:
-                await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
+                await ctx.message.channel.send(data.lang["is_dead"].format(i.name))
                 return
         parser = ParsePilotRoll(data.lang, chars, rolltype, dice, operator, expression)
         msg = parser.resolv()

@@ -26,17 +26,17 @@ from discord.ext import commands
 
 @unique
 class PiloteRollType(Enum):
-    ASTRAL = "astral"
-    PLANET = "planet"
+    ASTRAL = "pilot_a"
+    PLANET = "pilot_p"
 
     def translate(self, lang):
         return lang[self.value]
 
     def get_character_value(self, char):
-        if self.name == PiloteRollType.ASTRAL:
-            return char.pilot_a
-        elif self.name == PiloteRollType.PLANET:
-            return char.pilot_p
+        if self == PiloteRollType.ASTRAL:
+            return char.astral_pilot
+        elif self == PiloteRollType.PLANET:
+            return char.planet_pilot
         return
 
 @unique
@@ -296,8 +296,8 @@ class ParsePetRoll(ParseCharacterRoll):
             return self._resolv_intuition()
         raise AttributeError("Invalid stat {} in parsing roll".format(self.stat))
 
-    def _resolv_opportunity(self):
-        raise NotImplementedError("unsuported operation for pet")
+##    def _resolv_opportunity(self):
+##        raise NotImplementedError("unsuported operation for pet")
 
     def _check_skills(self): pass
 
@@ -324,9 +324,12 @@ class ParsePilotRoll:
         self.statval = 0
         self.strstat = self.ptype.translate(self.lang)
 
+        if self.expr is not None:
+            self.statval += (self.expr.resolv()[0] * ((-1)**(self.op=="-")))
+
         for i in self.chars:
             charval = self.ptype.get_character_value(i)
-            if charval < 0:
+            if charval is None or charval < 0:
                 raise discord.ext.BadArgument("Invalid stat {} in parsing pilot roll, stat value is negative for character {}".format(self.ptype.value, self.char.key))
             self.statval += charval
 

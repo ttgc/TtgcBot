@@ -29,10 +29,10 @@ class PiloteRollType(Enum):
     ASTRAL = "astral"
     PLANET = "planet"
 
-    def translate(lang):
+    def translate(self, lang):
         return lang[self.value]
 
-    def get_character_value(char):
+    def get_character_value(self, char):
         if self.name == PiloteRollType.ASTRAL:
             return char.pilot_a
         elif self.name == PiloteRollType.PLANET:

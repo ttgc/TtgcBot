@@ -231,6 +231,17 @@ Alias : `switch`
 - `/(character|char) roll <stat> [<+|-> <expression>]` (PJ only) <br/>
 Roll a dice in the given statistic and adding bonus or substracting malus if provided, the bonus/malus is formatted as for classical roll command and can be a complex expression such as `1d10-1d8+...`. The result will tell you if the action is a success or not, according to the rules of TTGC game. <br/>
 Alias : `r`
+- `/(character|char) pilot <type> <dice> [other_characters] [<+|-> <expression>]` (PJ only) <br/>
+Roll a pilot dice with given sides. You can provide other characters to be included in piloting action and any expression to add to or substract from the max value allowed for the roll to be a success. Type can only be `astral` or `planet`. <br/>
+Aliases : `p`, `piloting`, `pilotage` <br/>
+Aliases for `astral` type : `interplanetaire`, `a` <br/>
+Aliases for `planet` type : `planetaire`, `p`
+- `/(character|char) hybrid <charkey> <race>` (MJ only and JDR channel only) <br/>
+Set a character as an hybrid, giving him a secondary race and inherit all race's skills. This won't work if the character is already an hybrid <br/>
+Aliases : `transgenic`, `transgenique`, `hybride`
+- `/(character|char) symbiont <charkey> [symbiont]` <br/>
+Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character. <br/>
+Aliases : `symbiote`, `symb`, `sb`
 - `/(character|char) set <item> <charkey> <value>` (MJ only and JDR channel only) <br/>
 Set a property of a character to the given value. The following properties can be set with this command : <br/>
 ```
@@ -248,6 +259,8 @@ dp/darkpt/darkpoint - (integer) Same as lp but for the dark points
 defaultmod/dmod - (offensiv/defensiv) Set the default mod of the character
 defaultkarma/dkar/dkarma - (integer between -10 and 10) Set the default karma
 intuition/int/instinct - (integer between 1 and 6) Set the intuition
+pilotastral/pa - (integer) Set the astral piloting value (negative value = disable astral piloting)
+pilotplanet/pp - (integer) Set the planet piloting value (negative value = disable planet piloting)
 ```
 - `/(character|char) damage <charkey> <amount>` (MJ only and JDR channel only) <br/>
 Damage a character, he will lose the number of HP given in the command <br/>
@@ -330,6 +343,7 @@ The following commands can be used : <br/>
 /mj pay <charkey> <amount>
 /mj setmental <charkey> [+|-] <amount>
 /mj (roll|r) <charkey> <stat> [<+|-> <expression>]
+/mj (pilot|p|piloting|pilotage) (astral|interplanetaire|a|planet|planetaire|p) <dice> <characters> [<+|-> <expression>]
 /mj pet (roll|r) <charkey> <petkey> <stat> [<+|-> <expression>]
 /mj pet (switchmod|switchmode) <charkey> <petkey>
 /mj pet info <charkey> <petkey>

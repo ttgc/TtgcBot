@@ -501,14 +501,14 @@ DECLARE
 BEGIN
 	SELECT id_symbiont INTO prevsb FROM Characterr
 	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
-	IF prevsb <> NULL THEN
+	IF prevsb IS NOT NULL THEN
 		DELETE FROM havingskill
-		WHERE id_skill IN (SELECT id_skill FROM SymbiontSkills WHERE id_symbiont = prevsb);
+		WHERE charkey = dbkey AND id_server = idserv AND id_channel = idchan AND id_skill IN (SELECT id_skill FROM SymbiontSkills WHERE id_symbiont = prevsb);
 	END IF;
 	UPDATE characterr
 	SET id_symbiont = sb
 	WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
-	IF sb <> NULL THEN
+	IF sb IS NOT NULL THEN
 		FOR sk IN (SELECT id_skill FROM SymbiontSkills WHERE id_symbiont = sb) LOOP
 			PERFORM assign_skill(dbkey, idserv, idchan, sk.id_skill);
 		END LOOP;

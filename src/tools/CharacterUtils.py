@@ -191,7 +191,7 @@ def retrieveRaceName(rcid):
         raise DatabaseException("Race Name not found")
     row = cur.fetchone()
     db.close()
-    return row
+    return row[0]
 
 def retrieveSymbiontID(sbname):
     db = Database()
@@ -212,7 +212,7 @@ def retrieveSymbiontName(sbid):
         raise DatabaseException("Race Name not found")
     row = cur.fetchone()
     db.close()
-    return row
+    return row[0]
 
 def retrieveOrganization(orgid):
     db = Database()

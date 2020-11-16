@@ -82,14 +82,12 @@ class MainJDR(commands.Cog, name="JDR"):
                         else:
                             await i.edit(mute=True,deafen=True)
 
-    @commands.cooldown(1,1,commands.BucketType.channel)
-    @commands.command()
-    async def wiki(self,ctx,*,query):
-        """Make a quick search on The Tale of Great Cosmos wiki"""
-        data = GenericCommandParameters(ctx)
-        query = query.replace(" ","_")
-        info = requests.get("http://thetaleofgreatcosmos.fr/wiki/api.php?action=parse&page="+query+"&format=json&redirects=true")
-        exist_test = requests.get("http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query)
+    async def _fetch_wiki(self, ctx, data, query, useQueryAsURL=False):
+        url = query if useQueryAsURL else "https://thetaleofgreatcosmos.fr/wiki/index.php?title=" + query
+        extractedQuery = query.replace("https://thetaleofgreatcosmos.fr/wiki/index.php?title=", "") if useQueryAsURL else query
+        infourl = "https://thetaleofgreatcosmos.fr/wiki/api.php?action=parse&page=" + extractedQuery + "&format=json&redirects=true"
+        info = requests.get(infourl)
+        exist_test = requests.get(url)
         if exist_test.status_code != 200:
             await ctx.message.channel.send(data.lang["wiki_unexisting"].format(str(exist_test.status_code)))
             return
@@ -105,16 +103,35 @@ class MainJDR(commands.Cog, name="JDR"):
             temp = temp[pos+1:]
             temp = temp[:temp.find("/>")]
             temp = temp[temp.find("src=")+5:]
-            img = "http://thetaleofgreatcosmos.fr"+temp.split('"')[0]
-        embd = discord.Embed(title=info.json()["parse"]["title"],description=descrip,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query,colour=discord.Color(randint(0,int('ffffff',16))))
+            img = "https://thetaleofgreatcosmos.fr"+temp.split('"')[0]
+        embd = discord.Embed(title=info.json()["parse"]["title"],description=descrip,url=url,colour=discord.Color(randint(0,int('ffffff',16))))
         embd.set_footer(text="The Tale of Great Cosmos - Wiki")
         if img is not None:
             embd.set_image(url=img)
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url,url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+query)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url,url=url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         if len(info.json()["parse"]["redirects"]) != 0:
             embd.add_field(name=data.lang["wiki_redirect"],value=info.json()["parse"]["redirects"][0]["from"],inline=True)
+        return embd
+
+    @commands.cooldown(1,1,commands.BucketType.channel)
+    @commands.command()
+    async def wiki(self,ctx,*,query):
+        """Make a quick search on The Tale of Great Cosmos wiki"""
+        data = GenericCommandParameters(ctx)
+        query = query.replace(" ","_")
+        embd = await self._fetch_wiki(ctx, data, query)
         self.logger.log(logging.DEBUG+1,"wiki query (%s) in channel %d of server %d",query,ctx.message.channel.id,ctx.message.guild.id)
+        await ctx.message.channel.send(embed=embd)
+
+    @commands.cooldown(1,1,commands.BucketType.channel)
+    @commands.command(aliases=['rdmfact', 'rf', 'fact', 'randomwiki', 'rdmwiki', 'rw'])
+    async def randomfact(self,ctx):
+        """Get a random fact about The Tale of Great Cosmos"""
+        data = GenericCommandParameters(ctx)
+        info = requests.get("https://thetaleofgreatcosmos.fr/wiki/index.php?title=Sp%C3%A9cial:Page_au_hasard")
+        embd = await self._fetch_wiki(ctx, data, info.url, True)
+        self.logger.log(logging.DEBUG+1,"random fact in channel %d of server %d", ctx.message.channel.id, ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
     @commands.command(aliases=['jointtgc','ttgc'])

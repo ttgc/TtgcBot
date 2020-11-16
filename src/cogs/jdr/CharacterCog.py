@@ -141,6 +141,68 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/charroll (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._charroll(ctx,data,data.char,stat,operator,expression)
 
+    @commands.check(check_haschar)
+    @character.group(name="pilot", aliases=["p", "piloting", "pilotage"], invoke_without_command=False)
+    async def character_pilot(self, ctx): pass
+
+    async def _charpilot(self, ctx, rolltype, data, dice, chars, operator, expression):
+        if rolltype.get_character_value(chars[0]) < 0:
+            await ctx.message.channel.send(data.lang["not_pilot"].format(chars[0].name))
+            return
+        for i in chars:
+            if i.dead:
+                await ctx.message.channel.send(data.lang["is_dead"].format(i.name))
+                return
+        parser = ParsePilotRoll(data.lang, chars, rolltype, dice, operator, expression)
+        msg = parser.resolv()
+        await ctx.message.channel.send(msg)
+
+    @character_pilot.command(name="astral", aliases=["interplanetaire", "a"])
+    async def character_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
+        """**PC/PJ only**
+        Roll astral piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
+        According the rules, the result will also tell you if the action is a success or not.
+        Finally bonus and malus can also be dices expression (see help of roll for more information)"""
+        data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charpilot astral (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        allchars = [data.char] + chars
+        await self._charpilot(ctx, PiloteRollType.ASTRAL, data, dice, allchars, operator, expression)
+
+    @character_pilot.command(name="planet", aliases=["planetaire", "p"])
+    async def character_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
+        """**PC/PJ only**
+        Roll planet piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
+        According the rules, the result will also tell you if the action is a success or not.
+        Finally bonus and malus can also be dices expression (see help of roll for more information)"""
+        data = GenericCommandParameters(ctx)
+        self.logger.log(logging.DEBUG+1,"/charpilot planet (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
+        allchars = [data.char] + chars
+        await self._charpilot(ctx, PiloteRollType.PLANET, data, dice, allchars, operator, expression)
+
+    @commands.check(check_chanmj)
+    @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])
+    async def character_hybrid(self, ctx, char: CharacterConverter, *, race: RaceConverter):
+        """**GM/MJ only**
+        Set a character as an hybrid, give him a second race and inherit all race's skills.
+        This won't work if the character is already an hybrid"""
+        data = GenericCommandParameters(ctx)
+        char = char.makehybrid(race)
+        self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
+        await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
+
+    @commands.check(check_chanmj)
+    @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])
+    async def character_symbiont(self, ctx, char: CharacterConverter, *, symbiont: typing.Optional[SymbiontConverter] = None):
+        """**GM/MJ only**
+        Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character."""
+        data = GenericCommandParameters(ctx)
+        char = char.setsymbiont(symbiont)
+        self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
+        if char.symbiont is None:
+            await ctx.message.channel.send(data.lang["char_nosymbiont"].format(char.name))
+        else:
+            await ctx.message.channel.send(data.lang["char_symbiont"].format(char.name, char.symbiont))
+
     @commands.check(check_chanmj)
     @character.command(name="set")
     async def character_set(self,ctx,key,char: CharacterConverter,*,value):
@@ -160,6 +222,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         defaultmod/dmod
         defaultkarma/dkar/dkarma
         intuition/int/instinct
+        pilotastral/pa
+        pilotplanet/pp
         ```"""
         data = GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charset %s for %s in channel %d of server %d",key,char.key,ctx.message.channel.id,ctx.message.guild.id)
@@ -213,6 +277,12 @@ class CharacterCog(commands.Cog, name="Characters"):
             if int(value) >= 1 and int(value) <= 6:
                 char = char.charset('int',int(value))
                 await ctx.message.channel.send(data.lang["charset"].format(data.lang["intuition"]))
+        elif key.lower() in ["pilotastral","pa"]:
+            char = char.charset('pa',int(value) if int(value) >= 0 else -1)
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["pilot_a"]))
+        elif key.lower() in ["pilotplanet","pp"]:
+            char = char.charset('pp',int(value) if int(value) >= 0 else -1)
+            await ctx.message.channel.send(data.lang["charset"].format(data.lang["pilot_p"]))
         else:
             await ctx.message.channel.send(data.lang["charset_invalid"].format(key))
 
@@ -311,6 +381,19 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger.log(logging.DEBUG+1,"/charreset (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
 
+    @commands.check(check_chanmj)
+    @character.command(name="clear", aliases=['clr'])
+    async def character_clear(self,ctx,char: CharacterConverter):
+        """**GM/MJ only
+        Clear current gamemod when currently using light or dark point. This will restore default gamemod and won't reset anything else."""
+        data = GenericCommandParameters(ctx)
+        if Character.gm_map_inttochar[char.mod] in ['I', 'S']:
+            char.reset_lpdp()
+            self.logger.log(logging.DEBUG+1,"/charclear (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
+            await ctx.message.channel.send(data.lang["clearchar"].format(char.name))
+        else:
+            await ctx.message.channel.send(data.lang["clearchar_notpossible"].format(char.name))
+
     async def _pay(self,ctx,data,char,val):
         val = abs(val)
         if char.money-val < 0:
@@ -354,10 +437,11 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.message.channel.send(embed=embd)
 
     async def _charinfo(self,ctx,data,char):
-        if char.mod == 0: modd = data.lang["offensive"]
-        else: modd = data.lang["defensive"]
-        affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None else ""
-        embd = discord.Embed(title=char.name,description="{} {}{}".format(char.race,char.classe,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
+        modd = data.lang[Character.gm_map_inttostr[char.mod]]
+        affiliated = "\n{}".format(char.affiliated_with) if char.affiliated_with is not None and not isOrganizationHidden(char.affiliated_with) else ""
+        fullrace = "{} / {}".format(char.race, char.hybrid_race) if char.hybrid_race is not None else char.race
+        symbiont = "\n{} : {}".format(data.lang["symbiont"].capitalize(), char.symbiont) if char.symbiont is not None else ""
+        embd = discord.Embed(title=char.name,description="{} {}{}{}".format(fullrace,char.classe,symbiont,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -368,19 +452,23 @@ class CharacterCog(commands.Cog, name="Characters"):
             embd.add_field(name=data.lang["PV"]+" :",value=str(char.PV)+"/"+str(char.PVmax),inline=True)
         if not char.dead: embd.add_field(name=data.lang["PM"]+" :",value=str(char.PM)+"/"+str(char.PMmax),inline=True)
         embd.add_field(name=data.lang["lvl"].capitalize()+" :",value="{} ({} XP)".format(char.lvl, char.xp),inline=True)
-        if not char.dead: embd.add_field(name=data.lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
         if not char.dead: embd.add_field(name=data.lang["force"].capitalize()+" :",value=str(char.force),inline=True)
         if not char.dead: embd.add_field(name=data.lang["esprit"].capitalize()+" :",value=str(char.esprit),inline=True)
         if not char.dead: embd.add_field(name=data.lang["charisme"].capitalize()+" :",value=str(char.charisme),inline=True)
         if not char.dead: embd.add_field(name=data.lang["agilite"].capitalize()+" :",value=str(char.furtivite),inline=True)
         if not char.dead: embd.add_field(name=data.lang["precision"].capitalize()+" :",value=str(char.precision),inline=True)
         if not char.dead: embd.add_field(name=data.lang["chance"].capitalize()+" :",value=str(char.luck),inline=True)
+        if not char.dead: embd.add_field(name=data.lang["intuition"].capitalize()+" :",value=str(char.intuition),inline=True)
         if not char.dead: embd.add_field(name=data.lang["karma"].capitalize()+" :",value=str(char.karma),inline=True)
         embd.add_field(name=data.lang["money"].capitalize()+" :",value=str(char.money),inline=True)
         if not char.dead: embd.add_field(name=data.lang["lp"]+" :",value=str(char.lp),inline=True)
         if not char.dead: embd.add_field(name=data.lang["dp"]+" :",value=str(char.dp),inline=True)
         if not char.dead: embd.add_field(name=data.lang["mod"].capitalize()+" :",value=modd,inline=True)
         embd.add_field(name=data.lang["mental"].capitalize()+" :",value=str(char.mental),inline=True)
+        if not char.dead and char.astral_pilot >= 0:
+            embd.add_field(name=data.lang["pilot_a"].capitalize()+" :",value=str(char.astral_pilot),inline=True)
+        if not char.dead and char.planet_pilot >= 0:
+            embd.add_field(name=data.lang["pilot_p"].capitalize()+" :",value=str(char.planet_pilot),inline=True)
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_haschar)
@@ -463,21 +551,19 @@ class CharacterCog(commands.Cog, name="Characters"):
         else:
             await ctx.message.channel.send(data.lang["used_dp"].format(data.char.name))
             data.char.usedp()
-            result = randint(1,6)
-            await ctx.message.channel.send(data.lang["result_test_nomax"].format(data.lang["malchance"],str(result)))
-            if result == 1: await ctx.message.channel.send(data.lang["malchance_1"])
-            elif result == 2: await ctx.message.channel.send(data.lang["malchance_2"])
-            elif result == 3: await ctx.message.channel.send(data.lang["malchance_3"])
-            elif result == 4: await ctx.message.channel.send(data.lang["malchance_4"])
-            elif result == 5: await ctx.message.channel.send(data.lang["malchance_5"])
-            elif result == 6: await ctx.message.channel.send(data.lang["malchance_1"])
+            # result = randint(1,6)
+            # await ctx.message.channel.send(data.lang["result_test_nomax"].format(data.lang["malchance"],str(result)))
+            # if result == 1: await ctx.message.channel.send(data.lang["malchance_1"])
+            # elif result == 2: await ctx.message.channel.send(data.lang["malchance_2"])
+            # elif result == 3: await ctx.message.channel.send(data.lang["malchance_3"])
+            # elif result == 4: await ctx.message.channel.send(data.lang["malchance_4"])
+            # elif result == 5: await ctx.message.channel.send(data.lang["malchance_5"])
+            # elif result == 6: await ctx.message.channel.send(data.lang["malchance_1"])
             self.logger.log(logging.DEBUG+1,"/charusedp (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
 
     async def _switchmod(self,ctx,data,char):
         char = char.switchmod()
-        strmod = data.lang["offensive"]
-        if char.mod == 1:
-            strmod = data.lang["defensive"]
+        strmod = Character.gm_map_inttostr[char.mod]
         await ctx.message.channel.send(data.lang["switchmod"].format(char.name,strmod))
 
     @commands.check(check_haschar)
@@ -685,7 +771,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for char in data.charbase:
             alive = data.lang["dead"] if char.dead else data.lang["alive"]
-            linked = discord.utils.get(ctx.message.channel.members,id=int(char.linked)) if char.linked is not None else None
+            linked = ctx.message.guild.members.get_member(char.linked) if char.linked is not None else None
             linked = ":no_entry_sign:" if linked is None else linked.mention
             embd.add_field(name=char.key,value=data.lang["charlist_singlechar"].format(char.name,alive,linked),inline=True)
         await ctx.message.channel.send(embed=embd)

@@ -24,6 +24,7 @@ from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.checks import GenericCommandParameters
 from src.tools.mapmanager import *
+from src.tools.parsingdice import DiceType
 
 class CharacterConverter(commands.Converter):
     async def convert(self,ctx,arg):
@@ -33,6 +34,10 @@ class CharacterConverter(commands.Converter):
 class RaceConverter(commands.Converter):
     async def convert(self,ctx,arg):
         return retrieveRaceID(arg.replace("_"," "))
+
+class SymbiontConverter(commands.Converter):
+    async def convert(self,ctx,arg):
+        return retrieveSymbiontID(arg.replace("_"," "))
 
 class SkillConverter(commands.Converter):
     async def convert(self,ctx,arg):
@@ -104,3 +109,12 @@ class BattleEntityConverter(commands.Converter):
             tag, value = arg.split(":")
             return tag, int(value)
         raise commands.BadArgument("Invalid Battle Entity provided, cannot convert")
+
+class DiceConverter(commands.Converter):
+    async def convert(self, ctx, arg):
+        match = re.search(r"\d+", arg)
+        if match is not None:
+            try: return DiceType(int(match.group(0)))
+            except:
+                raise commands.BadArgument("Unable to convert value {} into a dice type".format(arg))
+        raise commands.BadArgument("Invalid Dice Type provided, cannot convert")

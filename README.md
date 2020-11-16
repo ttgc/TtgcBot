@@ -1,7 +1,7 @@
 # TtgcBot
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 
-![Generic badge](https://img.shields.io/badge/Bot&nbsp;Version-2.1.2-blue.svg) [![GitHub license](https://img.shields.io/github/license/ttgc/TtgcBot.svg)](https://github.com/ttgc/TtgcBot/blob/master/LICENSE) ![Generic badge](https://img.shields.io/badge/Python&nbsp;Version-3.5&nbsp;|&nbsp;3.6&nbsp;|&nbsp;3.7-blue.svg) [![Generic badge](https://img.shields.io/badge/Languages-EN&nbsp;|&nbsp;FR-green.svg)](https://github.com/ttgc/TtgcBot/tree/master/Lang) <br/>
+![Generic badge](https://img.shields.io/badge/Bot&nbsp;Version-2.4.0-blue.svg) [![GitHub license](https://img.shields.io/github/license/ttgc/TtgcBot.svg)](https://github.com/ttgc/TtgcBot/blob/master/LICENSE) ![Generic badge](https://img.shields.io/badge/Python&nbsp;Version-3.5&nbsp;|&nbsp;3.6&nbsp;|&nbsp;3.7-blue.svg) [![Generic badge](https://img.shields.io/badge/Languages-EN&nbsp;|&nbsp;FR-green.svg)](https://github.com/ttgc/TtgcBot/tree/master/Lang) <br/>
 [![Generic badge](https://img.shields.io/badge/discord.py-1.5.0-blue.svg)](https://pypi.python.org/pypi/discord.py/) [![Generic badge](https://img.shields.io/badge/asyncio-3.4.3-blue.svg)](https://pypi.org/project/asyncio/) [![Generic badge](https://img.shields.io/badge/Pillow-7.2.0-blue.svg)](https://pypi.org/project/Pillow/) [![Generic badge](https://img.shields.io/badge/psycopg2-2.8.1-blue.svg)](https://pypi.org/project/psycopg2/) [![Generic badge](https://img.shields.io/badge/PyNaCl-1.3.0-blue.svg)](https://pypi.org/project/PyNaCl/) [![Generic badge](https://img.shields.io/badge/requests-2.21.0-blue.svg)](https://pypi.org/project/requests/) [![Generic badge](https://img.shields.io/badge/urllib3-1.24.2-blue.svg)](https://pypi.org/project/urllib3/) [![Generic badge](https://img.shields.io/badge/latex-0.7.0-blue.svg)](https://pypi.org/project/latex/) [![Generic badge](https://img.shields.io/badge/deepmerge-0.1.0-blue.svg)](https://pypi.org/project/deepmerge/)
 
 TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of Great Cosmos universe ([French Website here](http://thetaleofgreatcosmos.fr)). But, today the bot is having many useful tools and features such as Keeprole system that allow leaving member to keep their roles after joining again your server, warn users that doesn't follow your rules, and more things (list of commands below). The bot is developed in Python 3 using [discord.py](https://github.com/Rapptz/discord.py/tree/async) lib and use also a postgresql 9 database.
@@ -190,6 +190,9 @@ Aliases : `setgmrole`
 Mute and deafen all the players that are not mentionned by the command. If there is no single mention, the bot will unmute and undeafen all the players. (Spectators and GM/MJ will not be affected by this)
 - `/wiki <topic>` <br/>
 Search on the wiki the given topic, if found a summary will be displayed with the link to the page
+- `/randomfact` <br/>
+Get a random fact about TTGC <br/>
+Aliases : `rf`, `rdmfact`, `randomwiki`, `rw`, `rdmwiki`
 - `/jointhegame` <br/>
 provide an invite link to the official discord of TTGC game (French discord) <br/>
 Aliases : `jointtgc`, `ttgc`
@@ -228,6 +231,17 @@ Alias : `switch`
 - `/(character|char) roll <stat> [<+|-> <expression>]` (PJ only) <br/>
 Roll a dice in the given statistic and adding bonus or substracting malus if provided, the bonus/malus is formatted as for classical roll command and can be a complex expression such as `1d10-1d8+...`. The result will tell you if the action is a success or not, according to the rules of TTGC game. <br/>
 Alias : `r`
+- `/(character|char) pilot <type> <dice> [other_characters] [<+|-> <expression>]` (PJ only) <br/>
+Roll a pilot dice with given sides. You can provide other characters to be included in piloting action and any expression to add to or substract from the max value allowed for the roll to be a success. Type can only be `astral` or `planet`. <br/>
+Aliases : `p`, `piloting`, `pilotage` <br/>
+Aliases for `astral` type : `interplanetaire`, `a` <br/>
+Aliases for `planet` type : `planetaire`, `p`
+- `/(character|char) hybrid <charkey> <race>` (MJ only and JDR channel only) <br/>
+Set a character as an hybrid, giving him a secondary race and inherit all race's skills. This won't work if the character is already an hybrid <br/>
+Aliases : `transgenic`, `transgenique`, `hybride`
+- `/(character|char) symbiont <charkey> [symbiont]` <br/>
+Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character. <br/>
+Aliases : `symbiote`, `symb`, `sb`
 - `/(character|char) set <item> <charkey> <value>` (MJ only and JDR channel only) <br/>
 Set a property of a character to the given value. The following properties can be set with this command : <br/>
 ```
@@ -245,6 +259,8 @@ dp/darkpt/darkpoint - (integer) Same as lp but for the dark points
 defaultmod/dmod - (offensiv/defensiv) Set the default mod of the character
 defaultkarma/dkar/dkarma - (integer between -10 and 10) Set the default karma
 intuition/int/instinct - (integer between 1 and 6) Set the intuition
+pilotastral/pa - (integer) Set the astral piloting value (negative value = disable astral piloting)
+pilotplanet/pp - (integer) Set the planet piloting value (negative value = disable planet piloting)
 ```
 - `/(character|char) damage <charkey> <amount>` (MJ only and JDR channel only) <br/>
 Damage a character, he will lose the number of HP given in the command <br/>
@@ -259,6 +275,9 @@ Add or substract karma points to the current karma of the character <br/>
 Aliases : `addkarma`, `getkarma`
 - `/(character|char) reset <charkey>` (MJ only and JDR channel only) <br/>
 Restore fully Health and Mana points, set the karma to its default value and set the mod to its default value for a character
+- `/(character|char) clear <charkey>` (MJ only and JDR channel only) <br/>
+Clear current gamemod when currently using light or dark point. This will restore default gamemod and won't reset anything else. <br/>
+Alias : `clr`
 - `/(character|char) pay <amount>` (PJ only) <br/>
 Pay the amount given
 - `/(character|char) earnmoney <charkey> <amount>` (MJ only and JDR channel only) <br/>
@@ -324,6 +343,7 @@ The following commands can be used : <br/>
 /mj pay <charkey> <amount>
 /mj setmental <charkey> [+|-] <amount>
 /mj (roll|r) <charkey> <stat> [<+|-> <expression>]
+/mj (pilot|p|piloting|pilotage) (astral|interplanetaire|a|planet|planetaire|p) <dice> <characters> [<+|-> <expression>]
 /mj pet (roll|r) <charkey> <petkey> <stat> [<+|-> <expression>]
 /mj pet (switchmod|switchmode) <charkey> <petkey>
 /mj pet info <charkey> <petkey>

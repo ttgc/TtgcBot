@@ -182,7 +182,7 @@ playlocal_notfound=fichier introuvable
 invite=Invite TtgcBot sur ton serveur !
 invite_srv=TtgcBot est actuellement sur :
 invite_author=TtgcBot version {} développé par Ttgc
-ping=ping actuel : `{} ms`
+ping=:ping_pong: pong ! :ping_pong:\nping actuel : `{} ms`
 error=Votre commande à provoqué l'exception suivante :\n```python\n{}\n```
 setlang=Langue mise à jour vers {}
 #Pet update v1.2
@@ -265,3 +265,15 @@ fight_round=Ordre du tour de combat
 max_karma_reach={} vient d'atteindre les 10 de karma
 min_karma_reach={} vient d'atteindre les -10 de karma
 nojoke=Aucune blague trouvée dans la langue choisie
+#Orianis update (Gamerule v5) v2.4
+illumination=Illumination
+sepulchral=Sépulcrale
+clearchar=La posture de combat de {} a été réinitialisé à sa valeur par défaut avec succès
+clearchar_notpossible=Le personnage {} n'a fait usage d'aucun LP ou DP. Impossible de poursuivre l'opération
+symbiont=symbiote
+pilot_a=pilotage astral
+pilot_p=pilotage planétaire
+char_hybrid=Le personnage {} est désormais un hybride {} / {}
+char_nosymbiont=Le personnage {} ne possède plus aucun symbiote
+char_symbiont=Le personnage {} possède désormais le symbiote {}
+not_pilot=Le personnage {} n'est pas un pilote valide !

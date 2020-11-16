@@ -20,7 +20,7 @@
 from src.utils.checks import *
 from src.tools.BotTools import *
 from discord.ext import commands
-import logging,asyncio,time
+import logging,asyncio
 import discord
 import typing
 from random import randint,choice
@@ -38,12 +38,9 @@ class Other(commands.Cog):
         """~~Play ping-pong :ping_pong:~~
         Show the current ping of the bot"""
         data = GenericCommandParameters(ctx)
-        tps_start = time.clock()
-        await ctx.message.channel.send(":ping_pong: pong ! :ping_pong:")
-        tps_end = time.clock()
-        ping = round((tps_end-tps_start)*1000)
+        ping = round(self.bot.latency * 1000)
         await ctx.message.channel.send(data.lang["ping"].format(ping))
-        self.logger.log(logging.DEBUG+1,"current ping : %d ms",ping)
+        self.logger.log(logging.DEBUG+1,"current ping : %d ms", ping)
 
     @commands.cooldown(1,60,commands.BucketType.user)
     @commands.command(aliases=['setlanguage'])

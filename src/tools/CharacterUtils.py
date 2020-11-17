@@ -115,6 +115,7 @@ class Skill:
         self.name = row[1]
         self.description = row[2]
         self.origine = row[3]
+        self.extension = Extension(row[5])
 
     def skillsearch(skname):
         db = Database()
@@ -134,6 +135,22 @@ class Skill:
             if i.ID == skid: return True
         return False
     isskillin = staticmethod(isskillin)
+
+class Extension:
+    def __init__(self,ID):
+        self.ID = ID
+        db = Database()
+        rows = db.execute("SELECT universe, world FROM Extensions WHERE id_extension = %(ext)s",ext=self.ID)
+        if rows is None:
+            db.close(True)
+            raise DatabaseException("Extension ID not found")
+        row = rows.fetchone()
+        db.close()
+        self.universe = row[0]
+        self.world = row[1]
+
+    def __str__(self):
+        return "{} : {}".format(self.universe, self.world)
 
 def retrieveCharacterOrigins(cl):
     db = Database()
@@ -165,6 +182,38 @@ def retrieveRaceID(rcname):
     db.close()
     return row
 
+def retrieveRaceName(rcid):
+    if rcid is None: return None
+    db = Database()
+    cur = db.execute("SELECT nom FROM race WHERE id_race = %(rc)s",rc=rcid)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Race Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row[0]
+
+def retrieveSymbiontID(sbname):
+    db = Database()
+    cur = db.execute("SELECT id_symbiont FROM symbiont WHERE lower(nom) = %(name)s",name=sbname.lower())
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Symbiont Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row
+
+def retrieveSymbiontName(sbid):
+    if sbid is None: return None
+    db = Database()
+    cur = db.execute("SELECT nom FROM symbiont WHERE id_symbiont = %(sb)s",sb=sbid)
+    if cur is None:
+        db.close(True)
+        raise DatabaseException("Race Name not found")
+    row = cur.fetchone()
+    db.close()
+    return row[0]
+
 def retrieveOrganization(orgid):
     db = Database()
     cur = db.execute("SELECT nom FROM organizations WHERE id_org = %(id)s",id=orgid)
@@ -174,6 +223,16 @@ def retrieveOrganization(orgid):
     row = cur.fetchone()
     db.close()
     return row[0] if row is not None else None
+
+def isOrganizationHidden(orgname):
+    db = Database()
+    cur = db.execute("SELECT hidden FROM organization WHERE nom = %(org)s", org=orgname)
+    if cur is None:
+        db.close()
+        return False
+    row = cur.fetchone()
+    db.close()
+    return row[0] if row is not None else False
 
 def organizationExists(orgname):
     db = Database()

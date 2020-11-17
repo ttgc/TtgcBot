@@ -29,6 +29,9 @@ from src.tools.CharacterUtils import *
 class Character:
     """Character class"""
     lvlcolor = ["00FF00","FFFF00","FF00FF","FF0000"]
+    gm_map_chartoint = {'O': 0, 'D': 1, 'I': 2, 'S': 3}
+    gm_map_inttochar = ['O', 'D', 'I', 'S']
+    gm_map_inttostr = ['offensive', 'defensive', 'illumination', 'sepulchral']
 
     def __init__(self,**kwargs):
         self.key = kwargs.get("charkey","unknown")
@@ -47,7 +50,6 @@ class Character:
         self.stat = kwargs.get("stat",[0,0,0,0,0,0,0])
         self.lp = kwargs.get("lp",0)
         self.dp = kwargs.get("dp",0)
-        #self.regenkarm = [0,kwargs.get("regenkarma",None)]
         self.mod = kwargs.get("mod",0)
         self.default_mod = kwargs.get("default_mod",0)
         self.default_karma = kwargs.get("default_karma",0)
@@ -67,7 +69,10 @@ class Character:
         self.precision = kwargs.get("prec",50)
         self.luck = kwargs.get("luck",50)
         self.affiliated_with = kwargs.get("org",None)
-        #mod 0 = offensiv / mod 1 = defensiv
+        self.hybrid_race = retrieveRaceName(kwargs.get("hybrid", None))
+        self.symbiont = retrieveSymbiontName(kwargs.get("symbiont", None))
+        self.planet_pilot = kwargs.get("planet_pilot", -1)
+        self.astral_pilot = kwargs.get("astral_pilot", -1)
 
     def __str__(self):
         return self.name
@@ -109,6 +114,20 @@ class Character:
         db.close()
         return self.jdr.get_character(self.key)
 
+    def makehybrid(self, race, allowOverride=False):
+        if allowOverride or self.hybrid_race is None:
+            db = Database()
+            db.call("charhybrid", dbkey=self.key, idserv=self.jdr.server, idchan=self.jdr.channel, rc=race)
+            db.close()
+            return self.jdr.get_character(self.key)
+        return self
+
+    def setsymbiont(self, symbiont):
+        db = Database()
+        db.call("charsb", dbkey=self.key, idserv=self.jdr.server, idchan=self.jdr.channel, sb=symbiont)
+        db.close()
+        return self.jdr.get_character(self.key)
+
     def setlore(self,lore):
         db = Database()
         db.call("charsetlore",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,lor=lore)
@@ -122,6 +141,7 @@ class Character:
         self.name = name_
 
     def switchmod(self,default=False):
+        if not default and self.mod > 1: return self
         db = Database()
         db.call("switchmod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,def_=default)
         db.close()
@@ -158,7 +178,7 @@ class Character:
         db.close()
         self.lp -= 1
         self.karma = 10
-        self.mod = 1
+        self.mod = 2
 
     def usedp(self):
         db = Database()
@@ -166,7 +186,13 @@ class Character:
         db.close()
         self.dp -= 1
         self.karma = -10
-        self.mod = 0
+        self.mod = 3
+
+    def reset_lpdp(self):
+        db = Database()
+        db.call("end_lpdp_gamemod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
+        db.close()
+        if Character.gm_map_inttochar[self.mod] in ['I', 'S']: self.mod = self.default_mod
 
     def pet_add(self,key):
         if key in self.pet: return False

@@ -182,7 +182,7 @@ playlocal_notfound=file not found
 invite=Invite TtgcBot to your server !
 invite_srv=TtgcBot is currently on :
 invite_author=TtgcBot version {} developed by Ttgc
-ping=ping value is currently : `{} ms`
+ping=:ping_pong: pong ! :ping_pong:\nping value is currently : `{} ms`
 error=Your command throw the following error :\n```python\n{}\n```
 setlang=Language updated to {}
 #Pet update v1.2
@@ -265,6 +265,18 @@ fight_round=Battle fight round order
 max_karma_reach={} has reached 10 karma points
 min_karma_reach={} has reached -10 karma points
 nojoke=No joke found for selected language
+#Orianis update (Gamerule v5) v2.4
+illumination=Illumination
+sepulchral=Sepulchral
+clearchar=Current gamemod of {} has been cleared to its default state successfuly
+clearchar_notpossible=The character {} has neither used LP nor DP. Clear cannot be performed
+symbiont=symbiont
+pilot_a=astral piloting
+pilot_p=planet piloting
+char_hybrid=Character {} is now an hybrid of {} / {}
+char_nosymbiont=Character {} doesn't have symbiont anymore
+char_symbiont=Character {} has now a symbiont of {} type
+not_pilot=Character {} is not a valid pilot !
 #RP Group update v2.4
 jdrgrplist_title=Group list
 jdrgrplist=List of groups in your RPG

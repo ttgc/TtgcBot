@@ -43,7 +43,8 @@ class SkillCog(commands.Cog, name="Skills"):
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in data.char.skills:
-            embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+            if not organizationExists(i.origine) or not isOrganizationHidden(i.origine):
+                embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
         self.logger.log(logging.DEBUG+1,"skill list requested for character %s in channel %d on server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
@@ -60,7 +61,7 @@ class SkillCog(commands.Cog, name="Skills"):
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for sklist in search:
             for i in sklist:
-                embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+                embd.add_field(name="{}#{} ({})\n[{}]".format(i.ID,i.name,i.origine,i.extension),value=i.description.replace("\\n","\n"),inline=True)
         self.logger.log(logging.DEBUG+1,"skill search by %d in channel %d on server %d",ctx.message.author.id,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=embd)
 
@@ -78,7 +79,7 @@ class SkillCog(commands.Cog, name="Skills"):
             embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             for i in skill:
-                embd.add_field(name="{}#{} ({})".format(i.ID,i.name,i.origine),value=i.description.replace("\\n","\n"),inline=True)
+                embd.add_field(name="{}#{} ({})\n[{}]".format(i.ID,i.name,i.origine,i.extension),value=i.description.replace("\\n","\n"),inline=True)
             botmsg = await ctx.message.channel.send(embed=embd)
             chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.isdecimal()
             try: answer = await self.bot.wait_for('message',check=chk,timeout=60)

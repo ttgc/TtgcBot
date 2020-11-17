@@ -64,7 +64,7 @@ INSERT INTO Organizations(nom) VALUES
 ('ROOT'), ('Assassin');
 INSERT INTO Skills(nom,description,origine,webclass) VALUES
 ('Interposition','peut s''interposer lorsque son hote est cible contre un jet d''agilite, en cas de reussite le gardien peut tenter une parade si applicable','Gardien Protecteur','guardian protecteur'),
-('Hierarchie','+5% de critique sur les jets de force','Gardien Protecteur','guardian protecteur'),
+('Casser la baraque','+5% de critique sur les jets de force','Gardien Protecteur','guardian protecteur'),
 ('La lumiere guide vos pas','Vous permet d''invoquer la lumiere divine pour vous eclairer. Cette lumiere n''a aucun impact offensif ni defensif','Fidele de la lumiere','general affiliation saisho'),
 ('Benediction divine','En priant, permet de vous guerir d''une malediction puissante au prix d''un montant proportionnel de PM max perdus definitivement','Fidele de la lumiere','general affiliation saisho'),
 ('Absolution','La lumiere ne vous blesse plus mais vous soigne (coeff de -1), en contrepartie le coefficient de degats d''ombre est doublé','Fidele de la lumiere','general affiliation saisho'),

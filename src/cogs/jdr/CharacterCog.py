@@ -29,7 +29,6 @@ from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.converters import *
 from src.tools.parsingdice import *
-from src.tools.LatexTools import *
 import typing
 from random import randint
 import os
@@ -690,41 +689,6 @@ class CharacterCog(commands.Cog, name="Characters"):
             self.logger.log(logging.DEBUG+1,"/charkill (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
             with open("pictures/you are dead.png","rb") as f:
                 await ctx.message.channel.send(file=discord.File(f))
-
-    @commands.check(check_chanmj)
-    @commands.cooldown(1,30,commands.BucketType.channel)
-    @character.command(name="export")
-    async def character_export(self,ctx,char: CharacterConverter, lang: typing.Optional[str] = "FR"):
-        """**GM/MJ only**
-        Export the character information in PDF file format and send it in the channel
-        By default, the generated PDF is in french, use `EN` value for `language` to output in english your character."""
-        if not os.access("template/{}".format(lang), os.F_OK): lang = "FR"
-        datalang = get_lang(lang) if lang_exist(lang) else get_lang()
-        template = LatexBuilder(file="main.tex",dir="template/{}/".format(lang))
-        template.set_remote(None)
-        modd = datalang["offensive"] if char.mod == 0 else datalang["defensive"]
-        sklist = []
-        for i in char.skills:
-            sklist.append("\\item {} : {}".format(i.name, i.description.replace("%","\\%")) if len(i.description) <= 80 else "\\item {}".format(i.name))
-        if sklist == []:
-            sklist = ["\\item \\dotfill \n"]*10
-        sklist = " \n".join(sklist)
-        latexcolor = {"00FF00": "green", "FFFF00": "yellow", "FF00FF": "magenta", "FF0000": "red"}
-        color = latexcolor[Character.lvlcolor[(char.lvl-1)%len(Character.lvlcolor)]]
-        pathtoimage = "{}/template/{}/".format(os.getcwd().replace("\\","/"), lang)
-        inv = str(char.inventory) if len(char.inventory.items) > 0 else "\\dotfill \\\\ \n"*5
-        charxp = char.xp/100 if char.xp <= 100 else max(min(char.xp-((char.lvl-1)*100), 100), 0)/100
-        template.parse(name=char.name, race=char.race, class_=char.classe, dmod=modd, pv=str(char.PV),
-                        str_=str(char.force), cha=str(char.charisme), sm=str(char.mental),
-                        pm=str(char.PM), spr=str(char.esprit), agi=str(char.furtivite),
-                        int=str(char.intuition), baseskill=sklist, inventory=inv,
-                        money=str(char.money), karma=str(char.karma), lp=r"\ding{113} "*char.lp,
-                        dp=r"\ding{110} "*char.dp, lvl=str(char.lvl), lvlcolor=color,
-                        xp=str(charxp), imgpath=pathtoimage)
-        self.logger.log(logging.DEBUG+1,"/export (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
-        callback = functools.partial(compileAndSendPDF, ctx.message.channel, template, char.name, self.bot.loop)
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            await self.bot.loop.run_in_executor(pool, callback)
 
     @commands.check(check_chanmj)
     @character.command(name="xp",aliases=["exp"])

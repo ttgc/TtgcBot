@@ -231,7 +231,6 @@ async def main():
     client.add_cog(Moderation(client,logger))
     client.add_cog(Other(client,logger))
     client.add_cog(NSFW(client,logger))
-    client.add_cog(Keeprole(client,logger))
     client.add_cog(Vocal(client,logger))
     client.add_cog(MainJDR(client,logger))
     client.add_cog(CharacterCog(client,logger))

@@ -20,7 +20,7 @@
 from src.utils.checks import *
 from src.tools.BotTools import *
 from discord.ext import commands
-import logging,asyncio
+import logging, asyncio
 import discord
 import typing
 from src.tools.Translator import *
@@ -56,7 +56,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(data.lang["setadmin"].format(role.mention))
 
     @commands.check(check_admin)
-    @commands.command()
+    @commands.command(enabled=False)
     async def contentban(self,ctx,ctban):
         """**Admin only**
         Forbid a content on your server. All message containing banned content will be automatically deleted by the bot and the author will receive a private message explaining why.
@@ -73,7 +73,7 @@ class Moderation(commands.Cog):
             await ctx.message.channel.send(data.lang["contentban_limit"])
 
     @commands.check(check_admin)
-    @commands.command()
+    @commands.command(enabled=False)
     async def contentunban(self,ctx,ctban):
         """**Admin only**
         Unban content previously banned by `contentban` command"""
@@ -84,7 +84,7 @@ class Moderation(commands.Cog):
 
     @commands.check(check_admin)
     @commands.bot_has_permissions(manage_roles=True,ban_members=True,kick_members=True)
-    @commands.command()
+    @commands.command(enabled=False)
     async def warn(self,ctx,members: commands.Greedy[discord.Member],*,reason):
         """**Admin only**
         Warn one or many members. The warn does nothing except inform the members that they have not followed your guidelines if you didn't configure the warn sanctions through `configwarn` command."""
@@ -130,7 +130,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_admin)
-    @commands.command()
+    @commands.command(enabled=False)
     async def unwarn(self,ctx,members: commands.Greedy[discord.Member]):
         """**Admin only**
         Remove a warn from one or many users. The number of warnings is important only if you have configure warn sanctions through `configwarn` command"""
@@ -148,7 +148,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_admin)
-    @commands.command()
+    @commands.command(enabled=False)
     async def configwarn(self,ctx,value: int,sanction,rl: typing.Optional[discord.Role]):
         """**Admin only**
         Configure warn sanctions. Set a sanction for a certain amount of warnings received. The sanction will be automatically applied to each members with at least the number of warnings given. Only the most valuable sanction will be applied.
@@ -176,7 +176,7 @@ class Moderation(commands.Cog):
         self.logger.info("set configwarn %s for %d warnings on server %s",sanction,value,str(ctx.message.guild.id))
 
     @commands.check(check_admin)
-    @commands.command(aliases=['warnls'])
+    @commands.command(aliases=['warnls'], enabled=False)
     async def warnlist(self,ctx):
         """**Admin only**
         Show all members with warnings and their number of warnings received"""
@@ -191,7 +191,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_admin)
-    @commands.command(aliases=['warnconfigls','warncfgls','warncfglist'])
+    @commands.command(aliases=['warnconfigls','warncfgls','warncfglist'], enabled=False)
     async def warnconfiglist(self,ctx):
         """**Admin only**
         Show the sanction configuration of warn command on your server"""
@@ -211,7 +211,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(embed=embd)
 
     @commands.check(check_admin)
-    @commands.command()
+    @commands.command(enabled=False)
     async def userblock(self,ctx,usr):
         """**Admin only**
         Block users joining your server by banning them if their username contains the specified value given"""
@@ -221,7 +221,7 @@ class Moderation(commands.Cog):
         await ctx.message.channel.send(data.lang["userblock"].format(usr))
 
     @commands.check(check_admin)
-    @commands.command()
+    @commands.command(enabled=False)
     async def userunblock(self,ctx,usr):
         """**Admin only**
         Remove user blocking for the specified value"""

@@ -25,34 +25,20 @@ import logging
 import traceback
 import os
 import sys
-# from random import randint,choice
-# from threading import Thread
-# import time
-# import zipfile
-# import requests
-# import subprocess as sub
 
 # import custom libs
 from src.utils.inits import *
-# from src.utils.INIfiles import *
 from src.utils.config import *
 from src.tools.BotTools import *
 from src.tools.Translator import *
 from src.utils.checks import *
 from src.help import *
-# from parsingdice import *
-# from VocalUtilities import *
-# from Character import *
-# from CharacterUtils import *
-# from converter import *
-# from mapmanager import *
 
 # import Cogs
 from src.cogs.BotManage import *
 from src.cogs.Moderation import *
 from src.cogs.Other import *
 from src.cogs.NSFW import *
-from src.cogs.Keeprole import *
 from src.cogs.Vocal import *
 from src.cogs.jdr.MainJDR import *
 from src.cogs.jdr.CharacterCog import *
@@ -73,8 +59,8 @@ initdirs(logger)
 checkfiles(logger)
 
 # Initialize bot status
-global statut
-statut = discord.Game(name=Config()["discord"]["default-game"])
+global status
+status = discord.Game(name=Config()["discord"]["default-game"])
 
 # Get bot Token
 global TOKEN
@@ -89,7 +75,7 @@ def get_prefix(bot,message):
 
 # Initialize client
 global client
-client = discord.ext.commands.Bot(get_prefix, case_insensitive=True, activity=statut, help_command=Help(), intents=discord.Intents.all())
+client = discord.ext.commands.Bot(get_prefix, case_insensitive=True, activity=status, help_command=Help(), intents=discord.Intents.all())
 
 # Global checks
 @client.check
@@ -106,28 +92,10 @@ async def blacklist(ctx):
         lgcode = getuserlang(str(ctx.message.author.id))
         if not lang_exist(lgcode): lgcode = "EN"
         lang = get_lang(lgcode)
-        await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention,str(reason)))
+        await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention, str(reason)))
     return not blacklisted
 
 # Client events
-@client.event
-async def on_message(message):
-    if not message.content.startswith(get_prefix(client,message)):
-        if message.guild is not None and message.author != client.user:
-            srv = DBServer(str(message.guild.id))
-            filtre = srv.wordblocklist()
-            for i in filtre:
-                if i in message.content:
-                    lgcode = getuserlang(str(message.author.id))
-                    if not lang_exist(lgcode): lgcode = "EN"
-                    lang = get_lang(lgcode)
-                    await message.delete()
-                    await message.author.send(lang["contentbanned"])
-                    return
-    else:
-        ctx = await client.get_context(message)
-        await client.invoke(ctx)
-
 @client.event
 async def on_command_error(ctx,error):
     global logger
@@ -148,44 +116,18 @@ async def on_command_error(ctx,error):
     await ctx.message.channel.send(msg)
 
 @client.event
-async def on_member_join(member):
-    global logger
-    srv = DBServer(str(member.guild.id))
-    userblocked = srv.blockuserlist()
-    for i in userblocked:
-        if i in str(member).split("#")[0]:
-            await asyncio.sleep(1)
-            await member.ban(delete_message_days=1)
-            try: logger.info("Auto banned user '%s'(ID=%s) from guild '%s'(ID=%s) because of blockuserlist",str(member),str(member.id),str(member.guild),str(member.guild.id))
-            except: logger.info("Auto banned user '%s' from guild '%s' because of blockuserlist",str(member.id),str(member.guild.id))
-            return
-    if srv.keepingrole:
-        await asyncio.sleep(1)
-        await srv.restorerolemember(member.guild,member)
-        try: logger.info("Restored user roles for %s(ID=%s) in guild %s(ID=%s)",str(member),str(member.id),str(member.guild),str(member.guild.id))
-        except: logger.info("Restored user roles for %s in guild %s",str(member.id),str(member.guild.id))
-
-@client.event
-async def on_member_remove(member):
-    srv = DBServer(str(member.guild.id))
-    if srv.keepingrole:
-        srv.backuprolemember(member)
-        try: logger.info("Backuped user roles for %s(ID=%s) in guild %s(ID=%s)",str(member),str(member.id),str(member.guild),str(member.guild.id))
-        except: logger.info("Backuped user roles for %s in guild %s",str(member.id),str(member.guild.id))
-
-@client.event
 async def on_guild_join(guild):
     global logger
     addserver(guild)
-    try: logger.info("Added server '%s' to the database : ID=%s",str(guild),str(guild.id))
-    except: logger.info("Added server to the database : ID=%s",str(guild.id))
+    try: logger.info("Added server '%s' to the database : ID=%s", str(guild), str(guild.id))
+    except: logger.info("Added server to the database : ID=%s", str(guild.id))
 
 @client.event
 async def on_guild_remove(guild):
     global logger
     srv = DBServer(str(guild.id))
     srv.remove()
-    logger.info("Removed server from the database : ID=%s",str(guild.id))
+    logger.info("Removed server from the database : ID=%s", str(guild.id))
 
 @client.event
 async def on_error(event,*args,**kwargs):
@@ -197,32 +139,41 @@ async def on_error(event,*args,**kwargs):
 
 @client.event
 async def on_ready():
-    global statut,logger
+    global logger
     logger.info("Successful connected. Initializing bot system")
     botaskperm = discord.Permissions().all()
     botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
-    url = discord.utils.oauth_url(str(client.user.id),botaskperm)
+    url = discord.utils.oauth_url(str(client.user.id), botaskperm)
     print(url)
-    logger.info("Generate invite link : %s",url)
-    srvid,nbr = [],0
+    logger.info("Generate invite link : %s", url)
+    srvid, nbr = [], 0
     for i in client.guilds:
         srvid.append(str(i.id))
         if str(i.id) not in srvlist():
             addserver(i)
             nbr += 1
-            try: logger.info("This server has invited the bot during off period, adding it to the database : %s (ID=%s)",str(i),str(i.id))
-            except: logger.info("Server added (ID=%s)",str(i.id))
-    logger.info("Added %d new servers to the database successful",nbr)
-    logger.info("Purged %d servers wich have kicked the bot at least one year ago successful",purgeservers(365))
+            try: logger.info("This server has invited the bot during off period, adding it to the database : %s (ID=%s)", str(i), str(i.id))
+            except: logger.info("Server added (ID=%s)", str(i.id))
+    logger.info("Added %d new servers to the database successful", nbr)
+    logger.info("Purged %d servers wich have kicked the bot at least one year ago successful", purgeservers(365))
     nbr = 0
     for i in srvlist():
         if i not in srvid:
             srv = DBServer(i)
             srv.remove()
             nbr += 1
-            logger.info("This server has kicked the bot during off period, removing it from the database : ID=%s",str(i))
-    logger.info("Removed %d old servers from the database successful",nbr)
+            logger.info("This server has kicked the bot during off period, removing it from the database : ID=%s", str(i))
+    logger.info("Removed %d old servers from the database successful", nbr)
     logger.info("Bot is now ready")
+
+@client.event
+async def on_resumed():
+    global status, client
+    logger.info("Resumed session")
+    botmanagecog = client.get_cog("Bot Management"):
+    if botmanagecog and botmanagecog.status:
+        status = botmanagecog.status
+    await self.bot.change_presence(activity=self.status)
 
 # ========== MAIN ========== #
 async def main():

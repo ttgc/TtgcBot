@@ -28,6 +28,7 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
         self.bot = bot
         self.logger = logger
         self.handlederror = 0
+        self.status = None
 
     @commands.check(check_botowner)
     @commands.command(aliases=["eval"])
@@ -38,9 +39,8 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
     @commands.check(check_botowner)
     @commands.command()
     async def setgame(self,ctx,*,game):
-        global statut
-        statut = discord.Game(name=game)
-        await self.bot.change_presence(activity=statut)
+        self.status = discord.Game(name=game)
+        await self.bot.change_presence(activity=self.status)
 
     @commands.check(check_botowner)
     @commands.command()

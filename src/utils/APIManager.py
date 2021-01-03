@@ -82,3 +82,4 @@ class APIManager:
             result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
 
         self._logout()
+        return result

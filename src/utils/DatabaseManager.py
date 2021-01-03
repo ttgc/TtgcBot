@@ -19,6 +19,7 @@
 
 import psycopg2 as sql
 from src.utils.config import *
+from src.utils.exceptions import *
 
 class Database:
     def __init__(self):
@@ -58,6 +59,3 @@ class Database:
         else:
             self.connection.commit()
         self.connection.close()
-
-class DatabaseException(Exception):
-    pass

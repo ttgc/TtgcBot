@@ -19,6 +19,15 @@
 
 from src.utils.exceptions import *
 
+class HTTPException(Exception):
+    def __init__(self, errcode, message=None):
+        self.errcode = errcode
+        self.message = message if message else "No more details provided"
+        super().__init__(str(self))
+
+    def __str__(self):
+        return "HTTPException: Error Code {} ({})".format(self.errcode, self.message)
+
 class ManagerException(Exception):
     def __init__(self, message="Manager exception occured", **kwargs):
         self.message = message

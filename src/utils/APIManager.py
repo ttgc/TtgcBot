@@ -69,15 +69,16 @@ class APIManager:
         if requesterID: headers["member"] = requesterID
         if roleID: headers["role"] = roleID
 
+        result = None
         if reqType == RequestType.GET:
-            return HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult))
+             result = await HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult)
         if reqType == RequestType.POST:
-            return HTTP.post("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult))
+            result = await HTTP.post("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.PUT:
             body = body if len(body) > 0 else None
-            return HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult))
+            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.DELETE:
             body = body if len(body) > 0 else None
-            return HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult))
+            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
 
         self._logout()

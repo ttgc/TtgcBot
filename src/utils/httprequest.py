@@ -46,27 +46,33 @@ class HTTP:
             if len(headers) > 0:
                 if len(query) > 0:
                     async with session.get(url, params=kwargs, headers=headers, ssl=False) as r:
-                        return cl._processResult(r, jsonResult=jsonResult)
+                        res = await cl._processResult(r, jsonResult=jsonResult)
+                        return res
                 else:
                     async with session.get(url, headers=headers, ssl=False) as r:
-                        return cl._processResult(r, jsonResult=jsonResult)
+                        res = await cl._processResult(r, jsonResult=jsonResult)
+                        return res
             else:
                 if len(query) > 0:
                     async with session.get(url, params=kwargs, ssl=False) as r:
-                        return cl._processResult(r, jsonResult=jsonResult)
+                        res = await cl._processResult(r, jsonResult=jsonResult)
+                        return res
                 else:
                     async with session.get(url, ssl=False) as r:
-                        return cl._processResult(r, jsonResult=jsonResult)
+                        res = await cl._processResult(r, jsonResult=jsonResult)
+                        return res
 
     @classmethod
     async def post(cl, url, body, *, hasResult=False, headers={}, jsonResult=True):
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 async with session.post(url, json=body, headers=headers, ssl=False) as r:
-                    return cl._processResult(r, hasResult, jsonResult)
+                    res = await cl._processResult(r, hasResult, jsonResult)
+                    return res
             else:
                 async with session.post(url, json=body, ssl=False) as r:
-                    return cl._processResult(r, hasResult, jsonResult)
+                    res = await cl._processResult(r, hasResult, jsonResult)
+                    return res
 
     @classmethod
     async def put(cl, url, body=None, *, hasResult=False, headers={}, jsonResult=True):
@@ -74,17 +80,21 @@ class HTTP:
             if len(headers) > 0:
                 if body:
                     async with session.post(url, json=body, headers=headers, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
                 else:
                     async with session.post(url, headers=headers, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
             else:
                 if body:
                     async with session.post(url, json=body, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
                 else:
                     async with session.post(url, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
 
     @classmethod
     async def delete(cl, url, body=None, *, hasResult=False, headers={}, jsonResult=True):
@@ -92,14 +102,18 @@ class HTTP:
             if len(headers) > 0:
                 if body:
                     async with session.post(url, json=body, headers=headers, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
                 else:
                     async with session.post(url, headers=headers, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
             else:
                 if body:
                     async with session.post(url, json=body, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res
                 else:
                     async with session.post(url, ssl=False) as r:
-                        return cl._processResult(r, hasResult, jsonResult)
+                        res = await cl._processResult(r, hasResult, jsonResult)
+                        return res

@@ -19,7 +19,7 @@
 
 import discord
 import asyncio
-from src.utils.DatabaseManager import *
+from src.tools.datahandler.DatabaseManager import *
 import src.tools.Character as ch
 import src.tools.CharacterUtils as chutil
 

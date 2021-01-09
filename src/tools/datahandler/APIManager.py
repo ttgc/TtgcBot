@@ -23,6 +23,7 @@ from enum import Enum
 from src.utils.config import *
 from src.utils.exceptions import *
 from src.utils.httprequest import *
+from src.tools.datahandler.DataCache import *
 
 class RequestType(Enum):
     GET=0
@@ -63,13 +64,18 @@ class APIManager:
         self.logged = False
         self._token = None
 
-    async def __call__(self, reqType, endpoint, *, requesterID=None, roleID=None, body={}, query={}, hasResult=False, jsonResult=True):
+    async def __call__(self, reqType, endpoint, *, requesterID=None, roleID=None, body={}, query={}, hasResult=False, jsonResult=True, resource=None, forceGet=False):
         self._login(requesterID, roleID, endpoint)
         headers = {"token": self._token}
         if requesterID: headers["member"] = requesterID
         if roleID: headers["role"] = roleID
-
+        cache = DataCache()
         result = None
+
+        if resource is not None and not forceGet and reqType == RequestType.GET:
+            result = cache[resource]
+            if result is not None: return result
+
         if reqType == RequestType.GET:
              result = await HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult)
         if reqType == RequestType.POST:
@@ -80,6 +86,12 @@ class APIManager:
         if reqType == RequestType.DELETE:
             body = body if len(body) > 0 else None
             result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
+
+        if resource is not None:
+            if reqType == RequestType.GET:
+                cache[resource] = result
+            else:
+                cache.remove(resource)
 
         self._logout()
         return result

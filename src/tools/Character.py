@@ -21,7 +21,7 @@ import discord
 import asyncio
 from random import randint,choice
 #from src.converter import *
-from src.utils.DatabaseManager import *
+from src.tools.datahandler.DatabaseManager import *
 #from tools.BotTools import DBJDR
 #import tools.BotTools as bt
 from src.tools.CharacterUtils import *

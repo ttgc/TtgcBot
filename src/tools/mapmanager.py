@@ -19,7 +19,7 @@
 
 from enum import Enum
 from PIL import Image,ImageDraw,ImageFont
-from src.utils.DatabaseManager import *
+from src.tools.datahandler.DatabaseManager import *
 from src.utils.config import *
 import io,asyncio,discord
 

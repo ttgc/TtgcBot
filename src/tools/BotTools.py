@@ -19,300 +19,96 @@
 
 import discord
 import asyncio
-from src.tools.datahandler.DatabaseManager import *
+from discord.ext import commands
+from src.tools.datahandler.APIManager import *
 import src.tools.Character as ch
 import src.tools.CharacterUtils as chutil
 
 class DBServer:
-    def __init__(self,ID):
+    async def __init__(self, ID):
         self.ID = ID
-        db = Database()
-        cur = db.execute("SELECT * FROM Serveur WHERE id_server = %(idserv)s;",idserv=ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the server")
-        info = cur.fetchone()
-        db.close()
-        self.mjrole = info[1] if info[1] is not None else "-1"
-        self.prefix = info[2]
-        self.keepingrole = info[3]
-        self.adminrole = info[4] if info[4] is not None else "-1"
+        self.api = APIManager()
+        info = await self.api(RequestType.GET, "Server/{}".format(self.ID), resource="SRV://{}".format(self.ID))
+        if info.status // 100 != 2:
+            raise APIException("Server not found", srv=self.ID, code=info.status)
+        self.mjrole = info.result.get("mjRole", None)
+        self.prefix = info.result.get("prefix", '/')
+        self.adminrole = info.result.get("adminRole", None)
 
-    def togglekeeprole(self):
-        self.keepingrole = not self.keepingrole
-        db = Database()
-        db.call("togglekeepingrole",idserv=self.ID)
-        db.close()
+    async def setmjrole(self, roleid, requester, requesterRole):
+        info = await self.api(RequestType.PUT, "Server/{}/setrole".format(self.ID),
+            resource="SRV://{}".format(self.ID), requesterID=requester, roleID=requesterRole, body={"mj": roleid, "admin": None})
 
-    def setmjrole(self,roleid):
+        if info.status // 100 != 2:
+            raise APIException("Server set MJ role error", srv=self.ID, code=info.status)
         self.mjrole = roleid
-        db = Database()
-        db.call("setroleserver",idserv=self.ID,rltype="M",rol=roleid)
-        db.close()
 
-    def setadminrole(self,roleid):
-        self.mjrole = roleid
-        db = Database()
-        db.call("setroleserver",idserv=self.ID,rltype="A",rol=roleid)
-        db.close()
+    async def setadminrole(self, roleid, requester, requesterRole):
+        info = await self.api(RequestType.PUT, "Server/{}/setrole".format(self.ID),
+            resource="SRV://{}".format(self.ID), requesterID=requester, roleID=requesterRole, body={"mj": None, "admin": roleid})
 
-    def setprefix(self,prefix):
+        if info.status // 100 != 2:
+            raise APIException("Server set Admin role error", srv=self.ID, code=info.status)
+        self.adminrole = roleid
+
+    async def setprefix(self, prefix, requester, requesterRole):
+        info = await self.api(RequestType.PUT, "Server/{}/setprefix".format(self.ID),
+            resource="SRV://{}".format(self.ID), requesterID=requester, roleID=requesterRole, body={"prefix": prefix})
+
+        if info.status // 100 != 2:
+            raise APIException("Server set prefix error", srv=self.ID, code=info.status)
         self.prefix = prefix
-        db = Database()
-        db.call("setprefix",idserv=self.ID,pref=prefix)
-        db.close()
 
-    def keeprolelist(self):
-        db = Database()
-        cur = db.execute("SELECT id_role FROM role WHERE id_server = %(idserv)s GROUP BY id_role;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the keeprole list")
-        ls = []
-        for i in cur:
-            ls.append(i[0])
-        db.close()
-        return ls
+    async def jdrlist(self, requester, requesterRole):
+        info = await self.api(RequestType.GET, "JDR/list/{}".format(self.ID),
+            resource="SRV://{}/jdrlist".format(self.ID), requesterID=requester, roleID=requesterRole)
 
-    def keeprolemember(self):
-        db = Database()
-        cur = db.execute("SELECT id_member FROM Keeprole WHERE id_server = %(idserv)s GROUP BY id_member;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the keeprole member list")
-        ls = []
-        for i in cur:
-            ls.append(i[0])
-        db.close()
-        return ls
+        if info.status // 100 != 2:
+            raise APIException("Unable to get the jdr list", srv=self.ID, code=info.status)
+        return info.result.get("jdr", [])
 
-    def keeprolememberwithrole(self):
-        db = Database()
-        cur = db.execute("SELECT id_member,id_role FROM Keeprole WHERE id_server = %(idserv)s;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the keeprole member/roles list")
-        ls = cur.fetchall()
-        db.close()
-        return ls
+    async def remove(self, requester, requesterRole):
+        info = await self.api(RequestType.PUT, "Server/{}/leave".format(self.ID),
+            resource="SRV://{}".format(self.ID), requesterID=requester, roleID=requesterRole)
 
-    def wordblocklist(self):
-        db = Database()
-        cur = db.execute("SELECT content FROM Word_Blocklist WHERE id_server = %(idserv)s;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the blocked word list")
-        ls = []
-        for i in cur:
-            ls.append(i[0])
-        db.close()
-        return ls
+        if info.status // 100 != 2:
+            raise APIException("Server leave error", srv=self.ID, code=info.status)
 
-    def jdrlist(self):
-        db = Database()
-        cur = db.execute("SELECT id_channel,creation,PJs,id_member FROM JDR WHERE id_server = %(idserv)s;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the jdr list")
-        ls = cur.fetchall()
-        db.close()
-        db = Database()
-        cur = db.execute("SELECT id_target FROM JDRextension WHERE id_server = %(idserv)s;",idserv=self.ID)
-        if cur is not None:
-            extended = []
-            for i in cur:
-                extended.append(i[0])
-            todel = []
-            for i in ls:
-                if i[0] in extended:
-                    todel.append(i)#ls.remove(i)
-            for i in todel:
-                ls.remove(i)
-        db.close()
-        return ls
+    async def getJDR(self, channelid, requester, requesterRole):
+        jdr = await DBJDR(self.ID, channelid, requester, requesterRole)
+        return jdr
 
-    def jdrextension(self):
-        db = Database()
-        cur = db.execute("SELECT id_target FROM JDRextension WHERE id_server = %(idserv)s GROUP BY id_target;",idserv=self.ID)
-        if cur is not None:
-            extended = []
-            for i in cur:
-                extended.append(i[0])
-        db.close()
-        return extended
+    async def jdrstart(self, mjid, requesterRole, *channels):
+        if len(channels) == 0:
+            raise commands.CommandError("JDR create error: channel list is empty")
 
-    def blockword(self,string):
-        db = Database()
-        db.call("blockword",idserv=self.ID,word=string)
-        db.close()
+        reqbody = {
+            "server": self.ID,
+            "channel": channels[0],
+            "extensions": list(channels[1:]) if len(channels) > 1 else [],
+            "owner": mjid
+        }
 
-    def unblockword(self,string):
-        db = Database()
-        db.call("unblockword",idserv=self.ID,word=string)
-        db.close()
+        info = await self.api(RequestType.PUT, "JDR/create",
+            resource="SRV://{}//{}".format(self.ID, channelid), requesterID=mjid, roleID=requesterRole, body=reqbody)
 
-    def blockusername(self,user):
-        db = Database()
-        cur = db.call("userblock",usr=user,idserv=self.ID)
-        newid = None
-        if cur is not None:
-            newid = cur.fetchone()
-        db.close()
-        return newid
+        if info.status // 100 != 2:
+            raise APIException("JDR create error", srv=self.ID, channel=channels[0], code=info.status)
+        return self.getJDR(channelid, mjid, requesterRole)
 
-    def unblockusername(self,user):
-        db = Database()
-        cur = db.call("find_userblocked",usr=user,idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("Unable to unblock username")
-        usrid = cur.fetchone()[0]
-        if usrid is None:
-            db.close(True)
-            return False
-        db.close()
-        db = Database()
-        db.call("userunblock",id=usrid)
-        db.close()
-        return True
+async def addserver(server):
+    info = await self.api(RequestType.PUT, "Server/{}/join".format(server.id), resource="SRV://{}".format(server.id))
 
-    def blockuserlist(self):
-        db = Database()
-        cur = db.call("userblock_list",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            return []
-        ls = []
-        for i in cur:
-            ls.append(i)
-        db.close()
-        return ls
+    if info.status // 100 != 2:
+        raise APIException("Server join error", srv=server.id, code=info.status)
+    return DBServer(server.id)
 
-    def backuprolemember(self,member):
-        db = Database()
-        ls = self.keeprolelist()
-        for i in member.roles:
-            if str(i.id) in ls:
-                db.call("backuprolemember",idmemb=str(member.id),idserv=self.ID,idrole=str(i.id))
-        db.close()
+async def purgeservers(days_):
+    info = await self.api(RequestType.DELETE, "Server/purge", hasResult=True, jsonResult=False, body={"days": days_})
 
-    async def restorerolemember(self,srv,member):
-        db = Database()
-        cur = db.execute("SELECT id_role FROM keeprole WHERE id_server = %(idserv)s AND id_member = %(idmemb)s;",idserv=self.ID,idmemb=member.id)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to restore roles of the member")
-        ls = []
-        for i in cur:
-            rl = discord.utils.get(srv.roles,id=int(i[0]))
-            ls.append(rl)
-            await member.add_roles(rl)
-        for i in ls:
-            db.call("restorerolemember",idmemb=str(member.id),idserv=self.ID,idrole=str(i.id))
-        db.close()
-
-    def addkeeprole(self,roleid):
-        db = Database()
-        db.call("addrole",idserv=self.ID,idrole=roleid)
-        db.close()
-
-    def removekeeprole(self,roleid):
-        db = Database()
-        db.call("removerole",idserv=self.ID,idrole=roleid)
-        db.close()
-
-    def clearkeeprole(self):
-        db = Database()
-        db.call("clearkeeprole",idserv=self.ID)
-        db.close()
-
-    def get_warned(self):
-        db = Database()
-        cur = db.execute("SELECT id_member,warn_number FROM warn WHERE id_server = %(idserv)s ORDER BY warn_number;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find warn for this server")
-        ls = cur.fetchall()
-        db.close()
-        return ls
-
-    def get_warnnbr(self,dbmember):
-        db = Database()
-        cur = db.execute("SELECT warn_number FROM warn WHERE id_server = %(idserv)s AND id_member = %(idmemb)s;",idserv=self.ID,idmemb=dbmember.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find warn number for this server and user")
-        result = cur.fetchone()
-        db.close()
-        if result is None: return 0
-        return result[0]
-
-    def get_warnconfig(self):
-        db = Database()
-        cur = db.execute("SELECT warn_number,sanction FROM warnconfig WHERE id_server = %(idserv)s ORDER BY warn_number DESC;",idserv=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find warnconfig for this server")
-        ls = cur.fetchall()
-        db.close()
-        return ls
-
-    def warnconfig(self,nbr,act):
-        db = Database()
-        db.call("warnconfigure",idserv=self.ID,warns=nbr,action=act)
-        db.close()
-
-    def warnuser(self,memberid):
-        db = Database()
-        db.call("warnuser",idmemb=memberid,idserv=self.ID)
-        db.close()
-
-    def unwarnuser(self,memberid):
-        db = Database()
-        db.call("unwarnuser",idmemb=memberid,idserv=self.ID)
-        db.close()
-
-    def remove(self):
-        db = Database()
-        db.call("removeserver",idserv=self.ID)
-        db.close()
-
-    def getJDR(self,channelid):
-        return DBJDR(self.ID,channelid)
-
-    def jdrstart(self,channelid,mjid):
-        db = Database()
-        db.call("jdrcreate",idserv=self.ID,idchan=channelid,mj=mjid)
-        db.close()
-        return self.getJDR(channelid)
-
-def addserver(server):
-    db = Database()
-    db.call("addserver",idserv=str(server.id))
-    db.close()
-    return DBServer(str(server.id))
-
-def purgeservers(days_):
-    db = Database()
-    cur = db.call("purgeserver",days=days_)
-    if cur is None:
-        db.close(True)
-        raise DatabaseException("unable to purge servers")
-    nbr = cur.fetchone()[0]
-    db.close()
-    return int(nbr)
-
-def srvlist():
-    db = Database()
-    cur = db.execute("SELECT id_server FROM Serveur WHERE id_server NOT IN (SELECT id_server FROM purge)")
-    if cur is None:
-        db.close(True)
-        raise DatabaseException("unable to find the server list")
-    ls = []
-    for i in cur:
-        ls.append(i[0])
-    db.close()
-    return ls
+    if info.status // 100 != 2:
+        raise APIException("Server purge error", code=info.status)
+    return int(info.result)
 
 class DBJDR:
     def __init__(self,srvid,channelid):

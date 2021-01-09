@@ -17,9 +17,10 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from discord.ext import commands
 from src.utils.exceptions import *
 
-class HTTPException(Exception):
+class HTTPException(commands.CommandError):
     def __init__(self, errcode, message=None):
         self.errcode = errcode
         self.message = message if message else "No more details provided"
@@ -28,11 +29,14 @@ class HTTPException(Exception):
     def __str__(self):
         return "HTTPException: Error Code {} ({})".format(self.errcode, self.message)
 
-class ManagerException(Exception):
+class ManagerException(commands.CommandError):
     def __init__(self, message="Manager exception occured", **kwargs):
         self.message = message
         self.kwargs = kwargs
         super().__init__(str(self))
+
+    def __getitem__(self, item):
+        return self.kwargs.get(item, None)
 
     def __str__(self):
         return "ManagerException: {} (with kwargs {})".format(self.message, self.kwargs)

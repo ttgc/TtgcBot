@@ -170,7 +170,7 @@ async def on_ready():
 async def on_resumed():
     global status, client
     logger.info("Resumed session")
-    botmanagecog = client.get_cog("Bot Management"):
+    botmanagecog = client.get_cog("Bot Management")
     if botmanagecog and botmanagecog.status:
         status = botmanagecog.status
     await self.bot.change_presence(activity=self.status)

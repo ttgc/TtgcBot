@@ -47,15 +47,16 @@ class DataCache:
     def setTimeLimit(self, time):
         self.maxTime = time
 
-    def remove(self, res):
+    def remove(self, res, remove_mapped_items=False):
         res = self._mappeditem.get(res, res)
         if res in self._cache:
             self._cache.pop(res)
             self._clock.pop(res)
-        self.removemapdest(res)
+        if remove_mapped_items:
+            self.removemapdest(res)
 
     def mapitems(self, res, *tomap):
-        for i in *tomap:
+        for i in tomap:
             if i not in self._cache:
                 self._mappeditem[i] = to
 

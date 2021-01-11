@@ -25,15 +25,18 @@ class DataCache:
     def __init__(self):
         self._cache = {}
         self._clock = {}
+        self._mappeditem = {}
         self.maxTime = 3600
 
     def __getitem__(self, res):
+        res = self._mappeditem.get(res, res)
         if res in self._cache and time.clock() - self._clock[res] > self.maxTime:
             self._cache.pop(res)
             self._clock.pop(res)
         return self._cache.get(res, None)
 
     def __setitem__(self, res, value):
+        res = self._mappeditem.get(res, res)
         self._cache[res] = value
         self._clock[res] = time.clock()
 
@@ -45,6 +48,24 @@ class DataCache:
         self.maxTime = time
 
     def remove(self, res):
+        res = self._mappeditem.get(res, res)
         if res in self._cache:
             self._cache.pop(res)
             self._clock.pop(res)
+        self.removemapdest(res)
+
+    def mapitems(self, res, *tomap):
+        for i in *tomap:
+            if i not in self._cache:
+                self._mappeditem[i] = to
+
+    def removemapsrc(self, mappedres):
+        if mappedres in self._mappeditem:
+            self._mappeditem.pop(mappedres)
+
+    def removemapdest(self, res):
+        ls = []
+        for i, k in self._mappeditem.items():
+            if k == res: ls.append(i)
+        for i in ls:
+            self.removemapsrc(i)

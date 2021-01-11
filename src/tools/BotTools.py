@@ -129,12 +129,18 @@ class DBJDR:
         self.channel = info.result.get("channel", self._initialChannelID)
         self.extensions = info.result.get("extensions", [])
 
+        cache = DataCache()
+        for i in [self.channel] + self.extensions:
+            if i != self._initialChannelID:
+                cache.mapitems("SRV://{}/{}".format(self.server, self._initialChannelID), "SRV://{}/{}".format(self.server, i))
+
     async def delete(self):
-        info = await self.api(RequestType.DELETE, "JDR/delete", body={"server": self.server, "channel": self.channel}
+        info = await self.api(RequestType.DELETE, "JDR/delete", body={"server": self.server, "channel": self.channel},
             resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
             raise APIException("JDR delete error", srv=self.ID, channel=self.channel, code=info.status)
+        DataCache.remove("SRV://{}/{}".format(self.server, self._initialChannelID))
 
     async def MJtransfer(self, member_id):
         info = await self.api(RequestType.PUT, "JDR/transfer/{}/{}".format(self.server, self.channel),
@@ -219,6 +225,9 @@ class DBJDR:
             raise APIException("JDR extend error", srv=self.ID, channel=self.channel, code=info.status)
         self.extensions.append(channel_id)
         self.extensions += list(other_channels)
+        cache = DataCache()
+        for i in [channel_id] + list(other_channels):
+            cache.mapitems("SRV://{}/{}".format(self.server, self._initialChannelID), "SRV://{}/{}".format(self.server, i))
 
     async def unextend(self, channel_id, *other_channels):
         reqbody = {
@@ -232,8 +241,13 @@ class DBJDR:
 
         if info.status // 100 != 2:
             raise APIException("JDR unextend error", srv=self.ID, channel=self.channel, code=info.status)
+        cache = DataCache()
         for channel in [channel_id] + list(other_channels):
             if channel in self.extensions: self.extensions.remove(channel)
+            cache.removemapsrc("SRV://{}/{}".format(self.server, channel))
+            if channel == self._initialChannelID:
+                cache.remove("SRV://{}/{}".format(self.server, self._initialChannelID))
+                self._initialChannelID = self.channel
 
     def unextend_all(self):
         reqbody = {
@@ -247,6 +261,11 @@ class DBJDR:
         if info.status // 100 != 2:
             raise APIException("JDR unextend all error", srv=self.ID, channel=self.channel, code=info.status)
         self.extensions = []
+        if self.channel == self._initialChannelID:
+            DataCache().removemapdest("SRV://{}/{}".format(self.server, self._initialChannelID))
+        else:
+            DataCache().remove("SRV://{}/{}".format(self.server, self._initialChannelID))
+            self._initialChannelID = self.channel
 
     def get_character(self,charkey):
         db = Database()

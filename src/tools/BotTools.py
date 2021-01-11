@@ -111,59 +111,142 @@ async def purgeservers(days_):
     return int(info.result)
 
 class DBJDR:
-    def __init__(self,srvid,channelid):
+    async def __init__(self, srvid, channelid, requester, requesterRole):
         self.server = srvid
-        db = Database()
-        cur = db.call("get_jdr",idserv=srvid,idchan=channelid)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the JDR")
-        info = cur.fetchone()
-        db.close()
-        self.creation_date = info[2]
-        self.pjs = info[3]
-        self.mj = info[4]
-        self.channel = info[1]
+        self.requester = requester
+        self.requesterRole = requesterRole
+        self._initialChannelID = channelid
 
-    def delete(self):
-        db = Database()
-        db.call("jdrdelete",idserv=self.server,idchan=self.channel)
-        db.close()
+        info = await self.api(RequestType.GET, "JDR/{}/{}".format(self.server, self._initialChannelID),
+            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
-    def MJtransfer(self,member_id):
-        db = Database()
-        db.call("mjtransfer",idserv=self.server,idchan=self.channel,mj=member_id)
-        db.close()
+        if info.status // 100 != 2:
+            raise APIException("Unable to find JDR", srv=self.server, channel=self._initialChannelID, code=info.status)
 
-    def copy(self,channel_id):
-        db = Database()
-        db.call("jdrcopy",idserv=self.server,src=self.channel,dest=channel_id)
-        db.close()
+        self.creation_date = info.result.get("creation", None)
+        self.pjs = info.result.get("players", -1)
+        self.mj = info.result.get("owner", self.requester)
+        self.channel = info.result.get("channel", self._initialChannelID)
+        self.extensions = info.result.get("extensions", [])
 
-    def charcreate(self,chardbkey,idclass):
-        db = Database()
-        db.call("charcreate",dbkey=chardbkey,idserv=self.server,idchan=self.channel,cl=idclass)
-        db.close()
+    async def delete(self):
+        info = await self.api(RequestType.DELETE, "JDR/delete", body={"server": self.server, "channel": self.channel}
+            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
-    def chardelete(self,chardbkey):
-        db = Database()
-        db.call("chardelete",dbkey=chardbkey,idserv=self.server,idchan=self.channel)
-        db.close()
+        if info.status // 100 != 2:
+            raise APIException("JDR delete error", srv=self.ID, channel=self.channel, code=info.status)
 
-    def extend(self,channel_id):
-        db = Database()
-        db.call("JDRextend",idserv=self.server,src=self.channel,target=channel_id)
-        db.close()
+    async def MJtransfer(self, member_id):
+        info = await self.api(RequestType.PUT, "JDR/transfer/{}/{}".format(self.server, self.channel),
+            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole,
+            body={"master": member_id})
 
-    def unextend(self,channel_id):
-        db = Database()
-        db.call("JDRstopextend",idserv=self.server,src=self.channel,target=channel_id)
-        db.close()
+        if info.status // 100 != 2:
+            raise APIException("MJ transfer error", srv=self.ID, channel=self.channel, oldmj=self.mj, newmj=member_id, code=info.status)
+        self.mj = member_id
+
+    async def copy(self, channel_id, *extensions):
+        reqbody = {
+            "server": self.server,
+            "from": self.channel,
+            "to": channel_id,
+            "extensions": list(extensions)
+        }
+
+        info = await self.api(RequestType.POST, "JDR/copy", body=reqbody
+            resource="SRV://{}/{}".format(self.server, channel_id), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("JDR copy error", srv=self.ID, channel=self.channel, tochan=channel_id, code=info.status)
+        return DBJDR(self.server, channel_id, self.requester, self.requesterRole)
+
+    async def charcreate(self, chardbkey, race, classe, **kwargs):
+        reqbody = {
+            "race": race,
+            "class_": classe,
+            "server": self.server,
+            "channel": self.channel,
+            "key": chardbkey,
+            "data": {
+                "name": kwargs.get("name", chardbkey),
+                "pv": kwargs.get("pv", 1)
+                "pm": kwargs.get("pm", 1)
+                "strength": kwargs.get("str", 50),
+                "spirit": kwargs.get("spr", 50),
+                "charisma": kwargs.get("cha", 50),
+                "agility": kwargs.get("agi", 50),
+                "precision": kwargs.get("prec", 50),
+                "luck": kwargs.get("luck", 50),
+                "intuition": kwargs.get("int", 50),
+                "mental": kwargs.get("mental", 100),
+                "karma": kwargs.get("karma", 0),
+                "gamemod": kwargs.get("gm", "offensive"),
+                "affiliation": kwargs.get("affiliation", None),
+                "money": kwargs.get("money", 0),
+                "hybrid": kwargs.get("hybrid", None),
+                "symbiont": kwargs.get("symbiont", None),
+                "pilot": {
+                    "astral": kwargs.get("pa", -1),
+                    "planet": kwargs.get("pp", -1)
+                }
+            }
+        }
+
+        info = await self.api(RequestType.POST, "Character/create", body=reqbody
+            resource="SRV://{}/{}/{}".format(self.server, self._initialChannelID, chardbkey), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Char create error", srv=self.ID, channel=self.channel, charkey=chardbkey, code=info.status)
+
+    async def chardelete(self, chardbkey):
+        info = await self.api(RequestType.DELETE, "Character/delete/{}/{}/{}".format(self.server, self.channel, chardbkey)
+            resource="SRV://{}/{}/{}".format(self.server, self._initialChannelID, chardbkey), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Char delete error", srv=self.ID, channel=self.channel, charkey=chardbkey, code=info.status)
+
+    async def extend(self, channel_id, *other_channels):
+        reqbody = {
+            "server": self.server,
+            "from": self.channel,
+            "to": [channel_id] + list(other_channels)
+        }
+
+        info = await self.api(RequestType.POST, "JDR/extend", body=reqbody
+            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("JDR extend error", srv=self.ID, channel=self.channel, code=info.status)
+        self.extensions.append(channel_id)
+        self.extensions += list(other_channels)
+
+    async def unextend(self, channel_id, *other_channels):
+        reqbody = {
+            "server": self.server,
+            "from": self.channel,
+            "to": [channel_id] + list(other_channels)
+        }
+
+        info = await self.api(RequestType.DELETE, "JDR/unextend", body=reqbody
+            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("JDR unextend error", srv=self.ID, channel=self.channel, code=info.status)
+        for channel in [channel_id] + list(other_channels):
+            if channel in self.extensions: self.extensions.remove(channel)
 
     def unextend_all(self):
-        db = Database()
-        db.call("JDRstopallextend",idserv=self.server,src=self.channel)
-        db.close()
+        reqbody = {
+            "server": self.server,
+            "channel": self.channel
+        }
+
+        info = await self.api(RequestType.DELETE, "JDR/unextend/all", body=reqbody
+            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("JDR unextend all error", srv=self.ID, channel=self.channel, code=info.status)
+        self.extensions = []
 
     def get_character(self,charkey):
         db = Database()
@@ -234,29 +317,47 @@ class DBJDR:
             charbase.append(self.get_character(i))
         return charbase
 
-    def get_serverinfo(self):
-        return DBServer(self.server)
+    async def get_serverinfo(self):
+        srv = await DBServer(self.server)
+        return srv
 
-    def set_finalizer_field(self,title,content):
-        db = Database()
-        db.call("set_finalize_field",idserv=self.server,idchan=self.channel,titl=title,descr=content)
-        db.close()
+    async def set_finalizer_field(self, **fields):
+        reqbody = {
+            "server": self.server,
+            "channel": self.channel,
+            "fields": []
+        }
 
-    def del_finalizer_field(self,title):
-        db = Database()
-        db.call("del_finalize_field",idserv=self.server,idchan=self.channel,titl=title)
-        db.close()
+        for i, k in fields.items():
+            reqbody["fields"].append({"title": i, "content": k})
 
-    def get_finalizer(self):
-        db = Database()
-        cur = db.call("finalizer",idserv=self.server,idchan=self.channel)
-        if cur is None:
-            db.close()
-            return []
+        info = await self.api(RequestType.POST, "Finalize/set", body=reqbody
+            resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Finalize set error", srv=self.ID, channel=self.channel, fields=fields, code=info.status)
+
+    async def del_finalizer_field(self, *fields):
+        reqbody = {
+            "fields": list(fields)
+        }
+
+        info = await self.api(RequestType.DELETE, "Finalize/delete/{}/{}".format(self.server, self.channel), body=reqbody
+            resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Finalize delete error", srv=self.ID, channel=self.channel, fields=fields, code=info.status)
+
+    async def get_finalizer(self):
+        info = await self.api(RequestType.GET, "Finalize/{}/{}".format(self.server, self.channel)
+            resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Finalize set error", srv=self.ID, channel=self.channel, fields=fields, code=info.status)
+
         ls = []
-        for i in cur:
-            ls.append((i[2],i[3]))
-        db.close()
+        for i in info.result.get("fields", []):
+            ls.append((i.get("title"), i.get("content")))
         return ls
 
 class DBMember:

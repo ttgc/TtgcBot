@@ -99,21 +99,23 @@ class DBServer:
             raise APIException("JDR create error", srv=self.ID, channel=channels[0], code=info.status)
         return self.getJDR(channelid, mjid, requesterRole)
 
-async def addserver(server):
-    api = APIManager()
-    info = await api(RequestType.PUT, "Server/{}/join".format(server.id), resource="SRV://{}".format(server.id))
+    @classmethod
+    async def addserver(cl, server):
+        api = APIManager()
+        info = await api(RequestType.PUT, "Server/{}/join".format(server.id), resource="SRV://{}".format(server.id))
 
-    if info.status // 100 != 2:
-        raise APIException("Server join error", srv=server.id, code=info.status)
-    return DBServer(server.id)
+        if info.status // 100 != 2:
+            raise APIException("Server join error", srv=server.id, code=info.status)
+        return cl(server.id)
 
-async def purgeservers(days_):
-    api = APIManager()
-    info = await api(RequestType.DELETE, "Server/purge", hasResult=True, jsonResult=False, body={"days": days_})
+    @staticmethod
+    async def purgeservers(days_):
+        api = APIManager()
+        info = await api(RequestType.DELETE, "Server/purge", hasResult=True, jsonResult=False, body={"days": days_})
 
-    if info.status // 100 != 2:
-        raise APIException("Server purge error", code=info.status)
-    return int(info.result)
+        if info.status // 100 != 2:
+            raise APIException("Server purge error", code=info.status)
+        return int(info.result)
 
 class DBJDR:
     async def __init__(self, srvid, channelid, requester, requesterRole):

@@ -15,10 +15,17 @@ jobs:
       with:
         python-version: 3.7
 
+    - name: Install Postgresql
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qy postgresql postgresql-server-dev-10 sudo
+        sudo service postgresql start
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip3 install -r Cosmo-Network/API/Tools/requirements.pip
+        pip3 install -r requirements.txt
 
     - name: Lint with flake8
       run: |
@@ -32,6 +39,37 @@ jobs:
 #      run: |
 #        pip install pytest
 #        pytest
+    
+    - name: Setup databases
+      env:
+        DBPWD: ${{ secrets.localdb_password }}
+      run: | 
+        Cosmo-Network/API/Tools/createdb/installdb.sh --api=ttgcapi --bot=ttgcbot --pwd=$DBPWD --generate-prod -c -u
+        Cosmo-Network/API/Tools/populatedb/populate.sh --bot=ttgcbot
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+      env:
+        ASPNETCORE_ENVIRONMENT: Production
+
+    - name: Build with dotnet
+      run: Cosmo-Network/API/Tools/deploy.sh --gmk --aspenv-prod --https
+      env:
+        ASPNETCORE_ENVIRONMENT: Production
+    
+    - name: Setup API environment
+      env:
+        TESTINGAPP_PWD: ${{ secrets.TESTINGAPP_PWD }}
+        TESTINGAPP_SALT: ${{ secrets.TESTINGAPP_SALT }}
+        DBPWD: ${{ secrets.localdb_password }}
+      run: |
+        echo "{\"apiurl\": \"https://localhost:5001\", \"register_test\": \"ttgcbotapp.json\", \"register_app\": {\"pwd\": \""$TESTINGAPP_PWD"\", \"timestamp\": \"05-10-2020-20-12-35\", \"salt\": "$TESTINGAPP_SALT"}}" > Cosmo-Network/API/Tools/toolsProperties.json
+        sleep 10
+        Cosmo-Network/API/Tools/populatedb/populate.sh --api=ttgcapi --scan=dynamic --pwd=$DBPWD
+        python3 "Cosmo-Network/API/Tools/API Register/register.py"
+        python3 Cosmo-Network/API/Tools/populatedb/scannode.py ttgcbot ttgcapi $(id -u -n) $DBPWD
 
     # - name: Install PostgreSQL
     #   run: |
@@ -71,8 +109,30 @@ jobs:
     #   run: |
     #     timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
 
+    - name: Unregister bot app
+      run: python3 "Cosmo-Network/API/Tools/API Register/unregister.py"
+
     - name: Approve pull request
       if: github.event_name == 'pull_request'
       uses: andrewmusgrave/automatic-pull-request-review@0.0.2
       with:
         repo-token: '${{ secrets.GITHUB_TOKEN }}'
+    
+    - name: Dump databases and gather artifacts
+      if: ${{ failure() }}
+      run: |
+        mkdir output
+        pg_dump ttgcbot > output/dump_bot.sql
+        pg_dump ttgcapi > output/dump_api.sql
+        cp Cosmo-Network/API/Tools/toolsProperties.json output/toolsProperties.json
+        cp Cosmo-Network/API/Tools/testingapp.json output/testingapp.json
+        cp Cosmo-Network/API/API/Properties/launchSettings.json output/launchSettings.json
+        cp Cosmo-Network/API/API/appsettings.Staging.json output/appsettings.Staging.json
+    
+    - name: Upload artifacts
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v2.1.4
+      with:
+        name: artifacts
+        path: output/
+        if-no-files-found: warn

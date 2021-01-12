@@ -21,7 +21,7 @@ import discord
 import asyncio
 from random import randint,choice
 #from src.converter import *
-from src.tools.datahandler.DatabaseManager import *
+from src.tools.datahandler.APIManager import *
 #from tools.BotTools import DBJDR
 #import tools.BotTools as bt
 from src.tools.CharacterUtils import *
@@ -315,7 +315,8 @@ class Pet:
 
     @staticmethod
     async def listpet(srv, channel, charkey, requester, requesterRole):
-        info = await self.api(RequestType.GET, "Pet/{}/{}/{}".format(srv, channel, charkey),
+        api = APIManager()
+        info = await api(RequestType.GET, "Pet/{}/{}/{}".format(srv, channel, charkey),
             resource="SRV://{}/{}/{}".format(srv, channel, charkey), requesterID=requester, roleID=requesterRole)
 
         if info.status // 100 != 2:

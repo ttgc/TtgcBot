@@ -20,6 +20,7 @@
 import discord
 import asyncio
 from discord.ext import commands
+from enum import Enum
 from src.tools.datahandler.APIManager import *
 from src.utils.decorators import deprecated
 from src.utils.config import Config
@@ -99,14 +100,16 @@ class DBServer:
         return self.getJDR(channelid, mjid, requesterRole)
 
 async def addserver(server):
-    info = await self.api(RequestType.PUT, "Server/{}/join".format(server.id), resource="SRV://{}".format(server.id))
+    api = APIManager()
+    info = await api(RequestType.PUT, "Server/{}/join".format(server.id), resource="SRV://{}".format(server.id))
 
     if info.status // 100 != 2:
         raise APIException("Server join error", srv=server.id, code=info.status)
     return DBServer(server.id)
 
 async def purgeservers(days_):
-    info = await self.api(RequestType.DELETE, "Server/purge", hasResult=True, jsonResult=False, body={"days": days_})
+    api = APIManager()
+    info = await api(RequestType.DELETE, "Server/purge", hasResult=True, jsonResult=False, body={"days": days_})
 
     if info.status // 100 != 2:
         raise APIException("Server purge error", code=info.status)
@@ -114,6 +117,7 @@ async def purgeservers(days_):
 
 class DBJDR:
     async def __init__(self, srvid, channelid, requester, requesterRole):
+        self.api = APIManager()
         self.server = srvid
         self.requester = requester
         self.requesterRole = requesterRole
@@ -357,80 +361,78 @@ class DBJDR:
             ls.append((i.get("title"), i.get("content")))
         return ls
 
+class MemberPermGrantable(Enum):
+    MANAGER = "manager"
+    PREMIUM = "premium"
+
 class DBMember:
-    def __init__(self,ID):
+    async def __init__(self, ID):
         self.ID = ID
-        db = Database()
-        cur = db.execute("SELECT * FROM Membre WHERE id_member = %(idmemb)s;",idmemb=ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the member")
-        info = cur.fetchone()
-        if info is None:
-            db.close(True)
-            raise DatabaseException("unexisting member")
-        db.close()
-        self.perm = info[1]
+        self.api = APIManager()
+        info = await self.api(RequestType.GET, "Member/{}".format(self.ID), resource="MEMBER://{}".format(self.ID), requesterID=self.ID)
+
+        if info.status // 100 != 2:
+            raise APIException("Unable to find the requested member", member=self.ID, code=info.status)
+
+        self.perm = info.result.get("permissions", "None")
+        if self.perm == "None": self.perm = None
+        self.lang = info.result.get("language", {}).get("langcode", "EN")
+        self.fulllangname = info.result.get("language", {}).get("name", "English") if self.lang != "EN" else "English"
+        self.blacklisted = info.result.get("blacklisted", {}).get("isBlacklisted", False)
+        self.blacklistReason = info.result.get("blacklisted", {}).get("reason", "")
 
     def is_owner(self):
-        return self.perm.upper() == "O"
+        return self.perm.lower() == "owner"
 
     def is_manager(self):
-        return (self.perm.upper() == "M" or self.is_owner())
+        return (self.perm.lower() == "manager" or self.is_owner())
 
     def is_premium(self):
-        return self.perm.upper() != "N"
+        return self.perm is not None
 
     def is_blacklisted(self):
-        db = Database()
-        cur = db.execute("SELECT COUNT(*) FROM blacklist WHERE id_member = %(idmemb)s;",idmemb=self.ID)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to retrieve blacklisting")
-        blacklisted = True
-        if cur.fetchone()[0] == 0:
-            blacklisted = False
-        db.close()
-        rs = ""
-        if blacklisted:
-            db = Database()
-            cur = db.execute("SELECT reason FROM blacklist WHERE id_member = %(idmemb)s;",idmemb=self.ID)
-            if cur is None:
-                db.close(True)
-                raise DatabaseException("unable to find reason for blacklisting")
-            rs = cur.fetchone()[0]
-            db.close()
-        return blacklisted,rs
+        return self.blacklisted, self.blacklistReason
 
-    def unblacklist(self):
+    async def unblacklist(self, requester):
         if not self.is_blacklisted()[0]: return
-        db = Database()
-        db.call("switchblacklist",idmemb=self.ID,eventual_reason="")
-        db.close()
+        info = await self.api(RequestType.DELETE, "Member/{}/unblacklist".format(self.ID), resource="MEMBER://{}".format(self.ID), requesterID=requester)
 
-def grantuser(memberid,permcode):
-    db = Database()
-    db.call("grantperms",idmemb=memberid,perm=permcode)
-    db.close()
+        if info.status // 100 != 2:
+            raise APIException("Member unblacklist error", member=self.ID, code=info.status)
 
-def blacklist(memberid,reason):
-    try:
-        mb = DBMember(memberid)
-        if mb.is_blacklisted()[0]: return
-    except DatabaseException: pass
-    db = Database()
-    db.call("switchblacklist",idmemb=memberid,eventual_reason=reason)
-    db.close()
-    return DBMember(memberid)
+    @classmethod
+    async def blacklist(cl, memberid, requester, reason=None):
+        api = APIManager()
+        info = await api(RequestType.PUT, "Member/{}/blacklist".format(memberid), resource="MEMBER://{}".format(memberid),
+            requesterID=requester, body={} if reason is None else {"reason": reason})
 
-def setuserlang(memberid,lang):
-    db = Database()
-    db.call("setlang",idmemb=memberid,lg=lang.upper())
-    db.close()
+        if info.status // 100 != 2 and info.status != 409:
+            raise APIException("Member blacklist error", member=memberid, code=info.status)
 
-def getuserlang(memberid):
-    db = Database()
-    cur = db.call("getlang",idmemb=memberid)
-    lang = cur.fetchone()[0]
-    db.close()
-    return lang
+        return cl(memberid)
+
+    @staticmethod
+    async def grantuser(memberid, perm, requester):
+        api = APIManager()
+        info = await api(RequestType.PUT, "Member/{}/grant/{}".format(memberid, perm.value), resource="MEMBER://{}".format(memberid), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Member grant error", member=memberid, perm=perm.value, code=info.status)
+
+    @staticmethod
+    async def setuserlang(memberid, lang):
+        api = APIManager()
+        info = await api(RequestType.PUT, "Member/{}/setlang/{}".format(memberid, lang), resource="MEMBER://{}".format(memberid), requesterID=memberid)
+
+        if info.status // 100 != 2:
+            raise APIException("Member setlang error", member=memberlang, lang=lang, code=info.status)
+
+    @classmethod
+    async def getuserlang(cl, memberid):
+        try:
+            mb = await cl(memberid)
+            return mb.lang
+        except APIException as e:
+            if e["code"] != 404:
+                raise e
+            return "EN"

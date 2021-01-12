@@ -55,7 +55,8 @@ class Inventory:
 
     @classmethod
     async def char_loadfromdb(cl, srv, channel, charkey, requester, requesterRole, maxsize):
-        info = await self.api(RequestType.GET, "Inventory/{}/{}/{}".format(srv, channel, charkey),
+        api = APIManager()
+        info = await api(RequestType.GET, "Inventory/{}/{}/{}".format(srv, channel, charkey),
             resource="SRV://{}/{}/{}".format(srv, channel, charkey), requesterID=requester, roleID=requesterRole)
 
         if info.status // 100 != 2:
@@ -69,7 +70,8 @@ class Inventory:
 
     @classmethod
     async def pet_loadfromdb(cl, srv, channel, charkey, petkey, requester, requesterRole, maxsize):
-        info = await self.api(RequestType.GET, "Inventory/{}/{}/{}/{}".format(srv, channel, charkey, petkey),
+        api = APIManager()
+        info = await api(RequestType.GET, "Inventory/{}/{}/{}/{}".format(srv, channel, charkey, petkey),
             resource="SRV://{}/{}/{}/{}".format(srv, channel, charkey, petkey), requesterID=requester, roleID=requesterRole)
 
         if info.status // 100 != 2:
@@ -151,7 +153,8 @@ class Skill:
 
     @classmethod
     async def loadfromdb(cl, srv, channel, charkey, requester, requesterRole):
-        info = await self.api(RequestType.GET, "Skills/{}/{}/{}".format(srv, channel, charkey),
+        api = APIManager()
+        info = await api(RequestType.GET, "Skills/{}/{}/{}".format(srv, channel, charkey),
             resource="SRV://{}/{}/{}".format(srv, channel, charkey), requesterID=requester, roleID=requesterRole)
 
         if info.status // 100 != 2:

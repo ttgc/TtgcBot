@@ -57,7 +57,7 @@ jobs:
       env:
         ASPNETCORE_ENVIRONMENT: Production
 
-    - name: Build with dotnet
+    - name: Build API
       run: Cosmo-Network/API/Tools/deploy.sh --gmk --aspenv-prod --https
       env:
         ASPNETCORE_ENVIRONMENT: Production

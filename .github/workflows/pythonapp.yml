@@ -115,7 +115,10 @@ jobs:
     #     timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
 
     - name: Unregister bot app
-      run: python3 "Cosmo-Network/API/Tools/API Register/unregister.py Cosmo-Network/API/Tools/ttgcbotapp.json"
+      run: |
+        cd Cosmo-Network/API
+        python3 "Tools/API Register/unregister.py"
+        cd ../..
 
     - name: Approve pull request
       if: github.event_name == 'pull_request'

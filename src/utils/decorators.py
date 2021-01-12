@@ -17,6 +17,8 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from src.utils.exceptions import DeprecatedException
+
 def singleton(cl):
     instances = {}
     def get_instance():
@@ -24,3 +26,18 @@ def singleton(cl):
             instances[cl] = cl()
         return instances[cl]
     return get_instance
+
+def deprecated(raise_error=True, logger=None):
+    def deprecated_decorator(fct):
+        logMethod = print
+        if logger: logMethod = logger
+        logMethod("Deprecated function/class : {}".format(fct))
+
+        def deprecated_call(*args, **kwargs):
+            exception = DeprecatedException(*args, **kwargs)
+            if raise_error:
+                raise exception
+            logMethod(exception)
+            return fct(*args, **kwargs)
+        return deprecated_call
+    return deprecated_decorator

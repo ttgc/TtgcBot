@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import time
-from src.utils.singleton import singleton
+from src.utils.decorators import singleton
 
 @singleton
 class DataCache:
@@ -58,7 +58,7 @@ class DataCache:
     def mapitems(self, res, *tomap):
         for i in tomap:
             if i not in self._cache:
-                self._mappeditem[i] = to
+                self._mappeditem[i] = res
 
     def removemapsrc(self, mappedres):
         if mappedres in self._mappeditem:

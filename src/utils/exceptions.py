@@ -18,7 +18,6 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from discord.ext import commands
-from src.utils.exceptions import *
 
 class HTTPException(commands.CommandError):
     def __init__(self, errcode, message=None):
@@ -48,3 +47,15 @@ class DatabaseException(ManagerException):
 class APIException(ManagerException):
     def __str__(self):
         return "APIException: {} (with kwargs {})".format(self.message, self.kwargs)
+
+class DeprecatedException(Exception):
+    def __init__(self, fct, *args, **kwargs):
+        self.fct = fct
+        self.args = args
+        self.kwargs = kwargs
+        super().__init__(str(self))
+
+    def __str__(self):
+        invok = "{}({}, {})".format(self.fct.__name__, list(self.args), dict(self.kwargs))
+        invok = invok.replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "=")
+        return "DeprecatedException: The function {} is deprecated\nTried to invoke {}".format(self.fct, invok)

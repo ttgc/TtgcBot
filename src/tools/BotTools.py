@@ -21,6 +21,8 @@ import discord
 import asyncio
 from discord.ext import commands
 from src.tools.datahandler.APIManager import *
+from src.utils.decorators import deprecated
+from src.utils.config import Config
 import src.tools.Character as ch
 import src.tools.CharacterUtils as chutil
 
@@ -159,7 +161,7 @@ class DBJDR:
             "extensions": list(extensions)
         }
 
-        info = await self.api(RequestType.POST, "JDR/copy", body=reqbody
+        info = await self.api(RequestType.POST, "JDR/copy", body=reqbody,
             resource="SRV://{}/{}".format(self.server, channel_id), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
@@ -198,14 +200,14 @@ class DBJDR:
             }
         }
 
-        info = await self.api(RequestType.POST, "Character/create", body=reqbody
+        info = await self.api(RequestType.POST, "Character/create", body=reqbody,
             resource="SRV://{}/{}/{}".format(self.server, self._initialChannelID, chardbkey), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
             raise APIException("Char create error", srv=self.ID, channel=self.channel, charkey=chardbkey, code=info.status)
 
     async def chardelete(self, chardbkey):
-        info = await self.api(RequestType.DELETE, "Character/delete/{}/{}/{}".format(self.server, self.channel, chardbkey)
+        info = await self.api(RequestType.DELETE, "Character/delete/{}/{}/{}".format(self.server, self.channel, chardbkey),
             resource="SRV://{}/{}/{}".format(self.server, self._initialChannelID, chardbkey), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
@@ -218,7 +220,7 @@ class DBJDR:
             "to": [channel_id] + list(other_channels)
         }
 
-        info = await self.api(RequestType.POST, "JDR/extend", body=reqbody
+        info = await self.api(RequestType.POST, "JDR/extend", body=reqbody,
             resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
@@ -236,7 +238,7 @@ class DBJDR:
             "to": [channel_id] + list(other_channels)
         }
 
-        info = await self.api(RequestType.DELETE, "JDR/unextend", body=reqbody
+        info = await self.api(RequestType.DELETE, "JDR/unextend", body=reqbody,
             resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
@@ -245,13 +247,13 @@ class DBJDR:
             if channel in self.extensions: self.extensions.remove(channel)
         DataCache().remove("SRV://{}/{}".format(self.server, self._initialChannelID), True)
 
-    def unextend_all(self):
+    async def unextend_all(self):
         reqbody = {
             "server": self.server,
             "channel": self.channel
         }
 
-        info = await self.api(RequestType.DELETE, "JDR/unextend/all", body=reqbody
+        info = await self.api(RequestType.DELETE, "JDR/unextend/all", body=reqbody,
             resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
@@ -309,23 +311,23 @@ class DBJDR:
         char.bind(self)
         return char
 
-    def charlist(self):
-        db = Database()
-        cur = db.call("get_allcharacter",idserv=self.server,idchan=self.channel)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find character")
-        ls = []
-        for i in cur:
-            ls.append(i[0])
-        db.close()
-        return ls
+    async def charlist(self):
+        info = await self.api(RequestType.GET, "Character/{}/{}".format(self.server, self.channel),
+            resource="SRV://{}/{}".format(self.server, self.channel), requesterID=self.requester, roleID=self.requesterRole)
 
-    def get_charbase(self):
-        ls = self.charlist()
+        if info.status // 100 != 2:
+            raise APIException("Character list error", srv=self.ID, channel=self.channel, code=info.status)
+
+        return info.result
+
+    @deprecated(raise_error=False)
+    async def get_charbase(self):
+        chars = await self.charlist()
+        ls = chars.get("characters", [])
         charbase = []
         for i in ls:
-            charbase.append(self.get_character(i))
+            character = await self.get_character(i)
+            charbase.append(character)
         return charbase
 
     async def get_serverinfo(self):
@@ -342,7 +344,7 @@ class DBJDR:
         for i, k in fields.items():
             reqbody["fields"].append({"title": i, "content": k})
 
-        info = await self.api(RequestType.POST, "Finalize/set", body=reqbody
+        info = await self.api(RequestType.POST, "Finalize/set", body=reqbody,
             resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
@@ -353,14 +355,14 @@ class DBJDR:
             "fields": list(fields)
         }
 
-        info = await self.api(RequestType.DELETE, "Finalize/delete/{}/{}".format(self.server, self.channel), body=reqbody
+        info = await self.api(RequestType.DELETE, "Finalize/delete/{}/{}".format(self.server, self.channel), body=reqbody,
             resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
             raise APIException("Finalize delete error", srv=self.ID, channel=self.channel, fields=fields, code=info.status)
 
     async def get_finalizer(self):
-        info = await self.api(RequestType.GET, "Finalize/{}/{}".format(self.server, self.channel)
+        info = await self.api(RequestType.GET, "Finalize/{}/{}".format(self.server, self.channel),
             resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:

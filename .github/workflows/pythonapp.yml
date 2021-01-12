@@ -9,9 +9,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@2.1.1
+      with:
+        submodules: true
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v1

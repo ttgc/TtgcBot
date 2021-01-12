@@ -64,11 +64,11 @@ jobs:
     
     - name: Setup API environment
       env:
-        TESTINGAPP_PWD: ${{ secrets.TESTINGAPP_PWD }}
-        TESTINGAPP_SALT: ${{ secrets.TESTINGAPP_SALT }}
+        API_REGISTERAPP_PWD: ${{ secrets.API_REGISTERAPP_PWD }}
+        API_REGISTERAPP_SALT: ${{ secrets.API_REGISTERAPP_SALT }}
         DBPWD: ${{ secrets.localdb_password }}
       run: |
-        echo "{\"apiurl\": \"https://localhost:5001\", \"register_test\": \"ttgcbotapp.json\", \"register_app\": {\"pwd\": \""$TESTINGAPP_PWD"\", \"timestamp\": \"05-10-2020-20-12-35\", \"salt\": "$TESTINGAPP_SALT"}}" > Cosmo-Network/API/Tools/toolsProperties.json
+        echo "{\"apiurl\": \"https://localhost:5001\", \"register_test\": \"ttgcbotapp.json\", \"register_app\": {\"pwd\": \""$API_REGISTERAPP_PWD"\", \"timestamp\": \"05-10-2020-20-12-35\", \"salt\": "$API_REGISTERAPP_SALT"}}" > Cosmo-Network/API/Tools/toolsProperties.json
         sleep 10
         Cosmo-Network/API/Tools/populatedb/populate.sh --api=ttgcapi --scan=dynamic --pwd=$DBPWD
         python3 "Cosmo-Network/API/Tools/API Register/register.py"
@@ -128,7 +128,7 @@ jobs:
         pg_dump ttgcbot > output/dump_bot.sql
         pg_dump ttgcapi > output/dump_api.sql
         cp Cosmo-Network/API/Tools/toolsProperties.json output/toolsProperties.json
-        cp Cosmo-Network/API/Tools/testingapp.json output/testingapp.json
+        cp Cosmo-Network/API/Tools/ttgcbotapp.json output/ttgcbotapp.json
         cp Cosmo-Network/API/API/Properties/launchSettings.json output/launchSettings.json
         cp Cosmo-Network/API/API/appsettings.Staging.json output/appsettings.Staging.json
     

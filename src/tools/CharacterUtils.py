@@ -17,11 +17,11 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.tools.datahandler.DatabaseManager import *
+from src.tools.datahandler.APIManager import *
 #from tools.BotTools import DBJDR
 
 class Item:
-    def __init__(self,name,weight):
+    def __init__(self, name, weight):
         self.name = name
         self.weight = weight
 
@@ -29,13 +29,19 @@ class Item:
         return self.name+" ("+self.weight+")"
 
 class Inventory:
-    def __init__(self,maxw=20):
+    def __init__(self, maxw=20):
         self.items = {}
         self.maxweight = 20
         self.weight = 0
         self.character = None
         self.jdr = None
         self.ID = None
+
+    def __getitem__(self, it):
+        return self.items.get(self.items[it], None)
+
+    def __setitem__(self, it, value):
+        self.items[it] = value
 
     def __str__(self):
         itemstring = []
@@ -47,19 +53,33 @@ class Inventory:
         self.character = char
         self.jdr = jdr
 
-    def loadfromdb(self,inventory_id):
-        db = Database()
-        cur = db.execute("SELECT item_name,qte,weight FROM items WHERE id_inventory = %(idinv)s;",idinv=inventory_id)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find the inventory")
-        self.items = {}
-        for i in cur:
-            it = Item(i[0],i[2])
-            self.items[it] = i[1]
-        db.close()
-        self.ID = inventory_id
-        self._reload()
+    @classmethod
+    async def char_loadfromdb(cl, srv, channel, charkey, requester, requesterRole, maxsize):
+        info = await self.api(RequestType.GET, "Inventory/{}/{}/{}".format(srv, channel, charkey),
+            resource="SRV://{}/{}/{}".format(srv, channel, charkey), requesterID=requester, roleID=requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Character inventory get error", srv=srv, channel=channel, charkey=charkey, code=info.status)
+
+        inv = cl(maxsize)
+        for i in info.result:
+            it = Item(i.get("info", {}).get("name", ""), i.get("info", {}).get("weight", 1))
+            inv[it] = i.get("quantity", 1)
+        return inv
+
+    @classmethod
+    async def pet_loadfromdb(cl, srv, channel, charkey, petkey, requester, requesterRole, maxsize):
+        info = await self.api(RequestType.GET, "Inventory/{}/{}/{}/{}".format(srv, channel, charkey, petkey),
+            resource="SRV://{}/{}/{}/{}".format(srv, channel, charkey, petkey), requesterID=requester, roleID=requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Pet inventory get error", srv=srv, channel=channel, charkey=charkey, petkey=petkey, code=info.status)
+
+        inv = cl(maxsize)
+        for i in info.result:
+            it = Item(i.get("info", {}).get("name", ""), i.get("info", {}).get("weight", 1))
+            inv[it] = i.get("quantity", 1)
+        return inv
 
     def _reload(self):
         db = Database()
@@ -103,20 +123,14 @@ class Inventory:
         db.close()
 
 class Skill:
-    def __init__(self,ID):
+    def __init__(self, ID, name, descr, origin, extension):
         self.ID = ID
-        db = Database()
-        rows = db.call("skillinfo",idskill=ID)
-        if rows is None:
-            db.close(True)
-            raise DatabaseException("Skill ID not found")
-        row = rows.fetchone()
-        db.close()
-        self.name = row[1]
-        self.description = row[2]
-        self.origine = row[3]
-        self.extension = Extension(row[5])
+        self.name = name
+        self.description = descr
+        self.origine = origin
+        self.extension = extension
 
+    @staticmethod
     def skillsearch(skname):
         db = Database()
         rows = db.call("skillsearch",name=skname)
@@ -128,26 +142,31 @@ class Skill:
             ls.append(Skill(i[0]))
         db.close()
         return ls
-    skillsearch = staticmethod(skillsearch)
 
-    def isskillin(ls,skid):
+    @staticmethod
+    def isskillin(ls, skid):
         for i in ls:
             if i.ID == skid: return True
         return False
-    isskillin = staticmethod(isskillin)
+
+    @classmethod
+    async def loadfromdb(cl, srv, channel, charkey, requester, requesterRole):
+        info = await self.api(RequestType.GET, "Skills/{}/{}/{}".format(srv, channel, charkey),
+            resource="SRV://{}/{}/{}".format(srv, channel, charkey), requesterID=requester, roleID=requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Skill list get error", srv=srv, channel=channel, charkey=charkey, code=info.status)
+
+        skls = []
+        for i in info.result:
+            ext = Extension(i.get("extension", {}).get("universe"), i.get("extension", {}).get("world"))
+            skls.append(cl(i.get("id", -1), i.get("name", ""), i.get("description", ""), i.get("origin", ""), ext))
+        return skls
 
 class Extension:
-    def __init__(self,ID):
-        self.ID = ID
-        db = Database()
-        rows = db.execute("SELECT universe, world FROM Extensions WHERE id_extension = %(ext)s",ext=self.ID)
-        if rows is None:
-            db.close(True)
-            raise DatabaseException("Extension ID not found")
-        row = rows.fetchone()
-        db.close()
-        self.universe = row[0]
-        self.world = row[1]
+    def __init__(self, universe, world):
+        self.universe = universe
+        self.world = world
 
     def __str__(self):
         return "{} : {}".format(self.universe, self.world)

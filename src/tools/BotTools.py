@@ -177,8 +177,8 @@ class DBJDR:
             "key": chardbkey,
             "data": {
                 "name": kwargs.get("name", chardbkey),
-                "pv": kwargs.get("pv", 1)
-                "pm": kwargs.get("pm", 1)
+                "pv": kwargs.get("pv", 1),
+                "pm": kwargs.get("pm", 1),
                 "strength": kwargs.get("str", 50),
                 "spirit": kwargs.get("spr", 50),
                 "charisma": kwargs.get("cha", 50),
@@ -261,53 +261,37 @@ class DBJDR:
         self.extensions = []
         DataCache().remove("SRV://{}/{}".format(self.server, self._initialChannelID), True)
 
-    def get_character(self,charkey):
-        db = Database()
-        cur = db.call("get_character",dbkey=charkey,idserv=self.server,idchan=self.channel)
-        if cur is None:
-            db.close(True)
-            raise DatabaseException("unable to find character")
-        rawchar = cur.fetchone()
-        db.close()
-        stat = [rawchar[19],rawchar[24],rawchar[22],rawchar[20],rawchar[21],rawchar[23],rawchar[25]]
-        gm = ch.Character.gm_map_chartoint[rawchar[28].upper()]
-        gmdefault = ch.Character.gm_map_chartoint[rawchar[29].upper()]
-        inv = chutil.Inventory()
-        inv.loadfromdb(rawchar[30])
-        pets = {}
-        db = Database()
-        cur = db.call("get_pets",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)
-        if cur is not None:
-            for i in cur:
-                gmpet = ch.Character.gm_map_chartoint[i[24].upper()]
-                gmpetdefault = ch.Character.gm_map_chartoint[i[25].upper()]
-                pets[i[0]] = ch.Pet(petkey=i[0],charkey=rawchar[0],name=i[1],espece=i[2],
-                                    PVm=i[5],PMm=i[7],force=i[8],esprit=i[9],
-                                    charisme=i[10],agilite=i[11],karma=i[12],
-                                    stat=[i[14],i[19],i[17],i[15],i[16],i[18],i[20]],mod=gmpet,
-                                    PV=i[4],PM=i[6],default_mod=gmpetdefault,
-                                    instinct=i[13],lvl=i[3],prec=i[26],luck=i[27])
-        db.close()
-        db = Database()
-        cur = db.call("get_skill",dbkey=rawchar[0],idserv=self.server,idchan=self.channel)
-        skls = []
-        if cur is not None:
-            for i in cur:
-                skls.append(chutil.Skill(i[0]))
-        db.close()
-        char = ch.Character(charkey=rawchar[0],name=rawchar[1],lore=rawchar[2],
-                            lvl=rawchar[3],PV=rawchar[4],PVm=rawchar[5],PM=rawchar[6],
-                            PMm=rawchar[7],force=rawchar[8],esprit=rawchar[9],
-                            charisme=rawchar[10],furtivite=rawchar[11],karma=rawchar[12],
-                            default_karma=rawchar[13],money=rawchar[14],lp=rawchar[15],
-                            dp=rawchar[16],intuition=rawchar[17],mentalhealth=rawchar[18],
-                            stat=stat,mod=gm,default_mod=gmdefault,inventory=inv,
-                            linked=rawchar[31],pet=pets,skills=skls,dead=rawchar[32],
-                            classe=rawchar[33],selected=rawchar[34],xp=rawchar[35],
-                            prec=rawchar[36],luck=rawchar[37],
-                            org=chutil.retrieveOrganization(rawchar[38]),
-                            hybrid=rawchar[39], symbiont=rawchar[40],
-                            planet_pilot=rawchar[41], astral_pilot=rawchar[42])
+    async def get_character(self, charkey):
+        info = await self.api(RequestType.GET, "Character/{}/{}/{}".format(self.server, self.channel, charkey),
+            resource="SRV://{}/{}/{}".format(self.server, self.channel, charkey), requesterID=self.requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Character get error", srv=self.ID, channel=self.channel, charkey=charkey, code=info.status)
+
+        rawchar = info.result
+        stat = [
+            rawchar.get("RolledDice", 0), rawchar.get("SuperCriticSuccess", 0), rawchar.get("CriticSuccess", 0), rawchar.get("Succes", 0),
+            rawchar.get("Fail", 0), rawchar.get("CriticFail", 0), rawchar.get("SuperCriticFail", 0)
+        ]
+
+        gm = ch.Character.gm_map_chartoint[rawchar.get("Gm", "offensive").lower()]
+        gmdefault = ch.Character.gm_map_chartoint[rawchar.get("GmDefault", "offensive").lower()]
+        inv = chutil.Inventory.char_loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, rawchar.get("MaxInvsize", 20))
+        pets = ch.Pet.listpet(self.server, self.channel, charkey, self.requester, self.requesterRole)
+        skls = chutil.Skill.loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole)
+        char = ch.Character(charkey=charkey, name=rawchar.get("Nom", charkey),
+                            lvl=rawchar.get("Lvl", 1), PV=rawchar.get("Pv", 1), PVm=rawchar.get("Pvmax", 1), PM=rawchar.get("Pm", 1),
+                            PMm=rawchar.get("Pmmax", 1), force=rawchar.get("Strength", 50), esprit=rawchar.get("Spirit", 50),
+                            charisme=rawchar.get("Charisma", 50), furtivite=rawchar.get("Agility", 50), karma=rawchar.get("Karma", 0),
+                            default_karma=rawchar.get("DefaultKarma", 0), money=rawchar.get("Argent", 0), lp=rawchar.get("LightPoints", 0),
+                            dp=rawchar.get("DarkPoints", 0), intuition=rawchar.get("Intuition", 3), mentalhealth=rawchar.get("Mental", 100),
+                            stat=stat, mod=gm, default_mod=gmdefault, inventory=inv,
+                            linked=rawchar.get("IdMember", None), pet=pets, skills=skls, dead=rawchar.get("Dead", False),
+                            classe=rawchar.get("Classe", "Unknown"), selected=rawchar.get("Linked", False), xp=rawchar.get("Xp", 0),
+                            prec=rawchar.get("Prec", 50), luck=rawchar.get("Luck", 50),
+                            org=rawchar.get("AffiliatedWith", {}).get("Organization", None),
+                            hybrid=rawchar.get("HybridRace", None), symbiont=rawchar.get("Symbiont", None),
+                            planet_pilot=rawchar.get("PilotP", -1), astral_pilot=rawchar.get("PilotA", -1))
         char.bind(self)
         return char
 

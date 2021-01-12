@@ -29,7 +29,7 @@ from src.tools.CharacterUtils import *
 class Character:
     """Character class"""
     lvlcolor = ["00FF00","FFFF00","FF00FF","FF0000"]
-    gm_map_chartoint = {'O': 0, 'D': 1, 'I': 2, 'S': 3}
+    gm_map_chartoint = {'offensive': 0, 'defensive': 1, 'illumination': 2, 'sepulchral': 3}
     gm_map_inttochar = ['O', 'D', 'I', 'S']
     gm_map_inttostr = ['offensive', 'defensive', 'illumination', 'sepulchral']
 
@@ -88,10 +88,8 @@ class Character:
     agilite = furtivite
 
     def bind(self,jdr):
-        self.inventory.bind(self,jdr)
+        self.inventory.bind(self, jdr)
         self.jdr = jdr
-        for i in self.pet.keys():
-            self.pet[i].bind(jdr)
 
     def check_life(self):
         if self.PV <= 0:
@@ -242,6 +240,12 @@ class Character:
         db.call("affiliate",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,org=org)
         db.close()
 
+    def get_pet(self, petkey):
+        if petkey not in self.pet or self.jdr is None: return None
+        if self.pet[petkey] is None:
+            self.pet[petkey] = Pet.loadfromdb(self.jdr.server, self.jdr.channel, self.key, petkey, self.jdr.requester, self.jdr.requesterRole)
+        return self.pet[petkey]
+
 class Pet:
     def __init__(self,**kwargs):
         self.key = kwargs.get("petkey","unknown")
@@ -304,3 +308,20 @@ class Pet:
         db.call("petlevelup",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
         self.lvl += 1
+
+    @classmethod
+    async def loadfromdb(cl, srv, channel, charkey, petkey, requester, requesterRole):
+        pass
+
+    @staticmethod
+    async def listpet(srv, channel, charkey, requester, requesterRole):
+        info = await self.api(RequestType.GET, "Pet/{}/{}/{}".format(srv, channel, charkey),
+            resource="SRV://{}/{}/{}".format(srv, channel, charkey), requesterID=requester, roleID=requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Character inventory get error", srv=srv, channel=channel, charkey=charkey, code=info.status)
+
+        pets = {}
+        for i in info.result.get("Pets", []):
+            pets[i] = None
+        return pets

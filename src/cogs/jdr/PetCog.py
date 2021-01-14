@@ -44,7 +44,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_add(self,ctx,char: CharacterConverter,petkey):
         """**GM/MJ only**
         Add a pet to a given character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if char.pet_add(petkey):
             self.logger.log(logging.DEBUG+1,"/petadd (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["petadd"].format(petkey,char.name))
@@ -57,7 +57,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_remove(self,ctx,char: CharacterConverter,petkey):
         """**GM/MJ only**
         Delete a pet from the given character. This cannot be undone"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if char.pet_delete(petkey):
             self.logger.log(logging.DEBUG+1,"/petrm (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["petrm"].format(petkey,char.name))
@@ -70,7 +70,7 @@ class PetCog(commands.Cog, name="Pets"):
         """**GM/MJ only**
         Same as character set command but for the specified pet.
         Somme attributes for characters are not avalaible for pet."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
@@ -134,7 +134,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_switchmod(self,ctx,petkey):
         """**Player only**
         Switch the battle mod of one of your pet"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/petswitchmod (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self._switchmod(ctx,data,data.char,petkey)
 
@@ -143,7 +143,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_lvlup(self,ctx,char: CharacterConverter,petkey):
         """**GM/MJ only**
         Make level up the specified pet of the given character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
@@ -210,7 +210,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_roll(self,ctx,petkey,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         """**Player only**
         Same as your character roll command, but for one of your pet"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/petroll (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self._petroll(ctx,data,data.char,petkey,stat,operator,expression)
 
@@ -244,7 +244,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_info(self,ctx,petkey):
         """**Player only**
         Show all information related to one of your pets"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/petinfo (%s / %s) in channel %d of server %d",data.char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self._petinfo(ctx,data,data.char,petkey)
 
@@ -253,7 +253,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_setkarma(self,ctx,char: CharacterConverter,petkey,amount: int):
         """**GM/MJ only**
         Set the karma like character setkarma command for the given pet"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
@@ -275,7 +275,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_stat(self,ctx,petkey):
         """**Player only**
         Show dice related statistics of one of your pets"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in data.char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
@@ -298,7 +298,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_damage(self,ctx,char: CharacterConverter,petkey,val: int):
         """**GM/MJ only**
         Inflict damage to a pet"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
@@ -318,7 +318,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_heal(self,ctx,char: CharacterConverter,petkey,val: int):
         """**GM/MJ only**
         Heal the given pet"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:
@@ -339,7 +339,7 @@ class PetCog(commands.Cog, name="Pets"):
     async def pet_getpm(self,ctx,char: CharacterConverter,petkey,val: int):
         """**GM/MJ only**
         Set MP/PM for the given pet such as character getPM for characters does"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if petkey not in char.pet:
             await ctx.message.channel.send(data.lang["petnotfound"].format(petkey))
         else:

@@ -40,20 +40,20 @@ class MJ(commands.Cog):
     async def mj_info(self,ctx,char: CharacterConverter):
         """**GM/MJ only**
         GM version of character info command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjcharinfo (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._charinfo(ctx,data,char)
 
     @mj.command(name="inventory",aliases=["inv"])
     async def mj_inventory(self,ctx,char: CharacterConverter):
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         await self.invcog._inventory(ctx,data,char)
 
     @mj.command(name="switchmod",aliases=["switchmode"])
     async def mj_switchmod(self,ctx,char: CharacterConverter):
         """**GM/MJ only**
         GM version of character switchmod command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjswitchmod (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._switchmod(ctx,data,char)
 
@@ -61,7 +61,7 @@ class MJ(commands.Cog):
     async def mj_pay(self,ctx,char: CharacterConverter,amount: int):
         """**GM/MJ only**
         GM version of character pay command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpay (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._pay(ctx,data,char,amount)
 
@@ -69,7 +69,7 @@ class MJ(commands.Cog):
     async def mj_setmental(self,ctx,char: CharacterConverter,op: typing.Optional[OperatorConverter],amount: int):
         """**GM/MJ only**
         GM version of character setmental command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjsetmental (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._setmental(ctx,data,char,op,amount)
 
@@ -77,7 +77,7 @@ class MJ(commands.Cog):
     async def mj_roll(self,ctx,char: CharacterConverter,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         """**GM/MJ only**
         GM version of character roll command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjroll (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self.charcog._charroll(ctx,data,char,stat,operator,expression)
 
@@ -88,7 +88,7 @@ class MJ(commands.Cog):
     async def mj_pilot_astral(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
         """**GM/MJ only**
         GM version of character pilot astral command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpilot astral (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         if len(chars) == 0:
             raise commands.MissingRequiredArgument(chars)
@@ -98,7 +98,7 @@ class MJ(commands.Cog):
     async def mj_pilot_planet(self, ctx, dice: DiceConverter, chars: commands.Greedy[CharacterConverter], operator: typing.Optional[OperatorConverter] = "+", *, expression=None):
         """**GM/MJ only**
         GM version of character pilot planet command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpilot planet (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         if len(chars) == 0:
             raise commands.MissingRequiredArgument(chars)
@@ -108,7 +108,7 @@ class MJ(commands.Cog):
     async def mj_transfer(self,ctx,newMJ: discord.Member):
         """**GM/MJ only**
         Transfer ownership of a RP/JDR to someone else (this member needs the GM/MJ role)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         destisMJ = discord.utils.get(ctx.message.guild.roles,id=int(data.srv.mjrole)) in newMJ.roles
         if not destisMJ:
             await ctx.message.channel.send(data.lang["mjtransfer_notmj"])
@@ -138,7 +138,7 @@ class MJ(commands.Cog):
     async def mj_pet_roll(self,ctx,char: CharacterConverter,petkey,stat,operator: typing.Optional[OperatorConverter] = "+",*,expression=None):
         """**GM/MJ only**
         GM version of pet roll command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpetroll (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self.petcog._petroll(ctx,data,char,petkey,stat,operator,expression)
 
@@ -146,7 +146,7 @@ class MJ(commands.Cog):
     async def mj_pet_switchmod(self,ctx,char: CharacterConverter,petkey):
         """**GM/MJ only**
         GM version of pet switchmod command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpetswitchmod (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self.petcog._switchmod(ctx,data,char,petkey)
 
@@ -154,6 +154,6 @@ class MJ(commands.Cog):
     async def mj_pet_info(self,ctx,char: CharacterConverter,petkey):
         """**GM/MJ only**
         GM version of pet info command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/mjpetinfo (%s / %s) in channel %d of server %d",char.key,petkey,ctx.message.channel.id,ctx.message.guild.id)
         await self.petcog._petinfo(ctx,data,char,petkey)

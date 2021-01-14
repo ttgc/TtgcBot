@@ -148,7 +148,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
         If you have activated vocal before this command, the bot will also play the credits song
         Current song : 'Never Give Up On Your Dreams' by Two Steps From Hell
         All rights for the music go to their owners"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["finalize"])
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm finalize'
         try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
@@ -165,7 +165,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
     async def finalize_set(self,ctx,*,title):
         """**GM/MJ only**
         Set a credit field for the finalize command."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["set_finalizer_ask"].format(title))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel
         try: ct = await self.bot.wait_for('message',check=chk,timeout=120)
@@ -182,7 +182,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
     async def finalize_delete(self,ctx,*,title):
         """**GM/MJ only**
         remove a credit field from the finalize command."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.jdr.del_finalizer_field(title)
         self.logger.log(logging.DEBUG+1,"remove finalize field %s in %d channel of %d server",title,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["finalizer_del"].format(title))

@@ -40,7 +40,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     async def global_damage(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
         """**GM/MJ only**
         Inflict damages to the specified characters or to everyone if not specified"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
         val = abs(val)
@@ -67,7 +67,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     async def global_heal(self,ctx,chars: commands.Greedy[CharacterConverter],val: int):
         """**GM/MJ only**
         Heal the specified characters or everyone if not specified"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
         val = abs(val)
@@ -91,7 +91,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         """**GM/MJ only**
         Give to or take MP/PM from the specified characters or everyone if not specified.
         The command follow the same rules as for `character getpm` command."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
         embd = discord.Embed(title=data.lang["global_pm"],description=data.lang["pm_earn"].format(str(val)),colour=discord.Color(int('0000ff',16)))
@@ -115,7 +115,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
     async def global_stat(self,ctx):
         """**RP/JDR channel only**
         Show dice related statistic - such as fails, success, critic, etc. - of every characters"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         ls = [0,0,0,0,0,0,0]
         for i in data.charbase:
             for k in range(len(ls)): ls[k] += i.stat[k]
@@ -143,7 +143,7 @@ class JDRGlobal(commands.Cog, name="Global (RP/JDR)"):
         Other is a list of tag:agility values for other source of actions, such as NPC/PNJ.
         Format for other items follow the rule : `tag:agility` (for example : `boss:70`)
         In case of equality between two entities nothing specific will be done and an arbitrary order will be given to each of them"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if len(chars) == 0:
             chars = data.charbase
         entities = []

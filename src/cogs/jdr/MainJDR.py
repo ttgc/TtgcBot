@@ -39,7 +39,7 @@ class MainJDR(commands.Cog, name="JDR"):
         You can also roll special dice with your own values by writing them between brackets as following : `1d{red,blue,yellow,green}`.
         Full example : `/rollindep (10+1d100)*(2d10-5d8)` will return the result of the following expression : `(10+(1 dice with 100 sides))*((2 dice with 10 sides)-(5 dice with 8 sides))` <br/>
         Special dice example : `/rollindep 1d{1,2,3,4,5,6,7,8,9,10,Jack,Queen,King}+1d{Clubs,Diamonds,Hearts,Spades}` will return a single card with its value and its color (example : Queen of Spades)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         parser = ParseRoll(expression)
         final_result,final_expression = parser.resolv()
         self.logger.log(logging.DEBUG+1,"roll %d (%s) in channel %d of server %d",final_result,final_expression,ctx.message.channel.id,ctx.message.guild.id)
@@ -51,7 +51,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def setmjrole(self,ctx,mjrole: discord.Role):
         """**Admin only**
         Define the GM/MJ role for the whole server. All people having this role will be able to create and manage RM/JDR"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.srv.setmjrole(str(mjrole.id))
         self.logger.log(logging.DEBUG+1,"set mj role to %d in server %d",mjrole.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["setmjrole"].format(mjrole.mention))
@@ -63,7 +63,7 @@ class MainJDR(commands.Cog, name="JDR"):
         """**GM/MJ only**
         Mute and deafen every players that are not mentioned. You have to be in a vocal channel.
         Members are considered as player only if they are linked to a character. Finally, even if you don't mention yourself, this command won't mute/deafen you."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"appart launched by %d in channel %d of server %d",ctx.message.author.id,ctx.message.channel.id,ctx.message.guild.id)
         if ctx.message.author.voice.channel is not None:
             linked = []
@@ -118,7 +118,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.command()
     async def wiki(self,ctx,*,query):
         """Make a quick search on The Tale of Great Cosmos wiki"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         query = query.replace(" ","_")
         embd = await self._fetch_wiki(ctx, data, query)
         self.logger.log(logging.DEBUG+1,"wiki query (%s) in channel %d of server %d",query,ctx.message.channel.id,ctx.message.guild.id)
@@ -128,7 +128,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.command(aliases=['rdmfact', 'rf', 'fact', 'randomwiki', 'rdmwiki', 'rw'])
     async def randomfact(self,ctx):
         """Get a random fact about The Tale of Great Cosmos"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         info = requests.get("https://thetaleofgreatcosmos.fr/wiki/index.php?title=Sp%C3%A9cial:Page_au_hasard")
         embd = await self._fetch_wiki(ctx, data, info.url, True)
         self.logger.log(logging.DEBUG+1,"random fact in channel %d of server %d", ctx.message.channel.id, ctx.message.guild.id)
@@ -150,7 +150,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_start(self,ctx,chan: discord.TextChannel):
         """**GM/MJ role Only**
         Start a RP/JDR in the mentioned channel"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         try:
             data.srv.getJDR(str(chan.id))
             await ctx.message.channel.send(data.lang["jdr_exist"].format(chan.mention))
@@ -165,7 +165,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_delete(self,ctx,chan: discord.TextChannel):
         """**Admin only**
         Delete the RP/JDR in the mentioned channel. This cannot be undone once performed and all data related to it will be lost forever and ever."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         curjdr = data.srv.getJDR(str(chan.id))
         await ctx.message.channel.send(data.lang["jdr_delete_confirm"].format(chan.mention))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
@@ -185,7 +185,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_copy(self,ctx,src: discord.TextChannel, dest: discord.TextChannel):
         """**Admin and GM/MJ role only**
         Copy all the data of a RP/JDR from a channel to one other."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if src.guild.id != ctx.message.guild.id or src.guild.id != dest.guild.id:
             await ctx.message.channel.send(data.lang["jdrcopy_serverror"])
         else:
@@ -207,7 +207,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_extend(self,ctx,src: discord.TextChannel, dest: discord.TextChannel):
         """**Admin and GM/MJ role only**
         Extend a RP/JDR from a channel to another. By extending, all data of the game will be avalaible on both channels."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if src.guild.id != ctx.message.guild.id or src.guild.id != dest.guild.id:
             await ctx.message.channel.send(data.lang["jdrcopy_serverror"])
         else:
@@ -231,7 +231,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_unextend(self,ctx,src: discord.TextChannel, dest: discord.TextChannel):
         """**Admin only**
         Remove an extension between two channels for a RP/JDR. The data will be only avalaible in the source/origin channel after performing this"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if src.guild.id != ctx.message.guild.id or src.guild.id != dest.guild.id:
             await ctx.message.channel.send(data.lang["jdrcopy_serverror"])
         else:
@@ -245,7 +245,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_unextendall(self,ctx,src: discord.TextChannel):
         """**Admin only**
         Remove all extensions for a RP/JDR. The data will be only avalaible in the source/origin channel after performing this"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.srv.getJDR(str(src.id)).unextend_all()
         self.logger.log(logging.DEBUG+1,"JDR unextended all from channel %d in server %d",src.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["jdrunextend"])
@@ -256,7 +256,7 @@ class MainJDR(commands.Cog, name="JDR"):
     async def jdr_list(self,ctx):
         """**Admin only**
         Show the list of all RP/JDR on the server"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         ls = data.srv.jdrlist()
         embd = discord.Embed(title=data.lang["jdrlist_title"],description=data.lang["jdrlist"],colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text=str(ctx.message.created_at))

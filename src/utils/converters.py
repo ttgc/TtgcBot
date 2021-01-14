@@ -28,7 +28,7 @@ from src.tools.parsingdice import DiceType
 
 class CharacterConverter(commands.Converter):
     async def convert(self,ctx,arg):
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         return data.jdr.get_character(arg)
 
 class RaceConverter(commands.Converter):
@@ -53,7 +53,7 @@ class OperatorConverter(commands.Converter):
 
 class MapTokenConverter(commands.Converter):
     async def convert(self,ctx,arg):
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         try: tk = Token.load(arg,data.jdr.server,data.jdr.channel)
         except:
             await ctx.message.channel.send(data.lang["token_notexist"].format(arg))

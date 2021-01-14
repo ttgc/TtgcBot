@@ -37,7 +37,7 @@ class Other(commands.Cog):
     async def ping(self,ctx):
         """~~Play ping-pong :ping_pong:~~
         Show the current ping of the bot"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         ping = round(self.bot.latency * 1000)
         await ctx.message.channel.send(data.lang["ping"].format(ping))
         self.logger.log(logging.DEBUG+1,"current ping : %d ms", ping)
@@ -55,13 +55,13 @@ class Other(commands.Cog):
             await ctx.message.channel.send(get_lang(lg)["setlang"].format(lg))
             self.logger.info("user %s switched lang from %s to %s",str(ctx.message.author.id),oldlg,lg)
         else:
-            data = GenericCommandParameters(ctx)
+            data = await GenericCommandParameters(ctx)
             await ctx.message.channel.send(data.lang["setlang_notexist"].format(lg))
 
     @commands.command(aliases=['invit'])
     async def invite(self,ctx):
         """Get the link to invite the bot on your server"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
         url = discord.utils.oauth_url(str(self.bot.user.id),botaskperm)
@@ -135,8 +135,8 @@ class Other(commands.Cog):
                 if len(jokelist) > 0:
                     await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
                 else:
-                    data = GenericCommandParameters(ctx)
+                    data = await GenericCommandParameters(ctx)
                     await ctx.message.channel.send(data.lang["nojoke"].format(lang))
         else:
-            data = GenericCommandParameters(ctx)
+            data = await GenericCommandParameters(ctx)
             await ctx.message.channel.send(data.lang["nojoke"].format(lang))

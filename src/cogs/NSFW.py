@@ -46,10 +46,10 @@ class NSFW(commands.Cog):
                 if len(jokelist) > 0:
                     await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
                 else:
-                    data = GenericCommandParameters(ctx)
+                    data = await GenericCommandParameters(ctx)
                     await ctx.message.channel.send(data.lang["nojoke"].format(lang))
         else:
-            data = GenericCommandParameters(ctx)
+            data = await GenericCommandParameters(ctx)
             await ctx.message.channel.send(data.lang["nojoke"].format(lang))
 
     @commands.cooldown(5,30,commands.BucketType.channel)

@@ -68,11 +68,11 @@ global TOKEN
 TOKEN = Config()["token"]
 
 # Get prefix function
-def get_prefix(bot,message):
+async def get_prefix(bot, message):
     try:
-        srv = DBServer(str(message.guild.id))
+        srv = await DBServer(message.guild.id)
         return srv.prefix
-    except (AttributeError,DatabaseException): return Config()["discord"]["default-prefix"]
+    except (AttributeError, DatabaseException): return Config()["discord"]["default-prefix"]
 
 # Initialize client
 global client
@@ -88,12 +88,12 @@ def isbot(ctx): return not ctx.message.author.bot
 @client.check
 async def blacklist(ctx):
     srv = DBServer(str(ctx.message.guild.id))
-    blacklisted,reason = is_blacklisted(str(ctx.message.author.id))
+    blacklisted, reason = await is_blacklisted(ctx.message.author.id)
     if blacklisted:
-        lgcode = getuserlang(str(ctx.message.author.id))
+        lgcode = await getuserlang(ctx.message.author.id)
         if not lang_exist(lgcode): lgcode = "EN"
         lang = get_lang(lgcode)
-        await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention, str(reason)))
+        await ctx.message.channel.send(lang["blacklisted"].format(ctx.message.author.mention, reason))
     return not blacklisted
 
 # Client events

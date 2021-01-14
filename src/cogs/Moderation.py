@@ -36,7 +36,7 @@ class Moderation(commands.Cog):
     async def setprefix(self,ctx,pref):
         """**Admin only**
         Set the prefix used by the bot for the command on your server"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.srv.setprefix(pref)
         self.logger.info("Changing command prefix on server %s into '%s'",str(ctx.message.guild.id),pref)
         await ctx.message.channel.send(data.lang["setprefix"].format(pref))
@@ -50,7 +50,7 @@ class Moderation(commands.Cog):
         All members with this role will be able to use every command specified as 'Admin' commands.
         Be sure of what you are doing before granting permissions to someone else.
         Even if the owner doesn't have the role, he will be able to use 'Admin' specified commands"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.srv.setadminrole(str(role.id))
         self.logger.info("Changing adminrole on server %s",str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["setadmin"].format(role.mention))
@@ -61,7 +61,7 @@ class Moderation(commands.Cog):
         """**Admin only**
         Forbid a content on your server. All message containing banned content will be automatically deleted by the bot and the author will receive a private message explaining why.
         You can only ban 20 differents content on each server except if you are a premium user"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if len(data.srv.wordblocklist()) < 20 or check_premium(ctx):
             if ctban.startswith(ctx.prefix):
                 await ctx.message.channel.send(data.lang["contentban_prefix"])
@@ -77,7 +77,7 @@ class Moderation(commands.Cog):
     async def contentunban(self,ctx,ctban):
         """**Admin only**
         Unban content previously banned by `contentban` command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.srv.unblockword(ctban)
         self.logger.info("'%s' unbanned on server %s",ctban,str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["contentunban"].format(ctban))
@@ -88,7 +88,7 @@ class Moderation(commands.Cog):
     async def warn(self,ctx,members: commands.Greedy[discord.Member],*,reason):
         """**Admin only**
         Warn one or many members. The warn does nothing except inform the members that they have not followed your guidelines if you didn't configure the warn sanctions through `configwarn` command."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         embd = discord.Embed(title="WARN",description=reason,colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -134,7 +134,7 @@ class Moderation(commands.Cog):
     async def unwarn(self,ctx,members: commands.Greedy[discord.Member]):
         """**Admin only**
         Remove a warn from one or many users. The number of warnings is important only if you have configure warn sanctions through `configwarn` command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         embd = discord.Embed(title="UNWARN",colour=discord.Color(int('00ff00',16)))
         embd.set_footer(text=str(ctx.message.created_at))
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -157,7 +157,7 @@ class Moderation(commands.Cog):
         `kick` kick members from your server
         `ban` ban members from your server
         You can also remove a sanction with `remove` value"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if sanction.lower() == "assign" and rl is not None:
             data.srv.warnconfig(value,str(rl.id))
             await ctx.message.channel.send(data.lang["cfgwarn_assign"].format(rl.mention,str(value)))
@@ -180,7 +180,7 @@ class Moderation(commands.Cog):
     async def warnlist(self,ctx):
         """**Admin only**
         Show all members with warnings and their number of warnings received"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         ls = data.srv.get_warned()
         embd = discord.Embed(title="Warned list",description=data.lang["warnlist"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
@@ -195,7 +195,7 @@ class Moderation(commands.Cog):
     async def warnconfiglist(self,ctx):
         """**Admin only**
         Show the sanction configuration of warn command on your server"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         ls = data.srv.get_warnconfig()
         embd = discord.Embed(title=data.lang["punishlist"],description=data.lang["warncfglist"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
@@ -215,7 +215,7 @@ class Moderation(commands.Cog):
     async def userblock(self,ctx,usr):
         """**Admin only**
         Block users joining your server by banning them if their username contains the specified value given"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         data.srv.blockusername(usr)
         self.logger.info("username %s blocked on server %s",usr,str(ctx.message.guild.id))
         await ctx.message.channel.send(data.lang["userblock"].format(usr))
@@ -225,7 +225,7 @@ class Moderation(commands.Cog):
     async def userunblock(self,ctx,usr):
         """**Admin only**
         Remove user blocking for the specified value"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if not data.srv.unblockusername(usr):
             await ctx.message.channel.send(data.lang["userunblock_notexist"].format(usr))
         else:

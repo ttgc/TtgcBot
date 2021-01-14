@@ -47,7 +47,7 @@ class InventoryCog(commands.Cog, name="Inventory"):
     async def inventory(self,ctx):
         """**PC/PJ only**
         Show your current inventory"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         await self._inventory(ctx,data,data.char)
 
     @commands.check(check_chanmj)
@@ -58,7 +58,7 @@ class InventoryCog(commands.Cog, name="Inventory"):
         Add the number of item to the inventory of the character.
         By default number is equal to 1 and weight to 1.0.
         The item name must not contains space char or need to be escaped with `""` (write `"healing potion"` instead of `healing potion`)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if char.inventory.weight + (quantity*weight) > char.inventory.maxweight:
             await ctx.message.channel.send(data.lang["inv_full"])
             await asyncio.sleep(0.2)
@@ -73,7 +73,7 @@ class InventoryCog(commands.Cog, name="Inventory"):
         """**GM/MJ only**
         Remove the number of item from the inventory of the character.
         This command works similary to the `inventory add` command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         itemobject = None
         for i in char.inventory.items.keys():
             if i.name == item:

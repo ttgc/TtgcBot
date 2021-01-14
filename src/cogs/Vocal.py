@@ -43,7 +43,7 @@ class Vocal(commands.Cog, command_attrs=dict(enabled=Config()["vocal"])):
     async def vocal_on(self,ctx):
         """**Premium Only**
         Join vocal. You have to be also in a vocal channel"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         vc = self.vocalcore.getvocal(str(ctx.message.guild.id))
         if ctx.message.author.voice is None:
             await ctx.message.channel.send(data.lang["vocal_cantconnect"])

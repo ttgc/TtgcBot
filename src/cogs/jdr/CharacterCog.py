@@ -48,7 +48,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**GM/MJ only**
         Create a new character"""
         classe = retrieveClassID(race,classeName.replace("_"," "))
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if (race is None or classe is None):
             await ctx.message.channel.send(data.lang["unknown_class"])
         else:
@@ -65,7 +65,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_delete(self,ctx,name):
         """**GM/MJ only**
         Delete an existing character. This cannot be undone"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["chardelete_confirm"].format(name))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
         try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
@@ -82,7 +82,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_link(self,ctx,character: CharacterConverter, player: discord.Member):
         """**GM/MJ only**
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         character.link(str(player.id))
         self.logger.log(logging.DEBUG+1,"/charlink in channel %d of server %d between %s and %d",ctx.message.channel.id,ctx.message.guild.id,character.key,player.id)
         await ctx.message.channel.send(data.lang["charlink"].format(character.name,player.mention))
@@ -92,7 +92,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_unlink(self,ctx,character: typing.Optional[CharacterConverter] = None):
         """**GM/MJ only**
         Unlink a character from his/her owner (player)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if character is None and data.char is not None:
             data.char.unlink()
             self.logger.log(logging.DEBUG+1,"/charunlink of character %s in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
@@ -108,7 +108,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_select(self,ctx,key):
         """**PC/PJ only**
         Select a character from all characters linked to you"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         for i in data.charbase:
             if i.key == key and i.linked == str(ctx.message.author.id):
                 i.select()
@@ -136,7 +136,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Roll dice for the given statistic and adding/substractiong bonus or malus if provided. According the rules, the result will also tell you if the action is a success or not.
         Finally bonus and malus can also be dices expression (see help of roll for more information)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charroll (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._charroll(ctx,data,data.char,stat,operator,expression)
 
@@ -162,7 +162,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Roll astral piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
         According the rules, the result will also tell you if the action is a success or not.
         Finally bonus and malus can also be dices expression (see help of roll for more information)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charpilot astral (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         allchars = [data.char] + chars
         await self._charpilot(ctx, PiloteRollType.ASTRAL, data, dice, allchars, operator, expression)
@@ -173,7 +173,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Roll planet piloting dice and adding/substractiong bonus or malus if provided. You can also add other pilots (characters) if needed
         According the rules, the result will also tell you if the action is a success or not.
         Finally bonus and malus can also be dices expression (see help of roll for more information)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charpilot planet (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         allchars = [data.char] + chars
         await self._charpilot(ctx, PiloteRollType.PLANET, data, dice, allchars, operator, expression)
@@ -184,7 +184,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**GM/MJ only**
         Set a character as an hybrid, give him a second race and inherit all race's skills.
         This won't work if the character is already an hybrid"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         char = char.makehybrid(race)
         self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
@@ -194,7 +194,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_symbiont(self, ctx, char: CharacterConverter, *, symbiont: typing.Optional[SymbiontConverter] = None):
         """**GM/MJ only**
         Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         char = char.setsymbiont(symbiont)
         self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
         if char.symbiont is None:
@@ -224,7 +224,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         pilotastral/pa
         pilotplanet/pp
         ```"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charset %s for %s in channel %d of server %d",key,char.key,ctx.message.channel.id,ctx.message.guild.id)
         if key.lower() == "name":
             char.setname(value)
@@ -290,7 +290,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_damage(self,ctx,char: CharacterConverter, val: int):
         """**GM/MJ only**
         Inflict damages to the specified character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         val = abs(val)
         char = char.charset('pv',-val)
         embd = discord.Embed(title=char.name,description=data.lang["damaged"],colour=discord.Color(int('ff0000',16)))
@@ -307,7 +307,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_heal(self,ctx,char: CharacterConverter, val: int):
         """**GM/MJ only**
         Heal the specified character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         val = abs(val)
         if char.PV+ val > char.PVmax: val = char.PVmax-char.PV
         char = char.charset('pv',val)
@@ -326,7 +326,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**GM/MJ only**
         Give to or take from the specified character the specified amount of MP/PM
         If the value is negative, the amount will be taken from the character else it will be given to the character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if char.PM + val < 0:
             await ctx.message.channel.send(data.lang["no_more_pm"].format(str(char.PM)))
         else:
@@ -349,7 +349,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**GM/MJ only**
         Give to or take from the specified character the specified amount of karma
         If the value is negative, the amount will be taken from the character else it will be given to the character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if Skill.isskillin(char.skills,7): val *= 2 #chanceux
         if Skill.isskillin(char.skills,84): #creature harmonieuse
             if char.karma == 0 and val < 0: val -= 5
@@ -375,7 +375,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_reset(self,ctx,char: CharacterConverter):
         """**GM/MJ only**
         Reset a character. This action won't delete the character but will restore base amount of HP/PV, MP/PM, karma and fight mod (offensive/defensive)"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         char.resetchar()
         self.logger.log(logging.DEBUG+1,"/charreset (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["resetchar"].format(char.name))
@@ -385,7 +385,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_clear(self,ctx,char: CharacterConverter):
         """**GM/MJ only
         Clear current gamemod when currently using light or dark point. This will restore default gamemod and won't reset anything else."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if Character.gm_map_inttochar[char.mod] in ['I', 'S']:
             char.reset_lpdp()
             self.logger.log(logging.DEBUG+1,"/charclear (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
@@ -413,7 +413,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_pay(self,ctx,val: int):
         """**PC/PJ only**
         Pay the specified amount if you have enough money"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charpay (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._pay(ctx,data,data.char,val)
 
@@ -422,7 +422,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_earnpo(self,ctx,char: CharacterConverter, val: int):
         """**GM/MJ only**
         Give money to a character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         val = abs(val)
         char = char.charset('po',val)
         Inventory.forceinvcalc()
@@ -476,7 +476,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_info(self,ctx):
         """**PC/PJ only**
         Show all information related to your character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charinfo (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._charinfo(ctx,data,data.char)
 
@@ -486,7 +486,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_stat(self,ctx):
         """**PC/PJ only**
         Show dice related statistic - such as fails, success, critic, etc. - of your character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["stat"],description=data.char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+data.char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -507,7 +507,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_use(self,ctx,*,itname):
         """**PC/PJ only**
         Use an item and remove it from your inventory"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         item = None
         for i in data.char.inventory.items.keys():
             if i.name == itname:
@@ -524,7 +524,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_use_lightpt(self,ctx):
         """**PC/PJ only**
         Consume a light point from your character and apply all the consequences to you"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if data.char.lp <= 0:
             await ctx.message.channel.send(data.lang["no_more_lp"])
         else:
@@ -544,7 +544,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_use_darkpt(self,ctx):
         """**PC/PJ only**
         Consume a dark point from your character and apply all consquences to you"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if data.char.dp <= 0:
             await ctx.message.channel.send(data.lang["no_more_dp"])
         else:
@@ -572,7 +572,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Switch your current fight mod
         If you are in defensive you will be in offensive, and if you are in offensive you will be in defensive"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/switchmod (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._switchmod(ctx,data,data.char)
 
@@ -604,7 +604,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Set the mental health of your character.
         Using + or - before the amount (and separated by space character) will result to add or substract the amount from your current mental health"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         self.logger.log(logging.DEBUG+1,"/charsetmental (%s) in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
         await self._setmental(ctx,data,data.char,op,amount)
 
@@ -663,7 +663,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_lvlup(self,ctx,char: CharacterConverter):
         """**GM/MJ only**
         Make level up the specified character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         char.lvlup()
         self.logger.log(logging.DEBUG+1,"/charlvlup (%s) in channel %d of server %d",char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(embed=self._levelup_embed(ctx,data,char))
@@ -676,7 +676,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Kill definitively the specified character, this action cannot be undone !
         If the character is linked, it will be automatically unlinked and nobody will be able to use it anymore.
         Killed character are kept for statistic purpose and for finalize command"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         await ctx.message.channel.send(data.lang["kill_confirm"].format(char.name))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
         try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
@@ -698,7 +698,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         XP is printed on exported PDF from the character, but it can also be used by the level system.
         if allowlevelup is true, then every 100 XP, the character will automatically earn one level.
         It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         earnedlvl = char.xpup(xp, allowlevelup)
         self.logger.log(logging.DEBUG+1,"/xp +%d (%s) in channel %d of server %d",xp,char.key,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.channel.send(data.lang["xp"].format(char.name,xp))
@@ -715,7 +715,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Affiliate the character with the specified organization, the organization should exists.
         This will automatically include all skills related to the organization.
         If no organization is provided, then the current character's affiliation will be removed."""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         char.affiliate(affiliation)
         self.logger.log(logging.DEBUG+1,"/char affiliate (%s with %s) in channel %d of server %d",char.key,affiliation,ctx.message.channel.id,ctx.message.guild.id)
         if affiliation is None:
@@ -728,7 +728,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_list(self,ctx):
         """**GM/MJ only**
         Display the list of all characters existing in the current game channel"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["charlist"],description=data.lang["charlist_descr"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)

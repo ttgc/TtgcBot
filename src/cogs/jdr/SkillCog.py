@@ -37,7 +37,7 @@ class SkillCog(commands.Cog, name="Skills"):
     async def skill(self,ctx):
         """**Player only**
         Display all natural skills inherited by your character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.char.name,description=data.lang["sklist"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -54,7 +54,7 @@ class SkillCog(commands.Cog, name="Skills"):
     async def skill_info(self,ctx,search: commands.Greedy[SkillConverter]):
         """**RP/JDR channel only**
         Search for one or many natural skills, retrieving all information and ID"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["skillsearch"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
         embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
@@ -70,7 +70,7 @@ class SkillCog(commands.Cog, name="Skills"):
     async def skill_assign(self,ctx,char: CharacterConverter,*, skill: SkillConverter):
         """**GM/MJ only**
         Assign a natural skill to a given character"""
-        data = GenericCommandParameters(ctx)
+        data = await GenericCommandParameters(ctx)
         if len(skill) == 0:
             await ctx.message.channel.send(data.lang["skill_notfound"])
         elif len(skill) > 1:

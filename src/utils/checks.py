@@ -21,70 +21,89 @@ from src.tools.BotTools import *
 from src.tools.Translator import *
 import discord.utils
 
-def is_blacklisted(ID):
-    try: member = DBMember(ID)
-    except: return False,""
-    bl,rs = member.is_blacklisted()
-    return bl,rs
+async def is_blacklisted(ID):
+    try: member = await DBMember(ID)
+    except: return False, ""
+    bl, rs = member.is_blacklisted()
+    return bl, rs
 
-def is_botmanager(ID):
-    try: member = DBMember(ID)
+async def is_botmanager(ID):
+    try: member = await DBMember(ID)
     except: return False
     return member.is_manager()
 
-def is_premium(ID):
-    try: member = DBMember(ID)
+async def is_premium(ID):
+    try: member = await DBMember(ID)
     except: return False
     return member.is_premium()
 
-def is_owner(ID):
-    try: member = DBMember(ID)
+async def is_owner(ID):
+    try: member = await DBMember(ID)
     except: return False
     return member.is_owner()
 
-def check_admin(ctx):
-    srv = DBServer(str(ctx.message.guild.id))
-    return discord.utils.get(ctx.message.guild.roles,id=int(srv.adminrole)) in ctx.message.author.roles or ctx.message.author == ctx.message.guild.owner
+async def check_admin(ctx):
+    srv = await DBServer(ctx.message.guild.id)
+    return discord.utils.get(ctx.message.guild.roles, id=srv.adminrole) in ctx.message.author.roles or ctx.message.author == ctx.message.guild.owner
 
-def check_botmanager(ctx): return is_botmanager(str(ctx.message.author.id))
-def check_botowner(ctx): return is_owner(str(ctx.message.author.id))
-def check_premium(ctx): return is_premium(str(ctx.message.author.id))
+async def check_botmanager(ctx):
+    result = await is_botmanager(ctx.message.author.id)
+    return result
 
-def check_mj(ctx):
-    srv = DBServer(str(ctx.message.guild.id))
-    return discord.utils.get(ctx.message.guild.roles,id=int(srv.mjrole)) in ctx.message.author.roles
+async def check_botowner(ctx):
+    result = await is_owner(ctx.message.author.id)
+    return result
 
-def check_jdrchannel(ctx):
-    srv = DBServer(str(ctx.message.guild.id))
-    for i in srv.jdrlist():
-        if str(ctx.message.channel.id) == i[0]: return True
-    return str(ctx.message.channel.id) in srv.jdrextension()
+async def check_premium(ctx):
+    result = await is_premium(ctx.message.author.id)
+    return result
 
-def check_chanmj(ctx):
-    if check_jdrchannel(ctx):
-        jdr = DBJDR(str(ctx.message.guild.id),str(ctx.message.channel.id))
-        return str(ctx.message.author.id) == jdr.mj
+async def check_mj(ctx):
+    srv = await DBServer(ctx.message.guild.id)
+    return discord.utils.get(ctx.message.guild.roles, id=srv.mjrole) in ctx.message.author.roles
+
+async def check_jdrchannel(ctx):
+    srv = await DBServer(ctx.message.guild.id)
+    role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+    if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
+    jdrlist = await srv.jdrlist(ctx.author.id, role.id if role is not None else None)
+
+    for i in jdrlist:
+        if ctx.message.channel.id == i.get("channel", -1): return True
+        if ctx.message.channel.id in i.get("extensions", []): return True
+    return False
+
+async def check_chanmj(ctx):
+    role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+    if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
+    jdrchannel = await check_jdrchannel(ctx)
+    if jdrchannel:
+        jdr = await DBJDR(ctx.message.guild.id, ctx.message.channel.id, ctx.author.id, role.id if role is not None else None)
+        return ctx.message.author.id == jdr.mj
     return False
 
 class GenericCommandParameters:
-    def __init__(self,ctx):
-        self.ID = str(ctx.message.id)
-        self.srv = DBServer(str(ctx.message.guild.id))
-        lgcode = getuserlang(str(ctx.message.author.id))
+    async def __init__(self, ctx):
+        role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+        if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
+        self.ID = ctx.message.id
+        self.srv = await DBServer(ctx.message.guild.id)
+        lgcode = await DBMember.getuserlang(ctx.message.author.id)
         if not lang_exist(lgcode): lgcode = "EN"
         self.lang = get_lang(lgcode)
-        self.jdrlist = self.srv.jdrlist()
+        self.jdrlist = await self.srv.jdrlist(ctx.author.id, role.id if role is not None else None)
         self.jdr = None
         self.charbase = None
         self.char = None
-        if check_jdrchannel(ctx):
-            self.jdr = self.srv.getJDR(str(ctx.message.channel.id))
-            self.charbase = self.jdr.get_charbase()
-            for i in self.charbase:
-                if i.linked == str(ctx.message.author.id) and i.selected:
-                    self.char = i
+        jdrchannel = await check_jdrchannel(ctx)
+        if jdrchannel:
+            self.jdr = await self.srv.getJDR(ctx.message.channel.id, ctx.author.id, role.id if role is not None else None)
+            self.charbase = await self.jdr.charlist()
+            for i in self.charbase.get("linked", []):
+                if i.get("member", -1) == ctx.message.author.id and i.get("selected", False):
+                    self.char = await self.jdr.get_character(i.get("charkey", ""))
                     break
 
-def check_haschar(ctx):
-    data = GenericCommandParameters(ctx)
+async def check_haschar(ctx):
+    data = await GenericCommandParameters(ctx)
     return data.char is not None

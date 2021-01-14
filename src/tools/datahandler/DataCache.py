@@ -36,9 +36,10 @@ class DataCache:
         return self._cache.get(res, None)
 
     def __setitem__(self, res, value):
-        res = self._mappeditem.get(res, res)
-        self._cache[res] = value
-        self._clock[res] = time.clock()
+        if value.status // 100 == 2:
+            res = self._mappeditem.get(res, res)
+            self._cache[res] = value
+            self._clock[res] = time.clock()
 
     def clear(self):
         self._cache = {}

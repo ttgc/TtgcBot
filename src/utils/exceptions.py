@@ -70,6 +70,18 @@ class HTTPErrorCode(Enum):
         except ValueError:
             return cl.UNKNOWN
 
+    def is_redirect(self):
+        return self.value // 100 == 3
+
+    def is_client_error(self):
+        return self.value // 100 == 4
+
+    def is_server_error(self):
+        return self.value // 100 == 5
+
+    def is_unknown(self):
+        return self == self.__class__.UNKNOWN
+
     def toString(self, lang, message=None, **kwargs):
         if message is None:
             message = str(kwargs)
@@ -84,7 +96,7 @@ class HTTPErrorCode(Enum):
             cl.PAYMENT_REQUIRED: cl.UNKNOWN,
             cl.NOT_ACCEPTABLE: cl.UNKNOWN,
             cl.PROXY_AUTHENTICATION_REQUIRED: cl.UNAUTHORIZED,
-            cl.REQUEST_URI_TOO_LONG: cl.REQUEST_ENTITY_TOO_LARGE
+            cl.REQUEST_URI_TOO_LONG: cl.REQUEST_ENTITY_TOO_LARGE,
             cl.GONE: cl.MOVED_PERMANENTLY,
             cl.LENGTH_REQUIRED: cl.UNKNOWN,
             cl.PRECONDITION_FAILED: cl.UNKNOWN,

@@ -32,6 +32,7 @@ from src.utils.config import *
 from src.tools.BotTools import *
 from src.tools.Translator import *
 from src.utils.checks import *
+from src.utils.exceptions import *
 from src.help import *
 
 # import Cogs
@@ -97,21 +98,27 @@ async def blacklist(ctx):
 
 # Client events
 @client.event
-async def on_command_error(ctx,error):
+async def on_command_error(ctx, error):
     global logger
     lgcode = getuserlang(str(ctx.message.author.id))
     if not lang_exist(lgcode): lgcode = "EN"
     lang = get_lang(lgcode)
     msg = lang["error"].format(error)
 
-    if isinstance(error,commands.CommandNotFound): msg = lang["error_notfound"]
-    elif isinstance(error,commands.MissingPermissions): msg = lang["error_selfperms"]
-    elif isinstance(error,commands.BotMissingPermissions): msg = lang["error_perms"]
-    elif isinstance(error,commands.NSFWChannelRequired): msg = lang["error_nsfw"]
-    elif isinstance(error,commands.DisabledCommand): msg = lang["error_disabled"]
-    elif isinstance(error,commands.CheckFailure): return
-    elif isinstance(error,commands.UserInputError): msg = lang["error_argument"]
-    elif isinstance(error,commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))
+    if isinstance(error, commands.CommandNotFound): msg = lang["error_notfound"]
+    elif isinstance(error, commands.MissingPermissions): msg = lang["error_selfperms"]
+    elif isinstance(error, commands.BotMissingPermissions): msg = lang["error_perms"]
+    elif isinstance(error, commands.NSFWChannelRequired): msg = lang["error_nsfw"]
+    elif isinstance(error, commands.DisabledCommand): msg = lang["error_disabled"]
+    elif isinstance(error, commands.CheckFailure): return
+    elif isinstance(error, commands.UserInputError): msg = lang["error_argument"]
+    elif isinstance(error, commands.CommandOnCooldown): msg = lang["error_cd"].format("{0:.2f}".format(error.retry_after))
+    elif isinstance(error, commands.APIException):
+        logger.warning(error)
+        msg = error.parse(lang)
+    elif isinstance(error, commands.HTTPException):
+        logger.warning(error)
+        msg = error.parse(lang)
     else: logger.warning(error)
     await ctx.message.channel.send(msg)
 

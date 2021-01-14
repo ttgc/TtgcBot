@@ -64,8 +64,7 @@ async def check_mj(ctx):
 
 async def check_jdrchannel(ctx):
     srv = await DBServer(ctx.message.guild.id)
-    role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
-    if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
+
     jdrlist = await srv.jdrlist(ctx.author.id, role.id if role is not None else None)
 
     for i in jdrlist:
@@ -84,10 +83,10 @@ async def check_chanmj(ctx):
 
 class GenericCommandParameters:
     async def __init__(self, ctx):
-        role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
-        if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
         self.ID = ctx.message.id
         self.srv = await DBServer(ctx.message.guild.id)
+        role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+        if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
         lgcode = await DBMember.getuserlang(ctx.message.author.id)
         if not lang_exist(lgcode): lgcode = "EN"
         self.lang = get_lang(lgcode)

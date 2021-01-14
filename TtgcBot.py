@@ -125,19 +125,19 @@ async def on_command_error(ctx, error):
 @client.event
 async def on_guild_join(guild):
     global logger
-    addserver(guild)
-    try: logger.info("Added server '%s' to the database : ID=%s", str(guild), str(guild.id))
-    except: logger.info("Added server to the database : ID=%s", str(guild.id))
+    await DBServer.addserver(guild)
+    try: logger.info("Added server '%s' to the database : ID=%d", str(guild), guild.id)
+    except: logger.info("Added server to the database : ID=%d", guild.id)
 
 @client.event
 async def on_guild_remove(guild):
     global logger
-    srv = DBServer(str(guild.id))
-    srv.remove()
-    logger.info("Removed server from the database : ID=%s", str(guild.id))
+    srv = await DBServer(guild.id)
+    await srv.remove()
+    logger.info("Removed server from the database : ID=%d", guild.id)
 
 @client.event
-async def on_error(event,*args,**kwargs):
+async def on_error(event, *args, **kwargs):
     global logger
     logger.error(traceback.format_exc())
     # infos = await client.application_info()
@@ -154,20 +154,21 @@ async def on_ready():
     print(url)
     logger.info("Generate invite link : %s", url)
     srvid, nbr = [], 0
+    srvlist = await DBServer.srvlist()
     for i in client.guilds:
-        srvid.append(str(i.id))
-        if str(i.id) not in srvlist():
-            addserver(i)
+        srvid.append(i.id)
+        if i.id not in srvlist:
+            await DBServer.addserver(i)
             nbr += 1
-            try: logger.info("This server has invited the bot during off period, adding it to the database : %s (ID=%s)", str(i), str(i.id))
-            except: logger.info("Server added (ID=%s)", str(i.id))
+            try: logger.info("This server has invited the bot during off period, adding it to the database : %s (ID=%d)", str(i), i.id)
+            except: logger.info("Server added (ID=%d)", i.id)
     logger.info("Added %d new servers to the database successful", nbr)
-    logger.info("Purged %d servers wich have kicked the bot at least one year ago successful", purgeservers(365))
+    logger.info("Purged %d servers wich have kicked the bot at least one year ago successful", DBServer.purgeservers(365))
     nbr = 0
-    for i in srvlist():
+    for i in srvlist:
         if i not in srvid:
-            srv = DBServer(i)
-            srv.remove()
+            srv = await DBServer(i)
+            await srv.remove()
             nbr += 1
             logger.info("This server has kicked the bot during off period, removing it from the database : ID=%s", str(i))
     logger.info("Removed %d old servers from the database successful", nbr)
@@ -185,20 +186,20 @@ async def on_resumed():
 # ========== MAIN ========== #
 async def main():
     global TOKEN,logger
-    client.add_cog(BotManage(client,logger))
-    client.add_cog(Moderation(client,logger))
-    client.add_cog(Other(client,logger))
-    client.add_cog(NSFW(client,logger))
-    client.add_cog(Vocal(client,logger))
-    client.add_cog(MainJDR(client,logger))
-    client.add_cog(CharacterCog(client,logger))
-    client.add_cog(SkillCog(client,logger))
-    client.add_cog(PetCog(client,logger))
-    client.add_cog(JDRGlobal(client,logger))
-    client.add_cog(Finalize(client,logger))
-    client.add_cog(Maps(client,logger))
-    client.add_cog(InventoryCog(client,logger))
-    client.add_cog(MJ(client,logger))
+    client.add_cog(BotManage(client, logger))
+    client.add_cog(Moderation(client, logger))
+    client.add_cog(Other(client, logger))
+    client.add_cog(NSFW(client, logger))
+    client.add_cog(Vocal(client, logger))
+    client.add_cog(MainJDR(client, logger))
+    client.add_cog(CharacterCog(client, logger))
+    client.add_cog(SkillCog(client, logger))
+    client.add_cog(PetCog(client, logger))
+    client.add_cog(JDRGlobal(client, logger))
+    client.add_cog(Finalize(client, logger))
+    client.add_cog(Maps(client, logger))
+    client.add_cog(InventoryCog(client, logger))
+    client.add_cog(MJ(client, logger))
     await client.login(TOKEN)
     await client.connect()
 

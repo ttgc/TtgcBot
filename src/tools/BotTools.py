@@ -117,6 +117,15 @@ class DBServer:
             raise APIException("Server purge error", code=info.status)
         return int(info.result)
 
+    @staticmethod
+    async def srvlist():
+        api = APIManager()
+        info = await api(RequestType.GET, "Server/list")
+
+        if info.status // 100 != 2:
+            raise APIException("Server list error", code=info.status)
+        return info.result.get("servers", [])
+
 class DBJDR:
     async def __init__(self, srvid, channelid, requester, requesterRole):
         self.api = APIManager()

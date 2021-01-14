@@ -29,22 +29,22 @@ from src.tools.Translator import *
 from src.utils.config import *
 
 class NSFW(commands.Cog):
-    def __init__(self,bot,logger):
+    def __init__(self, bot, logger):
         self.bot = bot
         self.logger = logger
 
-    @commands.cooldown(5,30,commands.BucketType.channel)
-    @commands.cooldown(1,5,commands.BucketType.user)
+    @commands.cooldown(5, 30, commands.BucketType.channel)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.is_nsfw()
     @commands.command()
-    async def nsfwjoke(self,ctx,lang: typing.Optional[str] = "FR"):
+    async def nsfwjoke(self, ctx, lang: typing.Optional[str] = "FR"):
         """**NSFW channel required**
         Display a NSFW joke (only in french currently)"""
         if lang in ["FR", "EN"]:
-            with open("{}/nsfw-{}.txt".format(Config()["directories"]["jokes"], lang),encoding="utf-8") as f:
+            with open("{}/nsfw-{}.txt".format(Config()["directories"]["jokes"], lang), encoding="utf-8") as f:
                 jokelist = f.readlines()
                 if len(jokelist) > 0:
-                    await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
+                    await ctx.message.channel.send(choice(jokelist).replace("\\n", "\n"))
                 else:
                     data = await GenericCommandParameters(ctx)
                     await ctx.message.channel.send(data.lang["nojoke"].format(lang))
@@ -52,20 +52,20 @@ class NSFW(commands.Cog):
             data = await GenericCommandParameters(ctx)
             await ctx.message.channel.send(data.lang["nojoke"].format(lang))
 
-    @commands.cooldown(5,30,commands.BucketType.channel)
-    @commands.cooldown(3,5,commands.BucketType.user)
+    @commands.cooldown(5, 30, commands.BucketType.channel)
+    @commands.cooldown(3, 5, commands.BucketType.user)
     @commands.is_nsfw()
     @commands.command()
-    async def hentai(self,ctx):
+    async def hentai(self, ctx):
         """**NSFW channel required**
         Display a random hentai pic :smirk:"""
-        with open("Hentai/{}".format(choice(os.listdir("Hentai"))),"rb") as f:
+        with open("Hentai/{}".format(choice(os.listdir("Hentai"))), "rb") as f:
             await ctx.message.channel.send(file=discord.File(f))
 
-    @commands.cooldown(1,30,commands.BucketType.channel)
+    @commands.cooldown(1, 30, commands.BucketType.channel)
     @commands.is_nsfw()
     @commands.command()
-    async def rule34(self,ctx):
+    async def rule34(self, ctx):
         """**NSFW channel required**
         Do you really need some further explanations ?"""
         await ctx.message.channel.send("Rule 34 : *If it exists, there is porn on it*\nhttps://rule34.paheal.net/")

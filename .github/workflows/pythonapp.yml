@@ -48,7 +48,7 @@ jobs:
         DBPWD: ${{ secrets.localdb_password }}
       run: | 
         Cosmo-Network/API/Tools/createdb/installdb.sh --api=ttgcapi --bot=ttgcbot --pwd=$DBPWD --generate-prod -c -u
-        Cosmo-Network/API/Tools/populatedb/populate.sh --bot=ttgcbot
+        Cosmo-Network/API/Tools/populatedb/populate.sh --bot=ttgcbot --no-test
 
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1

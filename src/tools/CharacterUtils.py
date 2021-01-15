@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from src.tools.datahandler.APIManager import *
+from src.utils.decorators import deprecated
 #from tools.BotTools import DBJDR
 
 class Item:
@@ -132,18 +133,23 @@ class Skill:
         self.origine = origin
         self.extension = extension
 
-    @staticmethod
-    def skillsearch(skname):
-        db = Database()
-        rows = db.call("skillsearch",name=skname)
-        if rows is None:
-            db.close(True)
-            return []
-        ls = []
-        for i in rows:
-            ls.append(Skill(i[0]))
-        db.close()
-        return ls
+    def __str__(self):
+        return self.description if self.description is not None else ""
+
+    @classmethod
+    async def skillsearch(cl, skname=None, origin=None, universe=None, world=None):
+        api = APIManager()
+        info = await api(RequestType.GET, "Skills/search", query={"name": skname, "origin": origin, "universe": universe, "world": world})
+
+        if info.status == 404: return []
+        if info.status // 100 != 2:
+            raise APIException("Skill info get error", srv=srv, channel=channel, name=skname, origin=origin, universe=universe, world=world, code=info.status)
+
+        skls = []
+        for i in info.result.get("skills", [info.result]):
+            ext = Extension(i.get("extension", {}).get("universe", "unknown"), i.get("extension", {}).get("world", "unknown"))
+            skls.append(cl(i.get("id", -1), i.get("name", ""), i.get("description", None), i.get("origin", ""), ext))
+        return skls
 
     @staticmethod
     def isskillin(ls, skid):
@@ -162,7 +168,7 @@ class Skill:
 
         skls = []
         for i in info.result:
-            ext = Extension(i.get("extension", {}).get("universe"), i.get("extension", {}).get("world"))
+            ext = Extension(i.get("extension", {}).get("universe", "unknown"), i.get("extension", {}).get("world", "unknown"))
             skls.append(cl(i.get("id", -1), i.get("name", ""), i.get("description", ""), i.get("origin", ""), ext))
         return skls
 
@@ -174,6 +180,7 @@ class Extension:
     def __str__(self):
         return "{} : {}".format(self.universe, self.world)
 
+@deprecated
 def retrieveCharacterOrigins(cl):
     db = Database()
     cur = db.execute("SELECT classe.nom,race.nom FROM classe INNER JOIN race ON classe.id_race = race.id_race WHERE id_classe = %(ID)s",ID=cl)
@@ -184,6 +191,7 @@ def retrieveCharacterOrigins(cl):
     db.close()
     return row[1],row[0]
 
+@deprecated
 def retrieveClassID(rcid,clname):
     db = Database()
     cur = db.execute("SELECT id_classe FROM classe WHERE lower(nom) = %(name)s AND id_race = %(rc)s",name=clname.lower(),rc=rcid)
@@ -194,6 +202,7 @@ def retrieveClassID(rcid,clname):
     db.close()
     return row
 
+@deprecated
 def retrieveRaceID(rcname):
     db = Database()
     cur = db.execute("SELECT id_race FROM race WHERE lower(nom) = %(name)s",name=rcname.lower())
@@ -204,6 +213,7 @@ def retrieveRaceID(rcname):
     db.close()
     return row
 
+@deprecated
 def retrieveRaceName(rcid):
     if rcid is None: return None
     db = Database()
@@ -215,6 +225,7 @@ def retrieveRaceName(rcid):
     db.close()
     return row[0]
 
+@deprecated
 def retrieveSymbiontID(sbname):
     db = Database()
     cur = db.execute("SELECT id_symbiont FROM symbiont WHERE lower(nom) = %(name)s",name=sbname.lower())
@@ -225,6 +236,7 @@ def retrieveSymbiontID(sbname):
     db.close()
     return row
 
+@deprecated
 def retrieveSymbiontName(sbid):
     if sbid is None: return None
     db = Database()
@@ -236,6 +248,7 @@ def retrieveSymbiontName(sbid):
     db.close()
     return row[0]
 
+@deprecated
 def retrieveOrganization(orgid):
     db = Database()
     cur = db.execute("SELECT nom FROM organizations WHERE id_org = %(id)s",id=orgid)
@@ -246,6 +259,7 @@ def retrieveOrganization(orgid):
     db.close()
     return row[0] if row is not None else None
 
+@deprecated
 def isOrganizationHidden(orgname):
     db = Database()
     cur = db.execute("SELECT hidden FROM organization WHERE nom = %(org)s", org=orgname)
@@ -256,6 +270,7 @@ def isOrganizationHidden(orgname):
     db.close()
     return row[0] if row is not None else False
 
+@deprecated
 def organizationExists(orgname):
     db = Database()
     cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname)
@@ -266,6 +281,7 @@ def organizationExists(orgname):
     db.close()
     return nbr > 0
 
+@deprecated
 def retrieveOrganizationSkill(orgname):
     db = Database()
     cur = db.call("get_orgskills",org=orgname)
@@ -278,6 +294,7 @@ def retrieveOrganizationSkill(orgname):
     db.close()
     return ls
 
+@deprecated
 def retrieveRaceSkill(racename):
     db = Database()
     cur = db.call("get_raceskills",racename=racename)

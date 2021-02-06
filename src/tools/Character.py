@@ -25,50 +25,52 @@ from src.tools.datahandler.APIManager import *
 #from tools.BotTools import DBJDR
 #import tools.BotTools as bt
 from src.tools.CharacterUtils import *
+from src.utils.exceptions import InternalCommandError
 
 class Character:
     """Character class"""
-    lvlcolor = ["00FF00","FFFF00","FF00FF","FF0000"]
+    lvlcolor = ["00FF00", "FFFF00", "FF00FF", "FF0000"]
     gm_map_chartoint = {'offensive': 0, 'defensive': 1, 'illumination': 2, 'sepulchral': 3}
     gm_map_inttochar = ['O', 'D', 'I', 'S']
     gm_map_inttostr = ['offensive', 'defensive', 'illumination', 'sepulchral']
 
     def __init__(self,**kwargs):
-        self.key = kwargs.get("charkey","unknown")
-        self.name = kwargs.get("name","unknown")
-        self.lore = kwargs.get("lore","")
-        self.PVmax = kwargs.get("PVm",1)
-        self.PMmax = kwargs.get("PMm",1)
-        self.PV = kwargs.get("PV",1)
-        self.PM = kwargs.get("PM",1)
-        self.force = kwargs.get("force",50)
-        self.esprit = kwargs.get("esprit",50)
-        self.charisme = kwargs.get("charisme",50)
-        self._furtivite = kwargs.get("furtivite",50)
-        self.karma = kwargs.get("karma",0)
-        self.money = kwargs.get("money",0)
-        self.stat = kwargs.get("stat",[0,0,0,0,0,0,0])
-        self.lp = kwargs.get("lp",0)
-        self.dp = kwargs.get("dp",0)
-        self.mod = kwargs.get("mod",0)
-        self.default_mod = kwargs.get("default_mod",0)
-        self.default_karma = kwargs.get("default_karma",0)
-        self.intuition = kwargs.get("intuition",3)
-        self.mental = kwargs.get("mentalhealth",100)
-        self.lvl = kwargs.get("lvl",1)
-        self.linked = kwargs.get("linked","NULL")
-        if self.linked.upper() == "NULL": self.linked = None
-        self.selected = kwargs.get("selected",False)
-        self.inventory = kwargs.get("inventory",Inventory())
-        self.pet = kwargs.get("pet",{})
-        self.skills = kwargs.get("skills",[])
-        self.dead = kwargs.get("dead",False)
-        self.race,self.classe = retrieveCharacterOrigins(kwargs.get("classe",1))
+        self.key = kwargs.get("charkey", "unknown")
+        self.name = kwargs.get("name", "unknown")
+        self.lore = kwargs.get("lore", "")
+        self.PVmax = kwargs.get("PVm", 1)
+        self.PMmax = kwargs.get("PMm", 1)
+        self.PV = kwargs.get("PV", 1)
+        self.PM = kwargs.get("PM", 1)
+        self.force = kwargs.get("force", 50)
+        self.esprit = kwargs.get("esprit", 50)
+        self.charisme = kwargs.get("charisme", 50)
+        self._furtivite = kwargs.get("furtivite", 50)
+        self.karma = kwargs.get("karma", 0)
+        self.money = kwargs.get("money", 0)
+        self.stat = kwargs.get("stat", [0,0,0,0,0,0,0])
+        self.lp = kwargs.get("lp", 0)
+        self.dp = kwargs.get("dp", 0)
+        self.mod = kwargs.get("mod", 0)
+        self.default_mod = kwargs.get("default_mod", 0)
+        self.default_karma = kwargs.get("default_karma", 0)
+        self.intuition = kwargs.get("intuition", 3)
+        self.mental = kwargs.get("mentalhealth", 100)
+        self.lvl = kwargs.get("lvl", 1)
+        self.linked = kwargs.get("linked", None)
+        self.selected = kwargs.get("selected", False)
+        self.inventory = kwargs.get("inventory", Inventory())
+        self.pet = kwargs.get("pet", {})
+        self.skills = kwargs.get("skills", [])
+        self.dead = kwargs.get("dead", False)
+        self.race = kwargs.get("race", "Unknown")
+        self.classe = kwargs.get("classe", "Unknown")
         self.jdr = None
-        self.xp = kwargs.get("xp",0)
-        self.precision = kwargs.get("prec",50)
-        self.luck = kwargs.get("luck",50)
-        self.affiliated_with = kwargs.get("org",None)
+        self.xp = kwargs.get("xp", 0)
+        self.precision = kwargs.get("prec", 50)
+        self.luck = kwargs.get("luck", 50)
+        self.affiliated_with = kwargs.get("org", None)
+        self.hidden_affiliation = kwargs.get("hide_org", False)
         self.hybrid_race = retrieveRaceName(kwargs.get("hybrid", None))
         self.symbiont = retrieveSymbiontName(kwargs.get("symbiont", None))
         self.planet_pilot = kwargs.get("planet_pilot", -1)
@@ -91,61 +93,136 @@ class Character:
         self.inventory.bind(self, jdr)
         self.jdr = jdr
 
+    def is_bound(self, raise_error=False):
+        bound = self.jdr is not None
+        if raise_error and not bound:
+            raise InternalCommandError("Character is not bound")
+        return bound
+
     def check_life(self):
         if self.PV <= 0:
             return False
         else:
             return True
 
-    def resetchar(self):
-        db = Database()
-        db.call("resetchar",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
+    def resetchar(self, requester):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Character/reset/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character reset error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
+
         self.karma = self.default_karma
         self.PV = self.PVmax
         self.PM = self.PMmax
         self.mod = self.default_mod
 
-    def charset(self,tag,value):
-        db = Database()
-        db.call("charset",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,stat=tag,val=value)
-        db.close()
-        return self.jdr.get_character(self.key)
+    def _internal_charset(self, requester, **kwargs):
+        info = await self.api(RequestType.PUT, "Character/set/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester, body=kwargs)
 
-    def makehybrid(self, race, allowOverride=False):
+        if info.status // 100 != 2:
+            raise APIException("Character set error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status, body=kwargs)
+
+        return info
+
+    def _internal_update(self, requester, **kwargs):
+        info = await self.api(RequestType.PUT, "Character/update/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester, body=kwargs)
+
+        if info.status // 100 != 2:
+            raise APIException("Character update error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status, body=kwargs)
+
+        return info
+
+    def charset(self, tag, value, requester):
+        self.is_bound(True)
+        tag = tag.lower()
+
+        if tag not in ["name", "pv", "pm", "strength", "spirit", "charisma", "agility", "precision", "luck",
+                        "intuition", "mental", "karma", "gamemod", "money", "pilot"]:
+            raise InternalCommandError("Invalid tag for charset command")
+
+        data = {tag: value}
+        info = self._internal_charset(requester, **data)
+
+        if tag == "name": self.name = value
+        elif tag == "pv": self.PVmax, self.PV = value, min(self.PV, value)
+        elif tag == "pm": self.PMmax, self.PM = value, min(self.PM, value)
+        elif tag == "strength": self.force = max(1, min(100, value))
+        elif tag == "spirit": self.esprit = max(1, min(100, value))
+        elif tag == "charisma": self.charisme = max(1, min(100, value))
+        elif tag == "agility": self.agilite = max(1, min(100, value))
+        elif tag == "precision": self.precision = max(1, min(100, value))
+        elif tag == "luck": self.luck = max(1, min(100, value))
+        elif tag == "intuition": self.intuition = max(1, min(6, value))
+        elif tag == "mental": self.mental = value
+        elif tag == "karma": self.default_karma = max(-10, min(10, value))
+        elif tag == "gamemod": self.default_mod = self.gm_map_chartoint[value]
+        elif tag == "money": self.money = min(0, value)
+        elif tag == "pilot":
+            self.astral_pilot = max(-1, value.get("astral", self.astral_pilot))
+            self.planet_pilot = max(-1, value.get("planet", self.planet_pilot))
+
+    def update(self, tag, value, requester):
+        self.is_bound(True)
+        tag = tag.lower()
+
+        if tag not in ["pv", "pm", "mental", "karma", "money", "light_point", "dark_point"]:
+            raise InternalCommandError("Invalid tag for char update command")
+
+        data = {tag: value}
+        info = self._internal_update(requester, **data)
+
+        elif tag == "pv": self.PV = min(self.PVmax, self.PV + value)
+        elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
+        elif tag == "mental": self.mental += value
+        elif tag == "karma": self.karma = max(-10, min(10, value))
+        elif tag == "money": self.money = self.money + value if self.money + value > 0 else self.money
+        elif tag == "light_point": self.lp += max(0, value)
+        elif tag == "dark_point": self.dp += max(0, value)
+
+    def makehybrid(self, race, requester, allowOverride=False):
         if allowOverride or self.hybrid_race is None:
-            db = Database()
-            db.call("charhybrid", dbkey=self.key, idserv=self.jdr.server, idchan=self.jdr.channel, rc=race)
-            db.close()
-            return self.jdr.get_character(self.key)
-        return self
+            self.is_bound(True)
+            info = self._internal_charset(requester, hybrid=race)
+            self.hybrid_race = race
 
-    def setsymbiont(self, symbiont):
-        db = Database()
-        db.call("charsb", dbkey=self.key, idserv=self.jdr.server, idchan=self.jdr.channel, sb=symbiont)
-        db.close()
-        return self.jdr.get_character(self.key)
+    def setsymbiont(self, symbiont, requester):
+        self.is_bound(True)
+        info = self._internal_charset(requester, symbiont=symbiont)
+        self.symbiont = symbiont
 
-    def setlore(self,lore):
-        db = Database()
-        db.call("charsetlore",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,lor=lore)
-        db.close()
+    @deprecated
+    def setlore(self, lore):
+        # db = Database()
+        # db.call("charsetlore",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,lor=lore)
+        # db.close()
         self.lore = lore
 
-    def setname(self,name_):
-        db = Database()
-        db.call("charsetname",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,name=name_)
-        db.close()
+    @deprecated
+    def setname(self, name_):
+        # db = Database()
+        # db.call("charsetname",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,name=name_)
+        # db.close()
         self.name = name_
 
-    def switchmod(self,default=False):
-        if not default and self.mod > 1: return self
-        db = Database()
-        db.call("switchmod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,def_=default)
-        db.close()
-        return self.jdr.get_character(self.key)
+    def switchmod(self, requester, default=False):
+        if not default and self.mod > 1: return
+        if default and self.mod == self.default_mod: return
 
-    def link(self,memberid):
+        self.is_bound(True)
+
+        if default:
+            self.mod = self.default_mod
+        else:
+            self.mod = 0 if self.mod == 1 else 1
+
+        info = self._internal_update(requester, gamemod=self.gm_map_inttostr[self.mod])
+
+    def link(self, memberid, requester):
         db = Database()
         db.call("charlink",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idmemb=memberid)
         db.close()
@@ -226,19 +303,22 @@ class Character:
         db.call("kill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
         db.close()
 
-    def xpup(self,amount,allowlevelup=False):
-        db = Database()
-        cur = db.call("charxp",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,amount=amount,allowlevelup=allowlevelup)
-        result = cur.fetchone()
-        db.close()
-        return result[0]
+    def xpup(self, amount, requester, allowlevelup=False, curve=None, *curveParameters):
+        self.is_bound(True)
+        xpdata = {"initial": amount, "curve": curve, "parameters": list(curveParameters), "earnlevel": allowlevelup}
+        info = self._internal_update(requester, xp=xpdata)
 
-    def affiliate(self,org):
-        # if self.affiliated_with is not None:
-        #     raise AttributeError("Character {} is already affiliated with an (other) organization".format(self.key))
-        db = Database()
-        db.call("affiliate",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,org=org)
-        db.close()
+        if curve is None:
+            self.lvl += (min(0, amount) // 100)
+            return self, min(0, amount) // 100
+        else:
+            newself = self.jdr.get_character(self.key)
+            return newself, newself.lvl - self.lvl
+
+    def affiliate(self, org, requester):
+        self.is_bound(True)
+        info = self._internal_charset(requester, affiliation=org)
+        self.affiliated_with = org
 
     def get_pet(self, petkey):
         if petkey not in self.pet or self.jdr is None: return None

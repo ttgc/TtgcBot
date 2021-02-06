@@ -156,3 +156,5 @@ class DeprecatedException(Exception):
         invok = "{}({}, {})".format(self.fct.__name__, list(self.args), dict(self.kwargs))
         invok = invok.replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "=")
         return "DeprecatedException: The function {} is deprecated\nTried to invoke {}".format(self.fct, invok)
+
+class InternalCommandError(commands.CommandError): pass

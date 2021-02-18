@@ -278,7 +278,7 @@ class DBJDR:
 
     async def get_character(self, charkey, forceGet=False):
         info = await self.api(RequestType.GET, "Character/{}/{}/{}".format(self.server, self.channel, charkey), forceGet=forceGet
-            resource="SRV://{}/{}/{}".format(self.server, self.channel, charkey), requesterID=self.requester, roleID=self.requesterRole)
+            resource="SRV://{}/{}/{}".format(self.server, self._initialChannelID, charkey), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
             raise APIException("Character get error", srv=self.server, channel=self.channel, charkey=charkey, code=info.status)

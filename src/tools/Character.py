@@ -48,7 +48,7 @@ class Character:
         self._furtivite = kwargs.get("furtivite", 50)
         self.karma = kwargs.get("karma", 0)
         self.money = kwargs.get("money", 0)
-        self.stat = kwargs.get("stat", [0,0,0,0,0,0,0])
+        self.stat = kwargs.get("stat", [0, 0, 0, 0, 0, 0, 0])
         self.lp = kwargs.get("lp", 0)
         self.dp = kwargs.get("dp", 0)
         self.mod = kwargs.get("mod", 0)
@@ -83,15 +83,15 @@ class Character:
     def furtivite(self):
         return self._furtivite
 
-    @property
-    def api(self):
-        return self.jdr.api if self.is_bound() else None
-
     @furtivite.setter
     def furtivite(self, val):
         self._furtivite = val
 
     agilite = furtivite
+
+    @property
+    def api(self):
+        return self.jdr.api if self.is_bound() else None
 
     def bind(self,jdr):
         self.inventory.bind(self, jdr)
@@ -109,7 +109,7 @@ class Character:
         else:
             return True
 
-    def resetchar(self, requester):
+    async def resetchar(self, requester):
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Character/reset/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
@@ -123,7 +123,7 @@ class Character:
         self.PM = self.PMmax
         self.mod = self.default_mod
 
-    def _internal_charset(self, requester, **kwargs):
+    async def _internal_charset(self, requester, **kwargs):
         info = await self.api(RequestType.PUT, "Character/set/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
             resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester, body=kwargs)
 
@@ -132,7 +132,7 @@ class Character:
 
         return info
 
-    def _internal_update(self, requester, **kwargs):
+    async def _internal_update(self, requester, **kwargs):
         info = await self.api(RequestType.PUT, "Character/update/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
             resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester, body=kwargs)
 
@@ -141,7 +141,7 @@ class Character:
 
         return info
 
-    def charset(self, tag, value, requester):
+    async def charset(self, tag, value, requester):
         self.is_bound(True)
         tag = tag.lower()
 
@@ -150,7 +150,7 @@ class Character:
             raise InternalCommandError("Invalid tag for charset command")
 
         data = {tag: value}
-        info = self._internal_charset(requester, **data)
+        info = await self._internal_charset(requester, **data)
 
         if tag == "name": self.name = value
         elif tag == "pv": self.PVmax, self.PV = value, min(self.PV, value)
@@ -170,7 +170,7 @@ class Character:
             self.astral_pilot = max(-1, value.get("astral", self.astral_pilot))
             self.planet_pilot = max(-1, value.get("planet", self.planet_pilot))
 
-    def update(self, tag, value, requester):
+    async def update(self, tag, value, requester):
         self.is_bound(True)
         tag = tag.lower()
 
@@ -178,7 +178,7 @@ class Character:
             raise InternalCommandError("Invalid tag for char update command")
 
         data = {tag: value}
-        info = self._internal_update(requester, **data)
+        info = await self._internal_update(requester, **data)
 
         if tag == "pv": self.PV = min(self.PVmax, self.PV + value)
         elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
@@ -188,15 +188,15 @@ class Character:
         elif tag == "light_point": self.lp += max(0, value)
         elif tag == "dark_point": self.dp += max(0, value)
 
-    def makehybrid(self, race, requester, allowOverride=False):
+    async def makehybrid(self, race, requester, allowOverride=False):
         if allowOverride or self.hybrid_race is None:
             self.is_bound(True)
-            info = self._internal_charset(requester, hybrid=race)
+            info = await self._internal_charset(requester, hybrid=race)
             self.hybrid_race = race
 
-    def setsymbiont(self, symbiont, requester):
+    async def setsymbiont(self, symbiont, requester):
         self.is_bound(True)
-        info = self._internal_charset(requester, symbiont=symbiont)
+        info = await self._internal_charset(requester, symbiont=symbiont)
         self.symbiont = symbiont
 
     @deprecated
@@ -213,7 +213,7 @@ class Character:
         # db.close()
         self.name = name_
 
-    def switchmod(self, requester, default=False):
+    async def switchmod(self, requester, default=False):
         if not default and self.mod > 1: return
         if default and self.mod == self.default_mod: return
 
@@ -224,9 +224,9 @@ class Character:
         else:
             self.mod = 0 if self.mod == 1 else 1
 
-        info = self._internal_update(requester, gamemod=self.gm_map_inttostr[self.mod])
+        info = await self._internal_update(requester, gamemod=self.gm_map_inttostr[self.mod])
 
-    def link(self, memberid, requester, override=False, select=True):
+    async def link(self, memberid, requester, override=False, select=True):
         self.is_bound(True)
 
         body = {"member": memberid, "overriding": override, "selected": select}
@@ -244,7 +244,7 @@ class Character:
         self.selected = select
         return True
 
-    def unlink(self, requester):
+    async def unlink(self, requester):
         self.is_bound(True)
 
         info = await self.api(RequestType.DELETE, "Character/unlink/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
@@ -256,7 +256,7 @@ class Character:
         self.linked = None
         self.selected = False
 
-    def select(self, requester):
+    async def select(self, requester):
         if self.linked is None: return
         self.is_bound(True)
 
@@ -268,7 +268,7 @@ class Character:
 
         self.selected = True
 
-    def lvlup(self, requester):
+    async def lvlup(self, requester):
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Character/levelup/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
@@ -280,7 +280,7 @@ class Character:
         self.lvl += 1
 
     @deprecated(raise_error=False)
-    def _uselpdp_dirty(self, what, requester):
+    async def _uselpdp_dirty(self, what, requester):
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Character/uselpdp/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key, what),
@@ -289,20 +289,20 @@ class Character:
         if info.status // 100 != 2:
             raise APIException("Character uselpdp error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, what=what, code=info.status)
 
-    def uselp(self, requester):
-        self._uselpdp_dirty("lp", requester)
+    async def uselp(self, requester):
+        await self._uselpdp_dirty("lp", requester)
         self.lp -= 1
         self.karma = 10
         self.mod = 2
 
-    def usedp(self, requester):
-        self._uselpdp_dirty("dp", requester)
+    async def usedp(self, requester):
+        await self._uselpdp_dirty("dp", requester)
         self.dp -= 1
         self.karma = -10
         self.mod = 3
 
     @deprecated(raise_error=False)
-    def _reset_lpdp_dirty(self, requester):
+    async def _reset_lpdp_dirty(self, requester):
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Character/cleanlpdp/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
@@ -311,11 +311,11 @@ class Character:
         if info.status // 100 != 2:
             raise APIException("Character cleanlpdp error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
 
-    def reset_lpdp(self, requester):
-        self._reset_lpdp_dirty(requester)
+    async def reset_lpdp(self, requester):
+        await self._reset_lpdp_dirty(requester)
         if Character.gm_map_inttochar[self.mod] in ['I', 'S']: self.mod = self.default_mod
 
-    def pet_add(self, key, requester, **body):
+    async def pet_add(self, key, requester, **body):
         if key in self.pet: return False
         self.is_bound(True)
         finalbody = {"key": key, "data": body}
@@ -331,7 +331,7 @@ class Character:
         self.pet[key] = newpet
         return True
 
-    def pet_delete(self, key, requester):
+    async def pet_delete(self, key, requester):
         if key not in self.pet: return False
         self.is_bound(True)
 
@@ -344,7 +344,7 @@ class Character:
         del(self.pet[key])
         return True
 
-    def assign_skill(self, requester, *skls):
+    async def assign_skill(self, requester, *skls):
         for i in self.skills:
             if sk.ID == i.ID: return False
 
@@ -359,7 +359,7 @@ class Character:
         self.skills = Skill.loadfromdb(self.jdr.server, self.jdr.channel, self.key, self.requester, self.jdr.requesterRole)
         return True
 
-    def kill(self):
+    async def kill(self):
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Character/kill/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
@@ -370,10 +370,10 @@ class Character:
 
         self.dead = True
 
-    def xpup(self, amount, requester, allowlevelup=False, curve=None, *curveParameters):
+    async def xpup(self, amount, requester, allowlevelup=False, curve=None, *curveParameters):
         self.is_bound(True)
         xpdata = {"initial": amount, "curve": curve, "parameters": list(curveParameters), "earnlevel": allowlevelup}
-        info = self._internal_update(requester, xp=xpdata)
+        info = await self._internal_update(requester, xp=xpdata)
 
         if curve is None:
             self.xp += min(0, amount)
@@ -383,49 +383,60 @@ class Character:
                 self.xp -= (levels * 100)
             return self
         else:
-            newself = self.jdr.get_character(self.key, True)
+            newself = await self.jdr.get_character(self.key, True)
             return newself
 
-    def affiliate(self, org, requester):
+    async def affiliate(self, org, requester):
         self.is_bound(True)
-        info = self._internal_charset(requester, affiliation=org)
+        info = await self._internal_charset(requester, affiliation=org)
         self.affiliated_with = org
 
-    def get_pet(self, petkey):
+    async def get_pet(self, petkey):
         if petkey not in self.pet or not self.is_bound(): return None
         if self.pet[petkey] is None:
-            self.pet[petkey] = Pet.loadfromdb(self.jdr.server, self.jdr.channel, self.key, petkey, self.jdr.requester, self.jdr.requesterRole)
+            self.pet[petkey] = await Pet.loadfromdb(self.jdr.server, self.jdr._initialChannelID, self.key, petkey, self.jdr.requester, self.jdr.requesterRole)
+            if self.is_bound(): self.pet[petkey].bind(self.jdr)
         return self.pet[petkey]
 
 class Pet:
-    def __init__(self,**kwargs):
-        self.key = kwargs.get("petkey","unknown")
-        self.charkey = kwargs.get("charkey","unknown")
-        self.name = kwargs.get("name","unknown")
-        self.espece = kwargs.get("espece","unknown")
-        self.PVmax = kwargs.get("PVm",1)
-        self.PMmax = kwargs.get("PMm",0)
-        self.PV = kwargs.get("PV",1)
-        self.PM = kwargs.get("PM",0)
-        self.force = kwargs.get("force",50)
-        self.esprit = kwargs.get("esprit",50)
-        self.charisme = kwargs.get("charisme",50)
-        self.agilite = kwargs.get("agilite",50)
-        self.karma = kwargs.get("karma",0)
-        self.stat = kwargs.get("stat",[0,0,0,0,0,0,0])
-        self.mod = kwargs.get("mod",0)
-        self.default_mod = kwargs.get("default_mod",0)
-        self.instinct = kwargs.get("instinct",3)
-        self.lvl = kwargs.get("lvl",1)
-        self.precision = kwargs.get("prec",50)
-        self.luck = kwargs.get("luck",50)
+    def __init__(self, **kwargs):
+        self.key = kwargs.get("petkey", "unknown")
+        self.charkey = kwargs.get("charkey", "unknown")
+        self.name = kwargs.get("name", "unknown")
+        self.espece = kwargs.get("espece", "unknown")
+        self.PVmax = kwargs.get("PVm", 1)
+        self.PMmax = kwargs.get("PMm", 0)
+        self.PV = kwargs.get("PV", 1)
+        self.PM = kwargs.get("PM", 0)
+        self.force = kwargs.get("force", 50)
+        self.esprit = kwargs.get("esprit", 50)
+        self.charisme = kwargs.get("charisme", 50)
+        self.agilite = kwargs.get("agilite", 50)
+        self.karma = kwargs.get("karma", 0)
+        self.stat = kwargs.get("stat", [0, 0, 0, 0, 0, 0, 0])
+        self.mod = kwargs.get("mod", 0)
+        self.default_mod = kwargs.get("default_mod", 0)
+        self.instinct = kwargs.get("instinct", 3)
+        self.lvl = kwargs.get("lvl", 1)
+        self.precision = kwargs.get("prec", 50)
+        self.luck = kwargs.get("luck", 50)
         self.jdr = None
 
     def __str__(self):
         return self.name
 
+    @property
+    def api(self):
+        return self.jdr.api if self.is_bound() else None
+
     def bind(self,jdr):
         self.jdr = jdr
+
+    def is_bound(self, raise_error=False):
+        bound = self.jdr is not None
+        if raise_error and not bound:
+            raise InternalCommandError("Pet is not bound")
+        return bound
 
     def check_life(self):
         return self.PV > 0
@@ -462,7 +473,25 @@ class Pet:
 
     @classmethod
     async def loadfromdb(cl, srv, channel, charkey, petkey, requester, requesterRole):
-        pass
+        api = APIManager()
+        info = await api(RequestType.GET, "Pet/{}/{}/{}/{}".format(srv, channel, charkey, petkey),
+            resource="SRV://{}/{}/{}/{}".format(srv, channel, charkey, petkey), requesterID=requester, roleID=self.requesterRole)
+
+        if info.status // 100 != 2:
+            raise APIException("Pet get error", srv=srv, channel=channel, character=charkey, petkey=petkey, code=info.status)
+
+        st = [
+            info.result.get("RolledDice", 0), info.result.get("SuperCriticSuccess", 0), info.result.get("CriticSuccess", 0),
+            info.result.get("Succes", 0), info.result.get("Fail", 0), info.result.get("CriticFail", 0), info.result.get("SuperCriticFail", 0)
+        ]
+
+        gm = ch.Character.gm_map_chartoint[info.result.get("Gm", "offensive").lower()]
+        gmdefault = ch.Character.gm_map_chartoint[info.result.get("GmDefault", "offensive").lower()]
+        return cl(petkey=petkey, charkey=charkey, name=info.result.get("Nom", "unknwon"), espece=info.result.get("Species", "unknown"),
+                    PVm=info.result.get("Pvmax", 1), PMm=info.result.get("Pmmax", 1), PV=info.result.get("PV", 1), PM=info.result.get("PM", 1),
+                    force=info.result.get("Strength", 50), esprit=info.result.get("Spirit", 50), charisme=info.result.get("Charisma", 50),
+                    agilite=info.result.get("Agilite", 50), karma=info.result.get("Karma", 0), stat=st, mod=gm, default_mod=gmdefault,
+                    instinct=info.result.get("Instinct", 3), prec=info.result.get("Prec", 50), luck=info.result.get("Luck", 50))
 
     @staticmethod
     async def listpet(srv, channel, charkey, requester, requesterRole):

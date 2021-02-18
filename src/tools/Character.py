@@ -305,7 +305,7 @@ class Character:
     def _reset_lpdp_dirty(self, requester):
         self.is_bound(True)
 
-        info = await self.api(RequestType.PUT, "Character/cleanlpdp/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+        info = await self.api(RequestType.PUT, "Character/cleanlpdp/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
             resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
 
         if info.status // 100 != 2:
@@ -315,22 +315,32 @@ class Character:
         self._reset_lpdp_dirty(requester)
         if Character.gm_map_inttochar[self.mod] in ['I', 'S']: self.mod = self.default_mod
 
-    def pet_add(self,key):
+    def pet_add(self, key, requester, **body):
         if key in self.pet: return False
-        db = Database()
-        db.call("petcreate",dbkey=key,charact=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
-        newpet = Pet()
-        newpet.key = newpet.name = key
-        newpet.charkey = self.key
+        self.is_bound(True)
+        finalbody = {"key": key, "data": body}
+
+        info = await self.api(RequestType.POST, "Pet/create/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key, key),
+            resource="SRV://{}/{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key, key), requesterID=requester, body=finalbody)
+
+        if info.status // 100 != 2:
+            raise APIException("Pet create error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, petkey=key, code=info.status)
+
+        newpet = Pet(petkey=key, name=key, charkey=self.key)
+        newpet.bind(self.jdr)
         self.pet[key] = newpet
         return True
 
-    def pet_delete(self,key):
+    def pet_delete(self, key, requester):
         if key not in self.pet: return False
-        db = Database()
-        db.call("petdelete",dbkey=key,charact=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
+        self.is_bound(True)
+
+        info = await self.api(RequestType.DELETE, "Pet/delete/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key, key),
+            resource="SRV://{}/{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key, key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Pet delete error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, petkey=key, code=info.status)
+
         del(self.pet[key])
         return True
 
@@ -346,7 +356,7 @@ class Character:
     def kill(self):
         self.is_bound(True)
 
-        info = await self.api(RequestType.PUT, "Character/kill/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+        info = await self.api(RequestType.PUT, "Character/kill/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
             resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
 
         if info.status // 100 != 2:
@@ -376,7 +386,7 @@ class Character:
         self.affiliated_with = org
 
     def get_pet(self, petkey):
-        if petkey not in self.pet or self.jdr is None: return None
+        if petkey not in self.pet or not self.is_bound(): return None
         if self.pet[petkey] is None:
             self.pet[petkey] = Pet.loadfromdb(self.jdr.server, self.jdr.channel, self.key, petkey, self.jdr.requester, self.jdr.requesterRole)
         return self.pet[petkey]

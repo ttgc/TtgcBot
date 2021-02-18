@@ -344,13 +344,19 @@ class Character:
         del(self.pet[key])
         return True
 
-    def assign_skill(self,sk):
+    def assign_skill(self, requester, *skls):
         for i in self.skills:
             if sk.ID == i.ID: return False
-        db = Database()
-        db.call("assign_skill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idskill=sk.ID)
-        db.close()
-        self.skills.append(sk)
+
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Skills/assign/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester, body={"skills": list(skls)})
+
+        if info.status // 100 != 2:
+            raise APIException("Skills assign error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, skills=skls, code=info.status)
+
+        self.skills = Skill.loadfromdb(self.jdr.server, self.jdr.channel, self.key, self.requester, self.jdr.requesterRole)
         return True
 
     def kill(self):

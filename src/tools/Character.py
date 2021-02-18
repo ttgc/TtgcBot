@@ -83,6 +83,10 @@ class Character:
     def furtivite(self):
         return self._furtivite
 
+    @property
+    def api(self):
+        return self.jdr.api if self.is_bound() else None
+
     @furtivite.setter
     def furtivite(self, val):
         self._furtivite = val
@@ -176,7 +180,7 @@ class Character:
         data = {tag: value}
         info = self._internal_update(requester, **data)
 
-        elif tag == "pv": self.PV = min(self.PVmax, self.PV + value)
+        if tag == "pv": self.PV = min(self.PVmax, self.PV + value)
         elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
         elif tag == "mental": self.mental += value
         elif tag == "karma": self.karma = max(-10, min(10, value))
@@ -222,51 +226,93 @@ class Character:
 
         info = self._internal_update(requester, gamemod=self.gm_map_inttostr[self.mod])
 
-    def link(self, memberid, requester):
-        db = Database()
-        db.call("charlink",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idmemb=memberid)
-        db.close()
+    def link(self, memberid, requester, override=False, select=True):
+        self.is_bound(True)
+
+        body = {"member": memberid, "overriding": override, "selected": select}
+
+        info = await self.api(RequestType.PUT, "Character/link/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester, body=body)
+
+        if info.status == 409:
+            return False
+
+        if info.status // 100 != 2:
+            raise APIException("Character link error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, memberid=memberid, code=info.status)
+
         self.linked = memberid
+        self.selected = select
+        return True
 
-    def unlink(self):
-        db = Database()
-        db.call("charunlink",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
+    def unlink(self, requester):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.DELETE, "Character/unlink/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character unlink error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
+
         self.linked = None
+        self.selected = False
 
-    def select(self):
+    def select(self, requester):
         if self.linked is None: return
-        db = Database()
-        db.call("charselect",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,idmemb=self.linked)
-        db.close()
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Character/select/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character select error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
+
         self.selected = True
 
-    def lvlup(self):
-        db = Database()
-        db.call("levelup",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
+    def lvlup(self, requester):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Character/levelup/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character levelup error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
+
         self.lvl += 1
 
-    def uselp(self):
-        db = Database()
-        db.call("usepoints",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,item="lightpt")
-        db.close()
+    @deprecated(raise_error=False)
+    def _uselpdp_dirty(self, what, requester):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Character/uselpdp/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key, what),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character uselpdp error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, what=what, code=info.status)
+
+    def uselp(self, requester):
+        self._uselpdp_dirty("lp", requester)
         self.lp -= 1
         self.karma = 10
         self.mod = 2
 
-    def usedp(self):
-        db = Database()
-        db.call("usepoints",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,item="darkpt")
-        db.close()
+    def usedp(self, requester):
+        self._uselpdp_dirty("dp", requester)
         self.dp -= 1
         self.karma = -10
         self.mod = 3
 
-    def reset_lpdp(self):
-        db = Database()
-        db.call("end_lpdp_gamemod",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
+    @deprecated(raise_error=False)
+    def _reset_lpdp_dirty(self, requester):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Character/cleanlpdp/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character cleanlpdp error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
+
+    def reset_lpdp(self, requester):
+        self._reset_lpdp_dirty(requester)
         if Character.gm_map_inttochar[self.mod] in ['I', 'S']: self.mod = self.default_mod
 
     def pet_add(self,key):
@@ -298,10 +344,15 @@ class Character:
         return True
 
     def kill(self):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Character/kill/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
+            resource="SRV://{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Character kill error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, code=info.status)
+
         self.dead = True
-        db = Database()
-        db.call("kill",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
 
     def xpup(self, amount, requester, allowlevelup=False, curve=None, *curveParameters):
         self.is_bound(True)
@@ -309,11 +360,15 @@ class Character:
         info = self._internal_update(requester, xp=xpdata)
 
         if curve is None:
-            self.lvl += (min(0, amount) // 100)
-            return self, min(0, amount) // 100
+            self.xp += min(0, amount)
+            if allowlevelup:
+                levels = self.xp // 100
+                self.lvl += levels
+                self.xp -= (levels * 100)
+            return self
         else:
-            newself = self.jdr.get_character(self.key)
-            return newself, newself.lvl - self.lvl
+            newself = self.jdr.get_character(self.key, True)
+            return newself
 
     def affiliate(self, org, requester):
         self.is_bound(True)

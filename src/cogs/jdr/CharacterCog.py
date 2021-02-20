@@ -29,53 +29,66 @@ from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.converters import *
 from src.tools.parsingdice import *
+from src.utils.exceptions import APIException
 import typing
 from random import randint
 import os
 
 class CharacterCog(commands.Cog, name="Characters"):
-    def __init__(self,bot,logger):
+    def __init__(self, bot, logger):
         self.bot = bot
         self.logger = logger
 
     @commands.check(check_jdrchannel)
-    @commands.group(invoke_without_command=False,aliases=['char'])
-    async def character(self,ctx): pass
+    @commands.group(invoke_without_command=False, aliases=['char'])
+    async def character(self, ctx): pass
 
     @commands.check(check_chanmj)
-    @character.command(name="create",aliases=["+"])
-    async def character_create(self,ctx,race: RaceConverter,classeName,name):
+    @character.command(name="create", aliases=["+"])
+    async def character_create(self, ctx, race, classeName, name, *, options: typing.Optional[JSONConverter] = {}):
         """**GM/MJ only**
         Create a new character"""
-        classe = retrieveClassID(race,classeName.replace("_"," "))
         data = await GenericCommandParameters(ctx)
-        if (race is None or classe is None):
-            await ctx.message.channel.send(data.lang["unknown_class"])
-        else:
-            if name in data.charbase:
-                await ctx.message.channel.send(data.lang["character_existing"])
-            else:
-                data.jdr.charcreate(name,classe)
-                self.logger.log(logging.DEBUG+1,"/charcreate (%s) in channel %d of server %d",name,ctx.message.channel.id,ctx.message.guild.id)
-                await ctx.message.channel.send(data.lang["charcreate"].format(name))
+
+        try:
+            await data.jdr.charcreate(name, race, classeName, **options)
+        except APIException as e:
+            if e["code"] == 400:
+                await ctx.channel.send(data.lang["chardata_invalid"])
+            elif e["code"] == 409:
+                await ctx.channel.send(data.lang["character_existing"])
+            else: raise e
+
+        self.logger.log(logging.DEBUG+1, "/charcreate (%s) in channel %d of server %d", name, ctx.channel.id, ctx.guild.id)
+        await ctx.channel.send(data.lang["charcreate"].format(name))
 
     @commands.check(check_chanmj)
-    @commands.cooldown(1,5,commands.BucketType.channel)
-    @character.command(name="delete",aliases=["del","-"])
-    async def character_delete(self,ctx,name):
+    @commands.cooldown(1, 5, commands.BucketType.channel)
+    @character.command(name="delete", aliases=["del", "-"])
+    async def character_delete(self, ctx, name):
         """**GM/MJ only**
         Delete an existing character. This cannot be undone"""
         data = await GenericCommandParameters(ctx)
-        await ctx.message.channel.send(data.lang["chardelete_confirm"].format(name))
-        chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
-        try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+        await ctx.channel.send(data.lang["chardelete_confirm"].format(name))
+        chk = lambda m: m.author == ctx.author and m.channel == ctx.channel and m.content.lower() == 'confirm'
+        try: answer = await self.bot.wait_for('message', check=chk, timeout=60)
         except asyncio.TimeoutError: answer = None
+        success = True
+
         if answer is None:
-            await ctx.message.channel.send(data.lang["timeout"])
+            await ctx.channel.send(data.lang["timeout"])
         else:
-            data.jdr.chardelete(name)
-            self.logger.log(logging.DEBUG+1,"/chardelete (%s) in channel %d of server %d",name,ctx.message.channel.id,ctx.message.guild.id)
-            await ctx.message.channel.send(data.lang["chardelete"])
+            try:
+                await data.jdr.chardelete(name)
+            except APIException as e:
+                success = False
+                if e["code"] != 404: raise e
+
+            if success:
+                self.logger.log(logging.DEBUG+1, "/chardelete (%s) in channel %d of server %d", name, ctx.channel.id, ctx.guild.id)
+                await ctx.channel.send(data.lang["chardelete"])
+            else:
+                await ctx.channel.send(data.lang["charnotexist"].format(name))
 
     @commands.check(check_chanmj)
     @character.command(name="link",aliases=["assign"])

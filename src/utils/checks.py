@@ -19,6 +19,7 @@
 
 from src.tools.BotTools import *
 from src.tools.Translator import *
+from src.utils.exceptions import APIException
 import discord.utils
 
 async def is_blacklisted(ID):
@@ -65,20 +66,28 @@ async def check_mj(ctx):
 async def check_jdrchannel(ctx):
     srv = await DBServer(ctx.message.guild.id)
 
+    role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+    if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
     jdrlist = await srv.jdrlist(ctx.author.id, role.id if role is not None else None)
 
     for i in jdrlist:
-        if ctx.message.channel.id == i.get("channel", -1): return True
-        if ctx.message.channel.id in i.get("extensions", []): return True
+        if ctx.channel.id == i.get("channel", -1): return True
+        if ctx.channel.id in i.get("extensions", []): return True
     return False
 
 async def check_chanmj(ctx):
-    role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
-    if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
     jdrchannel = await check_jdrchannel(ctx)
+
     if jdrchannel:
-        jdr = await DBJDR(ctx.message.guild.id, ctx.message.channel.id, ctx.author.id, role.id if role is not None else None)
-        return ctx.message.author.id == jdr.mj
+        role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+        if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
+
+        try:
+            jdr = await DBJDR(ctx.message.guild.id, ctx.message.channel.id, ctx.author.id, role.id if role is not None else None)
+            return ctx.message.author.id == jdr.mj
+        except APIException as e:
+            if e["code"] != 404: raise e
+
     return False
 
 class GenericCommandParameters:

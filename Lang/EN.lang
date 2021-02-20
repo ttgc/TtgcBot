@@ -205,7 +205,7 @@ userblock=The following template of user will now be banned automaticaly on join
 userunblock=The following template of user wont be banned anymore on joining your server : `{}`
 userunblock_notexist=The template `{}` does not exist
 sklist=Skill list
-unknown_class=This Race or Class does not exist
+#unknown_class=This Race or Class does not exist
 charselect=Switched character : `{}` :arrow_right: `{}`
 charnotexist=The character `{}` does not exist
 #Movement update v1.4
@@ -300,3 +300,4 @@ http_503=Service unavailable
 http_505=Error while requesting the server, HTTP is not supported. Report this issue with the following information : \n```\n{}\n```
 http_509=Your request cannot be performed due to bandwidth limitation, report this issue with the following information : \n```\n{}\n```
 http_unknown=Unknown error while performing your request, report this issue with the following information : \n```\n{}\n```
+chardata_invalid=Data provided are not valid for creating a character

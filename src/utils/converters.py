@@ -19,6 +19,7 @@
 
 import re
 import discord
+import json
 from discord.ext import commands
 from src.tools.Character import *
 from src.tools.CharacterUtils import *
@@ -27,13 +28,17 @@ from src.tools.mapmanager import *
 from src.tools.parsingdice import DiceType
 
 class CharacterConverter(commands.Converter):
-    async def convert(self,ctx,arg):
+    async def convert(self, ctx, arg):
         data = await GenericCommandParameters(ctx)
         return data.jdr.get_character(arg)
 
-class RaceConverter(commands.Converter):
-    async def convert(self,ctx,arg):
-        return retrieveRaceID(arg.replace("_"," "))
+# class RaceConverter(commands.Converter):
+#     async def convert(self,ctx,arg):
+#         return retrieveRaceID(arg.replace("_"," "))
+
+class JSONConverter(commands.Converter):
+    async def convert(self, ctx, arg):
+        return json.loads(arg)
 
 class SymbiontConverter(commands.Converter):
     async def convert(self,ctx,arg):

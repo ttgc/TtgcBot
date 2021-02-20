@@ -205,7 +205,7 @@ userblock=Les utilisateurs ayant le modèle suivant dans leur pseudo seront bann
 userunblock=Les utilisateurs ayant le modèle suivant dans leur pseudo ne seront plus bannis en rejoignant votre serveur : `{}`
 userunblock_notexist=Le modèle d'utilisateur suivant n'existe pas : `{}`
 sklist=Liste des compétences de bases
-unknown_class=La race ou la classe saisie n'existe pas
+#unknown_class=La race ou la classe saisie n'existe pas
 charselect=Changement de personnage : `{}` :arrow_right: `{}`
 charnotexist=Le personnage `{}` n'existe pas
 #Movement update v1.4
@@ -300,3 +300,4 @@ http_503=Service indisponible
 http_505=Erreur durant le traitement de votre requête, HTTP n'est pas supporté. Veuillez reporter cette erreur avec les informations suivantes : \n```\n{}\n```
 http_509=Votre requête ne peut aboutir a cause de limitations de bande passante, veuillez reporter cette erreur avec les informations suivantes : \n```\n{}\n```
 http_unknown=Une erreur inconnue s'est produite pendant le traitement de votre requête, veuillez reporter cette erreur avec les informations suivantes : \n```\n{}\n```
+chardata_invalid=Les informations reçues sont invalides pour créer votre personnage correctement

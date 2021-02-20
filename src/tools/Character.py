@@ -441,34 +441,98 @@ class Pet:
     def check_life(self):
         return self.PV > 0
 
-    def petset(self,tag,value):
-        db = Database()
-        db.call("petset",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,stat=tag,val=value)
-        db.close()
-        return self.jdr.get_character(self.charkey)
+    async def _internal_petset(self, requester, **kwargs):
+        info = await self.api(RequestType.PUT, "Pet/set/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.charkey, self.key),
+            resource="SRV://{}/{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.charkey, self.key), requesterID=requester, body=kwargs)
 
-    def setname(self,name_):
-        db = Database()
-        db.call("petsetname",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,name=name_)
-        db.close()
+        if info.status // 100 != 2:
+            raise APIException("Pet set error", srv=self.jdr.server, channel=self.jdr.channel, character=self.charkey, pet=self.key, code=info.status, body=kwargs)
+
+        return info
+
+    async def _internal_update(self, requester, **kwargs):
+        info = await self.api(RequestType.PUT, "Pet/update/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.charkey, self.key),
+            resource="SRV://{}/{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.charkey, self.key), requesterID=requester, body=kwargs)
+
+        if info.status // 100 != 2:
+            raise APIException("Pet update error", srv=self.jdr.server, channel=self.jdr.channel, character=self.charkey, pet=self.key, code=info.status, body=kwargs)
+
+        return info
+
+    async def petset(self, tag, value, requester):
+        self.is_bound(True)
+        tag = tag.lower()
+
+        if tag not in ["name", "pv", "pm", "strength", "spirit", "charisma", "agility", "precision", "luck",
+                        "instinct", "gamemod", "species"]:
+            raise InternalCommandError("Invalid tag for petset command")
+
+        data = {tag: value}
+        info = await self._internal_petset(requester, **data)
+
+        if tag == "name": self.name = value
+        elif tag == "pv": self.PVmax, self.PV = value, min(self.PV, value)
+        elif tag == "pm": self.PMmax, self.PM = value, min(self.PM, value)
+        elif tag == "strength": self.force = max(1, min(100, value))
+        elif tag == "spirit": self.esprit = max(1, min(100, value))
+        elif tag == "charisma": self.charisme = max(1, min(100, value))
+        elif tag == "agility": self.agilite = max(1, min(100, value))
+        elif tag == "precision": self.precision = max(1, min(100, value))
+        elif tag == "luck": self.luck = max(1, min(100, value))
+        elif tag == "instinct": self.instinct = max(1, min(6, value))
+        elif tag == "gamemod": self.default_mod = Character.gm_map_chartoint[value]
+        elif tag == "species": self.espece = value
+
+    async def update(self, tag, value, requester):
+        self.is_bound(True)
+        tag = tag.lower()
+
+        if tag not in ["pv", "pm", "karma"]:
+            raise InternalCommandError("Invalid tag for pet update command")
+
+        data = {tag: value}
+        info = await self._internal_update(requester, **data)
+
+        if tag == "pv": self.PV = min(self.PVmax, self.PV + value)
+        elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
+        elif tag == "karma": self.karma = max(-10, min(10, value))
+
+    @deprecated
+    def setname(self, name_):
+        # db = Database()
+        # db.call("petsetname",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,name=name_)
+        # db.close()
         self.name = name_
 
-    def setespece(self,espece):
-        db = Database()
-        db.call("petsetespece",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,esp=espece)
-        db.close()
+    @deprecated
+    def setespece(self, espece):
+        # db = Database()
+        # db.call("petsetespece",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,esp=espece)
+        # db.close()
         self.espece = espece
 
-    def switchmod(self,default=False):
-        db = Database()
-        db.call("petswitchmod",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,def_=default)
-        db.close()
-        return self.jdr.get_character(self.charkey)
+    async def switchmod(self, requester, default=False):
+        if not default and self.mod > 1: return
+        if default and self.mod == self.default_mod: return
 
-    def lvlup(self):
-        db = Database()
-        db.call("petlevelup",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel)
-        db.close()
+        self.is_bound(True)
+
+        if default:
+            self.mod = self.default_mod
+        else:
+            self.mod = 0 if self.mod == 1 else 1
+
+        info = await self._internal_update(requester, gamemod=Character.gm_map_inttostr[self.mod])
+
+    async def lvlup(self, requester):
+        self.is_bound(True)
+
+        info = await self.api(RequestType.PUT, "Pet/levelup/{}/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.charkey, self.key),
+            resource="SRV://{}/{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.charkey, self.key), requesterID=requester)
+
+        if info.status // 100 != 2:
+            raise APIException("Pet levelup error", srv=self.jdr.server, channel=self.jdr.channel, character=self.charkey, pet=self.key, code=info.status)
+
         self.lvl += 1
 
     @classmethod

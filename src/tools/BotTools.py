@@ -277,7 +277,7 @@ class DBJDR:
         DataCache().remove("SRV://{}/{}".format(self.server, self._initialChannelID), True)
 
     async def get_character(self, charkey, forceGet=False):
-        info = await self.api(RequestType.GET, "Character/{}/{}/{}".format(self.server, self.channel, charkey), forceGet=forceGet
+        info = await self.api(RequestType.GET, "Character/{}/{}/{}".format(self.server, self.channel, charkey), forceGet=forceGet,
             resource="SRV://{}/{}/{}".format(self.server, self._initialChannelID, charkey), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:

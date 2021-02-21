@@ -771,7 +771,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for char in data.charbase:
             alive = data.lang["dead"] if char.dead else data.lang["alive"]
-            linked = ctx.message.guild.members.get_member(char.linked) if char.linked is not None else None
+            linked = ctx.message.guild.get_member(int(char.linked)) if char.linked is not None else None
             linked = ":no_entry_sign:" if linked is None else linked.mention
             embd.add_field(name=char.key,value=data.lang["charlist_singlechar"].format(char.name,alive,linked),inline=True)
         await ctx.message.channel.send(embed=embd)

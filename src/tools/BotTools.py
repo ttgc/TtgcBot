@@ -427,14 +427,14 @@ class DBJDR:
             raise DatabaseException("unable to find character")
         ls = []
         for i in cur:
-            ls.append(i[0])
+            ls.append((i[0], i[31] if i[34] else None))
         db.close()
         return ls
 
     def get_charbase(self):
         ls = self.charlist()
         charbase = []
-        for i in ls:
+        for i, k in ls:
             charbase.append(self.get_character(i))
         return charbase
 

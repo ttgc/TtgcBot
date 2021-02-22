@@ -67,6 +67,11 @@ def check_chanmj(ctx):
     return False
 
 class GenericCommandParameters:
+    def __new__(cl, ctx):
+        if not hasattr(ctx, 'data') or ctx.data is None:
+            ctx.data = super().__new__(cl)
+        return ctx.data
+
     def __init__(self,ctx):
         self.ID = str(ctx.message.id)
         self.srv = DBServer(str(ctx.message.guild.id))
@@ -75,15 +80,22 @@ class GenericCommandParameters:
         self.lang = get_lang(lgcode)
         self.jdrlist = self.srv.jdrlist()
         self.jdr = None
-        self.charbase = None
+        self.charlist = None
+        self._charbase = None
         self.char = None
         if check_jdrchannel(ctx):
             self.jdr = self.srv.getJDR(str(ctx.message.channel.id))
-            self.charbase = self.jdr.get_charbase()
-            for i in self.charbase:
-                if i.linked == str(ctx.message.author.id) and i.selected:
-                    self.char = i
+            self.charlist = self.jdr.charlist()
+            for key, linked in self.charlist:
+                if linked is not None and linked == str(ctx.message.author.id):
+                    self.char = self.jdr.get_character(key)
                     break
+
+    @property
+    def charbase(self):
+        if self.jdr is not None and self._charbase is None:
+            self._charbase = self.jdr.get_charbase()
+        return self._charbase
 
 def check_haschar(ctx):
     data = GenericCommandParameters(ctx)

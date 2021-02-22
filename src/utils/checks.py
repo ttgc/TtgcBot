@@ -80,11 +80,13 @@ class GenericCommandParameters:
         self.lang = get_lang(lgcode)
         self.jdrlist = self.srv.jdrlist()
         self.jdr = None
+        self.charlist = None
         self._charbase = None
         self.char = None
         if check_jdrchannel(ctx):
             self.jdr = self.srv.getJDR(str(ctx.message.channel.id))
-            for key, linked in self.jdr.charlist():
+            self.charlist = self.jdr.charlist()
+            for key, linked in self.charlist:
                 if linked is not None and linked == str(ctx.message.author.id):
                     self.char = self.jdr.get_character(key)
                     break

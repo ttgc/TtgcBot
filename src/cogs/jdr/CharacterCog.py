@@ -91,44 +91,44 @@ class CharacterCog(commands.Cog, name="Characters"):
                 await ctx.channel.send(data.lang["charnotexist"].format(name))
 
     @commands.check(check_chanmj)
-    @character.command(name="link",aliases=["assign"])
-    async def character_link(self,ctx,character: CharacterConverter, player: discord.Member):
+    @character.command(name="link", aliases=["assign"])
+    async def character_link(self, ctx, character: CharacterConverter, player: discord.Member, override: typing.Optional[bool] = False):
         """**GM/MJ only**
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
         data = await GenericCommandParameters(ctx)
-        character.link(str(player.id))
-        self.logger.log(logging.DEBUG+1,"/charlink in channel %d of server %d between %s and %d",ctx.message.channel.id,ctx.message.guild.id,character.key,player.id)
-        await ctx.message.channel.send(data.lang["charlink"].format(character.name,player.mention))
+        await character.link(player.id, ctx.author.id, override)
+        self.logger.log(logging.DEBUG+1,"/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, player.id)
+        await ctx.channel.send(data.lang["charlink"].format(character.name, player.mention))
 
     @commands.check(check_chanmj)
-    @character.command(name="unlink",aliases=["unassign"])
-    async def character_unlink(self,ctx,character: typing.Optional[CharacterConverter] = None):
+    @character.command(name="unlink", aliases=["unassign"])
+    async def character_unlink(self, ctx, character: typing.Optional[CharacterConverter] = None):
         """**GM/MJ only**
         Unlink a character from his/her owner (player)"""
         data = await GenericCommandParameters(ctx)
         if character is None and data.char is not None:
-            data.char.unlink()
-            self.logger.log(logging.DEBUG+1,"/charunlink of character %s in channel %d of server %d",data.char.key,ctx.message.channel.id,ctx.message.guild.id)
-            await ctx.message.channel.send(data.lang["charunlink"].format(data.char.name))
+            await data.char.unlink(ctx.author.id)
+            self.logger.log(logging.DEBUG+1, "/charunlink of character %s in channel %d of server %d", data.char.key, ctx.channel.id, ctx.guild.id)
+            await ctx.channel.send(data.lang["charunlink"].format(data.char.name))
         elif character is not None:
-            character.unlink()
-            self.logger.log(logging.DEBUG+1,"/charcreate of character %s in channel %d of server %d",character.key,ctx.message.channel.id,ctx.message.guild.id)
-            await ctx.message.channel.send(data.lang["charunlink"].format(character.name))
+            await character.unlink(ctx.author.id)
+            self.logger.log(logging.DEBUG+1,"/charcreate of character %s in channel %d of server %d", character.key, ctx.channel.id, ctx.guild.id)
+            await ctx.channel.send(data.lang["charunlink"].format(character.name))
 
     @commands.check(check_haschar)
-    @commands.cooldown(1,5,commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @character.command(name="select", aliases=["switch"])
-    async def character_select(self,ctx,key):
+    async def character_select(self, ctx, key):
         """**PC/PJ only**
         Select a character from all characters linked to you"""
         data = await GenericCommandParameters(ctx)
-        for i in data.charbase:
-            if i.key == key and i.linked == str(ctx.message.author.id):
-                i.select()
-                self.logger.log(logging.DEBUG+1,"/charselect (%s -> %s) in channel %d of server %d",data.char.key,i.key,ctx.message.channel.id,ctx.message.guild.id)
-                await ctx.message.channel.send(data.lang["charselect"].format(data.char.key,i.key))
+        for i in self.charbase.get("linked", []):
+            if i.get("charkey") == key and i.get("member") == ctx.author.id:
+                await i.select(ctx.author.id)
+                self.logger.log(logging.DEBUG+1,"/charselect (%s -> %s) in channel %d of server %d", data.char.key, i.key, ctx.channel.id, ctx.guild.id)
+                await ctx.channel.send(data.lang["charselect"].format(data.char.key, i.key))
                 return
-        await ctx.message.channel.send(data.lang["charnotexist"].format(key))
+        await ctx.channel.send(data.lang["charnotexist"].format(key))
 
     async def _charroll(self,ctx,data,char,stat,operator,expression):
         if not char.dead:

@@ -91,6 +91,11 @@ async def check_chanmj(ctx):
     return False
 
 class GenericCommandParameters:
+    def __new__(cl, ctx):
+        if not hasattr(ctx, 'data') or ctx.data is None:
+            ctx.data = super().__new__(cl)
+        return ctx.data
+
     async def __init__(self, ctx):
         self.ID = ctx.message.id
         self.srv = await DBServer(ctx.message.guild.id)
@@ -101,7 +106,8 @@ class GenericCommandParameters:
         self.lang = get_lang(lgcode)
         self.jdrlist = await self.srv.jdrlist(ctx.author.id, role.id if role is not None else None)
         self.jdr = None
-        self.charbase = None
+        self.charlist = None
+        self._charbase = None
         self.char = None
         jdrchannel = await check_jdrchannel(ctx)
         if jdrchannel:

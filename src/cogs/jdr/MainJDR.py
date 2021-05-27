@@ -67,8 +67,8 @@ class MainJDR(commands.Cog, name="JDR"):
         self.logger.log(logging.DEBUG+1,"appart launched by %d in channel %d of server %d",ctx.message.author.id,ctx.message.channel.id,ctx.message.guild.id)
         if ctx.message.author.voice.channel is not None:
             linked = []
-            for i in data.charbase:
-                if i.linked is not None: linked.append(i.linked)
+            for k, i in data.charlist:
+                if i is not None: linked.append(i)
             ls = list(ctx.message.author.voice.channel.members)
             if len(nomute) == 0:
                 for i in ls:

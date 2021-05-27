@@ -57,9 +57,12 @@ class CharacterCog(commands.Cog, name="Characters"):
                 await ctx.channel.send(data.lang["chardata_invalid"])
             elif e["code"] == 409:
                 await ctx.channel.send(data.lang["character_existing"])
-            else: raise e
+            else:
+                raise e
+            return
+        finally:
+            self.logger.log(logging.DEBUG+1, "/charcreate (%s) in channel %d of server %d", name, ctx.channel.id, ctx.guild.id)
 
-        self.logger.log(logging.DEBUG+1, "/charcreate (%s) in channel %d of server %d", name, ctx.channel.id, ctx.guild.id)
         await ctx.channel.send(data.lang["charcreate"].format(name))
 
     @commands.check(check_chanmj)
@@ -83,9 +86,10 @@ class CharacterCog(commands.Cog, name="Characters"):
             except APIException as e:
                 success = False
                 if e["code"] != 404: raise e
+            finally:
+                self.logger.log(logging.DEBUG+1, "/chardelete (%s) in channel %d of server %d", name, ctx.channel.id, ctx.guild.id)
 
             if success:
-                self.logger.log(logging.DEBUG+1, "/chardelete (%s) in channel %d of server %d", name, ctx.channel.id, ctx.guild.id)
                 await ctx.channel.send(data.lang["chardelete"])
             else:
                 await ctx.channel.send(data.lang["charnotexist"].format(name))
@@ -96,8 +100,20 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**GM/MJ only**
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
         data = await GenericCommandParameters(ctx)
-        await character.link(player.id, ctx.author.id, override)
-        self.logger.log(logging.DEBUG+1,"/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, player.id)
+
+        try:
+            await character.link(player.id, ctx.author.id, override)
+        except APIException as e:
+            if e["code"] == 409:
+                await ctx.channel.send(data.lang["charlink_conflict"].format(character.name))
+            elif e["code"] == 403:
+                await ctx.channel.send(data.lang["is_dead"].format(character.name))
+            else:
+                raise e
+            return
+        finally:
+            self.logger.log(logging.DEBUG+1, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, player.id)
+
         await ctx.channel.send(data.lang["charlink"].format(character.name, player.mention))
 
     @commands.check(check_chanmj)
@@ -112,7 +128,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             await ctx.channel.send(data.lang["charunlink"].format(data.char.name))
         elif character is not None:
             await character.unlink(ctx.author.id)
-            self.logger.log(logging.DEBUG+1,"/charcreate of character %s in channel %d of server %d", character.key, ctx.channel.id, ctx.guild.id)
+            self.logger.log(logging.DEBUG+1, "/charcreate of character %s in channel %d of server %d", character.key, ctx.channel.id, ctx.guild.id)
             await ctx.channel.send(data.lang["charunlink"].format(character.name))
 
     @commands.check(check_haschar)

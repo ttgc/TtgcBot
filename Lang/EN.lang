@@ -301,3 +301,4 @@ http_505=Error while requesting the server, HTTP is not supported. Report this i
 http_509=Your request cannot be performed due to bandwidth limitation, report this issue with the following information : \n```\n{}\n```
 http_unknown=Unknown error while performing your request, report this issue with the following information : \n```\n{}\n```
 chardata_invalid=Data provided are not valid for creating a character
+charlink_conflict=Unable to link {}, the character is already linked to someone. Use `unlink` command or specify `override` parameter with `True` value

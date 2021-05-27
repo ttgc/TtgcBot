@@ -91,9 +91,9 @@ async def check_chanmj(ctx):
     return False
 
 class GenericCommandParameters:
-    def __new__(cl, ctx):
+    async def __new__(cl, ctx):
         if not hasattr(ctx, 'data') or ctx.data is None:
-            ctx.data = super().__new__(cl)
+            ctx.data = await super().__new__(cl)
         return ctx.data
 
     async def __init__(self, ctx):

@@ -43,9 +43,91 @@ class CharacterCog(commands.Cog, name="Characters"):
     @commands.group(invoke_without_command=False, aliases=['char'])
     async def character(self, ctx): pass
 
+    async def _character_create_workflow(self, ctx, data):
+        """TEMPORARLY HARDCODED"""
+        # TO BE REMOVED LATER
+        ext = {
+            "Cosmorigins : Terae": {
+                "Humain": ["Soldat", "Voleur", "Mage"],
+                "Élémentaire": ["Haut-élémentaire", "Élémentaire"],
+                "Onikaosu": ["Senshi", "Mahoutsukai"],
+                "Succube": ["Mage", "Éxécutrice", "Ensorceleuse"],
+                "Magical Girl": ["Magical enchanteresse", "Magical guerrière"],
+                "Gardien": ["Enchanteur", "Protecteur"],
+                "Ningemono": ["Nekonya", "Inuwan", "Okamiuooon", "Kitsunekon", "Toripi", "Umahin", "Hebishuru", "Sakanakari", "Usagipyon", "Doragondraa"],
+                "Machina": ["Host", "Server"],
+                "Polymorphe": ["Polymorphe"]
+            },
+            "Cosmorigins : Orianis": {
+                "Grits": ["Techno-guerrier", "Technomancien", "Transhumain"],
+                "Alfys": ["Imperialfys", "Sacralfys"],
+                "Nyfis": ["Négociateur", "Bagarreur", "Explorateur"],
+                "Darfys": ["Assassin", "Roublard"],
+                "Zyrfis": ["Guerrier ancestral", "Néo-guerrier", "Guerrier Armageddon"],
+                "Idylis": ["Idylis"],
+                "Lythis": ["Lythis"],
+                "Itys": ["Itys"],
+                "Alwenys": ["Alwenys"],
+                "Vampyris": ["Vampyris"]
+            },
+            "Cosmorigins : Xyord": {
+                "Xyordien": ["Backliner", "Invader", "Commander", "Pacifier", "Administrator"]
+            },
+            "Undefined": {
+                "Undefined": ["Undefined"]
+            }
+        }
+        # END OF TO BE REMOVED SECTION
+
+        # Create thread
+        thread = await ctx.message.create_thread(name="Charcreate by {} at {}".format(ctx.author, ctx.message.created_at))
+        await thread.add_user(ctx.author)
+
+        # Select extension
+        extOpt = []
+        for i in ext.keys():
+            extOpt.append(discord.SelectOption(label=i))
+        view = discord.ui.View()
+        view.add_item(discord.ui.Select(options=extOpt, placeholder="Select extension"))
+        msg = await thread.send("Choose extension to use:", view=view)
+        try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
+        except asyncio.TimeoutError:
+            await thread.edit(archived=True)
+            return
+        extSelected = view.children[0].values[0]
+
+        # Select race
+        raceOpt = []
+        for i in ext[extSelected].keys():
+            raceOpt.append(discord.SelectOption(label=i))
+        view = discord.ui.View()
+        view.add_item(discord.ui.Select(options=raceOpt, placeholder="Select race"))
+        msg = await thread.send("Choose race to use:", view=view)
+        try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
+        except asyncio.TimeoutError:
+            await thread.edit(archived=True)
+            return
+        raceSelected = view.children[0].values[0]
+
+        # Select class
+        clOpt = []
+        for i in ext[extSelected][raceSelected]:
+            raceOpt.append(discord.SelectOption(label=i))
+        view = discord.ui.View()
+        view.add_item(discord.ui.Select(options=clOpt, placeholder="Select class"))
+        msg = await thread.send("Choose class to use:", view=view)
+        try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
+        except asyncio.TimeoutError:
+            await thread.edit(archived=True)
+            return
+        classSelected = view.children[0].values[0]
+
+        await thread.send("Result: {} - {} - {}".format(extSelected, raceSelected, classSelected))
+        await thread.edit(archived=True)
+
     @commands.check(check_chanmj)
     @character.command(name="create", aliases=["+"])
-    async def character_create(self, ctx, race, classeName, name, *, options: typing.Optional[JSONConverter] = {}):
+    async def character_create(self, ctx, race: typing.Optional[str] = "", classeName: typing.Optional[str] = "", name: typing.Optional[str] = "", *, options: typing.Optional[JSONConverter] = {}):
         """**GM/MJ only**
         Create a new character"""
         data = await GenericCommandParameters(ctx)

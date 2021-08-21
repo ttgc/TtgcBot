@@ -77,52 +77,62 @@ class CharacterCog(commands.Cog, name="Characters"):
                 "Undefined": ["Undefined"]
             }
         }
+        print(ext)
         # END OF TO BE REMOVED SECTION
 
         # Create thread
         thread = await ctx.message.create_thread(name="Charcreate by {} at {}".format(ctx.author, ctx.message.created_at))
         await thread.add_user(ctx.author)
 
-        # Select extension
-        extOpt = []
-        for i in ext.keys():
-            extOpt.append(discord.SelectOption(label=i))
-        view = discord.ui.View()
-        view.add_item(discord.ui.Select(options=extOpt, placeholder="Select extension"))
-        msg = await thread.send("Choose extension to use:", view=view)
-        try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
-        except asyncio.TimeoutError:
-            await thread.edit(archived=True)
-            return
-        extSelected = view.children[0].values[0]
+        run = True
+        while run:
+            # Select extension
+            extSelector = Dropdown(self.bot, ctx, "Select extension", 1, 1, *ext.keys())
+            await thread.send("Choose extension to use:", view=extSelector.view)
+            timeout = await extSelector.wait()
+            print("Timeout: ", timeout)
+            if timeout:
+                await thread.edit(archived=True)
+                return
+            extSelected = extSelector.value
+            print(extSelected)
 
-        # Select race
-        raceOpt = []
-        for i in ext[extSelected].keys():
-            raceOpt.append(discord.SelectOption(label=i))
-        view = discord.ui.View()
-        view.add_item(discord.ui.Select(options=raceOpt, placeholder="Select race"))
-        msg = await thread.send("Choose race to use:", view=view)
-        try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
-        except asyncio.TimeoutError:
-            await thread.edit(archived=True)
-            return
-        raceSelected = view.children[0].values[0]
+            # Select race
+            raceSelector = Dropdown(self.bot, ctx, "Select race", 1, 1, *ext[extSelected].keys())
+            await thread.send("Choose race to use:", view=raceSelector.view)
+            timeout = await raceSelector.wait()
+            if timeout:
+                await thread.edit(archived=True)
+                return
+            raceSelected = raceSelector.value
+            print(raceSelected)
 
-        # Select class
-        clOpt = []
-        for i in ext[extSelected][raceSelected]:
-            raceOpt.append(discord.SelectOption(label=i))
-        view = discord.ui.View()
-        view.add_item(discord.ui.Select(options=clOpt, placeholder="Select class"))
-        msg = await thread.send("Choose class to use:", view=view)
-        try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
-        except asyncio.TimeoutError:
-            await thread.edit(archived=True)
-            return
-        classSelected = view.children[0].values[0]
+            # Select class
+            classSelector = Dropdown(self.bot, ctx, "Select class", 1, 1, *ext[extSelected][raceSelected])
+            await thread.send("Choose class to use:", view=classSelector.view)
+            timeout = await classSelector.wait()
+            if timeout:
+                await thread.edit(archived=True)
+                return
+            classSelected = classSelector.value
+            print(classSelected)
 
-        await thread.send("Result: {} - {} - {}".format(extSelected, raceSelected, classSelected))
+            # Validation
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(style=discord.ButtonStyle.success, label="Validate", custom_id=1, emoji="\U00002705"))
+            view.add_item(discord.ui.Button(style=discord.ButtonStyle.primary, label="Restart", custom_id=2, emoji="\U0001F501"))
+            view.add_item(discord.ui.Button(style=discord.ButtonStyle.danger, label="Cancel", custom_id=3, emoji="\U0000274C"))
+            msg = await thread.send("Is it correct ?", view=view)
+            try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
+            except asyncio.TimeoutError:
+                await thread.edit(archived=True)
+                return
+            result = int(interraction.data.get('custom_id', 3))
+            print(result, type(result))
+            if result == 1 or result == 3: run = False
+
+        if result == 1:
+            await thread.send("Result: {} - {} - {}".format(extSelected, raceSelected, classSelected))
         await thread.edit(archived=True)
 
     @commands.check(check_chanmj)

@@ -87,10 +87,9 @@ class CharacterCog(commands.Cog, name="Characters"):
         run = True
         while run:
             # Select extension
-            extSelector = Dropdown(self.bot, ctx, "Select extension", 1, 1, *ext.keys())
+            extSelector = Dropdown(ctx, "Select extension", 1, 1, *ext.keys())
             await thread.send("Choose extension to use:", view=extSelector.view)
             timeout = await extSelector.wait()
-            print("Timeout: ", timeout)
             if timeout:
                 await thread.edit(archived=True)
                 return
@@ -98,7 +97,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             print(extSelected)
 
             # Select race
-            raceSelector = Dropdown(self.bot, ctx, "Select race", 1, 1, *ext[extSelected].keys())
+            raceSelector = Dropdown(ctx, "Select race", 1, 1, *ext[extSelected].keys())
             await thread.send("Choose race to use:", view=raceSelector.view)
             timeout = await raceSelector.wait()
             if timeout:
@@ -108,7 +107,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             print(raceSelected)
 
             # Select class
-            classSelector = Dropdown(self.bot, ctx, "Select class", 1, 1, *ext[extSelected][raceSelected])
+            classSelector = Dropdown(ctx, "Select class", 1, 1, *ext[extSelected][raceSelected])
             await thread.send("Choose class to use:", view=classSelector.view)
             timeout = await classSelector.wait()
             if timeout:
@@ -118,17 +117,16 @@ class CharacterCog(commands.Cog, name="Characters"):
             print(classSelected)
 
             # Validation
-            view = discord.ui.View()
-            view.add_item(discord.ui.Button(style=discord.ButtonStyle.success, label="Validate", custom_id=1, emoji="\U00002705"))
-            view.add_item(discord.ui.Button(style=discord.ButtonStyle.primary, label="Restart", custom_id=2, emoji="\U0001F501"))
-            view.add_item(discord.ui.Button(style=discord.ButtonStyle.danger, label="Cancel", custom_id=3, emoji="\U0000274C"))
-            msg = await thread.send("Is it correct ?", view=view)
-            try: interraction = await self.bot.wait_for('interaction', timeout=180.0, check=lambda i: i.message == msg and i.user == ctx.author)
-            except asyncio.TimeoutError:
+            view = ButtonGroup(ctx)
+            view += Button(style=discord.ButtonStyle.success, label="Validate", custom_id=1, emoji="\U00002705")
+            view += Button(style=discord.ButtonStyle.primary, label="Restart", custom_id=2, emoji="\U0001F501")
+            view += Button(style=discord.ButtonStyle.danger, label="Cancel", custom_id=3, emoji="\U0000274C")
+            await thread.send("Is it correct ?", view=view)
+            timeout = await view.wait()
+            if timeout:
                 await thread.edit(archived=True)
                 return
-            result = int(interraction.data.get('custom_id', 3))
-            print(result, type(result))
+            result = view.value
             if result == 1 or result == 3: run = False
 
         if result == 1:

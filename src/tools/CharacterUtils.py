@@ -262,7 +262,7 @@ def retrieveOrganization(orgid):
 @deprecated
 def isOrganizationHidden(orgname):
     db = Database()
-    cur = db.execute("SELECT hidden FROM organization WHERE nom = %(org)s", org=orgname)
+    cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s", org=orgname)
     if cur is None:
         db.close()
         return False

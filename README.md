@@ -405,21 +405,21 @@ Alias : `getmp`
 #### Map commands
 - `/map` (MJ only and JDR channel only) <br/>
 Display the world map of Terae
-- `/map show <width> <height> [depth]` (MJ only and JDR channel only) <br/>
+- ~~`/map show <width> <height> [depth]` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Show the local fight map displaying all tokens and effects registered for the current game. Only effects affecting this depth (Z axis) given will be displayed, if not given, depth is considered equal to 0.
-- `/map clear` (MJ only and JDR channel only) <br/>
+- ~~`/map clear` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Clear all tokens and effects on your local fight map <br/>
 Aliases : `clr`, `reset`
-- `/map (token|tk) add <name>` (MJ only and JDR channel only) <br/>
+- ~~`/map (token|tk) add <name>` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Add a token on your local fight map, a token represents an entity that can be moved and can generate area of effects (AOE). When created, the token will automatically put on the origin (0;0;0) of the map. Use token move command to move it. <br/>
 Alias : `+`
-- `/map (token|tk) remove <name>` (MJ only and JDR channel only) <br/>
+- ~~`/map (token|tk) remove <name>` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Remove a token from your local fight map <br/>
 Aliases : `rm`, `delete`, `del`, `map token -`, `-`
-- `/map token move <name> <dx> <dy> [dz]` (MJ only and JDR channel only) <br/>
+- ~~`/map token move <name> <dx> <dy> [dz]` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Move a token in the direction given by the vector (dx;dy;dz). If not given dz is equal to 0 <br/>
 Alias : `mv`
-- `/map effect add <tkname> <dx> <dy> <dz> <shape> [parameters]` (MJ only and JDR channel only) <br/>
+- ~~`/map effect add <tkname> <dx> <dy> <dz> <shape> [parameters]` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Register an area of effect for a given token. shape must be one of the following : `circle`,`sphere`,`line`,`rect`,`cube`,`conic`. Each of theese shape have their own parameters, some of them have to be given for the generation. <br/>
 The parameters format is a list of key/value separated by space characters. The key/value pair should be as following : `key=value`.
 Alias : `+` <br/>
@@ -435,7 +435,7 @@ conic : <lengths> [orientation (default=0)]
     lengths -> list of lengths separated with '-' symbol, the first value is the closest line from the origin and the last the farthest line from the origin (example : 1-3-5). DO NOT USE SPACE BETWEEN LENGTHS VALUES.
     orientation -> the value in degrees (following counter-clockwise rotation), can only be one of the following : 0, 90, 180 or 270
 ```
-- `/map effect clear <tkname>` (MJ only and JDR channel only) <br/>
+- ~~`/map effect clear <tkname>` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Clear all effects for the given token <br/>
 Aliases : `clr`, `reset`
 

@@ -23,7 +23,7 @@ from discord.ext import commands
 from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.checks import GenericCommandParameters
-from src.tools.mapmanager import *
+# from src.tools.mapmanager import *
 from src.tools.parsingdice import DiceType
 
 class CharacterConverter(commands.Converter):

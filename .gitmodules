@@ -1,3 +1,4 @@
 [submodule "Cosmo-Network/API"]
 	path = Cosmo-Network/API
 	url = https://github.com/ttgc/TTGC-API
+	branch = dev

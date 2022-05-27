@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from enum import Enum
-from PIL import Image,ImageDraw,ImageFont
+# from PIL import Image,ImageDraw,ImageFont
 from src.tools.datahandler.DatabaseManager import *
 from src.utils.config import *
 import io,asyncio,discord

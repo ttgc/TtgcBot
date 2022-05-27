@@ -22,7 +22,7 @@ from src.tools.BotTools import *
 from discord.ext import commands
 import logging,asyncio
 import discord
-from src.tools.mapmanager import *
+# from src.tools.mapmanager import *
 from src.utils.converters import *
 import typing
 
@@ -43,7 +43,7 @@ class Maps(commands.Cog):
 
     @commands.check(check_chanmj)
     @commands.cooldown(1,60,commands.BucketType.channel)
-    @map.command(name="show")
+    @map.command(name="show", enabled=False)
     async def map_show(self,ctx,width: int, height: int, depth: typing.Optional[int] = 0):
         """**GM/MJ only**
         Display your game battle map"""
@@ -54,7 +54,7 @@ class Maps(commands.Cog):
 
     @commands.check(check_chanmj)
     @commands.cooldown(1,30,commands.BucketType.channel)
-    @map.command(name="clear",aliases=["reset","clr"])
+    @map.command(name="clear", aliases=["reset","clr"], enabled=False)
     async def map_clear(self,ctx):
         """**GM/MJ only**
         Clear all tokens and effects on your game battle map"""
@@ -64,11 +64,11 @@ class Maps(commands.Cog):
         await ctx.message.channel.send(data.lang["mapreset"])
 
     @commands.check(check_chanmj)
-    @map.group(name="token",invoke_without_command=False,aliases=["tk"])
+    @map.group(name="token", invoke_without_command=False, aliases=["tk"], enabled=False)
     async def map_token(self,ctx): pass
 
-    @map_token.command(name="add",aliases=["+"])
-    async def map_token_add(self,ctx,tkname):
+    @map_token.command(name="add",aliases=["+"], enabled=False)
+    async def map_token_add(self, ctx, tkname):
         """**GM/MJ only**
         Add a token on your game battle map"""
         data = await GenericCommandParameters(ctx)
@@ -77,8 +77,8 @@ class Maps(commands.Cog):
         self.logger.log(logging.DEBUG+1,"token %s registered in channel %d on server %d",tkname,ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["tokenadd"].format(tk.name))
 
-    @map_token.command(name="remove",aliases=["rm","-","delete","del"])
-    async def map_token_remove(self,ctx,tk: MapTokenConverter):
+    @map_token.command(name="remove", aliases=["rm","-","delete","del"], enabled=False)
+    async def map_token_remove(self, ctx, tk: MapTokenConverter):
         """**GM/MJ only**
         Remove a token and all its effects associated from your game battle map"""
         if tk is not None:
@@ -87,7 +87,7 @@ class Maps(commands.Cog):
             self.logger.log(logging.DEBUG+1,"token %s removed in channel %d on server %d",tk.name,ctx.message.channel.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["tokenrm"].format(tk.name))
 
-    @map_token.command(name="move",aliases=["mv"])
+    @map_token.command(name="move", aliases=["mv"], enabled=False)
     async def map_token_move(self,ctx,tk: MapTokenConverter, dx: int, dy: int, dz: typing.Optional[int] = 0):
         """**GM/MJ only**
         Move a token in the given direction"""
@@ -98,10 +98,10 @@ class Maps(commands.Cog):
             await ctx.message.channel.send(data.lang["tokenmove"].format(tk.name,tk.x,tk.y,tk.z))
 
     @commands.check(check_chanmj)
-    @map.group(name="effect",invoke_without_command=False)
+    @map.group(name="effect", invoke_without_command=False, enabled=False)
     async def map_effect(self,ctx): pass
 
-    @map_effect.command(name="add",aliases=["+"])
+    @map_effect.command(name="add", aliases=["+"], enabled=False)
     async def map_effect_add(self,ctx,tk: MapTokenConverter, dx: int, dy: int, dz: int, shape: ShapeConverter,*,params: MapEffectParameterConverter):
         """**GM/MJ only**
         Register an area of effect for a given token. shape must be one of the following : `circle`,`sphere`,`line`,`rect`,`cube`,`conic`.
@@ -129,7 +129,7 @@ class Maps(commands.Cog):
             await ctx.message.channel.send(data.lang["effect_register"].format(tk.name))
 
     @commands.cooldown(3,5,commands.BucketType.channel)
-    @map_effect.command(name="clear",aliases=["reset","clr"])
+    @map_effect.command(name="clear", aliases=["reset","clr"], enabled=False)
     async def map_effect_clear(self,ctx,tk: MapTokenConverter):
         """**GM/MJ only**
         Clear all effects from the given token"""

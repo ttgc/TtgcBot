@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -29,7 +29,9 @@ from src.utils.converters import *
 from src.tools.parsingdice import *
 import typing
 from random import randint
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class PetCog(commands.Cog, name="Pets"):
     def __init__(self,bot,logger):
         self.bot = bot

@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -25,7 +25,9 @@ import discord
 from src.tools.Translator import *
 from src.tools.parsingdice import *
 import requests
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class MainJDR(commands.Cog, name="JDR"):
     def __init__(self,bot,logger):
         self.bot = bot

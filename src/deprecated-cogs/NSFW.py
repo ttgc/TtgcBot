@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -27,7 +27,9 @@ import typing
 from random import choice
 from src.tools.Translator import *
 from src.utils.config import *
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class NSFW(commands.Cog):
     def __init__(self, bot, logger):
         self.bot = bot

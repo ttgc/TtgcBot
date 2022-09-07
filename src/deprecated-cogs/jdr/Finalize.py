@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -23,7 +23,9 @@ from discord.ext import commands
 import logging,asyncio
 import discord
 import os,time
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
     def __init__(self,bot,logger):
         self.bot = bot

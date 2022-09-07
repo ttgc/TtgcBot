@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -24,7 +24,9 @@ import logging, asyncio
 import discord
 import typing
 from src.tools.Translator import *
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class Moderation(commands.Cog):
     def __init__(self, bot, logger):
         self.bot = bot

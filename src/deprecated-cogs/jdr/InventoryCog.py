@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -25,7 +25,9 @@ from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.converters import *
 import typing
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class InventoryCog(commands.Cog, name="Inventory"):
     def __init__(self,bot,logger):
         self.bot = bot

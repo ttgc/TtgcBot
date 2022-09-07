@@ -1,4 +1,4 @@
-#!usr/bin/env python3.7
+#!usr/bin/env python3
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
@@ -26,7 +26,9 @@ from src.tools.Translator import *
 from src.tools.VocalUtilities import *
 from src.utils.config import *
 import os
+from src.utils.decorators import deprecated
 
+@deprecated("Old 2.0 cog")
 class Vocal(commands.Cog, command_attrs=dict(enabled=Config()["vocal"])):
     def __init__(self, bot, logger):
         self.bot = bot

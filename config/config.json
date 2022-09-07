@@ -21,26 +21,20 @@
     "vocal": false,
     "logs": {
         "directory": "Logs",
-        "all": {
+        "list": [{
             "filename": "all.log",
-            "enabled": true,
-            "stacking": true
-        },
-        "latest": {
+            "stacking": true,
+            "minlevel": "debug"
+        }, {
             "filename": "latest.log",
-            "enabled": true,
-            "stacking": false
-        },
-        "errors": {
+            "minlevel": "info"
+        }, {
             "filename": "errors.log",
-            "enabled": true,
-            "stacking": false
-        },
-        "debug": {
+            "minlevel": "error"
+        }, {
             "filename": "debug.log",
-            "enabled": true,
-            "stacking": false
-        }
+            "filter": "debug"
+        }]
     },
     "discord": {
         "default-prefix": "/",

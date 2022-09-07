@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.utils.exceptions import DeprecatedException
+from src.utils.exceptions import DeprecatedException, AlreadyCalledFunctionException
 
 def singleton(cl):
     instances = {}
@@ -27,14 +27,29 @@ def singleton(cl):
         return instances[cl]
     return get_instance
 
-def deprecated(raise_error=True, logger=None):
+def call_once(raise_error=False):
+    def call_once_decorator(fct):
+        called = {}
+        def call_fct(*args, **kwargs):
+            if fct not in call:
+                called[fct] = fct(*args, **kwargs)
+            elif raise_error:
+                raise AlreadyCalledFunctionException(fct)
+            return called[fct]
+        return call_fct
+    return call_once_decorator
+
+def call_only_once():
+    return call_once(True)
+
+def deprecated(reason, *, raise_error=True, logger=None):
     def deprecated_decorator(fct):
         logMethod = print
         if logger: logMethod = logger
-        logMethod("Deprecated function/class : {}".format(fct))
+        logMethod(f"Deprecated function/class: {fct}\nReason: {reason}")
 
         def deprecated_call(*args, **kwargs):
-            exception = DeprecatedException(*args, **kwargs)
+            exception = DeprecatedException(fct, reason, *args, **kwargs)
             if raise_error:
                 raise exception
             logMethod(exception)

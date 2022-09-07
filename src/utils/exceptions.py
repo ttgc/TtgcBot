@@ -146,15 +146,24 @@ class APIException(ManagerException):
         return HTTPErrorCode.get_code_from_int(self.kwargs.get("code", 502)).toString(lang, None, **self.kwargs)
 
 class DeprecatedException(Exception):
-    def __init__(self, fct, *args, **kwargs):
+    def __init__(self, fct, reason, *args, **kwargs):
         self.fct = fct
         self.args = args
         self.kwargs = kwargs
+        self.reason = reason
         super().__init__(str(self))
 
     def __str__(self):
         invok = "{}({}, {})".format(self.fct.__name__, list(self.args), dict(self.kwargs))
         invok = invok.replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "=")
-        return "DeprecatedException: The function {} is deprecated\nTried to invoke {}".format(self.fct, invok)
+        return f"DeprecatedException: The function/class {self.fct} is deprecated\nReason: {reason}\nTried to invoke: {invok}"
+
+class AlreadyCalledFunctionException(Exception):
+    def __init__(self, fct):
+        self.fct = fct
+        super().__init__(str(self))
+
+    def __str__(self):
+        return f"The function {self.fct} has already been called and should only be called once!"
 
 class InternalCommandError(commands.CommandError): pass

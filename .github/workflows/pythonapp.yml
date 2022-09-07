@@ -50,12 +50,22 @@ jobs:
         Cosmo-Network/API/Tools/createdb/installdb.sh --api=ttgcapi --bot=ttgcbot --pwd=$DBPWD --generate-prod -c -u
         Cosmo-Network/API/Tools/populatedb/populate.sh --bot=ttgcbot --no-test
 
-    - name: Setup .NET Core
+    - name: Setup .NET Core 2.2
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
       env:
         ASPNETCORE_ENVIRONMENT: Production
+    
+    - name: Setup .NET Core 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+            
+    - name: Build and Run DatabaseConverter Tool
+      run: |
+        dotnet publish Tools/DatabaseConverter/DatabaseConverter.csproj -c Release
+        dotnet Tools/DatabaseConverter/bin/Release/netcoreapp3.1/DatabaseConverter.dll -yc -d ttgcbot2 -p 5432 -u $(id -u -n) --pwd root --src Tools --db-version-path "Tools/DatabaseConverter/DBVersioning/Version Files" --throw-on-failure
 
     - name: Build API
       run: Cosmo-Network/API/Tools/deploy.sh --gmk --aspenv-prod --https
@@ -75,44 +85,6 @@ jobs:
         python3 "Tools/API Register/register.py"
         python3 Tools/populatedb/scannode.py ttgcbot ttgcapi $(id -u -n) $DBPWD
         cd ../..
-
-    # - name: Install PostgreSQL
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -qy postgresql postgresql-server-dev-10 sudo
-    #     sudo service postgresql start
-    #
-    # - name: Setup database
-    #   env:
-    #     dbpwd: ${{ secrets.localdb_password }}
-    #   run: |
-    #     user=$(id -u -n)
-    #     sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE ttgcbot"
-    #     sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE USER "$user" ENCRYPTED PASSWORD '"$dbpwd"';"
-    #     sudo -u postgres psql -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE ttgcbot TO "$user";"
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/tables.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/triggers.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/procedures.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/lang_features.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/userblock_features.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/pet.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/skill_and_kill_features.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/map.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/swap.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_rewrite.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_v4.sql
-    #     psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_v5.sql
-    # 
-    # - name: Create config file
-    #   env:
-    #     token: ${{ secrets.token }}
-    #     dbpwd: ${{ secrets.localdb_password }}
-    #   run: |
-    #     echo '{"token": "'$token'", "database": {"name": "ttgcbot", "user": "'$(id -u -n)'", "password": "'$dbpwd'"}}' > config/config.staging.json
-    #
-    # - name: Launch application
-    #   run: |
-    #     timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
 
     - name: Unregister bot app
       run: |

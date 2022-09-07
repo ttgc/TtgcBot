@@ -43,12 +43,10 @@ jobs:
 #        pip install pytest
 #        pytest
     
-    - name: Setup databases
+    - name: Setup API database
       env:
         DBPWD: ${{ secrets.localdb_password }}
-      run: | 
-        Cosmo-Network/API/Tools/createdb/installdb.sh --api=ttgcapi --bot=ttgcbot --pwd=$DBPWD --generate-prod -c -u
-        Cosmo-Network/API/Tools/populatedb/populate.sh --bot=ttgcbot --no-test
+      run: Cosmo-Network/API/Tools/createdb/installdb.sh --api=ttgcapi --pwd=$DBPWD --generate-prod -c -u
 
     - name: Setup .NET Core 2.2
       uses: actions/setup-dotnet@v1
@@ -64,8 +62,8 @@ jobs:
             
     - name: Build and Run DatabaseConverter Tool
       run: |
-        dotnet publish Tools/DatabaseConverter/DatabaseConverter.csproj -c Release
-        dotnet Tools/DatabaseConverter/bin/Release/netcoreapp3.1/DatabaseConverter.dll -yc -d ttgcbot2 -p 5432 -u $(id -u -n) --pwd root --src Tools --db-version-path "Tools/DatabaseConverter/DBVersioning/Version Files" --throw-on-failure
+        dotnet publish Cosmo-Network/API/Tools/DatabaseConverter/DatabaseConverter.csproj -c Release
+        dotnet Cosmo-Network/API/Tools/DatabaseConverter/bin/Release/netcoreapp3.1/DatabaseConverter.dll -yc -d ttgcbot -p 5432 -u $(id -u -n) --pwd root --src Cosmo-Network/API/Tools --db-version-path "Cosmo-Network/API/Tools/DatabaseConverter/DBVersioning/Version Files" --throw-on-failure
 
     - name: Build API
       run: Cosmo-Network/API/Tools/deploy.sh --gmk --aspenv-prod --https

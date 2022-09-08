@@ -80,7 +80,6 @@ def get_logger():
     logging.basicConfig(level=LogLevel.MIN.value)
 
     for config in LogConfig.all():
-        print(config.filepath, config.filter)
         logger.addHandler(config.to_handler())
 
     logger.info("Logger configured")

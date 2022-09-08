@@ -49,5 +49,4 @@ def init():
     logger = get_logger()
     _initdirs(logger)
     logger.info("Init done")
-    logger.log(LogLevel.DEBUG.value, "test")
     return logger

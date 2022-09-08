@@ -31,7 +31,7 @@ class Filters:
 
     def __iadd__(self, kargs):
         if not isinstance(kargs, dict):
-            raise ArgumentException(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
+            raise TypeError(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
 
         for name, filter in kargs.items():
             built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})

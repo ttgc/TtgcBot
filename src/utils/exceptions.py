@@ -145,7 +145,7 @@ class APIException(ManagerException):
     def parse(self, lang):
         return HTTPErrorCode.get_code_from_int(self.kwargs.get("code", 502)).toString(lang, None, **self.kwargs)
 
-class DeprecatedException(Exception):
+class DeprecatedException(DeprecationWarning):
     def __init__(self, fct, reason, *args, **kwargs):
         self.fct = fct
         self.args = args
@@ -156,7 +156,7 @@ class DeprecatedException(Exception):
     def __str__(self):
         invok = "{}({}, {})".format(self.fct.__name__, list(self.args), dict(self.kwargs))
         invok = invok.replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "=")
-        return f"DeprecatedException: The function/class {self.fct} is deprecated\nReason: {reason}\nTried to invoke: {invok}"
+        return f"DeprecatedException: The function/class {self.fct} is deprecated\nReason: {self.reason}\nTried to invoke: {invok}"
 
 class AlreadyCalledFunctionException(Exception):
     def __init__(self, fct):

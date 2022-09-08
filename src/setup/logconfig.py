@@ -19,48 +19,69 @@
 
 import logging
 import os
-from config import Config
-from logfilters import Filters
-from loglevel import LogLevel
+from setup.config import Config
+from setup.logfilters import Filters
+from setup.loglevel import LogLevel
+from utils.decorators import call_once
 
 class LogConfig:
     def __init__(self, rootdir, logconfig):
+        self._rootdir = rootdir
         self._logconfig = logconfig
 
     @property
     def mode(self):
-        return 'a' if config.get("stacking", False) else 'w'
+        return 'a' if self._logconfig.get("stacking", False) else 'w'
 
     @property
     def filepath(self):
-        return os.paths.join(rootdir, config["filename"])
+        return os.path.join(self._rootdir, self._logconfig["filename"])
 
     @property
     def enabled(self):
-        return config.get("enabled", True)
+        return self._logconfig.get("enabled", True)
 
     @property
     def minlevel(self):
-        return LogLevel.parse(config.get("minlevel", None))
+        return LogLevel.parse(self._logconfig.get("minlevel", None))
 
     @property
     def filter(self):
-        return getattr(Filters(), config.get("filter", ""), None)
+        return getattr(Filters(), self._logconfig.get("filter", ""), None)
 
     def to_handler(self, *, encoding='utf-8'):
         handler = logging.FileHandler(filename=self.filepath, encoding=encoding, mode=self.mode)
         handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 
-        if minlevel is not None:
-            handler.setLevel(self.minlevel)
-        if filter is not None:
+        if self.minlevel is not None:
+            handler.setLevel(self.minlevel.value)
+        if self.filter is not None:
             handler.addFilter(self.filter)
 
         return handler
 
     @classmethod
     def all(cls):
-        self._logs = []
-        for i in Config.get('logs')['list']:
-            self._logs.append(cls(i))
-        return self._logs
+        logs = []
+        config = Config()['logs']
+        for i in config['list']:
+            logs.append(cls(config['directory'], i))
+        return logs
+
+
+@call_once()
+def get_logger():
+    config = Config()["logs"]
+
+    if not os.access(config["directory"], os.F_OK):
+        os.mkdir(config["directory"])
+
+    logger = logging.getLogger('discord')
+    logging.basicConfig(level=LogLevel.MIN.value)
+
+    for config in LogConfig.all():
+        print(config.filepath, config.filter)
+        logger.addHandler(config.to_handler())
+
+    logger.info("Logger configured")
+    return logger

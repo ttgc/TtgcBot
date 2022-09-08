@@ -22,18 +22,17 @@ import os
 
 def get_lang(langcode="EN"):
     langcode = langcode.upper()
-    f = open("Lang/"+langcode+".lang","r",encoding="utf-8")
-    lines = f.readlines()
-    f.close()
     lang = {}
-    for i in lines:
-        if i.startswith("#"): continue
-        lang[i.split("=")[0]] = (i.split("=")[1]).replace("\n","").replace("\\n","\n")
+
+    with open(os.path.join("Lang", f"{langcode}.lang"), "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+        for i in lines:
+            if i.startswith("#"): continue
+            lang[i.split("=")[0]] = (i.split("=")[1]).replace("\n","").replace("\\n","\n")
+
     return lang
 
 def lang_exist(langcode="EN"):
     langcode = langcode.upper()
-    return os.access("Lang/"+langcode+".lang",os.R_OK)
-
-if not os.access("Lang/",os.F_OK):
-    os.mkdir("Lang")
+    return os.access(os.path.join("Lang", f"{langcode}.lang"), os.R_OK)

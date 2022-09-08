@@ -19,14 +19,14 @@
 
 import logging
 from utils.decorators import singleton
-from loglevel import LogLevel
+from setup.loglevel import LogLevel
 
 @singleton
 class Filters:
     def __init__(self):
         self += {
-            "Debug": lambda self, record: record.levelno == LogLevel.DEBUG,
-            "BotV3": lambda self, record: record.levelno == LogLevel.BOT_V3
+            "Debug": lambda record: record.levelno == LogLevel.DEBUG.value,
+            "BotV3": lambda record: record.levelno == LogLevel.BOT_V3.value
         }
 
     def __iadd__(self, kargs):
@@ -34,5 +34,5 @@ class Filters:
             raise ArgumentException(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
 
         for name, filter in kargs.items():
-            built_filter = type(f"{name}Filter", (loggging.Filter), {"filter": filter})
+            built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})
             setattr(self, name, built_filter)

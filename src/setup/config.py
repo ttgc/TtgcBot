@@ -20,7 +20,7 @@
 import json
 import os
 import sys
-from deepmerge import always_merger
+from deepmerge import Merger
 from utils.decorators import singleton
 from enum import Enum
 
@@ -56,8 +56,10 @@ class Environment(Enum):
 
 @singleton
 class Config:
+    merger = Merger([(dict, ["merge"])], ["override"], ["override"])
+
     def __init__(self):
-        self._staging = {}
+        self._dev = {}
         self._staging = {}
         self._prod = {}
 
@@ -66,7 +68,7 @@ class Config:
 
         if os.access("config/config.development.json", os.R_OK):
             with open("config/config.development.json", "r") as f:
-                self._staging = json.load(f)
+                self._dev = json.load(f)
         if os.access("config/config.staging.json", os.R_OK):
             with open("config/config.staging.json", "r") as f:
                 self._staging = json.load(f)
@@ -80,11 +82,11 @@ class Config:
 
         self._merged = dict(self._base)
         if self._environment == Environment.DEV:
-            always_merger.merge(self._merged, self._staging)
+            self.merger.merge(self._merged, self._dev)
         if self._environment == Environment.STAGING:
-            always_merger.merge(self._merged, self._staging)
+            self.merger.merge(self._merged, self._staging)
         if self._environment == Environment.PROD:
-            always_merger.merge(self._merged, self._prod)
+            self.merger.merge(self._merged, self._prod)
 
     def __getitem__(self, key):
         return self._merged[key]
@@ -92,11 +94,3 @@ class Config:
     @property
     def env(self):
         return self._environment
-
-    @classmethod
-    def get(cls, key):
-        return cls()[key]
-
-    @classmethod
-    def get_env(cls):
-        return cls().env

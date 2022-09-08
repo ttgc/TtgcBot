@@ -35,7 +35,6 @@ class LogLevel(Enum):
 
     @classmethod
     def parse(cls, value):
-        value = value.lower()
         for i in cls:
             if i.name.lower() == value:
                 return i

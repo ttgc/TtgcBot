@@ -19,28 +19,13 @@
 
 import logging
 import os
-from config import Config, Environment
-from logfilters import Filters
-from loglevel import LogLevel
-from logconfig import LogConfig
-from utils.decorators import call_once, call_only_once
+from setup.config import Config, Environment
+from setup.logfilters import Filters
+from setup.loglevel import LogLevel
+from setup.logconfig import LogConfig, get_logger
+from utils.decorators import call_once
 
-@call_once
-def get_logger():
-    config = Config()["logs"]
-
-    if not os.access(config["directory"], os.F_OK):
-        os.mkdir(config["directory"])
-
-    logger = logging.getLogger('discord')
-    logging.basicConfig(level=LogLevel.MIN)
-
-    for config in LogConfig.all():
-        logger.addHandler(config.to_handler())
-
-    return logger
-
-@call_once
+@call_once()
 def _initdirs(logger):
     config = Config()["directories"]
 
@@ -56,8 +41,13 @@ def _initdirs(logger):
         with open(os.path.join(config["jokes"], "nsfw-EN.txt"), "w"): pass
         logger.info("Create Jokes directory and files")
 
-@call_only_once
+    if not os.access("Lang/", os.F_OK):
+        os.mkdir("Lang")
+
+@call_once(True)
 def init():
     logger = get_logger()
     _initdirs(logger)
+    logger.info("Init done")
+    logger.log(LogLevel.DEBUG.value, "test")
     return logger

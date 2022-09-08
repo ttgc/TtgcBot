@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from src.utils.exceptions import DeprecatedException, AlreadyCalledFunctionException
+from utils.exceptions import DeprecatedException, AlreadyCalledFunctionException
 
 def singleton(cl):
     instances = {}
@@ -31,16 +31,13 @@ def call_once(raise_error=False):
     def call_once_decorator(fct):
         called = {}
         def call_fct(*args, **kwargs):
-            if fct not in call:
+            if fct not in called:
                 called[fct] = fct(*args, **kwargs)
             elif raise_error:
                 raise AlreadyCalledFunctionException(fct)
             return called[fct]
         return call_fct
     return call_once_decorator
-
-def call_only_once():
-    return call_once(True)
 
 def deprecated(reason, *, raise_error=True, logger=None):
     def deprecated_decorator(fct):

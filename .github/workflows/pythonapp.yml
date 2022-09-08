@@ -84,9 +84,14 @@ jobs:
         python3 Tools/populatedb/scannode.py ttgcbot ttgcapi $(id -u -n) $DBPWD
         cd ../..
 
-    - name: Launch application
+    - name: Create config file
+      env: 
+        token: ${{ secrets.token }}
       run: |
         echo '{"token": "'$token'"}' > config/config.staging.json
+
+    - name: Launch application
+      run: |
         timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
 
     - name: Unregister bot app

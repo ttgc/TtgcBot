@@ -17,7 +17,6 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discord.ext import commands
 from enum import Enum
 
 class HTTPErrorCode(Enum):
@@ -109,61 +108,3 @@ class HTTPErrorCode(Enum):
         final_error = mapped_errors.get(self, self)
         err_details = lang["http_{}".format(final_error.value if final_error != cl.UNKNOWN else "unknown")]
         return err_details.format(message)
-
-class HTTPException(commands.CommandError):
-    def __init__(self, errcode, message=None):
-        self.errcode = errcode
-        self.message = message if message else "No more details provided"
-        super().__init__(str(self))
-
-    def __str__(self):
-        return "HTTPException: Error Code {} ({})".format(self.errcode, self.message)
-
-    def parse(self, lang):
-        return HTTPErrorCode.get_code_from_int(self.errcode).toString(lang, self.message)
-
-class ManagerException(commands.CommandError):
-    def __init__(self, message="Manager exception occured", **kwargs):
-        self.message = message
-        self.kwargs = kwargs
-        super().__init__(str(self))
-
-    def __getitem__(self, item):
-        return self.kwargs.get(item, None)
-
-    def __str__(self):
-        return "ManagerException: {} (with kwargs {})".format(self.message, self.kwargs)
-
-class DatabaseException(ManagerException):
-    def __str__(self):
-        return "DatabaseException: {} (with kwargs {})".format(self.message, self.kwargs)
-
-class APIException(ManagerException):
-    def __str__(self):
-        return "APIException: {} (with kwargs {})".format(self.message, self.kwargs)
-
-    def parse(self, lang):
-        return HTTPErrorCode.get_code_from_int(self.kwargs.get("code", 502)).toString(lang, None, **self.kwargs)
-
-class DeprecatedException(DeprecationWarning):
-    def __init__(self, fct, reason, *args, **kwargs):
-        self.fct = fct
-        self.args = args
-        self.kwargs = kwargs
-        self.reason = reason
-        super().__init__(str(self))
-
-    def __str__(self):
-        invok = "{}({}, {})".format(self.fct.__name__, list(self.args), dict(self.kwargs))
-        invok = invok.replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "=")
-        return f"DeprecatedException: The function/class {self.fct} is deprecated\nReason: {self.reason}\nTried to invoke: {invok}"
-
-class AlreadyCalledFunctionException(Exception):
-    def __init__(self, fct):
-        self.fct = fct
-        super().__init__(str(self))
-
-    def __str__(self):
-        return f"The function {self.fct} has already been called and should only be called once!"
-
-class InternalCommandError(commands.CommandError): pass

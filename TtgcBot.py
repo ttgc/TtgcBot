@@ -39,7 +39,7 @@ from utils.translator import get_lang, lang_exist
 # from src.tools.BotTools import *
 # from src.tools.Translator import *
 # from src.utils.checks import *
-# from src.utils.exceptions import *
+# from src.exceptions.exceptions import *
 # from src.help import *
 
 # import Cogs

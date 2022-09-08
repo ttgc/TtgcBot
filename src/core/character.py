@@ -25,7 +25,7 @@ from src.tools.datahandler.APIManager import *
 #from tools.BotTools import DBJDR
 #import tools.BotTools as bt
 from src.tools.CharacterUtils import *
-from src.utils.exceptions import InternalCommandError
+from src.exceptions.exceptions import InternalCommandError
 
 class Character:
     """Character class"""
@@ -199,14 +199,14 @@ class Character:
         info = await self._internal_charset(requester, symbiont=symbiont)
         self.symbiont = symbiont
 
-    @deprecated
+    @deprecated("Old feature using DatabaseManager")
     def setlore(self, lore):
         # db = Database()
         # db.call("charsetlore",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,lor=lore)
         # db.close()
         self.lore = lore
 
-    @deprecated
+    @deprecated("Old feature using DatabaseManager")
     def setname(self, name_):
         # db = Database()
         # db.call("charsetname",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,name=name_)
@@ -497,14 +497,14 @@ class Pet:
         elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
         elif tag == "karma": self.karma = max(-10, min(10, value))
 
-    @deprecated
+    @deprecated("Old feature using DatabaseManager")
     def setname(self, name_):
         # db = Database()
         # db.call("petsetname",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,name=name_)
         # db.close()
         self.name = name_
 
-    @deprecated
+    @deprecated("Old feature using DatabaseManager")
     def setespece(self, espece):
         # db = Database()
         # db.call("petsetespece",dbkey=self.key,charact=self.charkey,idserv=self.jdr.server,idchan=self.jdr.channel,esp=espece)

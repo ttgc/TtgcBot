@@ -21,7 +21,7 @@ import base64, hashlib, time
 import argon2.low_level as argon2
 from enum import Enum
 from src.utils.config import *
-from src.utils.exceptions import *
+from src.exceptions.exceptions import *
 from src.utils.httprequest import *
 from src.tools.datahandler.DataCache import *
 

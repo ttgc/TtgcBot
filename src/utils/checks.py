@@ -19,7 +19,7 @@
 
 from src.tools.BotTools import *
 from src.tools.Translator import *
-from src.utils.exceptions import APIException
+from src.exceptions.exceptions import APIException
 import discord.utils
 
 async def is_blacklisted(ID):

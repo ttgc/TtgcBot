@@ -19,8 +19,10 @@
 
 import psycopg2 as sql
 from src.utils.config import *
-from src.utils.exceptions import *
+from src.exceptions.exceptions import *
+from src.utils.decorators import singleton
 
+@deprecated("Old database manager", raise_error=True)
 class Database:
     def __init__(self):
         config = Config()

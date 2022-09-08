@@ -29,7 +29,7 @@ from src.tools.Character import *
 from src.tools.CharacterUtils import *
 from src.utils.converters import *
 from src.tools.parsingdice import *
-from src.utils.exceptions import APIException
+from src.exceptions.exceptions import APIException
 import typing
 from random import randint
 import os

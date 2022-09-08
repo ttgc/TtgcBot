@@ -180,7 +180,7 @@ class Extension:
     def __str__(self):
         return "{} : {}".format(self.universe, self.world)
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveCharacterOrigins(cl):
     db = Database()
     cur = db.execute("SELECT classe.nom,race.nom FROM classe INNER JOIN race ON classe.id_race = race.id_race WHERE id_classe = %(ID)s",ID=cl)
@@ -191,7 +191,7 @@ def retrieveCharacterOrigins(cl):
     db.close()
     return row[1],row[0]
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveClassID(rcid,clname):
     db = Database()
     cur = db.execute("SELECT id_classe FROM classe WHERE lower(nom) = %(name)s AND id_race = %(rc)s",name=clname.lower(),rc=rcid)
@@ -202,7 +202,7 @@ def retrieveClassID(rcid,clname):
     db.close()
     return row
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveRaceID(rcname):
     db = Database()
     cur = db.execute("SELECT id_race FROM race WHERE lower(nom) = %(name)s",name=rcname.lower())
@@ -213,7 +213,7 @@ def retrieveRaceID(rcname):
     db.close()
     return row
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveRaceName(rcid):
     if rcid is None: return None
     db = Database()
@@ -225,7 +225,7 @@ def retrieveRaceName(rcid):
     db.close()
     return row[0]
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveSymbiontID(sbname):
     db = Database()
     cur = db.execute("SELECT id_symbiont FROM symbiont WHERE lower(nom) = %(name)s",name=sbname.lower())
@@ -236,7 +236,7 @@ def retrieveSymbiontID(sbname):
     db.close()
     return row
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveSymbiontName(sbid):
     if sbid is None: return None
     db = Database()
@@ -248,7 +248,7 @@ def retrieveSymbiontName(sbid):
     db.close()
     return row[0]
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveOrganization(orgid):
     db = Database()
     cur = db.execute("SELECT nom FROM organizations WHERE id_org = %(id)s",id=orgid)
@@ -259,7 +259,7 @@ def retrieveOrganization(orgid):
     db.close()
     return row[0] if row is not None else None
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def isOrganizationHidden(orgname):
     db = Database()
     cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s", org=orgname)
@@ -270,7 +270,7 @@ def isOrganizationHidden(orgname):
     db.close()
     return row[0] if row is not None else False
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def organizationExists(orgname):
     db = Database()
     cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname)
@@ -281,7 +281,7 @@ def organizationExists(orgname):
     db.close()
     return nbr > 0
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveOrganizationSkill(orgname):
     db = Database()
     cur = db.call("get_orgskills",org=orgname)
@@ -294,7 +294,7 @@ def retrieveOrganizationSkill(orgname):
     db.close()
     return ls
 
-@deprecated
+@deprecated("Old feature using DatabaseManager")
 def retrieveRaceSkill(racename):
     db = Database()
     cur = db.call("get_raceskills",racename=racename)

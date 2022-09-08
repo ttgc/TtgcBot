@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import aiohttp
-from src.utils.exceptions import *
+from src.exceptions.exceptions import *
 
 class HTTP:
     def __init__(self, url, status, result=None, raiseClientException=False, raiseServerException=True):

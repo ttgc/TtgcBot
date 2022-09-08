@@ -174,6 +174,7 @@ async def on_ready():
 @client.event
 async def on_resumed():
     # global status, client
+    logger = get_logger()
     logger.info("Resumed session")
     # botmanagecog = client.get_cog("Bot Management")
     # if botmanagecog and botmanagecog.status:

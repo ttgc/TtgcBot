@@ -38,7 +38,9 @@ jobs:
         echo ""
         echo "Warnings:"
         if [ -r warnings.log ]; then cat warnings.log; fi
+        echo ""
         if [ -r F401.log ]; then cat F401.log; fi
+        echo ""
         if [ -r ttgcbot.log ]; then cat ttgcbot.log; fi
     
 #    - name: Upload report

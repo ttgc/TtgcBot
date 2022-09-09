@@ -72,10 +72,12 @@ client = discord.ext.commands.Bot(Config()["discord"]["default-prefix"], case_in
 
 # Global checks
 @client.check
-def no_pm(ctx): return ctx.message.guild is not None
+def no_pm(ctx):
+    return ctx.message.guild is not None
 
 @client.check
-def isbot(ctx): return not ctx.message.author.bot
+def isbot(ctx):
+    return not ctx.message.author.bot
 
 # @client.check
 # async def blacklist(ctx):
@@ -180,7 +182,7 @@ async def on_resumed():
 
 # ========== MAIN ========== #
 def main():
-    # logger = init()
+    logger = init()
     # client.add_cog(BotManage(client, logger))
     # client.add_cog(Moderation(client, logger))
     # client.add_cog(Other(client, logger))
@@ -195,6 +197,7 @@ def main():
     # client.add_cog(Maps(client, logger))
     # client.add_cog(InventoryCog(client, logger))
     # client.add_cog(MJ(client, logger))
+    logger.info("Starting TtgcBot 3.0")
     client.run(Config()["token"])
 
 # Launch the bot

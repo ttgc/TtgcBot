@@ -17,12 +17,9 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
 import os
-from setup.config import Config, Environment
-from setup.logfilters import Filters
-from setup.loglevel import LogLevel
-from setup.logconfig import LogConfig, get_logger
+from setup.config import Config
+from setup.logconfig import get_logger
 from utils.decorators import call_once
 
 @call_once()

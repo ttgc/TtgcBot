@@ -19,9 +19,6 @@
 
 # import external and python libs
 import discord
-from discord.ext import commands
-import asyncio
-import logging
 import traceback
 import os
 import sys
@@ -183,7 +180,7 @@ async def on_resumed():
 
 # ========== MAIN ========== #
 def main():
-    logger = init()
+    # logger = init()
     # client.add_cog(BotManage(client, logger))
     # client.add_cog(Moderation(client, logger))
     # client.add_cog(Other(client, logger))

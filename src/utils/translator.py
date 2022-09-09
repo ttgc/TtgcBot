@@ -29,7 +29,7 @@ def get_lang(langcode="EN"):
 
         for i in lines:
             if i.startswith("#"): continue
-            lang[i.split("=")[0]] = (i.split("=")[1]).replace("\n","").replace("\\n","\n")
+            lang[i.split("=")[0]] = (i.split("=")[1]).replace("\n", "").replace("\\n", "\n")
 
     return lang
 

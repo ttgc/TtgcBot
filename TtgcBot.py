@@ -40,7 +40,7 @@ from utils.translator import get_lang, lang_exist
 # from src.help import *
 
 # import Cogs
-# from src.cogs.BotManage import *
+from cogs import BotManage
 # from src.cogs.Moderation import *
 # from src.cogs.Other import *
 # from src.cogs.NSFW import *
@@ -134,11 +134,32 @@ async def on_command_error(ctx, error):
 
 @client.event
 async def on_error(event, *args, **kwargs):
+    global client
     logger = get_logger()
     logger.error(traceback.format_exc())
     # infos = await client.application_info()
     # await infos.owner.send(get_lang()["error"].format(traceback.format_exc(limit=100)))
-    # client.get_cog("Bot Management").handlederror += 1
+    client.get_cog("Bot Management").handlederror += 1
+
+@client.event
+async def on_connect():
+    if len(client.cogs) > 0: return
+    
+    logger = get_logger()
+    await client.add_cog(BotManage(client, logger))
+    # client.add_cog(Moderation(client, logger))
+    # client.add_cog(Other(client, logger))
+    # client.add_cog(NSFW(client, logger))
+    # client.add_cog(Vocal(client, logger))
+    # client.add_cog(MainJDR(client, logger))
+    # client.add_cog(CharacterCog(client, logger))
+    # client.add_cog(SkillCog(client, logger))
+    # client.add_cog(PetCog(client, logger))
+    # client.add_cog(JDRGlobal(client, logger))
+    # client.add_cog(Finalize(client, logger))
+    # client.add_cog(Maps(client, logger))
+    # client.add_cog(InventoryCog(client, logger))
+    # client.add_cog(MJ(client, logger))
 
 @client.event
 async def on_ready():
@@ -147,7 +168,6 @@ async def on_ready():
     botaskperm = discord.Permissions().all()
     botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
     url = discord.utils.oauth_url(client.user.id, permissions=botaskperm)
-    print(url)
     logger.info("Generated invite link : %s", url)
     # srvid, nbr = [], 0
     # srvlist = await DBServer.srvlist()
@@ -183,20 +203,6 @@ async def on_resumed():
 # ========== MAIN ========== #
 def main():
     logger = init()
-    # client.add_cog(BotManage(client, logger))
-    # client.add_cog(Moderation(client, logger))
-    # client.add_cog(Other(client, logger))
-    # client.add_cog(NSFW(client, logger))
-    # client.add_cog(Vocal(client, logger))
-    # client.add_cog(MainJDR(client, logger))
-    # client.add_cog(CharacterCog(client, logger))
-    # client.add_cog(SkillCog(client, logger))
-    # client.add_cog(PetCog(client, logger))
-    # client.add_cog(JDRGlobal(client, logger))
-    # client.add_cog(Finalize(client, logger))
-    # client.add_cog(Maps(client, logger))
-    # client.add_cog(InventoryCog(client, logger))
-    # client.add_cog(MJ(client, logger))
     logger.info("Starting TtgcBot 3.0")
     client.run(Config()["token"])
 

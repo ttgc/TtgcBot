@@ -17,23 +17,18 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
-from utils.decorators import singleton
-from setup.loglevel import LogLevel
+import discord
 
-@singleton
-class Filters:
-    def __init__(self):
-        self += {
-            "Debug": lambda record: record.levelno == LogLevel.DEBUG.value,
-            "BotV3": lambda record: record.levelno == LogLevel.BOT_V3.value
-        }
+class TextInput(discord.ui.TextInput):
+    def __init__(self, ctx, view, label, *, style=discord.TextStyle.short, id=None, placeholder=None, default=None, required=True, minlen=None, maxlen=None, row=None):
+        if id is not None:
+            super().__init__(label=label, style=style, custom_id=id, placeholder=placeholder, default=default, required=required, min_length=minlen, max_length=maxlen, row=row)
+        else:
+            super().__init__(label=label, style=style, placeholder=placeholder, default=default, required=required, min_length=minlen, max_length=maxlen, row=row)
 
-    def __iadd__(self, kargs):
-        if not isinstance(kargs, dict):
-            raise TypeError(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
-        return self
+        view.add_item(self)
+        self._view = view
 
-        for name, filter in kargs.items():
-            built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})
-            setattr(self, name, built_filter)
+    @property
+    def view(self):
+        return self._view

@@ -20,12 +20,13 @@
 import discord.ui as ui
 
 class Modal(ui.Modal):
-    def __init__(self, ctx, title, *, check_callback=None, timeout=None, id=None):
+    def __init__(self, ctx, title, *, check_callback=None, timeout=None, id=None, onsubmit=None):
         super().__init__(title=title, timeout=timeout, custom_id=id if id is not None else title)
         self.ctx = ctx
         self.check_callback = None
         self._timeout_callback = None
         self._user_interaction = None
+        self._onsubmit = onsubmit
 
     async def interaction_check(self, interaction):
         return interaction.user == self.ctx.author and (self.check_callback is None or self.check_callback(self.ctx, self.interaction))
@@ -40,12 +41,23 @@ class Modal(ui.Modal):
             self._timeout_callback = callback
 
     @property
+    def onsubmit(self):
+        return self._onsubmit
+
+    @onsubmit.setter
+    def onsubmit(self, callback):
+        if self.onsubmit is not None:
+            self._onsubmit = callback
+
+    @property
     def user_interaction():
         return self._user_interaction
 
     async def on_submit(self, interaction, /):
         self._user_interaction = interaction
         await super().on_submit(interaction)
+        if self.onsubmit is not None:
+            await self.onsubmit(self, interaction)
         self.stop()
 
     async def on_timeout(self):

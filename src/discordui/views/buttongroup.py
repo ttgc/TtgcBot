@@ -45,12 +45,11 @@ class ButtonGroup(View):
         for b in buttons:
             b.custom_id = f"{self.grpid}-{len(self.buttons)}-{b.custom_id}"
             b.final = True
-            b.onclick = ButtonGroup._onclick
+            b.onclick = self._onclick
             self.buttons.append(b)
             self.add_item(b)
 
-    @staticmethod
-    async def _onclick(btn, interaction):
+    async def _onclick(self, btn, interaction):
         self.value = btn.custom_id
         self._user_interaction = interaction
 

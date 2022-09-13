@@ -51,7 +51,7 @@ class Dropdown(discord.ui.Select):
 
     async def callback(self, interaction):
         if self.onselection is not None:
-            await self.onselection(interaction)
+            await self.onselection(self, interaction)
 
 
 class StandaloneDropdown(Dropdown):

@@ -50,6 +50,6 @@ class Button(discord.ui.Button):
 
     async def callback(self, interaction):
         if self.onclick is not None:
-            await self.onclick(interaction)
+            await self.onclick(self, interaction)
         if self.final:
             self.view.stop()

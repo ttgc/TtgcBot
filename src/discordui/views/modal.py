@@ -20,8 +20,8 @@
 import discord.ui as ui
 
 class Modal(ui.Modal):
-    def __init__(self, ctx, title, *, check_callback=None):
-        super().__init__()
+    def __init__(self, ctx, title, *, check_callback=None, timeout=None, id=None):
+        super().__init__(title=title, timeout=timeout, custom_id=id if id is not None else title)
         self.ctx = ctx
         self.check_callback = None
         self._timeout_callback = None
@@ -45,7 +45,7 @@ class Modal(ui.Modal):
 
     async def on_submit(self, interaction, /):
         self._user_interaction = interaction
-        super().on_submit(interaction)
+        await super().on_submit(interaction)
         self.stop()
 
     async def on_timeout(self):

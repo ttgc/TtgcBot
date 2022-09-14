@@ -40,7 +40,7 @@ from utils.translator import get_lang, lang_exist
 # from src.help import *
 
 # import Cogs
-from cogs import BotManage
+from cogs import jdr, BotManage
 # from src.cogs.Moderation import *
 # from src.cogs.Other import *
 # from src.cogs.NSFW import *
@@ -144,9 +144,10 @@ async def on_error(event, *args, **kwargs):
 @client.event
 async def on_connect():
     if len(client.cogs) > 0: return
-    
+
     logger = get_logger()
     await client.add_cog(BotManage(client, logger))
+    await client.add_cog(jdr.CharacterCog(client, logger))
     # client.add_cog(Moderation(client, logger))
     # client.add_cog(Other(client, logger))
     # client.add_cog(NSFW(client, logger))

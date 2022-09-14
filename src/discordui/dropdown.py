@@ -21,14 +21,14 @@ import discord
 from discordui.views import View
 
 class Dropdown(discord.ui.Select):
-    def __init__(self, ctx, view, *, id=None, placeholder=None, minval=1, maxval=1, disabled=False, row=None, onselection=None, *args, **kargs):
+    def __init__(self, ctx, view, *, id=None, placeholder=None, minval=1, maxval=1, disabled=False, row=None, onselection=None, options=[], **kargs):
         self.ctx = ctx
-        options = [discord.SelectOption(label=i) for i in args]
-        options += [discord.SelectOption(label=i, value=k) for i, k in kargs.items()]
+        opt = [discord.SelectOption(label=i) for i in options]
+        opt += [discord.SelectOption(label=i, value=k) for i, k in kargs.items()]
         if id is not None:
-            super().__init__(custom_id=id, placeholder=placeholder, min_values=minval, max_values=maxval, options=options, disabled=disabled, row=row)
+            super().__init__(custom_id=id, placeholder=placeholder, min_values=minval, max_values=maxval, options=opt, disabled=disabled, row=row)
         else:
-            super().__init__(placeholder=placeholder, min_values=minval, max_values=maxval, options=options, disabled=disabled, row=row)
+            super().__init__(placeholder=placeholder, min_values=minval, max_values=maxval, options=opt, disabled=disabled, row=row)
         view.add_item(self)
         self._view = view
         self._onselection = onselection
@@ -55,9 +55,9 @@ class Dropdown(discord.ui.Select):
 
 
 class StandaloneDropdown(Dropdown):
-    def __init__(self, ctx, *, id=None, placeholder=None, minval=1, maxval=1, disabled=False, row=None, onselection=None, check_callback=None, timeout=None, *args, **kargs):
+    def __init__(self, ctx, *, id=None, placeholder=None, minval=1, maxval=1, disabled=False, row=None, onselection=None, check_callback=None, timeout=None, options=[], **kargs):
         view = View(ctx, check_callback=check_callback, timeout=timeout)
-        super().__init__(ctx, view, id=id, placeholder=placeholder, minval=minval, maxval=maxval, disabled=disabled, row=row, onselection=onselection, *args, **kargs)
+        super().__init__(ctx, view, id=id, placeholder=placeholder, minval=minval, maxval=maxval, disabled=disabled, row=row, onselection=onselection, options=options, **kargs)
 
     async def wait(self):
         result = await self.view.wait()

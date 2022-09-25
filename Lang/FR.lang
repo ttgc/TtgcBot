@@ -302,3 +302,4 @@ http_509=Votre requête ne peut aboutir a cause de limitations de bande passante
 http_unknown=Une erreur inconnue s'est produite pendant le traitement de votre requête, veuillez reporter cette erreur avec les informations suivantes : \n```\n{}\n```
 chardata_invalid=Les informations reçues sont invalides pour créer votre personnage correctement
 charlink_conflict=Impossible de lier le personnage {}, il est déjà lié à quelqu'un. Utiliser la commande `unlink` ou précisez le paramètre `override` à `True`
+charselect_placeholder=Choisissez votre personnage

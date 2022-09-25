@@ -24,6 +24,7 @@ from discord.ext import commands
 # import functools
 # import concurrent.futures
 # import discord
+from core.commandparameters import GenericCommandParameters
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -51,7 +52,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         """**PC/PJ only**
         Select a character from all characters linked to you"""
         async def _on_select(dropdown, interaction):
-            await interaction.response.edit_message(content=dropdown.value, view=None)
+            await interaction.response.edit_message(content=data.lang["charselect"].format("undefined", dropdown.value), view=None)
         # data = await GenericCommandParameters(ctx)
         # for i in self.charbase.get("linked", []):
         #     if i.get("charkey") == key and i.get("member") == ctx.author.id:
@@ -60,8 +61,9 @@ class CharacterCog(commands.Cog, name="Characters"):
         #         await ctx.channel.send(data.lang["charselect"].format(data.char.key, i.key))
         #         return
         # await ctx.channel.send(data.lang["charnotexist"].format(key))
+        data = await GenericCommandParameters.get_from_context(ctx)
         chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        dropdown = ui.StandaloneDropdown(ctx, placeholder="Select character", timeout=60, options=chars, onselection=_on_select)
+        dropdown = ui.StandaloneDropdown(ctx, placeholder=data.lang["charselect_placeholder"], timeout=60, options=chars, onselection=_on_select)
         await ctx.send(view=dropdown.view, reference=ctx.message)
         await dropdown.wait()
         self.logger.info(dropdown.value)

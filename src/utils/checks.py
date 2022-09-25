@@ -20,6 +20,7 @@
 from src.tools.BotTools import *
 from src.tools.Translator import *
 from src.exceptions.exceptions import APIException
+from core.commandparameters import GenericCommandParameters
 import discord.utils
 
 async def is_blacklisted(ID):
@@ -89,34 +90,6 @@ async def check_chanmj(ctx):
             if e["code"] != 404: raise e
 
     return False
-
-class GenericCommandParameters:
-    async def __new__(cl, ctx):
-        if not hasattr(ctx, 'data') or ctx.data is None:
-            ctx.data = await super().__new__(cl)
-        return ctx.data
-
-    async def __init__(self, ctx):
-        self.ID = ctx.message.id
-        self.srv = await DBServer(ctx.message.guild.id)
-        role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
-        if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
-        lgcode = await DBMember.getuserlang(ctx.message.author.id)
-        if not lang_exist(lgcode): lgcode = "EN"
-        self.lang = get_lang(lgcode)
-        self.jdrlist = await self.srv.jdrlist(ctx.author.id, role.id if role is not None else None)
-        self.jdr = None
-        self.charlist = None
-        self._charbase = None
-        self.char = None
-        jdrchannel = await check_jdrchannel(ctx)
-        if jdrchannel:
-            self.jdr = await self.srv.getJDR(ctx.message.channel.id, ctx.author.id, role.id if role is not None else None)
-            self.charbase = await self.jdr.charlist()
-            for i in self.charbase.get("linked", []):
-                if i.get("member", -1) == ctx.message.author.id and i.get("selected", False):
-                    self.char = await self.jdr.get_character(i.get("charkey", ""))
-                    break
 
 async def check_haschar(ctx):
     data = await GenericCommandParameters(ctx)

@@ -65,6 +65,6 @@ class Modal(ui.Modal):
             await self.timeout_callback()
         await super().on_timeout()
 
-    async def wait():
+    async def wait(self):
         result = await super().wait()
         return result, self.user_interaction

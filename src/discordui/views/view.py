@@ -43,5 +43,5 @@ class View(ui.View):
 
     async def on_timeout(self):
         if self.timeout_callback is not None:
-            await self.timeout_callback()
+            await self.timeout_callback(self)
         await super().on_timeout()

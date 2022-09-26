@@ -33,6 +33,12 @@ class Dropdown(discord.ui.Select):
         self._view = view
         self._onselection = onselection
 
+    def __iadd__(self, item):
+        if isinstance(item, discord.ui.SelectOption):
+            self.append_option(item)
+        else:
+            self.add_option(label=str(item))
+
     @property
     def view(self):
         return self._view
@@ -52,6 +58,12 @@ class Dropdown(discord.ui.Select):
     async def callback(self, interaction):
         if self.onselection is not None:
             await self.onselection(self, interaction)
+
+    def add_multiple_options(self, *args, **kwargs):
+        for i in args:
+            self += i
+        for i, k in kwargs.items():
+            self.add_option(label=i, value=k)
 
 
 class StandaloneDropdown(Dropdown):

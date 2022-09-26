@@ -29,6 +29,7 @@ sys.path.append(os.path.abspath("src"))
 # import custom libs
 from setup.inits import init
 from setup.logconfig import get_logger
+from setup.loglevel import LogLevel
 from setup.config import Config
 from utils.translator import get_lang, lang_exist
 # from src.utils.inits import *
@@ -148,6 +149,13 @@ async def on_connect():
     logger = get_logger()
     await client.add_cog(BotManage(client, logger))
     await client.add_cog(jdr.CharacterCog(client, logger))
+
+    test_guild = Config()['discord']['test-guild']
+    if test_guild is not None:
+        logger.log(LogLevel.BOT_V3, f"Test guild provided. Copying global command to test guild.")
+        client.tree.copy_global_to(guild=discord.Object(id=test_guild))
+
+    await client.tree.sync()
     # client.add_cog(Moderation(client, logger))
     # client.add_cog(Other(client, logger))
     # client.add_cog(NSFW(client, logger))

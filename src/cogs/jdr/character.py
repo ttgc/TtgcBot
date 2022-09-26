@@ -23,8 +23,9 @@ from discord.ext import commands
 # import logging,asyncio
 # import functools
 # import concurrent.futures
-# import discord
+import discord
 from core.commandparameters import GenericCommandParameters
+from utils.emojis import Emoji
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -42,7 +43,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.logger = logger
 
     #@commands.check(check_jdrchannel)
-    @commands.hybrid_group(invoke_without_command=False, aliases=['char'], guild_only=True)
+    @commands.hybrid_group(invoke_without_command=False, aliases=['char'])
     async def character(self, ctx): pass
 
     #@commands.check(check_haschar)
@@ -67,3 +68,48 @@ class CharacterCog(commands.Cog, name="Characters"):
         await ctx.send(view=dropdown.view, reference=ctx.message)
         await dropdown.wait()
         self.logger.info(dropdown.value)
+
+    #@commands.check(check_chanmj)
+    @character.command(name="link", aliases=["assign"])
+    async def character_link(self, ctx):
+        """**GM/MJ only**
+        Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
+        async def _on_submit(btn, interaction):
+            await interaction.response.edit_message(content="submit", view=None)
+
+        async def _on_cancel(btn, interaction):
+            await interaction.response.edit_message(content="cancel", view=None)
+
+        async def _on_select_defer(dropdown, interaction):
+            await interaction.response.defer()
+
+        data = await GenericCommandParameters.get_from_context(ctx)
+        view = ui.views.View(ctx, timeout=60)
+        chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
+        char_dd = ui.Dropdown(ctx, view, id="chars", placeholder="Select character", row=0, options=chars, onselection=_on_select_defer)
+        user_dd = ui.Dropdown(ctx, view, id="users", placeholder="Select user", row=1, onselection=_on_select_defer)
+
+        for i in ctx.channel.members:
+            if not i.bot:
+                user_dd.add_option(label=str(i), value=i.id)
+
+        ui.Button(ctx, view, style=discord.ButtonStyle.secondary, label="Cancel", emoji=str(Emoji.X), row=2, onclick=_on_cancel, final=True)
+        ui.Button(ctx, view, style=discord.ButtonStyle.success, label="Submit", emoji=str(Emoji.WHITE_CHECK_MARK), row=2, onclick=_on_submit, final=True)
+        await ctx.send(view=view)
+        await view.wait()
+        self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
+
+        # try:
+        #     await character.link(player.id, ctx.author.id, override)
+        # except APIException as e:
+        #     if e["code"] == 409:
+        #         await ctx.channel.send(data.lang["charlink_conflict"].format(character.name))
+        #     elif e["code"] == 403:
+        #         await ctx.channel.send(data.lang["is_dead"].format(character.name))
+        #     else:
+        #         raise e
+        #     return
+        # finally:
+        #     self.logger.log(logging.DEBUG+1, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, player.id)
+        #
+        # await ctx.channel.send(data.lang["charlink"].format(character.name, player.mention))

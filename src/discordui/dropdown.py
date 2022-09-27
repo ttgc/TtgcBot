@@ -58,6 +58,8 @@ class Dropdown(discord.ui.Select):
     async def callback(self, interaction):
         if self.onselection is not None:
             await self.onselection(self, interaction)
+        else:
+            await interaction.response.defer()
 
     def add_multiple_options(self, *args, **kwargs):
         for i in args:

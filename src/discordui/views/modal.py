@@ -58,6 +58,8 @@ class Modal(ui.Modal):
         await super().on_submit(interaction)
         if self.onsubmit is not None:
             await self.onsubmit(self, interaction)
+        else:
+            await interaction.response.defer()
         self.stop()
 
     async def on_timeout(self):

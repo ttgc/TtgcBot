@@ -24,8 +24,10 @@ from discord.ext import commands
 # import functools
 # import concurrent.futures
 import discord
+import asyncio
 from core.commandparameters import GenericCommandParameters
 from utils.emojis import Emoji
+from utils import async_lambda, async_conditional_lambda
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -52,8 +54,6 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_select(self, ctx): #(self, ctx, key)
         """**PC/PJ only**
         Select a character from all characters linked to you"""
-        async def _on_select(dropdown, interaction):
-            await interaction.response.edit_message(content=data.lang["charselect"].format("undefined", dropdown.value), view=None)
         # data = await GenericCommandParameters(ctx)
         # for i in self.charbase.get("linked", []):
         #     if i.get("charkey") == key and i.get("member") == ctx.author.id:
@@ -64,7 +64,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         # await ctx.channel.send(data.lang["charnotexist"].format(key))
         data = await GenericCommandParameters.get_from_context(ctx)
         chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        dropdown = ui.StandaloneDropdown(ctx, placeholder=data.lang["charselect_placeholder"], timeout=60, options=chars, onselection=_on_select)
+        on_select = async_lambda(lambda d, i: i.response.edit_message(content=data.lang["charselect"].format("undefined", d.value), view=None))
+        dropdown = ui.StandaloneDropdown(ctx, placeholder=data.lang["charselect_placeholder"], timeout=60, options=chars, onselection=on_select)
         await ctx.send(view=dropdown.view, reference=ctx.message)
         await dropdown.wait()
         self.logger.info(dropdown.value)
@@ -74,30 +75,30 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_link(self, ctx):
         """**GM/MJ only**
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
-        async def _on_submit(btn, interaction):
-            await interaction.response.edit_message(content="submit", view=None)
-
-        async def _on_cancel(btn, interaction):
-            await interaction.response.edit_message(content="cancel", view=None)
-
-        async def _on_select_defer(dropdown, interaction):
-            await interaction.response.defer()
-
         data = await GenericCommandParameters.get_from_context(ctx)
         view = ui.views.View(ctx, timeout=60)
         chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        char_dd = ui.Dropdown(ctx, view, id="chars", placeholder="Select character", row=0, options=chars, onselection=_on_select_defer)
-        user_dd = ui.Dropdown(ctx, view, id="users", placeholder="Select user", row=1, onselection=_on_select_defer)
+        char_dd = ui.Dropdown(ctx, view, id="chars", placeholder="Select character", row=0, options=chars)
+        user_dd = ui.Dropdown(ctx, view, id="users", placeholder="Select user", row=1)
 
         for i in ctx.channel.members:
             if not i.bot:
                 user_dd.add_option(label=str(i), value=i.id)
 
-        ui.Button(ctx, view, style=discord.ButtonStyle.secondary, label="Cancel", emoji=str(Emoji.X), row=2, onclick=_on_cancel, final=True)
-        ui.Button(ctx, view, style=discord.ButtonStyle.success, label="Submit", emoji=str(Emoji.WHITE_CHECK_MARK), row=2, onclick=_on_submit, final=True)
-        await ctx.send(view=view)
-        await view.wait()
-        self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
+        on_cancel = async_lambda(lambda b, i: i.response.edit_message(content="canceled", view=None))
+        submit_check = lambda b, i: char_dd.value is not None and user_dd.value is not None
+        on_submit = async_conditional_lambda(
+            asyncio.coroutine(lambda b, i: b.final),
+            lambda b, i: i.response.edit_message(content=f"linked {char_dd.value} to {user_dd.value}", view=None),
+            lambda b, i: i.response.edit_message(content="Submit failed. Try again", view=b.view)
+        )
+
+        ui.Button(ctx, view, style=discord.ButtonStyle.secondary, label="Cancel", emoji=str(Emoji.X), row=2, onclick=on_cancel, final=True)
+        ui.Button(ctx, view, style=discord.ButtonStyle.success, label="Submit", emoji=str(Emoji.WHITE_CHECK_MARK), row=2, onclick=on_submit, finalize_check=submit_check)
+        await ctx.send(view=view, reference=ctx.message)
+        timeout = await view.wait()
+        if not timeout:
+            self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
 
         # try:
         #     await character.link(player.id, ctx.author.id, override)

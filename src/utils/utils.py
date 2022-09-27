@@ -17,4 +17,19 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from utils.utils import async_lambda, async_conditional_lambda
+
+def async_lambda(callback):
+    async def _execute(*args, **kargs):
+        await callback(*args, **kargs)
+
+    return _execute
+
+def async_conditional_lambda(check_callback, if_callback, else_callback):
+    async def _execute(*args, **kwargs):
+        condition = await check_callback(*args, **kwargs)
+        if condition:
+            await if_callback(*args, **kwargs)
+        else:
+            await else_callback(*args, **kwargs)
+
+    return _execute

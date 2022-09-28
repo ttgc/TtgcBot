@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import discord.ui as ui
+from discordui.views import ViewResult, DefaultViewResults
 
 class View(ui.View):
     def __init__(self, ctx, *, check_callback=None, timeout=None, authorize_everyone=False):
@@ -26,6 +27,7 @@ class View(ui.View):
         self.check_callback = None
         self.authorize_everyone = authorize_everyone
         self._timeout_callback = None
+        self._result = DefaultViewResults.NONE
 
     async def interaction_check(self, interaction):
         author_check = self.authorize_everyone or interaction.user == self.ctx.author
@@ -40,6 +42,21 @@ class View(ui.View):
     def timeout_callback(self, callback):
         if self.timeout is not None:
             self._timeout_callback = callback
+
+    @property
+    def result(self):
+        return self._result
+
+    @result.setter
+    def result(self, value):
+        if isinstance(value, ViewResult):
+            self._result = value
+        elif isinstance(value, DefaultViewResults):
+            self._result = value.value
+        elif isinstance(value, int):
+            self._result = ViewResult(value)
+        else:
+            raise TypeError(f"view result must be a ViewResult, DefaultViewResults or int but not {type(value)}")
 
     async def on_timeout(self):
         if self.timeout_callback is not None:

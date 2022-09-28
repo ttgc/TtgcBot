@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import discord
-from discordui.views import View
+from discordui.views import View, DefaultViewResults
 
 class Dropdown(discord.ui.Select):
     def __init__(self, ctx, view, *, id=None, placeholder=None, minval=1, maxval=1, disabled=False, row=None, onselection=None, options=[], **kargs):
@@ -80,3 +80,25 @@ class StandaloneDropdown(Dropdown):
     async def callback(self, interaction):
         await super().callback(interaction)
         self.view.stop()
+
+
+async def send_dropdown(ctx, *, placeholder=None, check_callback=None, timeout=None, options=[], select_msg="{}", timeout_msg="timeout", format_msg=True, format_args_before=[], format_args_after=[]):
+    async def _on_select(dropdown, interaction):
+        final_select_msg = select_msg
+
+        if format_msg:
+            format_args = format_args_before + [dropdown.value] + format_args_after
+            final_select_msg = select_msg.format(*format_args)
+
+        await interaction.response.edit_message(content=final_select_msg, view=None)
+        dropdown.view.result = DefaultViewResults.SUBMIT
+
+    dropdown = StandaloneDropdown(ctx, placeholder=placeholder, check_callback=check_callback, timeout=timeout, options=options, onselection=_on_select)
+    msg = await ctx.send(view=dropdown.view, reference=ctx.message)
+    timeout = await dropdown.wait()
+
+    if timeout:
+        await msg.delete()
+        await ctx.send(timeout_msg, reference=ctx.message)
+
+    return not timeout and dropdown.view.result.is_success, dropdown.value

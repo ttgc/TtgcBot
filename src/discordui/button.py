@@ -18,9 +18,10 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import discord
+from discordui.views import DefaultViewResults
 
 class Button(discord.ui.Button):
-    def __init__(self, ctx, view, *, style=discord.ButtonStyle.primary, label=None, id=None, url=None, emoji=None, disabled=False, row=None, onclick=None, final=False, finalize_check=None):
+    def __init__(self, ctx, view, *, style=discord.ButtonStyle.primary, label=None, id=None, url=None, emoji=None, disabled=False, row=None, onclick=None, final=False, finalize_check=None, view_result=DefaultViewResults.DEFAULT):
         super().__init__(style=style, label=label, custom_id=id, url=url, emoji=emoji, disabled=disabled, row=row)
         self.ctx = ctx
         self._onclick = onclick
@@ -28,6 +29,7 @@ class Button(discord.ui.Button):
         self._view = view
         self._final = final
         self._finalize_check = finalize_check
+        self._view_result = view_result
 
     @property
     def view(self):
@@ -67,4 +69,5 @@ class Button(discord.ui.Button):
             await interaction.response.defer()
 
         if self.final:
+            self.view.result = self._view_result
             self.view.stop()

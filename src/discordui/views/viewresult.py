@@ -24,18 +24,18 @@ class ViewResult:
     def __init__(self, value: int, *, is_success: typing.Optional[bool] = None):
         self._value = value
         self._is_success = is_success if is_success is not None else bool(value)
-    
+
     def __bool__(self):
         return self.is_success
-    
+
     @property
     def value(self):
         return self._value
-    
+
     @property
     def is_success(self):
         return self._is_success
-    
+
 
 class DefaultViewResults(Enum):
     NONE = ViewResult(-1, is_success=False)

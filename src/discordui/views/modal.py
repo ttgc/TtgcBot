@@ -50,7 +50,7 @@ class Modal(ui.Modal):
             self._onsubmit = callback
 
     @property
-    def user_interaction():
+    def user_interaction(self):
         return self._user_interaction
 
     async def on_submit(self, interaction, /):

@@ -152,7 +152,7 @@ async def on_connect():
 
     test_guild = Config()['discord']['test-guild']
     if test_guild is not None:
-        logger.log(LogLevel.BOT_V3.value, f"Test guild provided. Copying global command to test guild.")
+        logger.log(LogLevel.BOT_V3.value, "Test guild provided. Copying global command to test guild.")
         client.tree.copy_global_to(guild=discord.Object(id=test_guild))
 
     await client.tree.sync()

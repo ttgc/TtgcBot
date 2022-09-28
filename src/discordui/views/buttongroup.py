@@ -17,7 +17,6 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import discord
 from discordui.views import View
 
 class ButtonGroup(View):
@@ -31,7 +30,7 @@ class ButtonGroup(View):
             self.addrange(*buttons)
 
     @property
-    def user_interaction():
+    def user_interaction(self):
         return self._user_interaction
 
     def __iadd__(self, button):

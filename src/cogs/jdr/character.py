@@ -64,11 +64,10 @@ class CharacterCog(commands.Cog, name="Characters"):
         # await ctx.channel.send(data.lang["charnotexist"].format(key))
         data = await GenericCommandParameters.get_from_context(ctx)
         chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        on_select = async_lambda(lambda d, i: i.response.edit_message(content=data.lang["charselect"].format("undefined", d.value), view=None))
-        dropdown = ui.StandaloneDropdown(ctx, placeholder=data.lang["charselect_placeholder"], timeout=60, options=chars, onselection=on_select)
-        await ctx.send(view=dropdown.view, reference=ctx.message)
-        await dropdown.wait()
-        self.logger.info(dropdown.value)
+        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_char_placeholder"], timeout=60, options=chars, select_msg=data.lang["charselect"], timeout_msg=data.lang["timeout"], format_args_before=["undefined"])
+
+        if success:
+            self.logger.info(selection)
 
     #@commands.check(check_chanmj)
     @character.command(name="link", aliases=["assign"])
@@ -78,26 +77,30 @@ class CharacterCog(commands.Cog, name="Characters"):
         data = await GenericCommandParameters.get_from_context(ctx)
         view = ui.views.View(ctx, timeout=60)
         chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        char_dd = ui.Dropdown(ctx, view, id="chars", placeholder="Select character", row=0, options=chars)
-        user_dd = ui.Dropdown(ctx, view, id="users", placeholder="Select user", row=1)
+        char_dd = ui.Dropdown(ctx, view, id="chars", placeholder=data.lang["dropdown_char_placeholder"], row=0, options=chars)
+        user_dd = ui.Dropdown(ctx, view, id="users", placeholder=data.lang["dropdown_user_placeholder"], row=1)
 
         for i in ctx.channel.members:
             if not i.bot:
                 user_dd.add_option(label=str(i), value=i.id)
 
-        on_cancel = async_lambda(lambda b, i: i.response.edit_message(content="canceled", view=None))
+        on_cancel = async_lambda(lambda b, i: i.response.edit_message(content=data.lang["canceled"], view=None))
         submit_check = lambda b, i: char_dd.value is not None and user_dd.value is not None
         on_submit = async_conditional_lambda(
             asyncio.coroutine(lambda b, i: b.final),
-            lambda b, i: i.response.edit_message(content=f"linked {char_dd.value} to {user_dd.value}", view=None),
-            lambda b, i: i.response.edit_message(content="Submit failed. Try again", view=b.view)
+            lambda b, i: i.response.edit_message(content=data.lang["charlink"].format(char_dd.value, user_dd.value), view=None),
+            lambda b, i: i.response.edit_message(content=data.lang["submit_failed"], view=b.view)
         )
 
-        ui.Button(ctx, view, style=discord.ButtonStyle.secondary, label="Cancel", emoji=str(Emoji.X), row=2, onclick=on_cancel, final=True)
-        ui.Button(ctx, view, style=discord.ButtonStyle.success, label="Submit", emoji=str(Emoji.WHITE_CHECK_MARK), row=2, onclick=on_submit, finalize_check=submit_check)
-        await ctx.send(view=view, reference=ctx.message)
+        ui.Button(ctx, view, style=discord.ButtonStyle.secondary, label=data.lang["btn_cancel"], emoji=str(Emoji.X), row=2, onclick=on_cancel, final=True, view_result=ui.views.DefaultViewResults.CANCEL)
+        ui.Button(ctx, view, style=discord.ButtonStyle.success, label=data.lang["btn_submit"], emoji=str(Emoji.WHITE_CHECK_MARK), row=2, onclick=on_submit, finalize_check=submit_check, view_result=ui.views.DefaultViewResults.SUBMIT)
+        msg = await ctx.send(view=view, reference=ctx.message)
         timeout = await view.wait()
-        if not timeout:
+
+        if timeout:
+            await msg.delete()
+            await ctx.send(data.lang["timeout"], reference=ctx.message)
+        elif view.result.is_success:
             self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
 
         # try:

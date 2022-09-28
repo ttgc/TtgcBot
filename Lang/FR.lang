@@ -308,3 +308,7 @@ canceled=Vous avez annulé l'exécution de la commande
 submit_failed=Votre soumission a échouée, veuillez réessayer
 btn_cancel=Annuler
 btn_submit=Valider
+dropdown_race_placeholder=Choisissez une race
+dropdown_symbiont_placeholder=Choisissez un symbiote
+dropdown_org_placeholder=Choisissez une affiliation
+none_m=Aucun

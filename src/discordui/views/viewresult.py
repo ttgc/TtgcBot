@@ -17,7 +17,35 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discordui.views.viewresult import ViewResult, DefaultViewResults
-from discordui.views.view import View
-from discordui.views.modal import Modal
-from discordui.views.buttongroup import ButtonGroup
+from enum import Enum
+import typing
+
+class ViewResult:
+    def __init__(self, value: int, *, is_success: typing.Optional[bool] = None):
+        self._value = value
+        self._is_success = is_success if is_success is not None else bool(value)
+
+    def __bool__(self):
+        return self.is_success
+
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def is_success(self):
+        return self._is_success
+
+
+class DefaultViewResults(Enum):
+    NONE = ViewResult(-1, is_success=False)
+    CANCEL = ViewResult(0)
+    DEFAULT = ViewResult(0, is_success=True)
+    SUBMIT = ViewResult(1)
+
+    def __bool__(self):
+        return self.value.is_success
+
+    @property
+    def result_code(self):
+        return self.value.value

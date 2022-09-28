@@ -17,7 +17,15 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discordui.views.viewresult import ViewResult, DefaultViewResults
-from discordui.views.view import View
-from discordui.views.modal import Modal
-from discordui.views.buttongroup import ButtonGroup
+from enum import Enum
+
+class Emoji(Enum):
+    X = '❌'
+    WHITE_CHECK_MARK = '✅'
+
+    def __str__(self):
+        return self.value
+
+    @classmethod
+    def from_str(cls, string):
+        return cls(string.strip(':').upper())

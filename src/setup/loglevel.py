@@ -33,6 +33,9 @@ class LogLevel(Enum):
     MIN = logging.DEBUG
     MAX = logging.CRITICAL
 
+    def __int__(self):
+        return self.value
+
     @classmethod
     def parse(cls, value):
         for i in cls:

@@ -18,7 +18,9 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import discord
-from discordui.views import DefaultViewResults
+from discordui.views import DefaultViewResults, ViewResult
+from utils.emojis import Emoji
+from enum import Enum
 
 class Button(discord.ui.Button):
     def __init__(self, ctx, view, *, style=discord.ButtonStyle.primary, label=None, id=None, url=None, emoji=None, disabled=False, row=None, onclick=None, final=False, finalize_check=None, view_result=DefaultViewResults.DEFAULT):
@@ -59,6 +61,14 @@ class Button(discord.ui.Button):
     def finalize_check(self, value):
         self._finalize_check = value
 
+    @property
+    def view_result(self):
+        return self._view_result
+
+    @view_result.setter
+    def view_result(self, value):
+        self._view_result = value
+
     async def callback(self, interaction):
         if self.finalize_check is not None:
             self.final = self.finalize_check(self, interaction)
@@ -69,5 +79,47 @@ class Button(discord.ui.Button):
             await interaction.response.defer()
 
         if self.final:
-            self.view.result = self._view_result
+            self.view.result = self.view_result
             self.view.stop()
+
+
+class DefaultButtons(Enum):
+    CANCEL = {
+        "style": discord.ButtonStyle.secondary,
+        "label": "Cancel",
+        "emoji": str(Emoji.X),
+        "final": True,
+        "view_result": DefaultViewResults.CANCEL
+    }
+
+    SUBMIT = {
+        "style": discord.ButtonStyle.success,
+        "label": "Submit",
+        "emoji": str(Emoji.WHITE_CHECK_MARK),
+        "final": True,
+        "view_result": DefaultViewResults.SUBMIT
+    }
+
+    ADD = {
+        "style": discord.ButtonStyle.success,
+        "emoji": str(Emoji.PLUS),
+        "view_result": ViewResult(1)
+    }
+
+    REMOVE = {
+        "style": discord.ButtonStyle.danger,
+        "emoji": str(Emoji.MINUS),
+        "view_result": ViewResult(-1, is_success=True)
+    }
+
+    SET = {
+        "emoji": str(Emoji.EQUAL),
+        "view_result": ViewResult(0, is_success=True)
+    }
+
+    def spawn(self, view, **overrides):
+        keys = dict(self.value)
+        for i, k in overrides.items():
+            keys[i] = k
+
+        return Button(view.ctx, view, **keys)

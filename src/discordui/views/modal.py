@@ -25,7 +25,6 @@ class Modal(ui.Modal):
         self.ctx = ctx
         self.check_callback = None
         self._timeout_callback = None
-        self._user_interaction = None
         self._onsubmit = onsubmit
 
     async def interaction_check(self, interaction):
@@ -49,12 +48,7 @@ class Modal(ui.Modal):
         if self.onsubmit is not None:
             self._onsubmit = callback
 
-    @property
-    def user_interaction(self):
-        return self._user_interaction
-
     async def on_submit(self, interaction, /):
-        self._user_interaction = interaction
         await super().on_submit(interaction)
         if self.onsubmit is not None:
             await self.onsubmit(self, interaction)
@@ -69,4 +63,4 @@ class Modal(ui.Modal):
 
     async def wait(self):
         result = await super().wait()
-        return result, self.user_interaction
+        return result

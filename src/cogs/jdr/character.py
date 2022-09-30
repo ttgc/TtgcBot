@@ -92,8 +92,8 @@ class CharacterCog(commands.Cog, name="Characters"):
             lambda b, i: i.response.edit_message(content=data.lang["submit_failed"], view=b.view)
         )
 
-        ui.Button(ctx, view, style=discord.ButtonStyle.secondary, label=data.lang["btn_cancel"], emoji=str(Emoji.X), row=2, onclick=on_cancel, final=True, view_result=ui.views.DefaultViewResults.CANCEL)
-        ui.Button(ctx, view, style=discord.ButtonStyle.success, label=data.lang["btn_submit"], emoji=str(Emoji.WHITE_CHECK_MARK), row=2, onclick=on_submit, finalize_check=submit_check, view_result=ui.views.DefaultViewResults.SUBMIT)
+        ui.DefaultButtons.CANCEL.spawn(view, label=data.lang["btn_cancel"], row=2, onclick=on_cancel)
+        ui.DefaultButtons.SUBMIT.spawn(view, label=data.lang["btn_submit"], row=2, onclick=on_submit, finalize_check=submit_check)
         msg = await ctx.send(view=view, reference=ctx.message)
         timeout = await view.wait()
 

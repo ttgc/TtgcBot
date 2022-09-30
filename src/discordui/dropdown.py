@@ -39,6 +39,8 @@ class Dropdown(discord.ui.Select):
         else:
             self.add_option(label=str(item))
 
+        return self
+
     @property
     def view(self):
         return self._view

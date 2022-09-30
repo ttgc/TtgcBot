@@ -17,6 +17,6 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>7
 
-from discordui.button import Button
+from discordui.button import Button, DefaultButtons
 from discordui.dropdown import Dropdown, StandaloneDropdown, send_dropdown
 from discordui.textinput import TextInput

@@ -17,41 +17,33 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discordui.views import View
+from discordui.views import View, ViewResult
 
 class ButtonGroup(View):
-    def __init__(self, ctx, grpid, check_callback=None, timeout=None, authorize_everyone=False, *buttons):
+    def __init__(self, ctx, grpid, *, check_callback=None, timeout=None, authorize_everyone=False):
         super().__init__(ctx, check_callback=check_callback, timeout=timeout, authorize_everyone=authorize_everyone)
         self.buttons = []
-        self.value = None
         self.grpid = grpid
-        self._user_interaction = None
-        if len(buttons) > 0:
-            self.addrange(*buttons)
-
-    @property
-    def user_interaction(self):
-        return self._user_interaction
 
     def __iadd__(self, button):
-        self.addrange(button)
-        return self
+        return self.add(button)
 
     def add(self, button):
-        self.addrange(button)
+        b.custom_id = f"{self.grpid}-{len(self.buttons)}-{b.custom_id}"
+        b.final = True
+        b.finalize_check = None
+
+        if not isinstance(b.view_result, ViewResult):
+            b.view_result = ViewResult(len(self.buttons), is_success=True)
+
+        self.buttons.append(b)
+        return self
 
     def addrange(self, *buttons):
         for b in buttons:
-            b.custom_id = f"{self.grpid}-{len(self.buttons)}-{b.custom_id}"
-            b.final = True
-            b.onclick = self._onclick
-            self.buttons.append(b)
-            self.add_item(b)
-
-    async def _onclick(self, btn, interaction):
-        self.value = btn.custom_id
-        self._user_interaction = interaction
+            self.add(b)
+        return self
 
     async def wait(self):
-        result = await super().wait()
-        return result, self.value, self.user_interaction
+        timeout = await super().wait()
+        return timeout

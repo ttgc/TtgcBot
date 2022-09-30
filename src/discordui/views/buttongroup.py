@@ -29,14 +29,14 @@ class ButtonGroup(View):
         return self.add(button)
 
     def add(self, button):
-        b.custom_id = f"{self.grpid}-{len(self.buttons)}-{b.custom_id}"
-        b.final = True
-        b.finalize_check = None
+        button.custom_id = f"{self.grpid}-{len(self.buttons)}-{button.custom_id}"
+        button.final = True
+        button.finalize_check = None
 
-        if not isinstance(b.view_result, ViewResult):
-            b.view_result = ViewResult(len(self.buttons), is_success=True)
+        if not isinstance(button.view_result, ViewResult):
+            button.view_result = ViewResult(len(self.buttons), is_success=True)
 
-        self.buttons.append(b)
+        self.buttons.append(button)
         return self
 
     def addrange(self, *buttons):

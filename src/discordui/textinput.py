@@ -20,7 +20,26 @@
 import discord
 
 class TextInput(discord.ui.TextInput):
+    """Discord UI TextInput Widget"""
+
     def __init__(self, ctx, view, label, *, style=discord.TextStyle.short, id=None, placeholder=None, default=None, required=True, minlen=None, maxlen=None, row=None):
+        """
+        TextInput(ctx, view, label, *options)
+
+        Parameters:
+            ctx: command context object
+            view: discord ui modal view object where the textinput will be displayed
+            label: label used by the textinput
+            ----
+            style: textinput style (default: discord.TextStyle.short)
+            id: textinput id. If None, the id will be automatically generated (default: None)
+            placeholder: the placeholder to display in the textinput when nothing is typed (default: None)
+            default: default text value to insert in the textinput on display (default: None)
+            required: whether the textinput is required or not (default: True)
+            minlen: the minimum length for the text typed in to be considered as valid. Use None for no minimum (default: None)
+            maxlen: the maximum length for the text typed in to be considered as valid. Use None for no maximum (default: None)
+            row: the row where to display the button inside the view. Should be between 0 and 4 included. If None, the display will be automatically adjusted (default: None)
+        """
         if id is not None:
             super().__init__(label=label, style=style, custom_id=id, placeholder=placeholder, default=default, required=required, min_length=minlen, max_length=maxlen, row=row)
         else:
@@ -31,4 +50,5 @@ class TextInput(discord.ui.TextInput):
 
     @property
     def view(self):
+        """Get the view where the textinput belongs to"""
         return self._view

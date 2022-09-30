@@ -15,7 +15,21 @@
 ##    GNU General Public License for more details.
 ##
 ##    You should have received a copy of the GNU General Public License
-##    along with this program. If not, see <http://www.gnu.org/licenses/>7
+##    along with this program. If not, see <http://www.gnu.org/licenses/>
+
+"""
+discordui package:
+    A short wrapper for discord.ui module of discord.py lib
+
+Contains:
+    Button: Discord UI Button Widget
+    DefaultButtons: Enumeration for standardized default Buttons
+    Dropdown: Discord UI Select/Dropdown Widget
+    StandaloneDropdown: Shortcut class to easily creates view with a single dropdown in it
+    send_dropdown: Shortcut function to create a StandaloneDropdown, display it, respond to the user interaction and return
+    TextInput: Discord UI TextInput Widget
+    view: Subpackage containing view's logic
+"""
 
 from discordui.button import Button, DefaultButtons
 from discordui.dropdown import Dropdown, StandaloneDropdown, send_dropdown

@@ -21,31 +21,47 @@ from enum import Enum
 import typing
 
 class ViewResult:
+    """Wrapper to determines a view's result"""
+
     def __init__(self, value: int, *, is_success: typing.Optional[bool] = None):
+        """
+        ViewResult(value, *, is_success)
+
+        Parameters:
+            value (int): the view's result identifier
+            is_success (Optional[bool]): determines if the view's result is a success or not. If not provided the value will be used instead
+        """
         self._value = value
         self._is_success = is_success if is_success is not None else bool(value)
 
     def __bool__(self):
+        """Returns if the view's result is a success or not"""
         return self.is_success
 
     @property
     def value(self):
+        """Get the view's result value"""
         return self._value
 
     @property
     def is_success(self):
+        """Get if the view's result is a success or not"""
         return self._is_success
 
 
 class DefaultViewResults(Enum):
+    """Enumeration for default view's results"""
+
     NONE = ViewResult(-1, is_success=False)
     CANCEL = ViewResult(0)
     DEFAULT = ViewResult(0, is_success=True)
     SUBMIT = ViewResult(1)
 
     def __bool__(self):
+        """Get if the view's result is a success or not"""
         return self.value.is_success
 
     @property
     def result_code(self):
+        """Get the view's result value"""
         return self.value.value

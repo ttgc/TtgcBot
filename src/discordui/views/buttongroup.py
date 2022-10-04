@@ -20,15 +20,33 @@
 from discordui.views import View, ViewResult
 
 class ButtonGroup(View):
+    """A standardized view for grouping multiple action buttons"""
+
     def __init__(self, ctx, grpid, *, check_callback=None, timeout=None, authorize_everyone=False):
+        """
+        ButtonGroup(ctx, grpid, *options)
+
+        Parameters:
+            ctx: command context object
+            grpid: the view id
+            ----
+            check_callback: callback function to determine whether an interaction should be answered or not (default: None)
+            timeout: timeout in seconds after which the view will timeout and be closed. If None, the view will never timeout (default: None)
+            authorize_everyone: should everyone be authorized to interact with view? (default: False)
+
+        Callback def:
+            def check_callback(ctx: discord.ext.commands.Context, interaction: discord.Interaction) -> bool
+        """
         super().__init__(ctx, check_callback=check_callback, timeout=timeout, authorize_everyone=authorize_everyone)
         self.buttons = []
         self.grpid = grpid
 
     def __iadd__(self, button):
+        """Allow usage of += operator to add buttons to the view"""
         return self.add(button)
 
     def add(self, button):
+        """Add a button to the view and returns self"""
         button.custom_id = f"{self.grpid}-{len(self.buttons)}-{button.custom_id}"
         button.final = True
         button.finalize_check = None
@@ -40,10 +58,7 @@ class ButtonGroup(View):
         return self
 
     def addrange(self, *buttons):
+        """Add multiple buttons at once to the view and returns self"""
         for b in buttons:
             self.add(b)
         return self
-
-    async def wait(self):
-        timeout = await super().wait()
-        return timeout

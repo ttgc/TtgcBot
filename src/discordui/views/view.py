@@ -42,7 +42,7 @@ class View(ui.View):
         self.check_callback = None
         self.authorize_everyone = authorize_everyone
         self._timeout_callback = None
-        self._result = DefaultViewResults.NONE
+        self._result = DefaultViewResults.NONE.value
 
     async def interaction_check(self, interaction):
         """
@@ -101,3 +101,15 @@ class View(ui.View):
         if self.timeout_callback is not None:
             await self.timeout_callback(self)
         await super().on_timeout()
+    
+    async def wait(self):
+        """
+        Override wait from base class
+        Wait for the view to be closed (or timeout)
+        """
+        timeout = await super().wait()
+
+        if self.result == DefaultViewResults.NONE.value:
+            self.result = ViewResult(0, is_success=not timeout)
+
+        return timeout

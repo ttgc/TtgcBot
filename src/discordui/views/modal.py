@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import discord.ui as ui
+from discordui.views import DefaultViewResults
 
 class Modal(ui.Modal):
     """Discord UI modal view wrapper"""
@@ -44,6 +45,7 @@ class Modal(ui.Modal):
         self.check_callback = None
         self._timeout_callback = None
         self._onsubmit = onsubmit
+        self._result = DefaultViewResults.CANCEL.value
 
     async def interaction_check(self, interaction):
         """
@@ -86,6 +88,11 @@ class Modal(ui.Modal):
         if self.onsubmit is not None:
             self._onsubmit = callback
 
+    @property
+    def result(self):
+        """Get modal result"""
+        return self._result
+
     async def on_submit(self, interaction, /):
         """
         Override on_submit from base class
@@ -95,10 +102,13 @@ class Modal(ui.Modal):
             interaction: the selection interaction that triggered the callback
         """
         await super().on_submit(interaction)
+
         if self.onsubmit is not None:
             await self.onsubmit(self, interaction)
         else:
             await interaction.response.defer()
+
+        self._result = DefaultViewResults.SUBMIT.value
         self.stop()
 
     async def on_timeout(self):
@@ -106,6 +116,9 @@ class Modal(ui.Modal):
         Override on_timeout from base class
         Triggered when the view has timed out
         """
+        await super().on_timeout()
+
         if self.timeout_callback is not None:
             await self.timeout_callback(self)
-        await super().on_timeout()
+
+        self._result = DefaultViewResults.NONE.value

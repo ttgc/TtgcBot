@@ -101,7 +101,7 @@ class View(ui.View):
         if self.timeout_callback is not None:
             await self.timeout_callback(self)
         await super().on_timeout()
-    
+
     async def wait(self):
         """
         Override wait from base class

@@ -312,3 +312,5 @@ dropdown_race_placeholder=Select race
 dropdown_symbiont_placeholder=Select symbiont
 dropdown_org_placeholder=Select affiliation
 none_m=None
+dropdown_charset_placeholder=Select property to set
+value_input=Enter value here

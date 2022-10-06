@@ -27,6 +27,7 @@ import discord
 import asyncio
 from core.commandparameters import GenericCommandParameters
 from utils.emojis import Emoji
+# from utils.taskqueue import TaskQueue
 from utils import async_lambda, async_conditional_lambda
 # from src.tools.Translator import *
 # from src.tools.Character import *
@@ -98,8 +99,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         timeout = await view.wait()
 
         if timeout:
-            await msg.delete()
-            await ctx.send(data.lang["timeout"], reference=ctx.message)
+            await msg.edit(content=data.lang["timeout"], view=None)
         elif view.result.is_success:
             self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
 
@@ -171,3 +171,60 @@ class CharacterCog(commands.Cog, name="Characters"):
         #     await ctx.channel.send(data.lang["unaffiliate"].format(char.name))
         # else:
         #     await ctx.channel.send(data.lang["affiliate"].format(char.name,affiliation))
+
+    #@commands.check(check_chanmj)
+    @character.command(name="set")
+    async def character_set(self, ctx, char): #(self, ctx, key)
+        """**PC/PJ only**"""
+        # async def _on_click(btn, interaction):
+        #     modal = ui.views.Modal(ctx, "/character set")
+        #     val_field = ui.TextInput(ctx, modal, "Value", placeholder="Enter value here", minlen=1, maxlen=4)
+        #     await interaction.response.send_modal(modal)
+            #await queue.queue(modal.wait, task_name='value')
+
+        # async def _on_select(dropdown, interaction):
+        #     btns_view = ui.views.ButtonGroup(ctx, 'operation', timeout=60)
+        #     btns_view.addrange(
+        #         ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=_on_click),
+        #         ui.DefaultButtons.SET.spawn(btns_view, onclick=_on_click),
+        #         ui.DefaultButtons.ADD.spawn(btns_view, onclick=_on_click)
+        #     )
+        #
+        #     await interaction.response.edit_message(view=btns_view)
+            #await queue.queue(btns_view.wait, task_name='operation')
+
+        #queue = TaskQueue()
+        data = await GenericCommandParameters.get_from_context(ctx)
+        modal = ui.views.Modal(ctx, "/character set", timeout=60)
+        val_field = ui.TextInput(ctx, modal, "Value", placeholder=data.lang["value_input"], minlen=1, maxlen=4)
+
+        btns_view = ui.views.ButtonGroup(ctx, 'operation', timeout=60)
+        on_click = async_lambda(lambda btn, i: i.response.send_modal(modal))
+        btns_view.addrange(
+            ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=on_click),
+            ui.DefaultButtons.SET.spawn(btns_view, onclick=on_click),
+            ui.DefaultButtons.ADD.spawn(btns_view, onclick=on_click)
+        )
+
+        settable = [data.lang["mental"], data.lang["karma"], data.lang["intuition"], data.lang["PV"], data.lang["PM"], data.lang["force"],
+                    data.lang["esprit"], data.lang["charisme"], data.lang["agilite"], data.lang["precision"], data.lang["chance"],
+                    data.lang["lp"], data.lang["dp"], data.lang["pilot_a"], data.lang["pilot_p"], data.lang["money"]]### HARDCODED - TO BE REMOVED
+        on_select = async_lambda(lambda d, i: i.response.edit_message(view=btns_view))
+        set_dd = ui.StandaloneDropdown(ctx, placeholder=data.lang["dropdown_charset_placeholder"], timeout=60, options=[i.capitalize() for i in settable], onselection=on_select)
+
+        msg = await ctx.send(view=set_dd.view, reference=ctx.message)
+        timeout = await set_dd.wait()
+
+        if not timeout:
+            timeout = await btns_view.wait()
+            if not timeout:
+                await msg.edit(content=Emoji.HOURGLASS, view=None)
+                timeout = await modal.wait()
+
+        if timeout:
+            await msg.edit(content=data.lang["timeout"], view=None)
+        else:
+            res = int(btns_view.result)
+            sign = '+' if res > 0 else '-' if res < 0 else ''
+            await msg.edit(content=data.lang["charset"].format(set_dd.value.lower()), view=None)
+            self.logger.info(f"set {set_dd.value} for {char} to {sign}{val_field.value}")

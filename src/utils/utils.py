@@ -17,23 +17,19 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
-from utils.decorators import singleton
-from setup.loglevel import LogLevel
 
-@singleton
-class Filters:
-    def __init__(self):
-        self += {
-            "Debug": lambda record: record.levelno == LogLevel.DEBUG.value,
-            "BotV3": lambda record: record.levelno == LogLevel.BOT_V3.value
-        }
+def async_lambda(callback):
+    async def _execute(*args, **kargs):
+        await callback(*args, **kargs)
 
-    def __iadd__(self, kargs):
-        if not isinstance(kargs, dict):
-            raise TypeError(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
-        return self
+    return _execute
 
-        for name, filter in kargs.items():
-            built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})
-            setattr(self, name, built_filter)
+def async_conditional_lambda(check_callback, if_callback, else_callback):
+    async def _execute(*args, **kwargs):
+        condition = await check_callback(*args, **kwargs)
+        if condition:
+            await if_callback(*args, **kwargs)
+        else:
+            await else_callback(*args, **kwargs)
+
+    return _execute

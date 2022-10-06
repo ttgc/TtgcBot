@@ -17,23 +17,19 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
-from utils.decorators import singleton
-from setup.loglevel import LogLevel
+"""
+discordui.views sub-package:
+    A short wrapper for discord.ui views of discord.py lib
 
-@singleton
-class Filters:
-    def __init__(self):
-        self += {
-            "Debug": lambda record: record.levelno == LogLevel.DEBUG.value,
-            "BotV3": lambda record: record.levelno == LogLevel.BOT_V3.value
-        }
+Contains:
+    View: Discord UI default view wrapper
+    ViewResult: Wrapper to determines a view's result
+    DefaultViewResults: Enumeration for default view's results
+    ButtonGroup: A standardized view for grouping multiple action buttons
+    Modal: Discord UI modal view wrapper
+"""
 
-    def __iadd__(self, kargs):
-        if not isinstance(kargs, dict):
-            raise TypeError(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
-        return self
-
-        for name, filter in kargs.items():
-            built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})
-            setattr(self, name, built_filter)
+from discordui.views.viewresult import ViewResult, DefaultViewResults
+from discordui.views.view import View
+from discordui.views.modal import Modal
+from discordui.views.buttongroup import ButtonGroup

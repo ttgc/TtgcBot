@@ -17,23 +17,4 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
-from utils.decorators import singleton
-from setup.loglevel import LogLevel
-
-@singleton
-class Filters:
-    def __init__(self):
-        self += {
-            "Debug": lambda record: record.levelno == LogLevel.DEBUG.value,
-            "BotV3": lambda record: record.levelno == LogLevel.BOT_V3.value
-        }
-
-    def __iadd__(self, kargs):
-        if not isinstance(kargs, dict):
-            raise TypeError(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
-        return self
-
-        for name, filter in kargs.items():
-            built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})
-            setattr(self, name, built_filter)
+from cogs.jdr.character import CharacterCog

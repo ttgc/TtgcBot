@@ -17,23 +17,18 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import logging
-from utils.decorators import singleton
-from setup.loglevel import LogLevel
+from enum import Enum
 
-@singleton
-class Filters:
-    def __init__(self):
-        self += {
-            "Debug": lambda record: record.levelno == LogLevel.DEBUG.value,
-            "BotV3": lambda record: record.levelno == LogLevel.BOT_V3.value
-        }
+class Emoji(Enum):
+    X = '❌'
+    WHITE_CHECK_MARK = '✅'
+    EQUAL='🟰'
+    PLUS='➕'
+    MINUS='➖'
 
-    def __iadd__(self, kargs):
-        if not isinstance(kargs, dict):
-            raise TypeError(f"Invalid type for added filter. Got {type(kargs)}. Expected: {type({})}")
-        return self
+    def __str__(self):
+        return self.value
 
-        for name, filter in kargs.items():
-            built_filter = type(f"{name}Filter", (logging.Filter,), {"filter": filter})
-            setattr(self, name, built_filter)
+    @classmethod
+    def from_str(cls, string):
+        return cls(string.strip(':').upper())

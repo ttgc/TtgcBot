@@ -67,5 +67,5 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
 
     @commands.check(check_botmanager)
     @commands.command()
-    async def geterrornbr(self,ctx):
+    async def geterrornbr(self, ctx):
         await ctx.message.author.send(f"Handled error since boot : {self.handlederror}")

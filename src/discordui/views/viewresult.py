@@ -38,6 +38,10 @@ class ViewResult:
         """Returns if the view's result is a success or not"""
         return self.is_success
 
+    def __int__(self):
+        """Returns the view's result value"""
+        return self.value
+
     @property
     def value(self):
         """Get the view's result value"""
@@ -58,8 +62,12 @@ class DefaultViewResults(Enum):
     SUBMIT = ViewResult(1)
 
     def __bool__(self):
-        """Get if the view's result is a success or not"""
+        """Return if the view's result is a success or not"""
         return self.value.is_success
+
+    def __int__(self):
+        """Return the view's result value"""
+        return self.result_code
 
     @property
     def result_code(self):

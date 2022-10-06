@@ -201,7 +201,6 @@ async def send_dropdown(ctx, *, placeholder=None, check_callback=None, timeout=N
     timeout = await dropdown.wait()
 
     if timeout:
-        await msg.delete()
-        await ctx.send(timeout_msg, reference=ctx.message)
+        await msg.edit(content=timeout_msg, view=None)
 
     return not timeout and dropdown.view.result.is_success, dropdown.value

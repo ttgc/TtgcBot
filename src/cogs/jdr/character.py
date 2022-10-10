@@ -187,9 +187,9 @@ class CharacterCog(commands.Cog, name="Characters"):
             ui.DefaultButtons.ADD.spawn(btns_view, onclick=on_click)
         )
 
-        settable = [data.lang["mental"], data.lang["karma"], data.lang["intuition"], data.lang["PV"], data.lang["PM"], data.lang["force"],
-                    data.lang["esprit"], data.lang["charisme"], data.lang["agilite"], data.lang["precision"], data.lang["chance"],
-                    data.lang["lp"], data.lang["dp"], data.lang["pilot_a"], data.lang["pilot_p"], data.lang["money"]]### HARDCODED - TO BE REMOVED
+        settable = [data.lang["mental"], data.lang["karma"], data.lang["intuition"], f'{data.lang["PV"]} max', f'{data.lang["PM"]} max',
+                    data.lang["force"], data.lang["esprit"], data.lang["charisme"], data.lang["agilite"], data.lang["precision"],
+                    data.lang["chance"], data.lang["lp"], data.lang["dp"], data.lang["pilot_a"], data.lang["pilot_p"], data.lang["money"]]### HARDCODED - TO BE REMOVED
         on_select = async_lambda(lambda d, i: i.response.edit_message(view=btns_view))
         set_dd = ui.StandaloneDropdown(ctx, placeholder=data.lang["dropdown_charset_placeholder"], timeout=60, options=[i.capitalize() for i in settable], onselection=on_select)
 
@@ -221,16 +221,16 @@ class CharacterCog(commands.Cog, name="Characters"):
                     newval = 100 - amount#char.mental - amount
             # char = char.charset('ment', newval)
 
-            embd = discord.Embed(title=char, description=data.lang["charset"].format(got, stat), colour=get_color('5B005B', 16))
+            embd = discord.Embed(title=char, description=data.lang["charset"].format(got, stat), colour=get_color('5B005B'))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+            embd.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             if op is not None:
-                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=amount, inline=True)
+                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=str(amount), inline=True)
             embd.add_field(name=data.lang["charset_current"].format(stat), value=str(newval), inline=True)
 
             await msg.edit(content=None, embed=embd, view=None)
-            self.logger.info(f"set {set_dd.value} for {char} to {newval}({op if op is not None else '='}{amount})")
+            self.logger.info(f"set {set_dd.value} for {char} to {newval} ({op if op is not None else '='}{amount})")
 
         # if char.dead:
         #     await ctx.message.channel.send(data.lang["is_dead"].format(char.name))

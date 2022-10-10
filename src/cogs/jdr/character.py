@@ -27,8 +27,7 @@ import discord
 import asyncio
 from core.commandparameters import GenericCommandParameters
 from utils.emojis import Emoji
-# from utils.taskqueue import TaskQueue
-from utils import async_lambda, async_conditional_lambda
+from utils import async_lambda, async_conditional_lambda, try_parse_int, get_color
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -176,24 +175,6 @@ class CharacterCog(commands.Cog, name="Characters"):
     @character.command(name="set")
     async def character_set(self, ctx, char): #(self, ctx, key)
         """**PC/PJ only**"""
-        # async def _on_click(btn, interaction):
-        #     modal = ui.views.Modal(ctx, "/character set")
-        #     val_field = ui.TextInput(ctx, modal, "Value", placeholder="Enter value here", minlen=1, maxlen=4)
-        #     await interaction.response.send_modal(modal)
-            #await queue.queue(modal.wait, task_name='value')
-
-        # async def _on_select(dropdown, interaction):
-        #     btns_view = ui.views.ButtonGroup(ctx, 'operation', timeout=60)
-        #     btns_view.addrange(
-        #         ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=_on_click),
-        #         ui.DefaultButtons.SET.spawn(btns_view, onclick=_on_click),
-        #         ui.DefaultButtons.ADD.spawn(btns_view, onclick=_on_click)
-        #     )
-        #
-        #     await interaction.response.edit_message(view=btns_view)
-            #await queue.queue(btns_view.wait, task_name='operation')
-
-        #queue = TaskQueue()
         data = await GenericCommandParameters.get_from_context(ctx)
         modal = ui.views.Modal(ctx, "/character set", timeout=60)
         val_field = ui.TextInput(ctx, modal, "Value", placeholder=data.lang["value_input"], minlen=1, maxlen=4)
@@ -225,6 +206,49 @@ class CharacterCog(commands.Cog, name="Characters"):
             await msg.edit(content=data.lang["timeout"], view=None)
         else:
             res = int(btns_view.result)
-            sign = '+' if res > 0 else '-' if res < 0 else ''
-            await msg.edit(content=data.lang["charset"].format(set_dd.value.lower()), view=None)
-            self.logger.info(f"set {set_dd.value} for {char} to {sign}{val_field.value}")
+            op = '+' if res > 0 else '-' if res < 0 else None
+            got = data.lang["new_value"]
+            stat = set_dd.value.lower()
+            amount = try_parse_int(val_field.value)
+            newval = amount
+
+            if op is not None:
+                if op == '+':
+                    got = data.lang["recovered"]
+                    newval += 100#char.mental
+                else:
+                    got = data.lang["lost"]
+                    newval = 100 - amount#char.mental - amount
+            # char = char.charset('ment', newval)
+
+            embd = discord.Embed(title=char, description=data.lang["charset"].format(got, stat), colour=get_color('5B005B', 16))
+            embd.set_footer(text="The Tale of Great Cosmos")
+            embd.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+            embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
+            if op is not None:
+                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=amount, inline=True)
+            embd.add_field(name=data.lang["charset_current"].format(stat), value=str(newval), inline=True)
+
+            await msg.edit(content=None, embed=embd, view=None)
+            self.logger.info(f"set {set_dd.value} for {char} to {newval}({op if op is not None else '='}{amount})")
+
+        # if char.dead:
+        #     await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
+        # else:
+        #     got = data.lang["new_value"]
+        #     newval = amount
+        #     if op is not None:
+        #         if op == "+":
+        #             got = data.lang["recovered"]
+        #             newval += char.mental
+        #         else:
+        #             got = data.lang["lost"]
+        #             newval = char.mental - amount
+        #     char = char.charset('ment',newval)
+        #     embd = discord.Embed(title=char.name,description=data.lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
+        #     embd.set_footer(text="The Tale of Great Cosmos")
+        #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        #     embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
+        #     if op is not None: embd.add_field(name=data.lang["mental_amount"].format(got),value=amount,inline=True)
+        #     embd.add_field(name=data.lang["current_mental"],value=str(char.mental),inline=True)
+        #     await ctx.message.channel.send(embed=embd)

@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import aiohttp
-from src.exceptions.exceptions import *
+from exceptions import HTTPException
 
 class HTTP:
     def __init__(self, url, status, result=None, raiseClientException=False, raiseServerException=True):
@@ -79,20 +79,20 @@ class HTTP:
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 if body:
-                    async with session.post(url, json=body, headers=headers, ssl=False) as r:
+                    async with session.put(url, json=body, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, headers=headers, ssl=False) as r:
+                    async with session.put(url, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
             else:
                 if body:
-                    async with session.post(url, json=body, ssl=False) as r:
+                    async with session.put(url, json=body, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, ssl=False) as r:
+                    async with session.put(url, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
 
@@ -101,19 +101,19 @@ class HTTP:
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 if body:
-                    async with session.post(url, json=body, headers=headers, ssl=False) as r:
+                    async with session.delete(url, json=body, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, headers=headers, ssl=False) as r:
+                    async with session.delete(url, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
             else:
                 if body:
-                    async with session.post(url, json=body, ssl=False) as r:
+                    async with session.delete(url, json=body, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, ssl=False) as r:
+                    async with session.delete(url, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res

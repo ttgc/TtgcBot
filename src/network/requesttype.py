@@ -17,17 +17,10 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discord.ext import commands
-from network import HTTPErrorCode
+from enum import Enum
 
-class HTTPException(commands.CommandError):
-    def __init__(self, errcode, message=None):
-        self.errcode = errcode
-        self.message = message if message else "No more details provided"
-        super().__init__(str(self))
-
-    def __str__(self):
-        return "HTTPException: Error Code {} ({})".format(self.errcode, self.message)
-
-    def parse(self, lang):
-        return HTTPErrorCode.get_code_from_int(self.errcode).toString(lang, self.message)
+class RequestType(Enum):
+    GET=0
+    POST=1
+    PUT=2
+    DELETE=3

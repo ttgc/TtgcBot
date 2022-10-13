@@ -29,7 +29,7 @@ class Item:
         self.weight = weight
 
     def __str__(self):
-        return self.name+" ("+self.weight+")"
+        return f"{self.name} ({self.weight})"
 
 
 class Inventory:
@@ -49,7 +49,7 @@ class Inventory:
 
     def __str__(self):
         itemstring = []
-        for i,k in self.items.items():
+        for i, k in self.items.items():
             itemstring.append("{}{}".format(i.name, " x{}".format(str(k)) if k > 1 else ""))
         return ", ".join(itemstring)
 
@@ -90,7 +90,7 @@ class Inventory:
     @deprecated("Old feature using DatabaseManager")
     def _reload(self):
         db = Database()
-        cur = db.execute("SELECT size_,size_max FROM inventaire WHERE id_inventory = %(idinv)s;",idinv=self.ID)
+        cur = db.execute("SELECT size_,size_max FROM inventaire WHERE id_inventory = %(idinv)s;", idinv=self.ID)
         if cur is None:
             db.close(True)
             raise DatabaseException("unable to reload the inventory")
@@ -100,28 +100,28 @@ class Inventory:
         self.maxweight = info[1]
 
     def __add__(self, it):
-        return self.additem(it,1)
+        return self.additem(it, 1)
 
     def __iadd__(self, it):
-        return self.additem(it,1)
+        return self.additem(it, 1)
 
     def __sub__(self, it):
-        return self.rmitem(it,1)
+        return self.rmitem(it, 1)
 
     def __isub__(self, it):
-        return self.rmitem(it,1)
+        return self.rmitem(it, 1)
 
     @deprecated("Old feature using DatabaseManager")
     def additem(self, it, qte):
         db = Database()
-        db.call("additem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte,poids=it.weight)
+        db.call("additem", dbkey=self.character.key, idserv=self.jdr.server, idchan=self.jdr.channel, itname=it.name, quantite=qte, poids=it.weight)
         db.close()
         self.loadfromdb(self.ID)
 
     @deprecated("Old feature using DatabaseManager")
     def rmitem(self, it, qte):
         db = Database()
-        db.call("removeitem",dbkey=self.character.key,idserv=self.jdr.server,idchan=self.jdr.channel,itname=it.name,quantite=qte)
+        db.call("removeitem", dbkey=self.character.key, idserv=self.jdr.server, idchan=self.jdr.channel, itname=it.name, quantite=qte)
         db.close()
         self.loadfromdb(self.ID)
 

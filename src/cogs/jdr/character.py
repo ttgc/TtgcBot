@@ -23,10 +23,9 @@ from discord.ext import commands
 # import logging,asyncio
 # import functools
 # import concurrent.futures
-import discord
+# import discord
 import asyncio
 from core.commandparameters import GenericCommandParameters
-from utils.emojis import Emoji
 from utils import async_lambda, async_conditional_lambda
 # from src.tools.Translator import *
 # from src.tools.Character import *

@@ -54,7 +54,7 @@ class Pet:
     def api(self):
         return self.jdr.api if self.is_bound() else None
 
-    def bind(self,jdr):
+    def bind(self, jdr):
         self.jdr = jdr
 
     def is_bound(self, raise_error=False):
@@ -92,7 +92,7 @@ class Pet:
             raise InternalCommandError("Invalid tag for petset command")
 
         data = {tag: value}
-        info = await self._internal_petset(requester, **data)
+        await self._internal_petset(requester, **data)
 
         if tag == "name": self.name = value
         elif tag == "pv": self.PVmax, self.PV = value, min(self.PV, value)
@@ -115,7 +115,7 @@ class Pet:
             raise InternalCommandError("Invalid tag for pet update command")
 
         data = {tag: value}
-        info = await self._internal_update(requester, **data)
+        await self._internal_update(requester, **data)
 
         if tag == "pv": self.PV = min(self.PVmax, self.PV + value)
         elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
@@ -146,7 +146,7 @@ class Pet:
         else:
             self.mod = Gamemods.OFFENSIVE if self.mod == Gamemods.DEFENSIVE else Gamemods.DEFENSIVE
 
-        info = await self._internal_update(requester, gamemod=str(self.mod))
+        await self._internal_update(requester, gamemod=str(self.mod))
 
     async def lvlup(self, requester):
         self.is_bound(True)

@@ -17,8 +17,11 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from exceptions.deprecated import DeprecatedException
-from exceptions.funcexception import AlreadyCalledFunctionException
-from exceptions.managerexception import ManagerException, DatabaseException, APIException
-from exceptions.networkexception import HTTPException
-from exceptions.other import InternalCommandError, NotBoundException
+
+class Extension:
+    def __init__(self, universe, world):
+        self.universe = universe
+        self.world = world
+
+    def __str__(self):
+        return "{} : {}".format(self.universe, self.world)

@@ -89,7 +89,7 @@ class Character:
     def api(self):
         return self.jdr.api if self.is_bound() else None
 
-    def bind(self,jdr):
+    def bind(self, jdr):
         self.inventory.bind(self, jdr)
         self.jdr = jdr
 
@@ -142,7 +142,7 @@ class Character:
             raise InternalCommandError("Invalid tag for charset command")
 
         data = {tag: value}
-        info = await self._internal_charset(requester, **data)
+        await self._internal_charset(requester, **data)
 
         if tag == "name": self.name = value
         elif tag == "pv": self.PVmax, self.PV = value, min(self.PV, value)
@@ -170,7 +170,7 @@ class Character:
             raise InternalCommandError("Invalid tag for char update command")
 
         data = {tag: value}
-        info = await self._internal_update(requester, **data)
+        await self._internal_update(requester, **data)
 
         if tag == "pv": self.PV = min(self.PVmax, self.PV + value)
         elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
@@ -183,12 +183,12 @@ class Character:
     async def makehybrid(self, race, requester, allowOverride=False):
         if allowOverride or self.hybrid_race is None:
             self.is_bound(True)
-            info = await self._internal_charset(requester, hybrid=race)
+            await self._internal_charset(requester, hybrid=race)
             self.hybrid_race = race
 
     async def setsymbiont(self, symbiont, requester):
         self.is_bound(True)
-        info = await self._internal_charset(requester, symbiont=symbiont)
+        await self._internal_charset(requester, symbiont=symbiont)
         self.symbiont = symbiont
 
     @deprecated("Old feature using DatabaseManager")
@@ -216,7 +216,7 @@ class Character:
         else:
             self.mod = Gamemods.OFFENSIVE if self.mod == Gamemods.DEFENSIVE else Gamemods.DEFENSIVE
 
-        info = await self._internal_update(requester, gamemod=str(self.mod))
+        await self._internal_update(requester, gamemod=str(self.mod))
 
     async def link(self, memberid, requester, override=False, select=True):
         self.is_bound(True)
@@ -313,7 +313,7 @@ class Character:
         self.is_bound(True)
         finalbody = {"key": key, "data": body}
 
-        info = await self.api(RequestType.POST, "Pet/create/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key, key),
+        info = await self.api(RequestType.POST, "Pet/create/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
             resource="SRV://{}/{}/{}/{}".format(self.jdr.server, self.jdr._initialChannelID, self.key, key), requesterID=requester, body=finalbody)
 
         if info.status // 100 != 2:
@@ -334,13 +334,10 @@ class Character:
         if info.status // 100 != 2:
             raise APIException("Pet delete error", srv=self.jdr.server, channel=self.jdr.channel, character=self.key, petkey=key, code=info.status)
 
-        del(self.pet[key])
+        del self.pet[key]
         return True
 
     async def assign_skill(self, requester, *skls):
-        for i in self.skills:
-            if sk.ID == i.ID: return False
-
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Skills/assign/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),
@@ -366,7 +363,7 @@ class Character:
     async def xpup(self, amount, requester, allowlevelup=False, curve=None, *curveParameters):
         self.is_bound(True)
         xpdata = {"initial": amount, "curve": curve, "parameters": list(curveParameters), "earnlevel": allowlevelup}
-        info = await self._internal_update(requester, xp=xpdata)
+        await self._internal_update(requester, xp=xpdata)
 
         if curve is None:
             self.xp += min(0, amount)
@@ -381,7 +378,7 @@ class Character:
 
     async def affiliate(self, org, requester):
         self.is_bound(True)
-        info = await self._internal_charset(requester, affiliation=org)
+        await self._internal_charset(requester, affiliation=org)
         self.affiliated_with = org
 
     async def get_pet(self, petkey):

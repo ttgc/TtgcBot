@@ -27,6 +27,7 @@ from models.pet import Pet
 from models.skills import Skill
 from models.character import Character
 from models.dbserver import DBServer
+from models.enums import Gamemods
 
 class DBJDR:
     async def __init__(self, srvid, channelid, requester, requesterRole):

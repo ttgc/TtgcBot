@@ -24,8 +24,8 @@ jobs:
       run: |
         pip install flake8
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=src/deprecated,TtgcBot.py --ignore=E265,E266,E302,E305,E306,E501,E261,E262,E701,F401,E731,E704 --output-file=warnings.log
-        flake8 TtgcBot.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=E265,E266,E302,E305,E306,E501,E261,E262,E701,E402,E731,E704 --output-file=ttgcbot.log
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=src/deprecated,TtgcBot.py --ignore=E265,E266,E302,E305,E306,E501,E261,E262,E701,F401,E731,E704,E128,C901 --output-file=warnings.log
+        flake8 TtgcBot.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=E265,E266,E302,E305,E306,E501,E261,E262,E701,E402,E731,E704,E128,C901 --output-file=ttgcbot.log
         flake8 . --count --select=F401 --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=src/deprecated,TtgcBot.py,*/__init__.py --output-file=F401.log
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude src/deprecated --output-file=errors.log

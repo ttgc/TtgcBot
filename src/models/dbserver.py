@@ -20,6 +20,8 @@
 from discord.ext import commands
 from datahandler.api import APIManager
 from exception import APIException
+from network import RequestType
+from models.dbjdr import DBJDR
 
 class DBServer:
     async def __init__(self, ID):
@@ -87,11 +89,11 @@ class DBServer:
         }
 
         info = await self.api(RequestType.PUT, "JDR/create",
-            resource="SRV://{}//{}".format(self.ID, channelid), requesterID=mjid, roleID=requesterRole, body=reqbody)
+            resource="SRV://{}//{}".format(self.ID, channels[0]), requesterID=mjid, roleID=requesterRole, body=reqbody)
 
         if info.status // 100 != 2:
             raise APIException("JDR create error", srv=self.ID, channel=channels[0], code=info.status)
-        return self.getJDR(channelid, mjid, requesterRole)
+        return self.getJDR(channels[0], mjid, requesterRole)
 
     @classmethod
     async def addserver(cl, server):

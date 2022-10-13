@@ -20,6 +20,7 @@
 from enum import Enum
 from datahandler.api import APIManager
 from exception import APIException
+from network import RequestType
 
 class MemberPermGrantable(Enum):
     MANAGER = "manager"
@@ -85,7 +86,7 @@ class DBMember:
         info = await api(RequestType.PUT, "Member/{}/setlang/{}".format(memberid, lang), resource="MEMBER://{}".format(memberid), requesterID=memberid)
 
         if info.status // 100 != 2:
-            raise APIException("Member setlang error", member=memberlang, lang=lang, code=info.status)
+            raise APIException("Member setlang error", member=memberid, lang=lang, code=info.status)
 
     @classmethod
     async def getuserlang(cl, memberid):

@@ -20,6 +20,7 @@
 from datahandler.database import Database
 from utils.decorators import deprecated
 from exceptions import DatabaseException
+from models.skills import Skill
 
 @deprecated("Old feature using DatabaseManager")
 def retrieveCharacterOrigins(cl):
@@ -30,7 +31,7 @@ def retrieveCharacterOrigins(cl):
         raise DatabaseException("Class ID not found")
     row = cur.fetchone()
     db.close()
-    return row[1],row[0]
+    return row[1], row[0]
 
 @deprecated("Old feature using DatabaseManager")
 def retrieveClassID(rcid,clname):
@@ -125,12 +126,12 @@ def organizationExists(orgname):
 @deprecated("Old feature using DatabaseManager")
 def retrieveOrganizationSkill(orgname):
     db = Database()
-    cur = db.call("get_orgskills",org=orgname)
+    cur = db.call("get_orgskills", org=orgname)
     if cur is None:
         db.close()
         return []
     ls = []
-    for i in row:
+    for i in cur:
         ls.append(Skill(i[0]))
     db.close()
     return ls
@@ -143,7 +144,7 @@ def retrieveRaceSkill(racename):
         db.close()
         return []
     ls = []
-    for i in row:
+    for i in cur:
         ls.append(Skill(i[0]))
     db.close()
     return ls

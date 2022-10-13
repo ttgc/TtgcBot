@@ -20,6 +20,7 @@
 from datahandler.api import APIManager
 from exceptions import APIException
 from models.extension import Extension
+from network import RequestType
 
 class Skill:
     def __init__(self, ID, name, descr, origin, extension):
@@ -42,7 +43,7 @@ class Skill:
 
         if info.status == 404: return []
         if info.status // 100 != 2:
-            raise APIException("Skill info get error", srv=srv, channel=channel, name=skname, origin=origin, universe=universe, world=world, code=info.status)
+            raise APIException("Skill info get error", name=skname, origin=origin, universe=universe, world=world, code=info.status)
 
         skls = []
         for i in info.result.get("skills", [info.result]):

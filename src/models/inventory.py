@@ -21,6 +21,7 @@ from datahandler.database import Database
 from datahandler.api import APIManager
 from utils.decorators import deprecated
 from exceptions import APIException, DatabaseException
+from network import RequestType
 
 class Item:
     def __init__(self, name, weight):

@@ -38,14 +38,14 @@ class HTTP:
                 res = await r.json()
             else:
                 res = await r.text()
-        return cl(url, r.status, res)
+        return cl(r.url, r.status, res)
 
     @classmethod
     async def get(cl, url, *, query={}, headers={}, jsonResult=True):
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 if len(query) > 0:
-                    async with session.get(url, params=kwargs, headers=headers, ssl=False) as r:
+                    async with session.get(url, params=query, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, jsonResult=jsonResult)
                         return res
                 else:
@@ -54,7 +54,7 @@ class HTTP:
                         return res
             else:
                 if len(query) > 0:
-                    async with session.get(url, params=kwargs, ssl=False) as r:
+                    async with session.get(url, params=query, ssl=False) as r:
                         res = await cl._processResult(r, jsonResult=jsonResult)
                         return res
                 else:

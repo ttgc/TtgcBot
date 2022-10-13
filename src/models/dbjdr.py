@@ -19,9 +19,14 @@
 
 from utils.decorators import deprecated
 from datahandler.api import APIManager
+from datahandler.cache import DataCache
 from exception import APIException
-# import src.tools.Character as ch
-# import src.tools.CharacterUtils as chutil
+from network import RequestType
+from models.inventory import Inventory
+from models.pet import Pet
+from models.skills import Skill
+from models.character import Character
+from models.dbserver import DBServer
 
 class DBJDR:
     async def __init__(self, srvid, channelid, requester, requesterRole):
@@ -186,12 +191,12 @@ class DBJDR:
             rawchar.get("Fail", 0), rawchar.get("CriticFail", 0), rawchar.get("SuperCriticFail", 0)
         ]
 
-        gm = ch.Character.gm_map_chartoint[rawchar.get("Gm", "offensive").lower()]
-        gmdefault = ch.Character.gm_map_chartoint[rawchar.get("GmDefault", "offensive").lower()]
-        inv = chutil.Inventory.char_loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, rawchar.get("MaxInvsize", 20))
-        pets = ch.Pet.listpet(self.server, self.channel, charkey, self.requester, self.requesterRole, api=self.api, nologin=True)
-        skls = chutil.Skill.loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, api=self.api, nologin=True)
-        char = ch.Character(charkey=charkey, name=rawchar.get("Nom", charkey),
+        gm = int(Gamemods.from_str(rawchar.get("Gm", "offensive").lower()))
+        gmdefault = int(Gamemods.from_str(rawchar.get("GmDefault", "offensive").lower()))
+        inv = Inventory.char_loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, rawchar.get("MaxInvsize", 20))
+        pets = Pet.listpet(self.server, self.channel, charkey, self.requester, self.requesterRole, api=self.api, nologin=True)
+        skls = Skill.loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, api=self.api, nologin=True)
+        char = Character(charkey=charkey, name=rawchar.get("Nom", charkey),
                             lvl=rawchar.get("Lvl", 1), PV=rawchar.get("Pv", 1), PVm=rawchar.get("Pvmax", 1), PM=rawchar.get("Pm", 1),
                             PMm=rawchar.get("Pmmax", 1), force=rawchar.get("Strength", 50), esprit=rawchar.get("Spirit", 50),
                             charisme=rawchar.get("Charisma", 50), furtivite=rawchar.get("Agility", 50), karma=rawchar.get("Karma", 0),
@@ -263,7 +268,7 @@ class DBJDR:
             resource="SRV://{}/{}/finalize".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
 
         if info.status // 100 != 2:
-            raise APIException("Finalize set error", srv=self.server, channel=self.channel, fields=fields, code=info.status)
+            raise APIException("Finalize set error", srv=self.server, channel=self.channel, code=info.status)
 
         ls = []
         for i in info.result.get("fields", []):

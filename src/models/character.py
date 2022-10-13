@@ -19,10 +19,12 @@
 
 from exceptions import NotBoundException, APIException, InternalCommandError
 from utils.decorators import deprecated
+from network import RequestType
 from models.enums import Gamemods, TagList
 from models.pet import Pet
 from models.skills import Skill
 from models.deprecated import retrieveRaceName, retrieveSymbiontName # TO BE REMOVED
+from models.inventory import Inventory
 
 class Character:
     """Character class"""
@@ -154,7 +156,7 @@ class Character:
         elif tag == "intuition": self.intuition = max(1, min(6, value))
         elif tag == "mental": self.mental = value
         elif tag == "karma": self.default_karma = max(-10, min(10, value))
-        elif tag == "gamemod": self.default_mod = Gamemods.from_charcode(value)
+        elif tag == "gamemod": self.default_mod = Gamemods.from_str(value)
         elif tag == "money": self.money = min(0, value)
         elif tag == "pilot":
             self.astral_pilot = max(-1, value.get("astral", self.astral_pilot))
@@ -350,7 +352,7 @@ class Character:
         self.skills = Skill.loadfromdb(self.jdr.server, self.jdr.channel, self.key, self.requester, self.jdr.requesterRole, api=self.api, nologin=True)
         return True
 
-    async def kill(self):
+    async def kill(self, requester):
         self.is_bound(True)
 
         info = await self.api(RequestType.PUT, "Character/kill/{}/{}/{}".format(self.jdr.server, self.jdr.channel, self.key),

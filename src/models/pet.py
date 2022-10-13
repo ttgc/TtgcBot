@@ -20,6 +20,7 @@
 from datahandler.api import APIManager
 from exceptions import NotBoundException, APIException, InternalCommandError
 from utils.decorators import deprecated
+from network import RequestType
 from models.enums import Gamemods, TagList
 
 class Pet:
@@ -103,7 +104,7 @@ class Pet:
         elif tag == "precision": self.precision = max(1, min(100, value))
         elif tag == "luck": self.luck = max(1, min(100, value))
         elif tag == "instinct": self.instinct = max(1, min(6, value))
-        elif tag == "gamemod": self.default_mod = Gamemods.from_charcode(value)
+        elif tag == "gamemod": self.default_mod = Gamemods.from_str(value)
         elif tag == "species": self.espece = value
 
     async def update(self, tag, value, requester):
@@ -165,7 +166,7 @@ class Pet:
             nologin = False
 
         info = await api(RequestType.GET, "Pet/{}/{}/{}/{}".format(srv, channel, charkey, petkey),
-            resource="SRV://{}/{}/{}/{}".format(srv, channel, charkey, petkey), requesterID=requester, roleID=self.requesterRole, disable_autologin=nologin)
+            resource="SRV://{}/{}/{}/{}".format(srv, channel, charkey, petkey), requesterID=requester, roleID=requesterRole, disable_autologin=nologin)
 
         if info.status // 100 != 2:
             raise APIException("Pet get error", srv=srv, channel=channel, character=charkey, petkey=petkey, code=info.status)
@@ -175,8 +176,8 @@ class Pet:
             info.result.get("Succes", 0), info.result.get("Fail", 0), info.result.get("CriticFail", 0), info.result.get("SuperCriticFail", 0)
         ]
 
-        gm = ch.Character.gm_map_chartoint[info.result.get("Gm", "offensive").lower()]
-        gmdefault = ch.Character.gm_map_chartoint[info.result.get("GmDefault", "offensive").lower()]
+        gm = int(Gamemods.from_str(info.result.get("Gm", "offensive").lower()))
+        gmdefault = int(Gamemods.from_str(info.result.get("GmDefault", "offensive").lower()))
         return cl(petkey=petkey, charkey=charkey, name=info.result.get("Nom", "unknwon"), espece=info.result.get("Species", "unknown"),
                     PVm=info.result.get("Pvmax", 1), PMm=info.result.get("Pmmax", 1), PV=info.result.get("PV", 1), PM=info.result.get("PM", 1),
                     force=info.result.get("Strength", 50), esprit=info.result.get("Spirit", 50), charisme=info.result.get("Charisma", 50),

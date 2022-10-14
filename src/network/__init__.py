@@ -19,4 +19,3 @@
 
 from network.httprequest import HTTP
 from network.requesttype import RequestType
-from network.statuscode import HTTPErrorCode

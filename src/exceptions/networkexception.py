@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from discord.ext import commands
-from network import HTTPErrorCode
+from exceptions.httpstatus import HTTPErrorCode
 
 class HTTPException(commands.CommandError):
     def __init__(self, errcode, message=None):

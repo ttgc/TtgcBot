@@ -41,7 +41,7 @@ class APIManager:
     async def login(self, requesterID=None, roleID=None, *endpoints):
         if self.logged: self.logout()
         timestamp = time.gmtime()
-        tohash = "{}-{}-{0:02d}-{1:02d}-{2:04d}".format(self.id, self.appname, timestamp.tm_mday, timestamp.tm_mon, timestamp.tm_year)
+        tohash = f"{self.id}-{self.appname}-{timestamp.tm_mday:02d}-{timestamp.tm_mon:02d}-{timestamp.tm_year:04d}"
         hash = base64.b64encode(hashlib.sha256(tohash.encode()).digest())
         body = {"app": {"id": self.id, "name": self.appname, "hash": hash.decode(), "pwd": self._pwd}, "endpoints": list(endpoints)}
         if requesterID is not None: body["member"] = requesterID
@@ -72,7 +72,7 @@ class APIManager:
         result = None
 
         if reqType == RequestType.GET:
-             result = await HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult)
+            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult)
         if reqType == RequestType.POST:
             result = await HTTP.post("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.PUT:

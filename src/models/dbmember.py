@@ -35,7 +35,7 @@ class DBMember:
         if info.status // 100 != 2:
             raise APIException("Unable to find the requested member", member=self.ID, code=info.status)
 
-        self.perm = info.result.get("permissions", "None")
+        self.perm = info.result.get("permissions", None)
         if self.perm == "None": self.perm = None
         self.lang = info.result.get("language", {}).get("langcode", "EN")
         self.fulllangname = info.result.get("language", {}).get("name", "English") if self.lang != "EN" else "English"

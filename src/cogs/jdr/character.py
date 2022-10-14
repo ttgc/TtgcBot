@@ -27,6 +27,7 @@ from discord.ext import commands
 import asyncio
 from core.commandparameters import GenericCommandParameters
 from utils import async_lambda, async_conditional_lambda
+from utils.checks import check_jdrchannel, check_haschar, check_chanmj
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -43,11 +44,11 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.bot = bot
         self.logger = logger
 
-    #@commands.check(check_jdrchannel)
+    @commands.check(check_jdrchannel)
     @commands.hybrid_group(invoke_without_command=False, aliases=['char'])
     async def character(self, ctx): pass
 
-    #@commands.check(check_haschar)
+    @commands.check(check_haschar)
     @commands.cooldown(1, 5, commands.BucketType.user)
     @character.command(name="select", aliases=["switch"])
     async def character_select(self, ctx): #(self, ctx, key)
@@ -68,7 +69,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         if success:
             self.logger.info(selection)
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="link", aliases=["assign"])
     async def character_link(self, ctx):
         """**GM/MJ only**
@@ -117,7 +118,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         #
         # await ctx.channel.send(data.lang["charlink"].format(character.name, player.mention))
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])
     async def character_hybrid(self, ctx, char):#: CharacterConverter, *, race: RaceConverter):
         """**GM/MJ only**
@@ -133,7 +134,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         # self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
         # await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])
     async def character_symbiont(self, ctx, char):#: CharacterConverter, *, symbiont: typing.Optional[SymbiontConverter] = None):
         """**GM/MJ only**
@@ -151,7 +152,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         # else:
         #     await ctx.message.channel.send(data.lang["char_symbiont"].format(char.name, char.symbiont))
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="affiliation", aliases=["organization", "organisation", "org"])
     async def character_affiliation(self, ctx, char):#: CharacterConverter, affiliation: typing.Optional[AffiliationConverter] = None):
         """**GM/MJ only**

@@ -31,6 +31,7 @@ from setup.inits import init
 from setup.logconfig import get_logger
 from setup.loglevel import LogLevel
 from setup.config import Config
+from utils.decorators import InternalDecoratorLoggerStorage
 from utils.translator import get_lang, lang_exist
 # from src.utils.inits import *
 # from src.utils.config import *
@@ -213,6 +214,7 @@ async def on_resumed():
 def main():
     logger = init()
     logger.info("Starting TtgcBot 3.0")
+    InternalDecoratorLoggerStorage().logger = logger.warning
     client.run(Config()["token"])
 
 # Launch the bot

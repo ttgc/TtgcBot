@@ -18,7 +18,6 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from exceptions import DeprecatedException, AlreadyCalledFunctionException
-from setup.logconfig import get_logger
 
 def singleton(cl):
     instances = {}
@@ -42,7 +41,7 @@ def call_once(raise_error=False):
 
 def deprecated(reason, *, raise_error=True, logger=None):
     def deprecated_decorator(fct):
-        logMethod = logger if logger else get_logger().warn
+        logMethod = logger if logger else _InternalLoggerStorage().logger
         logMethod(f"Deprecated function/class: {fct}\nReason: {reason}")
 
         def deprecated_call(*args, **kwargs):
@@ -53,3 +52,8 @@ def deprecated(reason, *, raise_error=True, logger=None):
             return fct(*args, **kwargs)
         return deprecated_call
     return deprecated_decorator
+
+@singleton
+class InternalDecoratorLoggerStorage:
+    def __init__(self):
+        self.logger = print

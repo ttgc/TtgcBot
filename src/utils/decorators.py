@@ -41,7 +41,7 @@ def call_once(raise_error=False):
 
 def deprecated(reason, *, raise_error=True, logger=None):
     def deprecated_decorator(fct):
-        logMethod = logger if logger else _InternalLoggerStorage().logger
+        logMethod = logger if logger else InternalDecoratorLoggerStorage().logger
         logMethod(f"Deprecated function/class: {fct}\nReason: {reason}")
 
         def deprecated_call(*args, **kwargs):

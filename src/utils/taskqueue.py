@@ -45,7 +45,7 @@ class TaskQueue:
         to_wait = await self._get_task(task_name)
 
         if to_wait is not None:
-            if and not task.done() and not task.cancelled():
+            if not to_wait.done() and not to_wait.cancelled():
                 await to_wait
             return to_wait.result()
         return default_return_value

@@ -74,9 +74,9 @@ class GenericCommandParameters:
                         self._char = await self.jdr.get_character(i.get("charkey", ""))
                         break
 
-            role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
+            role = discord.utils.get(ctx.author.roles, id=self.srv.mjrole)
             if role is None:
-                role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
+                role = discord.utils.get(ctx.author.roles, id=self.srv.adminrole)
 
             self._jdrlist = await self.srv.jdrlist(ctx.author.id, role.id if role is not None else None)
             if is_jdrchannel(self._jdrlist, ctx.channel.id):

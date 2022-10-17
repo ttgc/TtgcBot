@@ -24,23 +24,23 @@ import discord.utils
 
 async def is_blacklisted(ID):
     try: member = await DBMember(ID)
-    except: return False, ""
+    except Exception: return False, ""
     bl, rs = member.is_blacklisted()
     return bl, rs
 
 async def is_botmanager(ID):
     try: member = await DBMember(ID)
-    except: return False
+    except Exception: return False
     return member.is_manager()
 
 async def is_premium(ID):
     try: member = await DBMember(ID)
-    except: return False
+    except Exception: return False
     return member.is_premium()
 
 async def is_owner(ID):
     try: member = await DBMember(ID)
-    except: return False
+    except Exception: return False
     return member.is_owner()
 
 def is_jdrchannel(jdrlist, channelid):
@@ -80,6 +80,7 @@ async def check_chanmj(ctx):
     jdrchannel = await check_jdrchannel(ctx)
 
     if jdrchannel:
+        srv = await DBServer(ctx.guild.id)
         role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
         if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
 

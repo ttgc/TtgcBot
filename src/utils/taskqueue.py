@@ -26,7 +26,6 @@ class TaskQueue:
 
     async def queue(self, coroutine, *, task_name=None):
         async with self._lock:
-            index = len(self._queue)
             task = asyncio.create_task(coroutine(), name=task_name)
             self._queue.add(task)
 

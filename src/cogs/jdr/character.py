@@ -26,8 +26,10 @@ from discord.ext import commands
 # import discord
 import asyncio
 from core.commandparameters import GenericCommandParameters
+from setup.loglevel import LogLevel
 from utils import async_lambda, async_conditional_lambda
 from utils.checks import check_jdrchannel, check_haschar, check_chanmj
+from models import Character
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -54,20 +56,23 @@ class CharacterCog(commands.Cog, name="Characters"):
     async def character_select(self, ctx): #(self, ctx, key)
         """**PC/PJ only**
         Select a character from all characters linked to you"""
-        # data = await GenericCommandParameters(ctx)
-        # for i in self.charbase.get("linked", []):
-        #     if i.get("charkey") == key and i.get("member") == ctx.author.id:
-        #         await i.select(ctx.author.id)
-        #         self.logger.log(logging.DEBUG+1,"/charselect (%s -> %s) in channel %d of server %d", data.char.key, i.key, ctx.channel.id, ctx.guild.id)
-        #         await ctx.channel.send(data.lang["charselect"].format(data.char.key, i.key))
-        #         return
-        # await ctx.channel.send(data.lang["charnotexist"].format(key))
         data = await GenericCommandParameters.get_from_context(ctx)
-        chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_char_placeholder"], timeout=60, options=chars, select_msg=data.lang["charselect"], timeout_msg=data.lang["timeout"], format_args_before=["undefined"])
+        current_char = await data.char
+        chars = []
 
-        if success:
-            self.logger.info(selection)
+        async for i in data.charbase.charlist.get("linked", []):
+            if i.get("member", -1) == ctx.author.id:
+                chars.append(i.get("charkey"))
+
+        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_char_placeholder"], timeout=60, options=chars, select_msg=data.lang["charselect"], timeout_msg=data.lang["timeout"], format_args_before=[current_char.key])
+
+        if success and selection != current_char.key:
+            jdr = await data.jdr
+            to_select = Character(charkey=selection, linked=ctx.author.id)
+            to_select.bind(jdr)
+            await to_select.select(ctx.author.id)
+            self.logger.log(LogLevel.DEBUG.value, "/charselect (%s -> %s) in channel %d of server %d", current_char.key, selection, ctx.channel.id, ctx.guild.id)
+            # await ctx.channel.send(data.lang["charselect"].format(data.char.key, i.key))
 
     @commands.check(check_chanmj)
     @character.command(name="link", aliases=["assign"])

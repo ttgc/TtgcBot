@@ -19,10 +19,15 @@
 
 import discord
 from utils.translator import get_lang, lang_exist
-from utils.checks import is_jdrchannel
 from utils.taskqueue import TaskQueue
 from models import DBMember, DBServer
 from async_property import async_cached_property
+
+def is_jdrchannel(jdrlist, channelid):
+    for i in jdrlist:
+        if channelid == i.get("channel", -1): return True
+        if channelid in i.get("extensions", []): return True
+    return False
 
 class GenericCommandParameters:
     def __new__(cl, ctx, min_query=False):

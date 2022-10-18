@@ -19,7 +19,7 @@
 
 from models import DBMember, DBServer, DBJDR
 from exceptions import APIException
-from core.commandparameters import GenericCommandParameters
+from core.commandparameters import GenericCommandParameters, is_jdrchannel
 import discord.utils
 
 async def is_blacklisted(ID):
@@ -42,12 +42,6 @@ async def is_owner(ID):
     try: member = await DBMember(ID)
     except Exception: return False
     return member.is_owner()
-
-def is_jdrchannel(jdrlist, channelid):
-    for i in jdrlist:
-        if channelid == i.get("channel", -1): return True
-        if channelid in i.get("extensions", []): return True
-    return False
 
 async def check_admin(ctx):
     srv = await DBServer(ctx.guild.id)

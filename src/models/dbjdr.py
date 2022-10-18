@@ -20,7 +20,7 @@
 from utils.decorators import deprecated
 from datahandler.api import APIManager
 from datahandler.cache import DataCache
-from exception import APIException
+from exceptions import APIException
 from network import RequestType
 from models.inventory import Inventory
 from models.pet import Pet
@@ -223,7 +223,7 @@ class DBJDR:
 
         return info.result
 
-    @deprecated(raise_error=False)
+    @deprecated("Too many API queries, avoid using this method at all cost", raise_error=False)
     async def get_charbase(self):
         chars = await self.charlist()
         ls = chars.get("characters", [])

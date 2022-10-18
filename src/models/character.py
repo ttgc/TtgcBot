@@ -271,7 +271,7 @@ class Character:
 
         self.lvl += 1
 
-    @deprecated(raise_error=False)
+    @deprecated("Workaround for API waiting for an upcoming version", raise_error=False)
     async def _uselpdp_dirty(self, what, requester):
         self.is_bound(True)
 
@@ -293,7 +293,7 @@ class Character:
         self.karma = -10
         self.mod = Gamemods.SEPULCHRAL
 
-    @deprecated(raise_error=False)
+    @deprecated("Workaround for API waiting for an upcoming version", raise_error=False)
     async def _reset_lpdp_dirty(self, requester):
         self.is_bound(True)
 

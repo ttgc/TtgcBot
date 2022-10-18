@@ -19,7 +19,7 @@
 
 from enum import Enum
 from datahandler.api import APIManager
-from exception import APIException
+from exceptions import APIException
 from network import RequestType
 
 class MemberPermGrantable(Enum):

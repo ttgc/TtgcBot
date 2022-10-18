@@ -26,7 +26,6 @@ from models.inventory import Inventory
 from models.pet import Pet
 from models.skills import Skill
 from models.character import Character
-from models.dbserver import DBServer
 from models.enums import Gamemods
 
 class DBJDR:
@@ -232,10 +231,6 @@ class DBJDR:
             character = await self.get_character(i)
             charbase.append(character)
         return charbase
-
-    async def get_serverinfo(self):
-        srv = await DBServer(self.server)
-        return srv
 
     async def set_finalizer_field(self, **fields):
         reqbody = {

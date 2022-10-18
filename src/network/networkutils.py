@@ -17,6 +17,17 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from network.httprequest import HTTP
-from network.requesttype import RequestType
-from network.networkutils import safe_request
+from exceptions import APIException, HTTPErrorCode, HTTPException
+
+async def safe_request(request, *whitelist):
+    try:
+        await request
+    except APIException as e:
+        error = HTTPErrorCode.get_code_from_int(e.get("code", 502))
+        if not error in whitelist: raise e
+        return error
+    except HTTPException as e2:
+        error = HTTPErrorCode.get_code_from_int(e2.errcode)
+        if not error in whitelist: raise e2
+        return error
+    return None

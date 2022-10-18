@@ -30,6 +30,8 @@ from setup.loglevel import LogLevel
 from utils import async_lambda, async_conditional_lambda
 from utils.checks import check_jdrchannel, check_haschar, check_chanmj
 from models import Character
+from exceptions import HTTPErrorCode
+from network import safe_request
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -60,7 +62,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         current_char = await data.char
         chars = []
 
-        async for i in data.charbase.charlist.get("linked", []):
+        async for i in data.charbase.get("linked", []):
             if i.get("member", -1) == ctx.author.id:
                 chars.append(i.get("charkey"))
 
@@ -81,7 +83,8 @@ class CharacterCog(commands.Cog, name="Characters"):
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
         data = await GenericCommandParameters.get_from_context(ctx)
         view = ui.views.View(ctx, timeout=60)
-        chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
+        chars = await data.charbase.get("characters", [])
+
         char_dd = ui.Dropdown(ctx, view, id="chars", placeholder=data.lang["dropdown_char_placeholder"], row=0, options=chars)
         user_dd = ui.Dropdown(ctx, view, id="users", placeholder=data.lang["dropdown_user_placeholder"], row=1)
 
@@ -93,7 +96,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         submit_check = lambda b, i: char_dd.value is not None and user_dd.value is not None
         on_submit = async_conditional_lambda(
             asyncio.coroutine(lambda b, i: b.final),
-            lambda b, i: i.response.edit_message(content=data.lang["charlink"].format(char_dd.value, user_dd.value), view=None),
+            lambda b, i: i.response.edit_message(content=Emoji.HOURGLASS, view=None),
             lambda b, i: i.response.edit_message(content=data.lang["submit_failed"], view=b.view)
         )
 
@@ -106,22 +109,30 @@ class CharacterCog(commands.Cog, name="Characters"):
             await msg.delete()
             await ctx.send(data.lang["timeout"], reference=ctx.message)
         elif view.result.is_success:
-            self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
+            character = Character(charkey=char_dd.value)
+            character.bind(jdr)
+            error = await safe_request(character.link(user_dd.value, ctx.author.id), HTTPErrorCode.CONFLICT, HTTPErrorCode.FORBIDDEN)
 
-        # try:
-        #     await character.link(player.id, ctx.author.id, override)
-        # except APIException as e:
-        #     if e["code"] == 409:
-        #         await ctx.channel.send(data.lang["charlink_conflict"].format(character.name))
-        #     elif e["code"] == 403:
-        #         await ctx.channel.send(data.lang["is_dead"].format(character.name))
-        #     else:
-        #         raise e
-        #     return
-        # finally:
-        #     self.logger.log(logging.DEBUG+1, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, player.id)
-        #
-        # await ctx.channel.send(data.lang["charlink"].format(character.name, player.mention))
+            if error is None:
+                await msg.edit(content=data.lang["charlink"].format(character.key, user_dd.value))
+                self.logger.log(LogLevel.DEBUG.value, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, user_dd.value)
+            elif error == HTTPErrorCode.CONFLICT:
+                await msg.edit(content=data.lang["charlink_conflict"].format(character.key))
+            else:
+                await msg.edit(content=data.lang["is_dead"].format(character.key))
+
+            # try:
+            #     await character.link(user_dd.value, ctx.author.id)
+            # except APIException as e:
+            #     if e["code"] == 409:
+            #         await msg.edit(content=data.lang["charlink_conflict"].format(character.key))
+            #     elif e["code"] == 403:
+            #         await msg.edit(content=data.lang["is_dead"].format(character.key))
+            #     else:
+            #         raise e
+            # else:
+            #     await msg.edit(content=data.lang["charlink"].format(character.key, user_dd.value))
+            #     self.logger.log(LogLevel.DEBUG.value, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, user_dd.value)
 
     @commands.check(check_chanmj)
     @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])

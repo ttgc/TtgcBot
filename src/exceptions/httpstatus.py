@@ -62,6 +62,12 @@ class HTTPErrorCode(Enum):
     HTTP_VERSION_NOT_SUPPORTED = 505
     BANDWIDTH_LIMIT_EXCEEDED = 509
 
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __ne__(self, other):
+        return self.value != other.value
+
     @classmethod
     def get_code_from_int(cl, code):
         try:

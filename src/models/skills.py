@@ -19,7 +19,7 @@
 
 from datahandler.api import APIManager
 from exceptions import APIException
-from models.extension import Extension
+from models.enums import Extension
 from network import RequestType
 
 class Skill:

@@ -17,6 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from enums import Enum
 
 def async_lambda(callback):
     async def _execute(*args, **kargs):
@@ -33,3 +34,13 @@ def async_conditional_lambda(check_callback, if_callback, else_callback):
             await else_callback(*args, **kwargs)
 
     return _execute
+
+class SerializableEnum(Enum):
+    def __str__(self):
+        return str(self.value)
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

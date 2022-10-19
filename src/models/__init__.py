@@ -22,7 +22,6 @@ from models.dbjdr import DBJDR
 from models.dbmember import DBMember, MemberPermGrantable
 from models.dbserver import DBServer
 import models.enums as enums
-from models.extension import Extension
 from models.inventory import Inventory, Item
 from models.pet import Pet
 from models.skills import Skill

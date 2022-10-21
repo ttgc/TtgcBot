@@ -108,7 +108,7 @@ class AutoPopulatedEnums:
         return self._ext if universe is None else self._ext[universe]
 
     async def get_races(self, extension):
-        if not extension in self._races:
+        if extension not in self._races:
             info = await self.api(RequestType.GET, f"JDR/{extension.universe}/{extension.world}/races")
 
             if info.status // 100 != 2:
@@ -119,7 +119,7 @@ class AutoPopulatedEnums:
         return self._races.get(extension)
 
     async def get_symbionts(self, extension):
-        if not extension in self._sb:
+        if extension not in self._sb:
             info = await self.api(RequestType.GET, f"JDR/{extension.universe}/{extension.world}/symbionts")
 
             if info.status // 100 != 2:
@@ -130,7 +130,7 @@ class AutoPopulatedEnums:
         return self._sb.get(extension)
 
     async def get_orgs(self, extension):
-        if not extension in self._orgs:
+        if extension not in self._orgs:
             info = await self.api(RequestType.GET, f"JDR/{extension.universe}/{extension.world}/organizations")
 
             if info.status // 100 != 2:

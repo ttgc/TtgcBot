@@ -30,6 +30,7 @@ from setup.loglevel import LogLevel
 from utils import async_lambda, async_conditional_lambda
 from utils.checks import check_jdrchannel, check_haschar, check_chanmj
 from utils.converters import CharacterConverter
+from utils.emojis import Emoji
 from models import Character
 from models.enums import AutoPopulatedEnums
 from exceptions import HTTPErrorCode
@@ -111,6 +112,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             await msg.delete()
             await ctx.send(data.lang["timeout"], reference=ctx.message)
         elif view.result.is_success:
+            jdr = await data.jdr
             character = Character(charkey=char_dd.value)
             character.bind(jdr)
             error = await safe_request(character.link(user_dd.value, ctx.author.id), HTTPErrorCode.CONFLICT, HTTPErrorCode.FORBIDDEN)
@@ -136,7 +138,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
         if success:
             char = await char.makehybrid(Races(selection), ctx.author.id)
-            self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
+            self.logger.log(LogLevel.DEBUG.value, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
     @commands.check(check_chanmj)
     @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])
@@ -152,11 +154,11 @@ class CharacterCog(commands.Cog, name="Characters"):
             lambda dd, i: i.response.edit_message(content=data.lang["char_nosymbiont"].format(char.name), view=None),
             lambda dd, i: i.response.edit_message(content=data.lang["char_symbiont"].format(char.name, dd.value), view=None)
         )
-        
+
         success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_symbiont_placeholder"], timeout=60, options=sb_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
         if success:
             char = await char.setsymbiont(Symbionts(selection), ctx.author.id)
-            self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
+            self.logger.log(LogLevel.DEBUG.value, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
     @commands.check(check_chanmj)
     @character.command(name="affiliation", aliases=["organization", "organisation", "org"])

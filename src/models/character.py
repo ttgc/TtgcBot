@@ -286,12 +286,14 @@ class Character:
 
     async def uselp(self, requester):
         await self._uselpdp_dirty("lp", requester)
+        Gamemods = await AutoPopulatedEnums().get_gamemods()
         self.lp -= 1
         self.karma = 10
         self.mod = Gamemods.ILLUMINATION
 
     async def usedp(self, requester):
         await self._uselpdp_dirty("dp", requester)
+        Gamemods = await AutoPopulatedEnums().get_gamemods()
         self.dp -= 1
         self.karma = -10
         self.mod = Gamemods.SEPULCHRAL

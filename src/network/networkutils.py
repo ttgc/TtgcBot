@@ -24,10 +24,10 @@ async def safe_request(request, *whitelist):
         await request
     except APIException as e:
         error = HTTPErrorCode.get_code_from_int(e.get("code", 502))
-        if not error in whitelist: raise e
+        if error not in whitelist: raise e
         return error
     except HTTPException as e2:
         error = HTTPErrorCode.get_code_from_int(e2.errcode)
-        if not error in whitelist: raise e2
+        if error not in whitelist: raise e2
         return error
     return None

@@ -123,22 +123,9 @@ class CharacterCog(commands.Cog, name="Characters"):
             else:
                 await msg.edit(content=data.lang["is_dead"].format(character.key))
 
-            # try:
-            #     await character.link(user_dd.value, ctx.author.id)
-            # except APIException as e:
-            #     if e["code"] == 409:
-            #         await msg.edit(content=data.lang["charlink_conflict"].format(character.key))
-            #     elif e["code"] == 403:
-            #         await msg.edit(content=data.lang["is_dead"].format(character.key))
-            #     else:
-            #         raise e
-            # else:
-            #     await msg.edit(content=data.lang["charlink"].format(character.key, user_dd.value))
-            #     self.logger.log(LogLevel.DEBUG.value, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, user_dd.value)
-
     @commands.check(check_chanmj)
     @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])
-    async def character_hybrid(self, ctx, char: CharacterConverter):#: CharacterConverter, *, race: RaceConverter):
+    async def character_hybrid(self, ctx, char: CharacterConverter): #, *, race: RaceConverter):
         """**GM/MJ only**
         Set a character as an hybrid, give him a second race and inherit all race's skills.
         This won't work if the character is already an hybrid"""
@@ -148,26 +135,28 @@ class CharacterCog(commands.Cog, name="Characters"):
         success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_race_placeholder"], timeout=60, options=filtered_races, select_msg=data.lang["char_hybrid"], timeout_msg=data.lang["timeout"], format_args_before=[char, char.race])
 
         if success:
-            char = char.makehybrid(Races(selection))
-            self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
+            char = await char.makehybrid(Races(selection), ctx.author.id)
+            self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
     @commands.check(check_chanmj)
     @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])
-    async def character_symbiont(self, ctx, char):#: CharacterConverter, *, symbiont: typing.Optional[SymbiontConverter] = None):
+    async def character_symbiont(self, ctx, char: CharacterConverter): #, *, symbiont: typing.Optional[SymbiontConverter] = None):
         """**GM/MJ only**
         Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character."""
         data = await GenericCommandParameters.get_from_context(ctx)
-        symbionts = [data.lang["none_m"], "Azort", "Iridyanis", "Enairo", "Horya", "Manahil"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_symbiont_placeholder"], timeout=60, options=symbionts, select_msg=data.lang["char_symbiont"], timeout_msg=data.lang["timeout"], format_args_before=[char])
-
+        Symbionts = await AutoPopulatedEnums().get_symbionts(char.extension)
+        sb_dict = {data.lang["none_m"]: data.lang["none_m"]}
+        sb_dict.update({sb.name: sb.value for sb in Symbionts})
+        submit_callback = async_conditional_lambda(
+            asyncio.coroutine(lambda dd, i: dd.value is None),
+            lambda dd, i: i.response.edit_message(content=data.lang["char_nosymbiont"].format(char.name), view=None),
+            lambda dd, i: i.response.edit_message(content=data.lang["char_symbiont"].format(char.name, dd.value), view=None)
+        )
+        
+        success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_symbiont_placeholder"], timeout=60, options=sb_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
         if success:
-            self.logger.info(selection)
-        # char = char.setsymbiont(symbiont)
-        # self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
-        # if char.symbiont is None:
-        #     await ctx.message.channel.send(data.lang["char_nosymbiont"].format(char.name))
-        # else:
-        #     await ctx.message.channel.send(data.lang["char_symbiont"].format(char.name, char.symbiont))
+            char = await char.setsymbiont(Symbionts(selection), ctx.author.id)
+            self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
     @commands.check(check_chanmj)
     @character.command(name="affiliation", aliases=["organization", "organisation", "org"])

@@ -185,12 +185,12 @@ class Character:
     async def makehybrid(self, race, requester, allowOverride=False):
         if allowOverride or self.hybrid_race is None:
             self.is_bound(True)
-            await self._internal_charset(requester, hybrid=race.value)
+            await self._internal_charset(requester, hybrid=str(race))
             self.hybrid_race = race
 
     async def setsymbiont(self, symbiont, requester):
         self.is_bound(True)
-        await self._internal_charset(requester, symbiont=symbiont)
+        await self._internal_charset(requester, symbiont=str(symbiont))
         self.symbiont = symbiont
 
     @deprecated("Old feature using DatabaseManager")

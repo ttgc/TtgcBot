@@ -21,7 +21,7 @@ from datahandler.api import APIManager
 from exceptions import NotBoundException, APIException, InternalCommandError
 from utils.decorators import deprecated
 from network import RequestType
-from models.enums import Gamemods, TagList
+from models.enums import AutoPopulatedEnums, TagList
 
 class Pet:
     def __init__(self, **kwargs):
@@ -39,8 +39,8 @@ class Pet:
         self.agilite = kwargs.get("agilite", 50)
         self.karma = kwargs.get("karma", 0)
         self.stat = kwargs.get("stat", [0, 0, 0, 0, 0, 0, 0])
-        self.mod = Gamemods.from_int(kwargs.get("mod", 0))
-        self.default_mod = Gamemods.from_int(kwargs.get("default_mod", 0))
+        self.mod = kwargs.get("mod", 0)
+        self.default_mod = kwargs.get("default_mod", 0)
         self.instinct = kwargs.get("instinct", 3)
         self.lvl = kwargs.get("lvl", 1)
         self.precision = kwargs.get("prec", 50)
@@ -104,8 +104,10 @@ class Pet:
         elif tag == "precision": self.precision = max(1, min(100, value))
         elif tag == "luck": self.luck = max(1, min(100, value))
         elif tag == "instinct": self.instinct = max(1, min(6, value))
-        elif tag == "gamemod": self.default_mod = Gamemods.from_str(value)
         elif tag == "species": self.espece = value
+        elif tag == "gamemod":
+            Gamemods = await AutoPopulatedEnums().get_gamemods()
+            self.default_mod = Gamemods.from_str(value)
 
     async def update(self, tag, value, requester):
         self.is_bound(True)
@@ -140,6 +142,7 @@ class Pet:
         if default and self.mod == self.default_mod: return
 
         self.is_bound(True)
+        Gamemods = await AutoPopulatedEnums().get_gamemods()
 
         if default:
             self.mod = self.default_mod
@@ -176,8 +179,9 @@ class Pet:
             info.result.get("Succes", 0), info.result.get("Fail", 0), info.result.get("CriticFail", 0), info.result.get("SuperCriticFail", 0)
         ]
 
-        gm = int(Gamemods.from_str(info.result.get("Gm", "offensive").lower()))
-        gmdefault = int(Gamemods.from_str(info.result.get("GmDefault", "offensive").lower()))
+        Gamemods = await AutoPopulatedEnums().get_gamemods()
+        gm = Gamemods.from_str(info.result.get("Gm", "offensive").lower())
+        gmdefault = Gamemods.from_str(info.result.get("GmDefault", "offensive").lower())
         return cl(petkey=petkey, charkey=charkey, name=info.result.get("Nom", "unknwon"), espece=info.result.get("Species", "unknown"),
                     PVm=info.result.get("Pvmax", 1), PMm=info.result.get("Pmmax", 1), PV=info.result.get("PV", 1), PM=info.result.get("PM", 1),
                     force=info.result.get("Strength", 50), esprit=info.result.get("Spirit", 50), charisme=info.result.get("Charisma", 50),

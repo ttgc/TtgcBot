@@ -20,10 +20,9 @@
 from exceptions import NotBoundException, APIException, InternalCommandError
 from utils.decorators import deprecated
 from network import RequestType
-from models.enums import Gamemods, TagList
+from models.enums import AutoPopulatedEnums, TagList
 from models.pet import Pet
 from models.skills import Skill
-from models.deprecated import retrieveRaceName, retrieveSymbiontName # TO BE REMOVED
 from models.inventory import Inventory
 
 class Character:
@@ -47,8 +46,8 @@ class Character:
         self.stat = kwargs.get("stat", [0, 0, 0, 0, 0, 0, 0])
         self.lp = kwargs.get("lp", 0)
         self.dp = kwargs.get("dp", 0)
-        self.mod = Gamemods.from_int(kwargs.get("mod", 0))
-        self.default_mod = Gamemods.from_int(kwargs.get("default_mod", 0))
+        self.mod = kwargs.get("mod", None)
+        self.default_mod = kwargs.get("default_mod", None)
         self.default_karma = kwargs.get("default_karma", 0)
         self.intuition = kwargs.get("intuition", 3)
         self.mental = kwargs.get("mentalhealth", 100)
@@ -67,10 +66,11 @@ class Character:
         self.luck = kwargs.get("luck", 50)
         self.affiliated_with = kwargs.get("org", None)
         self.hidden_affiliation = kwargs.get("hide_org", False)
-        self.hybrid_race = retrieveRaceName(kwargs.get("hybrid", None))
-        self.symbiont = retrieveSymbiontName(kwargs.get("symbiont", None))
+        self.hybrid_race = kwargs.get("hybrid", None)
+        self.symbiont = kwargs.get("symbiont", None)
         self.planet_pilot = kwargs.get("planet_pilot", -1)
         self.astral_pilot = kwargs.get("astral_pilot", -1)
+        self.extension = kwargs.get("ext", None)
 
     def __str__(self):
         return self.name
@@ -156,8 +156,10 @@ class Character:
         elif tag == "intuition": self.intuition = max(1, min(6, value))
         elif tag == "mental": self.mental = value
         elif tag == "karma": self.default_karma = max(-10, min(10, value))
-        elif tag == "gamemod": self.default_mod = Gamemods.from_str(value)
         elif tag == "money": self.money = min(0, value)
+        elif tag == "gamemod":
+            Gamemods = await AutoPopulatedEnums().get_gamemods()
+            self.default_mod = Gamemods.from_str(value)
         elif tag == "pilot":
             self.astral_pilot = max(-1, value.get("astral", self.astral_pilot))
             self.planet_pilot = max(-1, value.get("planet", self.planet_pilot))
@@ -183,7 +185,7 @@ class Character:
     async def makehybrid(self, race, requester, allowOverride=False):
         if allowOverride or self.hybrid_race is None:
             self.is_bound(True)
-            await self._internal_charset(requester, hybrid=race)
+            await self._internal_charset(requester, hybrid=race.value)
             self.hybrid_race = race
 
     async def setsymbiont(self, symbiont, requester):
@@ -210,6 +212,7 @@ class Character:
         if default and self.mod == self.default_mod: return
 
         self.is_bound(True)
+        Gamemods = await AutoPopulatedEnums().get_gamemods()
 
         if default:
             self.mod = self.default_mod

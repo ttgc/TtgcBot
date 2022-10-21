@@ -21,41 +21,46 @@ import re
 import discord
 import json
 from discord.ext import commands
-from src.tools.Character import *
-from src.tools.CharacterUtils import *
-from src.utils.checks import GenericCommandParameters
-# from src.tools.mapmanager import *
-from src.tools.parsingdice import DiceType
+from models import Character
+from core.commandparameters import GenericCommandParameters
+from utils.decorators import deprecated
 
 class CharacterConverter(commands.Converter):
     async def convert(self, ctx, arg):
-        data = await GenericCommandParameters(ctx)
-        return data.jdr.get_character(arg)
+        data = await GenericCommandParameters.get_from_context(ctx)
+        jdr = await data.jdr
+        return jdr.get_character(arg)
 
-# class RaceConverter(commands.Converter):
-#     async def convert(self,ctx,arg):
-#         return retrieveRaceID(arg.replace("_"," "))
+@deprecated("Old converter using DBManager")
+class RaceConverter(commands.Converter):
+    async def convert(self,ctx,arg):
+        return retrieveRaceID(arg.replace("_"," "))
 
+@deprecated("Unused converter that might get removed at some point")
 class JSONConverter(commands.Converter):
     async def convert(self, ctx, arg):
         return json.loads(arg)
 
+@deprecated("Old converter using DBManager")
 class SymbiontConverter(commands.Converter):
     async def convert(self,ctx,arg):
         return retrieveSymbiontID(arg.replace("_"," "))
 
+@deprecated("Old converter using DBManager")
 class SkillConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if arg.isdecimal():
             return [Skill(int(arg))]
         return Skill.skillsearch(arg.replace("_"," "))
 
+@deprecated("Old unused converter that might get removed at some point")
 class OperatorConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if arg not in ["+","-"]:
             raise commands.BadArgument("Operator conversion error ! Not a valid operator")
         return arg
 
+@deprecated("Old unused converter that might get removed at some point")
 class MapTokenConverter(commands.Converter):
     async def convert(self,ctx,arg):
         data = await GenericCommandParameters(ctx)
@@ -65,6 +70,7 @@ class MapTokenConverter(commands.Converter):
             return None
         return tk
 
+@deprecated("Old map feature converter that will be removed at some point")
 class ShapeConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if arg.lower() == "circle": return Shape.CIRCLE
@@ -75,6 +81,7 @@ class ShapeConverter(commands.Converter):
         if arg.lower() == "conic": return Shape.CONIC
         raise commands.BadArgument("Shape conversion error ! Not a valid shape")
 
+@deprecated("Old map feature converter that will be removed at some point")
 class MapEffectParameterConverter(commands.Converter):
     async def convert(self,ctx,arg):
         args = arg.split(" ")
@@ -101,6 +108,7 @@ class MapEffectParameterConverter(commands.Converter):
             data[tag] = value
         return data
 
+@deprecated("Old converter using DBManager")
 class AffiliationConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if arg.lower() == "none": return None
@@ -108,6 +116,7 @@ class AffiliationConverter(commands.Converter):
             raise commands.BadArgument("Unexisting organization provided")
         return arg
 
+@deprecated("Old converter using DBManager")
 class BattleEntityConverter(commands.Converter):
     async def convert(self,ctx,arg):
         if re.match(r"\w+:\d\d?", arg):
@@ -115,6 +124,7 @@ class BattleEntityConverter(commands.Converter):
             return tag, int(value)
         raise commands.BadArgument("Invalid Battle Entity provided, cannot convert")
 
+@deprecated("Old unused converter that might get removed at some point")
 class DiceConverter(commands.Converter):
     async def convert(self, ctx, arg):
         match = re.search(r"\d+", arg)

@@ -26,7 +26,7 @@ from models.inventory import Inventory
 from models.pet import Pet
 from models.skills import Skill
 from models.character import Character
-from models.enums import Gamemods
+from models.enums import AutoPopulatedEnums, Extension
 
 class DBJDR:
     async def __init__(self, srvid, channelid, requester, requesterRole):
@@ -191,11 +191,13 @@ class DBJDR:
             rawchar.get("Fail", 0), rawchar.get("CriticFail", 0), rawchar.get("SuperCriticFail", 0)
         ]
 
-        gm = int(Gamemods.from_str(rawchar.get("Gm", "offensive").lower()))
-        gmdefault = int(Gamemods.from_str(rawchar.get("GmDefault", "offensive").lower()))
+        Gamemods = await AutoPopulatedEnums().get_gamemods()
+        gm = Gamemods.from_str(rawchar.get("Gm", "offensive").lower())
+        gmdefault = Gamemods.from_str(rawchar.get("GmDefault", "offensive").lower())
         inv = Inventory.char_loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, rawchar.get("MaxInvsize", 20))
         pets = Pet.listpet(self.server, self.channel, charkey, self.requester, self.requesterRole, api=self.api, nologin=True)
         skls = Skill.loadfromdb(self.server, self.channel, charkey, self.requester, self.requesterRole, api=self.api, nologin=True)
+        ext = rawchar.get("Extension", {})
         char = Character(charkey=charkey, name=rawchar.get("Nom", charkey),
                             lvl=rawchar.get("Lvl", 1), PV=rawchar.get("Pv", 1), PVm=rawchar.get("Pvmax", 1), PM=rawchar.get("Pm", 1),
                             PMm=rawchar.get("Pmmax", 1), force=rawchar.get("Strength", 50), esprit=rawchar.get("Spirit", 50),
@@ -209,7 +211,8 @@ class DBJDR:
                             org=rawchar.get("AffiliatedWith", {}).get("Organization", None),
                             hide_org=rawchar.get("AffiliatedWith", {}).get("Hidden", False),
                             hybrid=rawchar.get("HybridRace", None), symbiont=rawchar.get("Symbiont", None),
-                            planet_pilot=rawchar.get("PilotP", -1), astral_pilot=rawchar.get("PilotA", -1))
+                            planet_pilot=rawchar.get("PilotP", -1), astral_pilot=rawchar.get("PilotA", -1),
+                            ext=Extension(ext.get("universe", "Cosmorigins"), ext.get("world", "Terae")))
         char.bind(self)
         return char
 

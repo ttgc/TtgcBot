@@ -23,6 +23,7 @@ from utils import SerializableEnum
 from utils.decorators import singleton
 from exceptions import APIException
 from network import RequestType
+from datahandler import APIManager
 
 class Extension:
     def __init__(self, universe, world):
@@ -67,6 +68,7 @@ class AutoPopulatedEnums:
         self._races: dict[Extension, EnumMeta] = {}
         self._sb: dict[Extension, EnumMeta] = {}
         self._orgs: dict[Extension, EnumMeta] = {}
+        self.api = APIManager()
 
     def purge(self):
         self._gm = None
@@ -89,7 +91,7 @@ class AutoPopulatedEnums:
             self._gm = _Gamemods('Gamemods', values)
         return self._gm
 
-    async def get_extensions(self):
+    async def get_extensions(self, *, universe=None):
         if not self._ext:
             info = await self.api(RequestType.GET, "JDR/extensions")
 
@@ -103,7 +105,7 @@ class AutoPopulatedEnums:
                 else:
                     self._ext[ext.universe] = [ext]
 
-        return self._ext
+        return self._ext if universe is None else self._ext[universe]
 
     async def get_races(self, extension):
         if not extension in self._races:
@@ -194,6 +196,15 @@ class _Race(SerializableEnum):
             clName = f'Classe_{extension.universe}_{extension.world}_{self}'
             self._classes = SerializableEnum(clName, {cl.upper(): cl.lower() for cl in info.result.get('list', [])})
         return self._classes
+
+    @classmethod
+    def to_dict(cls, filter=lambda x: True):
+        result = {}
+        for race in cls:
+            if filter(race):
+                result[race.name] = race.value
+
+        return result
 
 class _Org(SerializableEnum):
     def __init__(self, name, hidden=False):

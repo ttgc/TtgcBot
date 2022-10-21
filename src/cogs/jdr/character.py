@@ -29,7 +29,9 @@ from core.commandparameters import GenericCommandParameters
 from setup.loglevel import LogLevel
 from utils import async_lambda, async_conditional_lambda
 from utils.checks import check_jdrchannel, check_haschar, check_chanmj
+from utils.converters import CharacterConverter
 from models import Character
+from models.enums import AutoPopulatedEnums
 from exceptions import HTTPErrorCode
 from network import safe_request
 # from src.tools.Translator import *
@@ -136,19 +138,18 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_chanmj)
     @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])
-    async def character_hybrid(self, ctx, char):#: CharacterConverter, *, race: RaceConverter):
+    async def character_hybrid(self, ctx, char: CharacterConverter):#: CharacterConverter, *, race: RaceConverter):
         """**GM/MJ only**
         Set a character as an hybrid, give him a second race and inherit all race's skills.
         This won't work if the character is already an hybrid"""
         data = await GenericCommandParameters.get_from_context(ctx)
-        races = ["Grits", "Alfys", "Nyfis", "Zyrfis", "Darfys", "Idylis", "Alwenys", "Vampirys", "Lythis"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_race_placeholder"], timeout=60, options=races, select_msg=data.lang["char_hybrid"], timeout_msg=data.lang["timeout"], format_args_before=[char, "Grits (fake)"])
+        Races = await AutoPopulatedEnums().get_races(char.extension)
+        filtered_races = Races.to_dict(lambda r: str(r) != str(char.race))
+        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_race_placeholder"], timeout=60, options=filtered_races, select_msg=data.lang["char_hybrid"], timeout_msg=data.lang["timeout"], format_args_before=[char, char.race])
 
         if success:
-            self.logger.info(selection)
-        # char = char.makehybrid(race)
-        # self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
-        # await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
+            char = char.makehybrid(Races(selection))
+            self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
 
     @commands.check(check_chanmj)
     @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])

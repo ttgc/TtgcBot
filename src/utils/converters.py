@@ -86,7 +86,7 @@ class MapEffectParameterConverter(commands.Converter):
         while "" in args: args.remove("") # noqa
         data = {} # noqa
         for i in args: # noqa
-            tag,value = i.split("=")
+            tag,value = i.split("=") # noqa
             if tag.lower() == "lengths": # noqa
                 value = value.split("-") # noqa
                 for i in range(len(value)): # noqa

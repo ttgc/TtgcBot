@@ -23,7 +23,7 @@ from utils import SerializableEnum
 from utils.decorators import singleton
 from exceptions import APIException
 from network import RequestType
-from datahandler import APIManager
+from datahandler.api import APIManager
 
 class Extension:
     def __init__(self, universe, world):

@@ -147,7 +147,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character."""
         data = await GenericCommandParameters.get_from_context(ctx)
         Symbionts = await AutoPopulatedEnums().get_symbionts(char.extension)
-        sb_dict = {data.lang["none_m"]: data.lang["none_m"]}
+        sb_dict = {None: data.lang["none_m"]}
         sb_dict.update({sb.name: sb.value for sb in Symbionts})
         submit_callback = async_conditional_lambda(
             asyncio.coroutine(lambda dd, i: dd.value is None),
@@ -157,25 +157,27 @@ class CharacterCog(commands.Cog, name="Characters"):
 
         success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_symbiont_placeholder"], timeout=60, options=sb_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
         if success:
-            char = await char.setsymbiont(Symbionts(selection), ctx.author.id)
+            char = await char.setsymbiont(Symbionts(selection) if selection is not None else None, ctx.author.id)
             self.logger.log(LogLevel.DEBUG.value, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
     @commands.check(check_chanmj)
     @character.command(name="affiliation", aliases=["organization", "organisation", "org"])
-    async def character_affiliation(self, ctx, char):#: CharacterConverter, affiliation: typing.Optional[AffiliationConverter] = None):
+    async def character_affiliation(self, ctx, char: CharacterConverter):#, affiliation: typing.Optional[AffiliationConverter] = None):
         """**GM/MJ only**
         Affiliate the character with the specified organization, the organization should exists.
         This will automatically include all skills related to the organization.
         If no organization is provided, then the current character's affiliation will be removed."""
         data = await GenericCommandParameters.get_from_context(ctx)
-        orgs = [data.lang["none"], "Espion", "Religieux", "Scientifique", "Contrebandier", "Bureaucrate", "Militaire", "Federation du commerce", "Adphyra-Core"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_org_placeholder"], timeout=60, options=orgs, select_msg=data.lang["affiliate"], timeout_msg=data.lang["timeout"], format_args_before=[char])
+        Organizations = await AutoPopulatedEnums().get_orgs(char.extension)
+        org_dict = {None: data.lang["none"]}
+        org_dict.update({org.name: org.value for org in Organizations})
+        submit_callback = async_conditional_lambda(
+            asyncio.coroutine(lambda dd, i: dd.value is None),
+            lambda dd, i: i.response.edit_message(content=data.lang["unaffiliate"].format(char.name), view=None),
+            lambda dd, i: i.response.edit_message(data.lang["affiliate"].format(char.name, dd.value), view=None)
+        )
 
+        success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_org_placeholder"], timeout=60, options=sb_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
         if success:
-            self.logger.info(selection)
-        # char.affiliate(affiliation)
-        # self.logger.log(logging.DEBUG+1,"/char affiliate (%s with %s) in channel %d of server %d",char.key,affiliation,ctx.message.channel.id,ctx.message.guild.id)
-        # if affiliation is None:
-        #     await ctx.channel.send(data.lang["unaffiliate"].format(char.name))
-        # else:
-        #     await ctx.channel.send(data.lang["affiliate"].format(char.name,affiliation))
+            char = await char.affiliate(Organizations(selection) if selection is not None else None, ctx.author.id)
+            self.logger.log(LogLevel.DEBUG.value, "/char affiliate (%s with %s) in channel %d of server %d", char.key, selection, ctx.channel.id, ctx.guild.id)

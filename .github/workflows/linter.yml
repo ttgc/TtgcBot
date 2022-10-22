@@ -1,0 +1,64 @@
+name: Flake Linting
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: false
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip3 install -r requirements.txt
+
+    - name: Lint with flake8
+      env:
+        EXCLUDE_FILES: src/deprecated,*/deprecated.py,src/datahandler/database.py,src/core/help.py
+        EXCLUDE_CODE: E265,E266,E302,E305,E306,E501,E261,E262,E701,F401,E731,E704,E127,E128,C901,E9,F63,F7,F82
+        WARN_FORMAT: '::Warning file=%(path)s,line=%(row)d,col=%(col)d,title=%(code)s::%(path)s:%(row)d:%(col)d: %(code)s %(text)s'
+        ERROR_FORMAT: '::Error file=%(path)s,line=%(row)d,col=%(col)d,title=%(code)s::%(path)s:%(row)d:%(col)d: %(code)s %(text)s'
+      run: |
+        pip install flake8
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=$EXCLUDE_FILES,TtgcBot.py --ignore=$EXCLUDE_CODE --output-file=warnings.log --format="$WARN_FORMAT"
+        flake8 TtgcBot.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=$EXCLUDE_CODE,E402 --output-file=ttgcbot.log --format="$WARN_FORMAT"
+        flake8 . --count --select=F401 --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=$EXCLUDE_FILES,TtgcBot.py,*/__init__.py --output-file=F401.log --format="$WARN_FORMAT"
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=$EXCLUDE_FILES --output-file=errors.log --format="$ERROR_FORMAT"
+    
+    - name: Show report
+      if: ${{ always() }}
+      run: |
+        echo "::group::Critical errors"
+        if [ -r errors.log ]; then cat errors.log; fi
+        echo "::endgroup::"
+        echo "::group::Warnings"
+        if [ -r warnings.log ]; then cat warnings.log; fi
+        echo "::endgroup::"
+        echo "::group::Warnings F401"
+        if [ -r F401.log ]; then cat F401.log; fi
+        echo "::endgroup::"
+        echo "::group::Warnings TtgcBot.py"
+        if [ -r ttgcbot.log ]; then cat ttgcbot.log; fi
+    
+#    - name: Upload report
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v3
+#      with:
+#        path: report.log
+#        if-no-files-found: warn
+#        retention-days: 1
+
+#    - name: Test with pytest
+#      run: |
+#        pip install pytest
+#        pytest

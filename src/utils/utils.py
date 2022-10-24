@@ -17,6 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import discord
 from enum import Enum
 
 def async_lambda(callback):
@@ -34,6 +35,15 @@ def async_conditional_lambda(check_callback, if_callback, else_callback):
             await else_callback(*args, **kwargs)
 
     return _execute
+
+def try_parse_int(value: str, default_value: int = 0) -> int:
+    try:
+        return int(value)
+    except:
+        return default_value
+
+def get_color(hexvalue: str) -> discord.Color:
+    return discord.Color(int(hexvalue, 16))
 
 class SerializableEnum(Enum):
     def __str__(self):

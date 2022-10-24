@@ -25,6 +25,7 @@ class Emoji(Enum):
     EQUAL='🟰'
     PLUS='➕'
     MINUS='➖'
+    HOURGLASS='⏳'
 
     def __str__(self):
         return self.value

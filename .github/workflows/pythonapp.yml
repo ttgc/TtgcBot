@@ -68,11 +68,6 @@ jobs:
       run: |
         mkdir output
         pg_dump ttgcbot > output/dump_bot.sql
-        pg_dump ttgcapi > output/dump_api.sql
-        cp Cosmo-Network/API/Tools/toolsProperties.json output/toolsProperties.json
-        cp Cosmo-Network/API/Tools/ttgcbotapp.json output/ttgcbotapp.json
-        cp Cosmo-Network/API/API/Properties/launchSettings.json output/launchSettings.json
-        cp Cosmo-Network/API/API/appsettings.Production.json output/appsettings.Production.json
         cp -R Logs/ output/Logs/
     
     - name: Upload artifacts

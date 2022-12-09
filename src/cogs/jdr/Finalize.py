@@ -29,24 +29,24 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
         self.bot = bot
         self.logger = logger
 
-    async def _finalizing_vocalstart(self,ctx,data):
-        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_vocalstart begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
-        vsys = self.bot.get_cog("Vocal").vocalcore
-        vc = vsys.getvocal(str(ctx.message.guild.id))
-        if vc is not None and vc.vocal and os.access("Music/never_give_up_tsfh.mp3",os.F_OK):
-            playable = True
-            if len(vc.queue) > 0: await ctx.message.channel.send(data.lang["finalize_notemptyqueue"])
-            startTimer = time.clock()
-            while len(vc.queue) > 0:
-                curTimer = time.clock()-startTimer
-                if curTimer > 10:
-                    await ctx.message.channel.send(data.lang["finalize_emptyqueue_timeout"])
-                    playable = False
-                    break
-                await vc.skip(True)
-            if playable: await vc.append("Music/never_give_up_tsfh.mp3",yt=False,no_output=True)
-        self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_vocalstart end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
-        return vsys,vc
+    # async def _finalizing_vocalstart(self,ctx,data):
+    #     self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_vocalstart begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
+    #     vsys = self.bot.get_cog("Vocal").vocalcore
+    #     vc = vsys.getvocal(str(ctx.message.guild.id))
+    #     if vc is not None and vc.vocal and os.access("Music/never_give_up_tsfh.mp3",os.F_OK):
+    #         playable = True
+    #         if len(vc.queue) > 0: await ctx.message.channel.send(data.lang["finalize_notemptyqueue"])
+    #         startTimer = time.clock()
+    #         while len(vc.queue) > 0:
+    #             curTimer = time.clock()-startTimer
+    #             if curTimer > 10:
+    #                 await ctx.message.channel.send(data.lang["finalize_emptyqueue_timeout"])
+    #                 playable = False
+    #                 break
+    #             await vc.skip(True)
+    #         if playable: await vc.append("Music/never_give_up_tsfh.mp3",yt=False,no_output=True)
+    #     self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_vocalstart end (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
+    #     return vsys,vc
 
     def _finalizing_generateinfo(self,ctx,data):
         def sum_ls(ls1,ls2):
@@ -104,7 +104,7 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
             titl = i[0]
             cont = i[1]
             embd = discord.Embed(title=titl,description=cont,colour=discord.Color(int("5B005B",16)))
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_footer(text=time.asctime())
             await ctx.message.channel.send(embed=embd)
             await asyncio.sleep(10)
@@ -126,11 +126,11 @@ class Finalize(commands.Cog, name="Finalize (RP/JDR)"):
     async def _finalizing_operation(self,ctx,data):
         self.logger.log(logging.DEBUG+1,"[finalize] _finalizing_operation begin (%d, %d)",ctx.message.channel.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["finalize_start"])
-        vsys,vc = await self._finalizing_vocalstart(ctx,data)
+        #vsys,vc = await self._finalizing_vocalstart(ctx,data)
         await asyncio.sleep(2)
         embd = discord.Embed(title="The Tale of Great Cosmos",colour=discord.Color(int("5B005B",16)))
         embd.set_image(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Logo.jpg")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_footer(text=time.asctime())
         await ctx.message.channel.send(embed=embd)
         await asyncio.sleep(5)

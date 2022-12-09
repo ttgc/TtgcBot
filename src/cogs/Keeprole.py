@@ -75,7 +75,7 @@ class Keeprole(commands.Cog):
         if rllist == "": rllist = "No roles"
         embd = discord.Embed(title="Keeprole system",description=data.lang["kr_roles"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.add_field(name="Roles list :",value=rllist,inline=True)
         await ctx.message.channel.send(embed=embd)
 
@@ -124,7 +124,7 @@ class Keeprole(commands.Cog):
             mblist[i[0]].append(i[1])
         embd = discord.Embed(title="Keeprole system",description=data.lang["kr_members"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text=str(ctx.message.created_at))
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         for i,k in mblist.items():
             rllist = ""
             for j in k:

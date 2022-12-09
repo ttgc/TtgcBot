@@ -34,7 +34,7 @@ class InventoryCog(commands.Cog, name="Inventory"):
     async def _inventory(self,ctx,data,char):
         embd = discord.Embed(title=char.name,description=data.lang["inv"].format(char.inventory.weight, char.inventory.maxweight),colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for item, qte in char.inventory.items.items():
             embd.add_field(name=item.name,value=data.lang["inv_item"].format(qte,item.weight),inline=True)

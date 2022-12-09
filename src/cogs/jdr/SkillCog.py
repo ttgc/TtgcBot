@@ -40,7 +40,7 @@ class SkillCog(commands.Cog, name="Skills"):
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.char.name,description=data.lang["sklist"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in data.char.skills:
             if not organizationExists(i.origine) or not isOrganizationHidden(i.origine):
@@ -57,7 +57,7 @@ class SkillCog(commands.Cog, name="Skills"):
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["skillsearch"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for sklist in search:
             for i in sklist:
@@ -76,7 +76,7 @@ class SkillCog(commands.Cog, name="Skills"):
         elif len(skill) > 1:
             embd = discord.Embed(title="Skill Assign",description=data.lang["skill_assign_choice"],colour=discord.Color(int('5B005B',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embd.set_author(name=message.author.name,icon_url=message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             for i in skill:
                 embd.add_field(name="{}#{} ({})\n[{}]".format(i.ID,i.name,i.origine,i.extension),value=i.description.replace("\\n","\n"),inline=True)

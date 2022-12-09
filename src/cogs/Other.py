@@ -66,8 +66,8 @@ class Other(commands.Cog):
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
         url = discord.utils.oauth_url(str(self.bot.user.id),botaskperm)
         embd = discord.Embed(title="TtgcBot",description=data.lang["invite"],colour=discord.Color(randint(0,int('ffffff',16))),url=url)
-        embd.set_footer(text=data.lang["invite_author"].format(Config()["version"]),icon_url=self.bot.user.avatar_url)
-        embd.set_image(url=self.bot.user.avatar_url)
+        embd.set_footer(text=data.lang["invite_author"].format(Config()["version"]),icon_url=self.bot.user.display_avatar.url)
+        embd.set_image(url=self.bot.user.display_avatar.url)
         embd.set_author(name="Ttgc",icon_url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/08/avatar-2-perso.png",url=url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["invite_srv"],value=str(len(self.bot.guilds))+" servers",inline=True)
@@ -124,19 +124,19 @@ class Other(commands.Cog):
         await ctx.message.channel.send(msg,tts=True)
         await ctx.message.delete()
 
-    @commands.cooldown(5,30,commands.BucketType.channel)
-    @commands.cooldown(1,10,commands.BucketType.user)
-    @commands.command()
-    async def joke(self,ctx,lang: typing.Optional[str] = "FR"):
-        """Funny jokes (only in french currently)"""
-        if lang in ["FR", "EN"]:
-            with open("{}/joke-{}.txt".format(Config()["directories"]["jokes"], lang),encoding="utf-8") as f:
-                jokelist = f.readlines()
-                if len(jokelist) > 0:
-                    await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
-                else:
-                    data = GenericCommandParameters(ctx)
-                    await ctx.message.channel.send(data.lang["nojoke"].format(lang))
-        else:
-            data = GenericCommandParameters(ctx)
-            await ctx.message.channel.send(data.lang["nojoke"].format(lang))
+    # @commands.cooldown(5,30,commands.BucketType.channel)
+    # @commands.cooldown(1,10,commands.BucketType.user)
+    # @commands.command()
+    # async def joke(self,ctx,lang: typing.Optional[str] = "FR"):
+    #     """Funny jokes (only in french currently)"""
+    #     if lang in ["FR", "EN"]:
+    #         with open("{}/joke-{}.txt".format(Config()["directories"]["jokes"], lang),encoding="utf-8") as f:
+    #             jokelist = f.readlines()
+    #             if len(jokelist) > 0:
+    #                 await ctx.message.channel.send(choice(jokelist).replace("\\n","\n"))
+    #             else:
+    #                 data = GenericCommandParameters(ctx)
+    #                 await ctx.message.channel.send(data.lang["nojoke"].format(lang))
+    #     else:
+    #         data = GenericCommandParameters(ctx)
+    #         await ctx.message.channel.send(data.lang["nojoke"].format(lang))

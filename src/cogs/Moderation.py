@@ -91,7 +91,7 @@ class Moderation(commands.Cog):
     #     data = GenericCommandParameters(ctx)
     #     embd = discord.Embed(title="WARN",description=reason,colour=discord.Color(int('ff0000',16)))
     #     embd.set_footer(text=str(ctx.message.created_at))
-    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
     #     embd.set_thumbnail(url="https://www.ggte.unicamp.br/ea/img/iconalerta.png")
     #     cfg = data.srv.get_warnconfig()
     #     for memb in members:
@@ -137,7 +137,7 @@ class Moderation(commands.Cog):
     #     data = GenericCommandParameters(ctx)
     #     embd = discord.Embed(title="UNWARN",colour=discord.Color(int('00ff00',16)))
     #     embd.set_footer(text=str(ctx.message.created_at))
-    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
     #     embd.set_thumbnail(url="https://cdn1.iconfinder.com/data/icons/interface-elements/32/accept-circle-512.png")
     #     for memb in members:
     #         data.srv.unwarnuser(str(memb.id))
@@ -184,7 +184,7 @@ class Moderation(commands.Cog):
     #     ls = data.srv.get_warned()
     #     embd = discord.Embed(title="Warned list",description=data.lang["warnlist"],colour=discord.Color(int('ff0000',16)))
     #     embd.set_footer(text=str(ctx.message.created_at))
-    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
     #     for i in ls:
     #         user = await self.bot.fetch_user(int(i[0]))
     #         embd.add_field(name=str(user)+" :",value=str(i[1])+" warning(s)",inline=True)
@@ -199,7 +199,7 @@ class Moderation(commands.Cog):
     #     ls = data.srv.get_warnconfig()
     #     embd = discord.Embed(title=data.lang["punishlist"],description=data.lang["warncfglist"],colour=discord.Color(int('ff0000',16)))
     #     embd.set_footer(text=str(ctx.message.created_at))
-    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+    #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
     #     for i in ls:
     #         if i[1] == "kick":
     #             sanction = "Kick"

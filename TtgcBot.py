@@ -64,21 +64,12 @@ from src.cogs.jdr.Finalize import *
 #from src.cogs.jdr.Maps import *
 from src.cogs.jdr.InventoryCog import *
 
-# Initialize logs
 global logger
-logger = initlogs()
-
-# Check bot directories and files
-initdirs(logger)
-checkfiles(logger)
+global TOKEN
 
 # Initialize bot status
 global statut
 statut = discord.Game(name=Config()["discord"]["default-game"])
-
-# Get bot Token
-global TOKEN
-TOKEN = Config()["token"]
 
 # Get prefix function
 def get_prefix(bot,message):
@@ -259,9 +250,21 @@ async def on_resumed():
 
 # ========== MAIN ========== #
 def main():
-    global TOKEN, logger
+    # Initialize logs
+    global logger
+    logger = initlogs()
+
+    # Check bot directories and files
+    initdirs(logger)
+    checkfiles(logger)
+
+    # Get bot Token
+    global TOKEN
+    TOKEN = Config()["token"]
+
+    # Boot
     logger.info("Starting TtgcBot alpha 3.0")
-    client.run(Config()["token"])
+    client.run(TOKEN)
 
 # Launch the bot
 if __name__ == "__main__":

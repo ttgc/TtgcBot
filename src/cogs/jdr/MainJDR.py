@@ -108,7 +108,7 @@ class MainJDR(commands.Cog, name="JDR"):
         embd.set_footer(text="The Tale of Great Cosmos - Wiki")
         if img is not None:
             embd.set_image(url=img)
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url,url=url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url,url=url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         if len(info.json()["parse"]["redirects"]) != 0:
             embd.add_field(name=data.lang["wiki_redirect"],value=info.json()["parse"]["redirects"][0]["from"],inline=True)
@@ -260,7 +260,7 @@ class MainJDR(commands.Cog, name="JDR"):
         ls = data.srv.jdrlist()
         embd = discord.Embed(title=data.lang["jdrlist_title"],description=data.lang["jdrlist"],colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text=str(ctx.message.created_at))
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for i in ls:
             info = data.lang["jdrlist_info"].format(discord.utils.get(ctx.message.guild.members,id=int(i[3])).mention,str(i[2]),str(i[1]))

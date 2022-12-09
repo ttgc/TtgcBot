@@ -32,7 +32,7 @@ class MainJDR(commands.Cog, name="JDR"):
         self.logger = logger
 
     @commands.cooldown(1,2,commands.BucketType.user)
-    @commands.command(aliases=["rollindep","r","rolldice"])
+    @commands.hybrid_command(aliases=["rollindep","r","rolldice"], description="Roll dice and perform operations")
     async def roll(self,ctx,*,expression):
         """Roll dice and perform operations (supported symbols and operations : `*,+,-,/,()`) if given in the expression field.
         For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example).
@@ -43,7 +43,7 @@ class MainJDR(commands.Cog, name="JDR"):
         parser = ParseRoll(expression)
         final_result,final_expression = parser.resolv()
         self.logger.log(logging.DEBUG+1,"roll %d (%s) in channel %d of server %d",final_result,final_expression,ctx.message.channel.id,ctx.message.guild.id)
-        await ctx.message.channel.send(data.lang["rollindep"].format(final_result,final_expression))
+        await ctx.send(data.lang["rollindep"].format(final_result,final_expression))
 
     @commands.check(check_admin)
     @commands.cooldown(1,30,commands.BucketType.guild)
@@ -89,7 +89,7 @@ class MainJDR(commands.Cog, name="JDR"):
         info = requests.get(infourl)
         exist_test = requests.get(url)
         if exist_test.status_code != 200:
-            await ctx.message.channel.send(data.lang["wiki_unexisting"].format(str(exist_test.status_code)))
+            await ctx.send(data.lang["wiki_unexisting"].format(str(exist_test.status_code)))
             return
         descrip = info.json()["parse"]["text"]["*"]
         descrip = descrip.split("</p>")[0]
@@ -115,24 +115,24 @@ class MainJDR(commands.Cog, name="JDR"):
         return embd
 
     @commands.cooldown(1,1,commands.BucketType.channel)
-    @commands.command()
+    @commands.hybrid_command()
     async def wiki(self,ctx,*,query):
         """Make a quick search on The Tale of Great Cosmos wiki"""
         data = GenericCommandParameters(ctx)
         query = query.replace(" ","_")
         embd = await self._fetch_wiki(ctx, data, query)
         self.logger.log(logging.DEBUG+1,"wiki query (%s) in channel %d of server %d",query,ctx.message.channel.id,ctx.message.guild.id)
-        await ctx.message.channel.send(embed=embd)
+        await ctx.send(embed=embd)
 
     @commands.cooldown(1,1,commands.BucketType.channel)
-    @commands.command(aliases=['rdmfact', 'rf', 'fact', 'randomwiki', 'rdmwiki', 'rw'])
+    @commands.hybrid_command(aliases=['rdmfact', 'rf', 'fact', 'randomwiki', 'rdmwiki', 'rw'])
     async def randomfact(self,ctx):
         """Get a random fact about The Tale of Great Cosmos"""
         data = GenericCommandParameters(ctx)
         info = requests.get("https://thetaleofgreatcosmos.fr/wiki/index.php?title=Sp%C3%A9cial:Page_au_hasard")
         embd = await self._fetch_wiki(ctx, data, info.url, True)
         self.logger.log(logging.DEBUG+1,"random fact in channel %d of server %d", ctx.message.channel.id, ctx.message.guild.id)
-        await ctx.message.channel.send(embed=embd)
+        await ctx.send(embed=embd)
 
     @commands.command(aliases=['jointtgc','ttgc'])
     async def jointhegame(self,ctx):

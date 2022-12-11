@@ -22,7 +22,7 @@ jobs:
     - name: Install PostgreSQL
       run: |
         sudo apt-get update
-        sudo apt-get install -qy postgresql postgresql-server-dev-12 sudo
+        sudo apt-get install -qy postgresql postgresql-server-dev-14 sudo
         sudo service postgresql start
 
     - name: Setup database

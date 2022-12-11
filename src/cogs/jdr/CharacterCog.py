@@ -693,7 +693,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_chanmj)
     @commands.cooldown(1,30,commands.BucketType.channel)
-    @character.command(name="export")
+    @character.command(name="export", enabled=False)
     async def character_export(self,ctx,char: CharacterConverter, lang: typing.Optional[str] = "FR"):
         """**GM/MJ only**
         Export the character information in PDF file format and send it in the channel

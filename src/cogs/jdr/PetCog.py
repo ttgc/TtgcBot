@@ -151,7 +151,7 @@ class PetCog(commands.Cog, name="Pets"):
             char.pet[petkey].lvlup()
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(char.pet[petkey].lvl),inline=True)
             if char.pet[petkey].lvl == 2:
@@ -222,7 +222,7 @@ class PetCog(commands.Cog, name="Pets"):
             if char.pet[petkey].mod == 0: modd = data.lang["offensive"]
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["petbelong"].format(char.pet[petkey].espece,char.name),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["PV"]+" :",value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
             embd.add_field(name=data.lang["PM"]+" :",value=str(char.pet[petkey].PM)+"/"+str(char.pet[petkey].PMmax),inline=True)
@@ -262,7 +262,7 @@ class PetCog(commands.Cog, name="Pets"):
             if amount < 0: got = data.lang["lost"]
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["get_karma"].format(got),colour=discord.Color(int('5B005B',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["get_karma_amount"].format(got),value=str(amount),inline=True)
             embd.add_field(name=data.lang["current_karma"],value=str(char.pet[petkey].karma),inline=True)
@@ -281,7 +281,7 @@ class PetCog(commands.Cog, name="Pets"):
         else:
             embd = discord.Embed(title=data.lang["petstat"],description=data.char.pet[petkey].name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+data.char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["dice_rolled"],value=str(data.char.pet[petkey].stat[0]),inline=True)
         embd.add_field(name=data.lang["super_critic_success"],value=str(data.char.pet[petkey].stat[1]),inline=True)
@@ -306,7 +306,7 @@ class PetCog(commands.Cog, name="Pets"):
             char = char.pet[petkey].petset('pv',-val)
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["damaged"],colour=discord.Color(int('ff0000',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["damage_taken"],value=str(val),inline=True)
             embd.add_field(name=data.lang["remaining_pv"],value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
@@ -327,7 +327,7 @@ class PetCog(commands.Cog, name="Pets"):
             char = char.pet[petkey].petset('pv',val)
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["healed"],colour=discord.Color(int('00ff00',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["heal_amount"],value=str(val),inline=True)
             embd.add_field(name=data.lang["remaining_pv"],value=str(char.pet[petkey].PV)+"/"+str(char.pet[petkey].PVmax),inline=True)
@@ -352,7 +352,7 @@ class PetCog(commands.Cog, name="Pets"):
             if val < 0: got = data.lang["lost"]
             embd = discord.Embed(title=char.pet[petkey].name,description=data.lang["get_pm"].format(got),colour=discord.Color(int('0000ff',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
             embd.add_field(name=data.lang["remaining_pm"],value=str(char.pet[petkey].PM)+"/"+str(char.pet[petkey].PMmax),inline=True)

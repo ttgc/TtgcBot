@@ -296,7 +296,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         char = char.charset('pv',-val)
         embd = discord.Embed(title=char.name,description=data.lang["damaged"],colour=discord.Color(int('ff0000',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["damage_taken"],value=str(val),inline=True)
         embd.add_field(name=data.lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
@@ -314,7 +314,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         char = char.charset('pv',val)
         embd = discord.Embed(title=char.name,description=data.lang["healed"],colour=discord.Color(int('00ff00',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["heal_amount"],value=str(val),inline=True)
         embd.add_field(name=data.lang["remaining_pv"],value=str(char.PV)+"/"+str(char.PVmax),inline=True)
@@ -337,7 +337,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         if val < 0: got = data.lang["lost"]
         embd = discord.Embed(title=char.name,description=data.lang["get_pm"].format(got),colour=discord.Color(int('0000ff',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["get_pm_amount"].format(got),value=str(abs(val)),inline=True)
         embd.add_field(name=data.lang["remaining_pm"],value=str(char.PM)+"/"+str(char.PMmax),inline=True)
@@ -364,7 +364,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         if val < 0: got = data.lang["lost"]
         embd = discord.Embed(title=char.name,description=data.lang["get_karma"].format(got),colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["get_karma_amount"].format(got),value=str(val),inline=True)
         embd.add_field(name=data.lang["current_karma"],value=str(char.karma),inline=True)
@@ -403,7 +403,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             Inventory.forceinvcalc()
             embd = discord.Embed(title=char.name,description=data.lang["paid"],colour=discord.Color(int('ffff00',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             embd.add_field(name=data.lang["money_spent"],value=str(val),inline=True)
             embd.add_field(name=data.lang["remaining_money"],value=str(char.money),inline=True)
@@ -429,7 +429,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         Inventory.forceinvcalc()
         embd = discord.Embed(title=char.name,description=data.lang["earnmoney"],colour=discord.Color(int('ffff00',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["money_earned"],value=str(val),inline=True)
         embd.add_field(name=data.lang["remaining_money"],value=str(char.money),inline=True)
@@ -444,7 +444,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         embd = discord.Embed(title=char.name,description="{} {}{}{}".format(fullrace,char.classe,symbiont,affiliated),colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+char.name.replace(" ","_"))
         if char.dead: embd.set_image(url="http://www.thetaleofgreatcosmos.fr/wp-content/uploads/2018/06/you-are-dead.png")
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         if char.dead:
             embd.add_field(name=data.lang["PV"]+" :",value="DEAD",inline=True)
@@ -490,7 +490,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["stat"],description=data.char.name,colour=discord.Color(randint(0,int('ffffff',16))),url="http://thetaleofgreatcosmos.fr/wiki/index.php?title="+data.char.name.replace(" ","_"))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["dice_rolled"],value=str(data.char.stat[0]),inline=True)
         embd.add_field(name=data.lang["super_critic_success"],value=str(data.char.stat[1]),inline=True)
@@ -593,7 +593,7 @@ class CharacterCog(commands.Cog, name="Characters"):
             char = char.charset('ment',newval)
             embd = discord.Embed(title=char.name,description=data.lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
             embd.set_footer(text="The Tale of Great Cosmos")
-            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+            embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             if op is not None: embd.add_field(name=data.lang["mental_amount"].format(got),value=amount,inline=True)
             embd.add_field(name=data.lang["current_mental"],value=str(char.mental),inline=True)
@@ -612,7 +612,7 @@ class CharacterCog(commands.Cog, name="Characters"):
     def _levelup_embed(self,ctx,data,char):
         embd = discord.Embed(title=char.name,description=data.lang["lvlup"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         embd.add_field(name=data.lang["lvl"].capitalize()+" :",value=str(char.lvl),inline=True)
         if char.lvl == 2:
@@ -693,7 +693,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_chanmj)
     @commands.cooldown(1,30,commands.BucketType.channel)
-    @character.command(name="export")
+    @character.command(name="export", enabled=False)
     async def character_export(self,ctx,char: CharacterConverter, lang: typing.Optional[str] = "FR"):
         """**GM/MJ only**
         Export the character information in PDF file format and send it in the channel
@@ -767,7 +767,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         data = GenericCommandParameters(ctx)
         embd = discord.Embed(title=data.lang["charlist"],description=data.lang["charlist_descr"],colour=discord.Color(int('5B005B',16)))
         embd.set_footer(text="The Tale of Great Cosmos")
-        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
+        embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.display_avatar.url)
         embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
         for char in data.charbase:
             alive = data.lang["dead"] if char.dead else data.lang["alive"]

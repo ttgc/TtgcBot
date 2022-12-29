@@ -93,23 +93,23 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
             await ctx.message.channel.send("your request has timeout")
         else:
             self.logger.warning("Shutdown requested by %s",str(ctx.message.author))
-            await self.bot.logout()
+            await self.bot.close()
             sys.exit(0)
 
-    @commands.check(check_botmanager)
-    @commands.command()
-    async def reboot(self,ctx):
-        await ctx.message.channel.send("You are requesting a reboot, please ensure that you want to performe it by typing `confirm`")
-        chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
-        try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
-        except asyncio.TimeoutError: answer = None
-        if answer is None:
-            await ctx.message.channel.send("your request has timeout")
-        else:
-            self.logger.warning("Reboot requested by %s",str(ctx.message.author))
-            await self.bot.logout()
-            sub.call(['./bootbot.sh'])
-            sys.exit(0)
+    # @commands.check(check_botmanager)
+    # @commands.command()
+    # async def reboot(self,ctx):
+    #     await ctx.message.channel.send("You are requesting a reboot, please ensure that you want to performe it by typing `confirm`")
+    #     chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
+    #     try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
+    #     except asyncio.TimeoutError: answer = None
+    #     if answer is None:
+    #         await ctx.message.channel.send("your request has timeout")
+    #     else:
+    #         self.logger.warning("Reboot requested by %s",str(ctx.message.author))
+    #         await self.bot.logout()
+    #         sub.call(['./bootbot.sh'])
+    #         sys.exit(0)
 
     @commands.check(check_botmanager)
     @commands.command()

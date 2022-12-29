@@ -41,7 +41,8 @@
     },
     "discord": {
         "default-prefix": "/",
-        "default-game": "Ohayo !"
+        "default-game": "Ohayo !",
+        "test-guild": null
     },
     "directories": {
         "music": "Music",

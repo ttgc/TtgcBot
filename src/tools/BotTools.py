@@ -23,6 +23,9 @@ from src.utils.DatabaseManager import *
 import src.tools.Character as ch
 import src.tools.CharacterUtils as chutil
 
+def extract_channel(channel):
+    return channel.parent if isinstance(channel, discord.Thread) else channel
+
 class DBServer:
     def __init__(self,ID):
         self.ID = ID
@@ -282,7 +285,7 @@ class DBServer:
 
     def jdrstart(self,channelid,mjid):
         db = Database()
-        db.call("jdrcreate",idserv=self.ID,idchan=channelid,mj=mjid)
+        db.call("jdrcreate",idserv=self.ID,idchan=extract_channel(channelid),mj=mjid)
         db.close()
         return self.getJDR(channelid)
 
@@ -318,7 +321,7 @@ class DBJDR:
     def __init__(self,srvid,channelid):
         self.server = srvid
         db = Database()
-        cur = db.call("get_jdr",idserv=srvid,idchan=channelid)
+        cur = db.call("get_jdr",idserv=srvid,idchan=extract_channel(channelid))
         if cur is None:
             db.close(True)
             raise DatabaseException("unable to find the JDR")
@@ -356,12 +359,12 @@ class DBJDR:
 
     def extend(self,channel_id):
         db = Database()
-        db.call("JDRextend",idserv=self.server,src=self.channel,target=channel_id)
+        db.call("JDRextend",idserv=self.server,src=self.channel,target=extract_channel(channel_id))
         db.close()
 
     def unextend(self,channel_id):
         db = Database()
-        db.call("JDRstopextend",idserv=self.server,src=self.channel,target=channel_id)
+        db.call("JDRstopextend",idserv=self.server,src=self.channel,target=extract_channel(channel_id))
         db.close()
 
     def unextend_all(self):

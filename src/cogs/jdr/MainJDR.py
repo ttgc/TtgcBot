@@ -20,11 +20,13 @@
 from src.utils.checks import *
 from src.tools.BotTools import *
 from discord.ext import commands
-import logging,asyncio
+import logging
+import asyncio
 import discord
 from src.tools.Translator import *
 from src.tools.parsingdice import *
 import requests
+import typing
 
 class MainJDR(commands.Cog, name="JDR"):
     def __init__(self,bot,logger):
@@ -147,7 +149,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.check(check_mj)
     @commands.cooldown(1,60,commands.BucketType.user)
     @jdr.command(name="start",aliases=["create"])
-    async def jdr_start(self,ctx,chan: discord.TextChannel):
+    async def jdr_start(self,ctx,chan: typing.Union[discord.TextChannel, discord.ForumChannel]):
         """**GM/MJ role Only**
         Start a RP/JDR in the mentioned channel"""
         data = GenericCommandParameters(ctx)
@@ -162,7 +164,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.check(check_admin)
     @commands.cooldown(1,60,commands.BucketType.user)
     @jdr.command(name="delete")
-    async def jdr_delete(self,ctx,chan: discord.TextChannel):
+    async def jdr_delete(self,ctx,chan: typing.Union[discord.TextChannel, discord.ForumChannel]):
         """**Admin only**
         Delete the RP/JDR in the mentioned channel. This cannot be undone once performed and all data related to it will be lost forever and ever."""
         data = GenericCommandParameters(ctx)
@@ -182,7 +184,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.check(check_mj)
     @commands.cooldown(1,60,commands.BucketType.user)
     @jdr.command(name="copy")
-    async def jdr_copy(self,ctx,src: discord.TextChannel, dest: discord.TextChannel):
+    async def jdr_copy(self,ctx,src: typing.Union[discord.TextChannel, discord.ForumChannel], dest: typing.Union[discord.TextChannel, discord.ForumChannel]):
         """**Admin and GM/MJ role only**
         Copy all the data of a RP/JDR from a channel to one other."""
         data = GenericCommandParameters(ctx)
@@ -204,7 +206,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.check(check_mj)
     @commands.cooldown(1,5,commands.BucketType.user)
     @jdr.command(name="extend")
-    async def jdr_extend(self,ctx,src: discord.TextChannel, dest: discord.TextChannel):
+    async def jdr_extend(self,ctx,src: typing.Union[discord.TextChannel, discord.ForumChannel], dest: typing.Union[discord.TextChannel, discord.ForumChannel]):
         """**Admin and GM/MJ role only**
         Extend a RP/JDR from a channel to another. By extending, all data of the game will be avalaible on both channels."""
         data = GenericCommandParameters(ctx)
@@ -228,7 +230,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.check(check_admin)
     @commands.cooldown(1,5,commands.BucketType.user)
     @jdr.command(name="unextend")
-    async def jdr_unextend(self,ctx,src: discord.TextChannel, dest: discord.TextChannel):
+    async def jdr_unextend(self,ctx,src: typing.Union[discord.TextChannel, discord.ForumChannel], dest: typing.Union[discord.TextChannel, discord.ForumChannel]):
         """**Admin only**
         Remove an extension between two channels for a RP/JDR. The data will be only avalaible in the source/origin channel after performing this"""
         data = GenericCommandParameters(ctx)
@@ -242,7 +244,7 @@ class MainJDR(commands.Cog, name="JDR"):
     @commands.check(check_admin)
     @commands.cooldown(1,5,commands.BucketType.user)
     @jdr.command(name="unextendall")
-    async def jdr_unextendall(self,ctx,src: discord.TextChannel):
+    async def jdr_unextendall(self,ctx,src: typing.Union[discord.TextChannel, discord.ForumChannel]):
         """**Admin only**
         Remove all extensions for a RP/JDR. The data will be only avalaible in the source/origin channel after performing this"""
         data = GenericCommandParameters(ctx)

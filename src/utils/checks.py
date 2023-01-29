@@ -57,8 +57,8 @@ def check_mj(ctx):
 def check_jdrchannel(ctx):
     srv = DBServer(str(ctx.message.guild.id))
     for i in srv.jdrlist():
-        if str(ctx.message.channel.id) == i[0]: return True
-    return str(ctx.message.channel.id) in srv.jdrextension()
+        if str(extract_channel(ctx.channel.id)) == i[0]: return True
+    return str(extract_channel(ctx.channel.id)) in srv.jdrextension()
 
 def check_chanmj(ctx):
     if check_jdrchannel(ctx):

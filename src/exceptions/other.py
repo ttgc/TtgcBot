@@ -29,3 +29,7 @@ class NotBoundException(InternalCommandError):
     @property
     def obj(self):
         return self._obj
+
+class RaisedExceptionCommandError(InternalCommandError):
+    def __init__(self, inner: Exception):
+        super().__init__(f"Command raised {type(inner).__name__}: {inner}")

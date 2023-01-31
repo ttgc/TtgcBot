@@ -21,8 +21,8 @@ import discord
 from enum import Enum
 
 def async_lambda(callback):
-    async def _execute(*args, **kargs):
-        await callback(*args, **kargs)
+    async def _execute(*args, **kwargs):
+        await callback(*args, **kwargs)
 
     return _execute
 

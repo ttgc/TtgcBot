@@ -20,7 +20,7 @@
 from exceptions import NotBoundException, APIException, InternalCommandError
 from utils.decorators import deprecated
 from network import RequestType
-from models.enums import AutoPopulatedEnums, TagList
+from models.enums import AutoPopulatedEnums, AttributeTag
 from models.pet import Pet
 from models.skills import Skill
 from models.inventory import Inventory
@@ -33,8 +33,8 @@ class Character:
         self.key = kwargs.get("charkey", "unknown")
         self.name = kwargs.get("name", "unknown")
         self.lore = kwargs.get("lore", "")
-        self.PVmax = kwargs.get("PVm", 1)
-        self.PMmax = kwargs.get("PMm", 1)
+        self._PVmax = kwargs.get("PVm", 1)
+        self._PMmax = kwargs.get("PMm", 1)
         self.PV = kwargs.get("PV", 1)
         self.PM = kwargs.get("PM", 1)
         self.force = kwargs.get("force", 50)
@@ -86,6 +86,24 @@ class Character:
     agilite = furtivite
 
     @property
+    def PVmax(self):
+        return self._PVmax
+
+    @PVmax.setter
+    def PVmax(self, val):
+        self._PVmax = val
+        self.PV = min(self.PV, val)
+
+    @property
+    def PMmax(self):
+        return self._PMmax
+
+    @PVmax.setter
+    def PMmax(self, val):
+        self._PMmax = val
+        self.PM = min(self.PM, val)
+
+    @property
     def api(self):
         return self.jdr.api if self.is_bound() else None
 
@@ -134,53 +152,44 @@ class Character:
 
         return info
 
-    async def charset(self, tag, value, requester):
+    def _internal_check_setupdate(self, taglist, callername, kwargs):
         self.is_bound(True)
-        tag = tag.lower()
 
-        if tag not in TagList.CHARSET:
-            raise InternalCommandError("Invalid tag for charset command")
+        for tag in final_dict.keys():
+            if tag.id not in taglist:
+                raise InternalCommandError(f"Invalid tag for {callername} command")
 
-        data = {tag: value}
+    async def charset(self, requester, kwargs={}):
+        self._internal_check_setupdate(AttributeTag.get_charset(), 'charset', kwargs)
+        data = {tag.dbkey: value for tag, value in kwargs.items() if tag != AttributeTag.PILOT_A and tag != AttributeTag.PILOT_P}
+
+        if AttributeTag.PILOT_A in kwargs or AttributeTag.PILOT_P in kwargs:
+            data["pilot"] = {
+                "astral": kwargs.get(AttributeTag.PILOT_A, None),
+                "planet": kwargs.get(AttributeTag.PILOT_P, None)
+            }
+
         await self._internal_charset(requester, **data)
 
-        if tag == "name": self.name = value
-        elif tag == "pv": self.PVmax, self.PV = value, min(self.PV, value)
-        elif tag == "pm": self.PMmax, self.PM = value, min(self.PM, value)
-        elif tag == "strength": self.force = max(1, min(100, value))
-        elif tag == "spirit": self.esprit = max(1, min(100, value))
-        elif tag == "charisma": self.charisme = max(1, min(100, value))
-        elif tag == "agility": self.agilite = max(1, min(100, value))
-        elif tag == "precision": self.precision = max(1, min(100, value))
-        elif tag == "luck": self.luck = max(1, min(100, value))
-        elif tag == "intuition": self.intuition = max(1, min(6, value))
-        elif tag == "mental": self.mental = value
-        elif tag == "karma": self.default_karma = max(-10, min(10, value))
-        elif tag == "money": self.money = min(0, value)
-        elif tag == "gamemod":
-            Gamemods = await AutoPopulatedEnums().get_gamemods()
-            self.default_mod = Gamemods.from_str(value)
-        elif tag == "pilot":
-            self.astral_pilot = max(-1, value.get("astral", self.astral_pilot))
-            self.planet_pilot = max(-1, value.get("planet", self.planet_pilot))
+        for tag, value in kwargs.items():
+            if tag.id == "default_mod":
+                Gamemods = await AutoPopulatedEnums().get_gamemods()
+                value = Gamemods.from_str(value)
 
-    async def update(self, tag, value, requester):
-        self.is_bound(True)
-        tag = tag.lower()
+            tag.set_attribute(self, value)
 
-        if tag not in TagList.CHARUPDATE:
-            raise InternalCommandError("Invalid tag for char update command")
-
-        data = {tag: value}
+    async def update(self, requester, kwargs={}):
+        kwargs = self._internal_check_setupdate(AttributeTag.get_charupdate(), 'charupdate', kwargs)
+        data = {tag.dbkey: value for tag, value in kwargs.items()}
         await self._internal_update(requester, **data)
 
-        if tag == "pv": self.PV = min(self.PVmax, self.PV + value)
-        elif tag == "pm": self.PM = min(self.PMmax, self.PM + value)
-        elif tag == "mental": self.mental += value
-        elif tag == "karma": self.karma = max(-10, min(10, value))
-        elif tag == "money": self.money = self.money + value if self.money + value > 0 else self.money
-        elif tag == "light_point": self.lp += max(0, value)
-        elif tag == "dark_point": self.dp += max(0, value)
+        for tag, value in kwargs.items():
+            if tag.id == "mental":
+                value += self.mental
+            elif tag.id == "money":
+                value = self.money + value if self.money + value > 0 else self.money
+
+            tag.set_attribute(self, value)
 
     async def makehybrid(self, race, requester, allowOverride=False):
         if allowOverride or self.hybrid_race is None:

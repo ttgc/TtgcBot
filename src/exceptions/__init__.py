@@ -22,4 +22,4 @@ from exceptions.funcexception import AlreadyCalledFunctionException
 from exceptions.httpstatus import HTTPErrorCode
 from exceptions.managerexception import ManagerException, DatabaseException, APIException
 from exceptions.networkexception import HTTPException
-from exceptions.other import InternalCommandError, NotBoundException
+from exceptions.other import InternalCommandError, NotBoundException, RaisedExceptionCommandError

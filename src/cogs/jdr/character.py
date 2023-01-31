@@ -27,12 +27,12 @@ from discord.ext import commands
 import asyncio
 from core.commandparameters import GenericCommandParameters
 from setup.loglevel import LogLevel
-from utils import async_lambda, async_conditional_lambda
+from utils import async_lambda, async_conditional_lambda, try_parse_int, get_color
 from utils.checks import check_jdrchannel, check_haschar, check_chanmj
 from utils.converters import CharacterConverter
 from utils.emojis import Emoji
 from models import Character
-from models.enums import AutoPopulatedEnums
+from models.enums import AutoPopulatedEnums, AttributeTag
 from exceptions import HTTPErrorCode
 from network import safe_request
 # from src.tools.Translator import *
@@ -176,31 +176,43 @@ class CharacterCog(commands.Cog, name="Characters"):
             lambda dd, i: i.response.edit_message(data.lang["affiliate"].format(char.name, dd.value), view=None)
         )
 
-        success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_org_placeholder"], timeout=60, options=sb_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
+        success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_org_placeholder"], timeout=60, options=org_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
         if success:
             char = await char.affiliate(Organizations(selection) if selection is not None else None, ctx.author.id)
             self.logger.log(LogLevel.DEBUG.value, "/char affiliate (%s with %s) in channel %d of server %d", char.key, selection, ctx.channel.id, ctx.guild.id)
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="set")
-    async def character_set(self, ctx, char): #(self, ctx, key)
+    async def character_set(self, ctx, char: CharacterConverter): #(self, ctx, key)
         """**PC/PJ only**"""
+        async def _send_modal(btn, interaction):
+            if AttributeTag(set_dd.value).isnumeric():
+                result = int(btns_view.result)
+                if result > 0:
+                    val_field.label = data.lang["value_input"].format(data.lang['add'])
+                elif result < 0:
+                    val_field.label = data.lang["value_input"].format(data.lang['remove'])
+
+            interaction.response.send_modal(modal)
+
         data = await GenericCommandParameters.get_from_context(ctx)
+        if char.dead:
+            await ctx.channel.send(data.lang["is_dead"].format(char.name))
+
         modal = ui.views.Modal(ctx, "/character set", timeout=60)
-        val_field = ui.TextInput(ctx, modal, "Value", placeholder=data.lang["value_input"], minlen=1, maxlen=4)
+        val_field = ui.TextInput(ctx, modal, data.lang["value_input"].format(data.lang['set']), placeholder=data.lang["value"], minlen=1, maxlen=4)
 
         btns_view = ui.views.ButtonGroup(ctx, 'operation', timeout=60)
-        on_click = async_lambda(lambda btn, i: i.response.send_modal(modal))
-        btns_view.addrange(
-            ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=on_click),
-            ui.DefaultButtons.SET.spawn(btns_view, onclick=on_click),
-            ui.DefaultButtons.ADD.spawn(btns_view, onclick=on_click)
-        )
+        ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=_send_modal)
+        ui.DefaultButtons.SET.spawn(btns_view, onclick=_send_modal)
+        ui.DefaultButtons.ADD.spawn(btns_view, onclick=_send_modal)
 
-        settable = [data.lang["mental"], data.lang["karma"], data.lang["intuition"], f'{data.lang["PV"]} max', f'{data.lang["PM"]} max',
-                    data.lang["force"], data.lang["esprit"], data.lang["charisme"], data.lang["agilite"], data.lang["precision"],
-                    data.lang["chance"], data.lang["lp"], data.lang["dp"], data.lang["pilot_a"], data.lang["pilot_p"], data.lang["money"]]### HARDCODED - TO BE REMOVED
-        on_select = async_lambda(lambda d, i: i.response.edit_message(view=btns_view))
+        settable = AttributeTag.get_charset(lang=data.lang)
+        on_select = async_conditional_lambda(
+            asyncio.coroutine(lambda dd, i: AttributeTag(dd.value).isnumeric()),
+            lambda dd, i: i.response.edit_message(view=btns_view),
+            _send_modal
+        )
         set_dd = ui.StandaloneDropdown(ctx, placeholder=data.lang["dropdown_charset_placeholder"], timeout=60, options=[i.capitalize() for i in settable], onselection=on_select)
 
         msg = await ctx.send(view=set_dd.view, reference=ctx.message)
@@ -215,50 +227,34 @@ class CharacterCog(commands.Cog, name="Characters"):
         if timeout:
             await msg.edit(content=data.lang["timeout"], view=None)
         else:
-            res = int(btns_view.result)
-            op = '+' if res > 0 else '-' if res < 0 else None
+            tag = AttributeTag(set_dd.value)
+            value = val_field.value
             got = data.lang["new_value"]
-            stat = set_dd.value.lower()
-            amount = try_parse_int(val_field.value)
-            newval = amount
+            stat = tag.translate(data.lang)
+            op = None
 
-            if op is not None:
-                if op == '+':
+            if tag.isnumeric():
+                value = try_parse_int(val_field.value, tag.get_attribute(char))
+                res = int(btns_view.result)
+
+                if res > 0:
+                    value += tag.get_attribute_or_default(char, 0)
                     got = data.lang["recovered"]
-                    newval += 100#char.mental
-                else:
+                    op = '+'
+                elif res < 0:
+                    value = tag.get_attribute_or_default(char, 0) - value
                     got = data.lang["lost"]
-                    newval = 100 - amount#char.mental - amount
-            # char = char.charset('ment', newval)
+                    op = '-'
 
+            char.charrset(ctx.author.id, {tag: value})
+            final_value = tag.get_attribute_or_default(char, value)
             embd = discord.Embed(title=char, description=data.lang["charset"].format(got, stat), colour=get_color('5B005B'))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             if op is not None:
-                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=str(amount), inline=True)
-            embd.add_field(name=data.lang["charset_current"].format(stat), value=str(newval), inline=True)
+                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=str(value), inline=True)
+            embd.add_field(name=data.lang["charset_current"].format(stat), value=str(final_value), inline=True)
 
             await msg.edit(content=None, embed=embd, view=None)
-            self.logger.info(f"set {set_dd.value} for {char} to {newval} ({op if op is not None else '='}{amount})")
-
-        # if char.dead:
-        #     await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
-        # else:
-        #     got = data.lang["new_value"]
-        #     newval = amount
-        #     if op is not None:
-        #         if op == "+":
-        #             got = data.lang["recovered"]
-        #             newval += char.mental
-        #         else:
-        #             got = data.lang["lost"]
-        #             newval = char.mental - amount
-        #     char = char.charset('ment',newval)
-        #     embd = discord.Embed(title=char.name,description=data.lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
-        #     embd.set_footer(text="The Tale of Great Cosmos")
-        #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        #     embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
-        #     if op is not None: embd.add_field(name=data.lang["mental_amount"].format(got),value=amount,inline=True)
-        #     embd.add_field(name=data.lang["current_mental"],value=str(char.mental),inline=True)
-        #     await ctx.message.channel.send(embed=embd)
+            self.logger.info(f"set {set_dd.value} for {char} to {final_value} ({op if op is not None else '='}{value})")

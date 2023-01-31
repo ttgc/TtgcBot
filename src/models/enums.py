@@ -23,7 +23,8 @@ from utils import SerializableEnum
 from utils.decorators import singleton
 from exceptions import APIException
 from network import RequestType
-from datahandler.api import APIManager
+from datahandler.api import APIManager, RaisedExceptionCommandError
+from functools import partial
 
 class Extension:
     def __init__(self, universe, world):
@@ -45,20 +46,105 @@ class Extension:
     def contained_in(self, universe):
         return self.universe == universe
 
-class TagList(Enum):
-    CHARSET = [
-        "name", "pv", "pm", "strength", "spirit", "charisma", "agility",
-        "precision", "luck", "intuition", "mental", "karma", "gamemod",
-        "money", "pilot"
-    ]
+class AttributeRule(Enum):
+    """
+    Attribute setter rules. When set the rule is applied receiving those parameters:
+    x = value to set
+    e = entity on which the set will be applied
+    attr = attribute/tag that will be set
+    """
+    ASSIGN = lambda x, e, attr: x
+    BOUNDED_6 = lambda x, e, attr: max(1, min(6, x))
+    BOUNDED_100 = lambda x, e, attr: max(1, min(100, x))
+    RANGE_M10_10 = lambda x, e, attr: max(-10, min(10, x))
+    POSITIVE = lambda x, e, attr: max(0, x)
+    REL_POSITIVE = lambda x, e, attr: max(0, x + attr.get_attribute(e))
+    POSITIVE_STRICT = lambda x, e, attr: max(1, x)
+    SUP_M1 = lambda x, e, attr: max(-1, x)
+    REL_BOUNDED_CUSTOM = lambda x, e, attr, tag: max(0, min(tag.get_attribute(e), x))
+    REL_LIMITED_CUSTOM = lambda x, e, attr, tag: min(tag.get_attribute(e), x)
 
-    PETSET = [
-        "name", "pv", "pm", "strength", "spirit", "charisma", "agility",
-        "precision", "luck", "instinct", "gamemod", "species"
-    ]
+class AttributeTag(Enum):
+    ######    = (id             , valtype, langkey    , dbkey        , charset, petset, charupdate, petupdate, rule)
+    NAME      = ('name'         , str    , 'name'     , 'name'       , True   , True  , False     , False    , None)
+    PV        = ('PV'           , int    , 'PV'       , 'pv'         , False  , False , True      , True     , partial(AttributeRule.REL_LIMITED_CUSTOM.value, tag=AttributeTag.PV_MAX))
+    PM        = ('PM'           , int    , 'PM'       , 'pm'         , False  , False , True      , True     , partial(AttributeRule.REL_BOUNDED_CUSTOM.value, tag=AttributeTab.PM_MAX))
+    PV_MAX    = ('PVmax'        , int    , 'PVmax'    , 'pv'         , True   , True  , False     , False    , AttributeRule.POSITIVE_STRICT.value)
+    PM_MAX    = ('PMmax'        , int    , 'PMmax'    , 'pm'         , True   , True  , False     , False    , AttributeRule.POSITIVE.value)
+    STR       = ('force'        , int    , 'force'    , 'strength'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
+    SPR       = ('esprit'       , int    , 'esprit'   , 'spirit'     , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
+    CHA       = ('charisme'     , int    , 'charisme' , 'charisma'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
+    AGI       = ('agilite'      , int    , 'agilite'  , 'agility'    , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
+    PREC      = ('precision'    , int    , 'precision', 'precision'  , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
+    LUCK      = ('luck'         , int    , 'chance'   , 'luck'       , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
+    INTUITION = ('intuition'    , int    , 'intuition', 'intuition'  , True   , False , False     , False    , AttributeRule.BOUNDED_6.value)
+    MENTAL    = ('mental'       , int    , 'mental'   , 'mental'     , True   , False , True      , False    , AttributeRule.POSITIVE.value)
+    KARMA     = ('karma'        , int    , 'karma'    , 'karma'      , False  , False , True      , False    , AttributeRule.RANGE_M10_10.value)
+    DEF_KARMA = ('default_karma', int    , 'dkarma'   , 'karma'      , True   , True  , False     , False    , AttributeRule.RANGE_M10_10.value)
+    DEF_GM    = ('default_mod'  , str    , 'dmod'     , 'gamemod'    , True   , True  , False     , False    , None)
+    MONEY     = ('money'        , int    , 'money'    , 'money'      , True   , True  , True      , False    , AttributeRule.POSITIVE.value)
+    PILOT_A   = ('astral_pilot' , int    , 'pilot_a'  , 'pilot'      , True   , False , False     , False    , AttributeRule.SUP_M1.value)
+    PILOT_P   = ('planet_pilot' , int    , 'pilot_p'  , 'pilot'      , True   , False , False     , False    , AttributeRule.SUP_M1.value)
+    INSTINCT  = ('instinct'     , int    , 'instinct' , 'instinct'   , False  , True  , False     , False    , AttributeRule.BOUNDED_6.value)
+    SPECIES   = ('espece'       , str    , 'espece'   , 'species'    , False  , True  , False     , False    , None)
+    LP        = ('lp'           , int    , 'lp'       , 'light_point', False  , False , True      , False    , AttributeRule.REL_POSITIVE.value)
+    DP        = ('dp'           , int    , 'dp'       , 'dark_point' , False  , False , True      , False    , AttributeRule.REL_POSITIVE.value)
 
-    CHARUPDATE = ["pv", "pm", "mental", "karma", "money", "light_point", "dark_point"]
-    PETUPDATE = ["pv", "pm", "karma"]
+    def __init__(self, id, valtype, langkey, dbkey, charset, petset, charupdate, petupdate, rule):
+        self.id = id
+        self.valtype = valtype
+        self.langkey = langkey
+        self.dbkey = dbkey
+        self.charset = charset
+        self.petset = petset
+        self.charupdate = charupdate
+        self.petupdate = petupdate
+        self.rule = partial(rule if rule is not None else AttributeRule.ASSIGN.value, attr=self)
+
+    def translate(self, lang=None):
+        return lang[self.langkey] if lang else self.id.replace('_', ' ').capitalize()
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def isnumeric(self):
+        return self.valtype is int or self.valtype is float
+
+    def isstring(self):
+        return self.valtype is str
+
+    def get_attribute_or_default(self, entity, default_value=None, *, throw=False):
+        if throw and not hasattr(entity, self.id):
+            raise RaisedExceptionCommandError(AttributeError(f"Entity {entity} of type {type(entity).__name__} does not have attribute {self.id}"))
+        return getattr(entity, self.id, default_value)
+
+    get_attribute = partial(get_attribute_or_default, default_value=None, throw=True)
+
+    def set_attribute(self, entity, value):
+        setattr(entity, self.id, self.rule(value, entity))
+
+    @classmethod
+    def to_dict(cls, lang=None, filter=lambda x: True):
+        return {i.id: i.translate(lang) for i in cls if filter(i)}
+
+    @classmethod
+    def get_charset(cls, lang=None, with_num=True, with_str=True):
+        return cls.to_dict(lang, lambda x: x.charset and ((with_num and x.isnumeric()) or (with_str and x.isstring())))
+
+    @classmethod
+    def get_petset(cls, lang=None, with_num=True, with_str=True):
+        return cls.to_dict(lang, lambda x: x.petset and ((with_num and x.isnumeric()) or (with_str and x.isstring())))
+
+    @classmethod
+    def get_charupdate(cls, lang=None, with_num=True, with_str=True):
+        return cls.to_dict(lang, lambda x: x.charupdate and ((with_num and x.isnumeric()) or (with_str and x.isstring())))
+
+    @classmethod
+    def get_petupdate(cls, lang=None, with_num=True, with_str=True):
+        return cls.to_dict(lang, lambda x: x.petupdate and ((with_num and x.isnumeric()) or (with_str and x.isstring())))
 
 @singleton
 class AutoPopulatedEnums:

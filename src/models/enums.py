@@ -67,28 +67,28 @@ class AttributeRule(Enum):
 class AttributeTag(Enum):
     ######    = (id             , valtype, langkey    , dbkey        , charset, petset, charupdate, petupdate, rule)
     NAME      = ('name'         , str    , 'name'     , 'name'       , True   , True  , False     , False    , None)
-    PV        = ('PV'           , int    , 'PV'       , 'pv'         , False  , False , True      , True     , partial(AttributeRule.REL_LIMITED_CUSTOM.value, tag='PV_MAX'))
-    PM        = ('PM'           , int    , 'PM'       , 'pm'         , False  , False , True      , True     , partial(AttributeRule.REL_BOUNDED_CUSTOM.value, tag='PM_MAX'))
-    PV_MAX    = ('PVmax'        , int    , 'PVmax'    , 'pv'         , True   , True  , False     , False    , AttributeRule.POSITIVE_STRICT.value)
-    PM_MAX    = ('PMmax'        , int    , 'PMmax'    , 'pm'         , True   , True  , False     , False    , AttributeRule.POSITIVE.value)
-    STR       = ('force'        , int    , 'force'    , 'strength'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
-    SPR       = ('esprit'       , int    , 'esprit'   , 'spirit'     , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
-    CHA       = ('charisme'     , int    , 'charisme' , 'charisma'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
-    AGI       = ('agilite'      , int    , 'agilite'  , 'agility'    , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
-    PREC      = ('precision'    , int    , 'precision', 'precision'  , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
-    LUCK      = ('luck'         , int    , 'chance'   , 'luck'       , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)
-    INTUITION = ('intuition'    , int    , 'intuition', 'intuition'  , True   , False , False     , False    , AttributeRule.BOUNDED_6.value)
-    MENTAL    = ('mental'       , int    , 'mental'   , 'mental'     , True   , False , True      , False    , AttributeRule.POSITIVE.value)
-    KARMA     = ('karma'        , int    , 'karma'    , 'karma'      , False  , False , True      , False    , AttributeRule.RANGE_M10_10.value)
-    DEF_KARMA = ('default_karma', int    , 'dkarma'   , 'karma'      , True   , True  , False     , False    , AttributeRule.RANGE_M10_10.value)
+    PV        = ('PV'           , int    , 'PV'       , 'pv'         , False  , False , True      , True     , partial(AttributeRule.REL_LIMITED_CUSTOM, tag='PV_MAX'))
+    PM        = ('PM'           , int    , 'PM'       , 'pm'         , False  , False , True      , True     , partial(AttributeRule.REL_BOUNDED_CUSTOM, tag='PM_MAX'))
+    PV_MAX    = ('PVmax'        , int    , 'PVmax'    , 'pv'         , True   , True  , False     , False    , AttributeRule.POSITIVE_STRICT)
+    PM_MAX    = ('PMmax'        , int    , 'PMmax'    , 'pm'         , True   , True  , False     , False    , AttributeRule.POSITIVE)
+    STR       = ('force'        , int    , 'force'    , 'strength'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100)
+    SPR       = ('esprit'       , int    , 'esprit'   , 'spirit'     , True   , True  , False     , False    , AttributeRule.BOUNDED_100)
+    CHA       = ('charisme'     , int    , 'charisme' , 'charisma'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100)
+    AGI       = ('agilite'      , int    , 'agilite'  , 'agility'    , True   , True  , False     , False    , AttributeRule.BOUNDED_100)
+    PREC      = ('precision'    , int    , 'precision', 'precision'  , True   , True  , False     , False    , AttributeRule.BOUNDED_100)
+    LUCK      = ('luck'         , int    , 'chance'   , 'luck'       , True   , True  , False     , False    , AttributeRule.BOUNDED_100)
+    INTUITION = ('intuition'    , int    , 'intuition', 'intuition'  , True   , False , False     , False    , AttributeRule.BOUNDED_6)
+    MENTAL    = ('mental'       , int    , 'mental'   , 'mental'     , True   , False , True      , False    , AttributeRule.POSITIVE)
+    KARMA     = ('karma'        , int    , 'karma'    , 'karma'      , False  , False , True      , False    , AttributeRule.RANGE_M10_10)
+    DEF_KARMA = ('default_karma', int    , 'dkarma'   , 'karma'      , True   , True  , False     , False    , AttributeRule.RANGE_M10_10)
     DEF_GM    = ('default_mod'  , str    , 'dmod'     , 'gamemod'    , True   , True  , False     , False    , None)
-    MONEY     = ('money'        , int    , 'money'    , 'money'      , True   , True  , True      , False    , AttributeRule.POSITIVE.value)
-    PILOT_A   = ('astral_pilot' , int    , 'pilot_a'  , 'pilot'      , True   , False , False     , False    , AttributeRule.SUP_M1.value)
-    PILOT_P   = ('planet_pilot' , int    , 'pilot_p'  , 'pilot'      , True   , False , False     , False    , AttributeRule.SUP_M1.value)
-    INSTINCT  = ('instinct'     , int    , 'instinct' , 'instinct'   , False  , True  , False     , False    , AttributeRule.BOUNDED_6.value)
+    MONEY     = ('money'        , int    , 'money'    , 'money'      , True   , True  , True      , False    , AttributeRule.POSITIVE)
+    PILOT_A   = ('astral_pilot' , int    , 'pilot_a'  , 'pilot'      , True   , False , False     , False    , AttributeRule.SUP_M1)
+    PILOT_P   = ('planet_pilot' , int    , 'pilot_p'  , 'pilot'      , True   , False , False     , False    , AttributeRule.SUP_M1)
+    INSTINCT  = ('instinct'     , int    , 'instinct' , 'instinct'   , False  , True  , False     , False    , AttributeRule.BOUNDED_6)
     SPECIES   = ('espece'       , str    , 'espece'   , 'species'    , False  , True  , False     , False    , None)
-    LP        = ('lp'           , int    , 'lp'       , 'light_point', False  , False , True      , False    , AttributeRule.REL_POSITIVE.value)
-    DP        = ('dp'           , int    , 'dp'       , 'dark_point' , False  , False , True      , False    , AttributeRule.REL_POSITIVE.value)
+    LP        = ('lp'           , int    , 'lp'       , 'light_point', False  , False , True      , False    , AttributeRule.REL_POSITIVE)
+    DP        = ('dp'           , int    , 'dp'       , 'dark_point' , False  , False , True      , False    , AttributeRule.REL_POSITIVE)
 
     def __init__(self, id, valtype, langkey, dbkey, charset, petset, charupdate, petupdate, rule):
         self.id = id
@@ -99,7 +99,7 @@ class AttributeTag(Enum):
         self.petset = petset
         self.charupdate = charupdate
         self.petupdate = petupdate
-        self.rule = partial(rule if rule is not None else AttributeRule.ASSIGN.value, attr=self)
+        self.rule = partial(rule if rule is not None else AttributeRule.ASSIGN, attr=self)
 
     def translate(self, lang=None):
         return lang[self.langkey] if lang else self.id.replace('_', ' ').capitalize()

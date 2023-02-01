@@ -22,10 +22,10 @@ from enum import Enum
 class Emoji(Enum):
     X = '❌'
     WHITE_CHECK_MARK = '✅'
-    EQUAL='🟰'
-    PLUS='➕'
-    MINUS='➖'
-    HOURGLASS='⏳'
+    EQUAL = '🟰'
+    PLUS = '➕'
+    MINUS = '➖'
+    HOURGLASS = '⏳'
 
     def __str__(self):
         return self.value

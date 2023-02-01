@@ -39,7 +39,7 @@ def async_conditional_lambda(check_callback, if_callback, else_callback):
 def try_parse_int(value: str, default_value: int = 0) -> int:
     try:
         return int(value)
-    except:
+    except ValueError:
         return default_value
 
 def get_color(hexvalue: str) -> discord.Color:

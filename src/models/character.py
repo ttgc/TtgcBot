@@ -98,7 +98,7 @@ class Character:
     def PMmax(self):
         return self._PMmax
 
-    @PVmax.setter
+    @PMmax.setter
     def PMmax(self, val):
         self._PMmax = val
         self.PM = min(self.PM, val)
@@ -155,7 +155,7 @@ class Character:
     def _internal_check_setupdate(self, taglist, callername, kwargs):
         self.is_bound(True)
 
-        for tag in final_dict.keys():
+        for tag in kwargs.keys():
             if tag.id not in taglist:
                 raise InternalCommandError(f"Invalid tag for {callername} command")
 

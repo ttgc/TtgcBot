@@ -23,7 +23,7 @@ from discord.ext import commands
 # import logging,asyncio
 # import functools
 # import concurrent.futures
-# import discord
+import discord
 import asyncio
 from core.commandparameters import GenericCommandParameters
 from setup.loglevel import LogLevel

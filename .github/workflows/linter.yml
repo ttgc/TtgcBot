@@ -23,7 +23,7 @@ jobs:
     - name: Lint with flake8
       env:
         EXCLUDE_FILES: src/deprecated,*/deprecated.py,src/datahandler/database.py,src/core/help.py
-        EXCLUDE_CODE: E265,E266,E302,E305,E306,E501,E261,E262,E701,F401,E731,E704,E127,E128,C901,E9,F63,F7,F82
+        EXCLUDE_CODE: E265,E266,E302,E305,E306,E501,E261,E262,E701,F401,E731,E704,E127,E128,C901,E9,F63,F7,F82,E203,E221
         WARN_FORMAT: '::Warning file=%(path)s,line=%(row)d,col=%(col)d,title=%(code)s::%(path)s:%(row)d:%(col)d: %(code)s %(text)s'
         ERROR_FORMAT: '::Error file=%(path)s,line=%(row)d,col=%(col)d,title=%(code)s::%(path)s:%(row)d:%(col)d: %(code)s %(text)s'
       run: |

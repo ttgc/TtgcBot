@@ -21,9 +21,9 @@ import typing
 from enum import Enum, EnumMeta
 from utils import SerializableEnum
 from utils.decorators import singleton
-from exceptions import APIException
+from exceptions import APIException, RaisedExceptionCommandError
 from network import RequestType
-from datahandler.api import APIManager, RaisedExceptionCommandError
+from datahandler.api import APIManager
 from functools import partial
 
 class Extension:
@@ -61,14 +61,14 @@ class AttributeRule(Enum):
     REL_POSITIVE = lambda x, e, attr: max(0, x + attr.get_attribute(e))
     POSITIVE_STRICT = lambda x, e, attr: max(1, x)
     SUP_M1 = lambda x, e, attr: max(-1, x)
-    REL_BOUNDED_CUSTOM = lambda x, e, attr, tag: max(0, min(tag.get_attribute(e), x))
-    REL_LIMITED_CUSTOM = lambda x, e, attr, tag: min(tag.get_attribute(e), x)
+    REL_BOUNDED_CUSTOM = lambda x, e, attr, tag: max(0, min(AttributeTag[tag].get_attribute(e), x))
+    REL_LIMITED_CUSTOM = lambda x, e, attr, tag: min(AttributeTag[tag].get_attribute(e), x)
 
 class AttributeTag(Enum):
     ######    = (id             , valtype, langkey    , dbkey        , charset, petset, charupdate, petupdate, rule)
     NAME      = ('name'         , str    , 'name'     , 'name'       , True   , True  , False     , False    , None)
-    PV        = ('PV'           , int    , 'PV'       , 'pv'         , False  , False , True      , True     , partial(AttributeRule.REL_LIMITED_CUSTOM.value, tag=AttributeTag.PV_MAX))
-    PM        = ('PM'           , int    , 'PM'       , 'pm'         , False  , False , True      , True     , partial(AttributeRule.REL_BOUNDED_CUSTOM.value, tag=AttributeTab.PM_MAX))
+    PV        = ('PV'           , int    , 'PV'       , 'pv'         , False  , False , True      , True     , partial(AttributeRule.REL_LIMITED_CUSTOM.value, tag='PV_MAX'))
+    PM        = ('PM'           , int    , 'PM'       , 'pm'         , False  , False , True      , True     , partial(AttributeRule.REL_BOUNDED_CUSTOM.value, tag='PM_MAX'))
     PV_MAX    = ('PVmax'        , int    , 'PVmax'    , 'pv'         , True   , True  , False     , False    , AttributeRule.POSITIVE_STRICT.value)
     PM_MAX    = ('PMmax'        , int    , 'PMmax'    , 'pm'         , True   , True  , False     , False    , AttributeRule.POSITIVE.value)
     STR       = ('force'        , int    , 'force'    , 'strength'   , True   , True  , False     , False    , AttributeRule.BOUNDED_100.value)

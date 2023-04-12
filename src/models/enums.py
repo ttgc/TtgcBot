@@ -121,7 +121,8 @@ class AttributeTag(Enum):
             raise RaisedExceptionCommandError(AttributeError(f"Entity {entity} of type {type(entity).__name__} does not have attribute {self.id}"))
         return getattr(entity, self.id, default_value)
 
-    get_attribute = partial(get_attribute_or_default, default_value=None, throw=True)
+    def get_attribute(self, entity):
+        return self.get_attribute_or_default(entity, throw=True)
 
     def set_attribute(self, entity, value):
         setattr(entity, self.id, self.rule(value, entity))

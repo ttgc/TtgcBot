@@ -21,7 +21,7 @@ from datahandler.api import APIManager
 from exceptions import NotBoundException, APIException, InternalCommandError
 from utils.decorators import deprecated
 from network import RequestType
-from models.enums import AutoPopulatedEnums, TagList
+from models.enums import AutoPopulatedEnums, AttributeTag
 
 class Pet:
     def __init__(self, **kwargs):
@@ -84,11 +84,12 @@ class Pet:
 
         return info
 
+    @deprecated("Needs to be rewritten following character model")
     async def petset(self, tag, value, requester):
         self.is_bound(True)
         tag = tag.lower()
 
-        if tag not in TagList.PETSET:
+        if tag not in AttributeTag.get_petset():
             raise InternalCommandError("Invalid tag for petset command")
 
         data = {tag: value}
@@ -109,11 +110,12 @@ class Pet:
             Gamemods = await AutoPopulatedEnums().get_gamemods()
             self.default_mod = Gamemods.from_str(value)
 
+    @deprecated("Needs to be rewritten following character model")
     async def update(self, tag, value, requester):
         self.is_bound(True)
         tag = tag.lower()
 
-        if tag not in TagList.PETUPDATE:
+        if tag not in AttributeTag.get_petupdate():
             raise InternalCommandError("Invalid tag for pet update command")
 
         data = {tag: value}

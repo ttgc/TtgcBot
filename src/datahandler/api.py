@@ -65,7 +65,9 @@ class APIManager:
             result = cache[resource]
             if result is not None: return result
 
-        if not disable_autologin: self.login(requesterID, roleID, endpoint)
+        if not disable_autologin:
+            await self.login(requesterID, roleID, endpoint)
+
         headers = {"token": self._token}
         if requesterID: headers["member"] = requesterID
         if roleID: headers["role"] = roleID
@@ -77,10 +79,10 @@ class APIManager:
             result = await HTTP.post("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.PUT:
             body = body if len(body) > 0 else None
-            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
+            result = await HTTP.put("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.DELETE:
             body = body if len(body) > 0 else None
-            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
+            result = await HTTP.delete("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
 
         if resource is not None:
             if reqType == RequestType.GET:
@@ -88,5 +90,7 @@ class APIManager:
             else:
                 cache.remove(resource)
 
-        if not disable_autologin: self.logout()
+        if not disable_autologin:
+            await self.logout()
+
         return result

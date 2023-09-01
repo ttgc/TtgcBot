@@ -32,7 +32,7 @@ class APIManager:
         self.id = config["api-app"]["id"]
         self.appname = config["api-app"]["nom"]
         pwdargs = config["api-app"]["password"]
-        rawpwd = "{}-{}".format(pwdargs["pwd"], pwdargs["timestamp"])
+        rawpwd = "{}-{}".format(pwdargs["pwd"], pwdargs["timestamp"]).encode()
         self._pwd = argon2.hash_secret_raw(rawpwd, bytes(pwdargs["salt"]), time_cost=4, memory_cost=1024, parallelism=8, hash_len=32, type=argon2.Type.ID).hex()
         self.url = config["api-path"]
         self.logged = False

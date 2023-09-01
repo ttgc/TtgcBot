@@ -161,7 +161,7 @@ class CharacterCog(commands.Cog, name="Characters"):
 
     @commands.check(check_chanmj)
     @character.command(name="affiliation", aliases=["organization", "organisation", "org"])
-    async def character_affiliation(self, ctx, char: CharacterConverter):#, affiliation: typing.Optional[AffiliationConverter] = None):
+    async def character_affiliation(self, ctx, char: CharacterConverter): #, affiliation: typing.Optional[AffiliationConverter] = None):
         """**GM/MJ only**
         Affiliate the character with the specified organization, the organization should exists.
         This will automatically include all skills related to the organization.

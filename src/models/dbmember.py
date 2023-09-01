@@ -27,20 +27,30 @@ class MemberPermGrantable(Enum):
     PREMIUM = "premium"
 
 class DBMember:
-    async def __init__(self, ID):
+    def __init__(self, ID):
         self.ID = ID
         self.api = APIManager()
-        info = await self.api(RequestType.GET, "Member/{}".format(self.ID), resource="MEMBER://{}".format(self.ID), requesterID=self.ID)
+        self.perm = None
+        self.lang = "EN"
+        self.fulllangname = "English"
+        self.blacklisted = False
+        self.blacklistReason = ""
+
+    @classmethod
+    async def pull(cls, ID):
+        member = cls(ID)
+        info = await member.api(RequestType.GET, "Member/{}".format(member.ID), resource="MEMBER://{}".format(member.ID), requesterID=member.ID)
 
         if info.status // 100 != 2:
-            raise APIException("Unable to find the requested member", member=self.ID, code=info.status)
+            raise APIException("Unable to find the requested member", member=member.ID, code=info.status)
 
-        self.perm = info.result.get("permissions", None)
-        if self.perm == "None": self.perm = None
-        self.lang = info.result.get("language", {}).get("langcode", "EN")
-        self.fulllangname = info.result.get("language", {}).get("name", "English") if self.lang != "EN" else "English"
-        self.blacklisted = info.result.get("blacklisted", {}).get("isBlacklisted", False)
-        self.blacklistReason = info.result.get("blacklisted", {}).get("reason", "")
+        member.perm = info.result.get("permissions", None)
+        if member.perm == "None": member.perm = None
+        member.lang = info.result.get("language", {}).get("langcode", "EN")
+        member.fulllangname = info.result.get("language", {}).get("name", "English") if member.lang != "EN" else "English"
+        member.blacklisted = info.result.get("blacklisted", {}).get("isBlacklisted", False)
+        member.blacklistReason = info.result.get("blacklisted", {}).get("reason", "")
+        return member
 
     def is_owner(self):
         return self.perm.lower() == "owner"

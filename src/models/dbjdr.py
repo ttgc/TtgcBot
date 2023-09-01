@@ -29,29 +29,39 @@ from models.character import Character
 from models.enums import AutoPopulatedEnums, Extension
 
 class DBJDR:
-    async def __init__(self, srvid, channelid, requester, requesterRole):
+    def __init__(self, srvid, channelid, requester, requesterRole):
         self.api = APIManager()
         self.server = srvid
         self.requester = requester
         self.requesterRole = requesterRole
         self._initialChannelID = channelid
+        self.creation_date = None
+        self.pjs = -1
+        self.mj = self.requester
+        self.channel = self._initialChannelID
+        self.extensions = []
 
-        info = await self.api(RequestType.GET, "JDR/{}/{}".format(self.server, self._initialChannelID),
-            resource="SRV://{}/{}".format(self.server, self._initialChannelID), requesterID=self.requester, roleID=self.requesterRole)
+    @classmethod
+    async def pull(cls, srvid, channelid, requester, requesterRole):
+        jdr = cls(srvid, channelid, requester, requesterRole)
+        info = await jdr.api(RequestType.GET, "JDR/{}/{}".format(jdr.server, jdr._initialChannelID),
+            resource="SRV://{}/{}".format(jdr.server, jdr._initialChannelID), requesterID=jdr.requester, roleID=jdr.requesterRole)
 
         if info.status // 100 != 2:
-            raise APIException("Unable to find JDR", srv=self.server, channel=self._initialChannelID, code=info.status)
+            raise APIException("Unable to find JDR", srv=jdr.server, channel=jdr._initialChannelID, code=info.status)
 
-        self.creation_date = info.result.get("creation", None)
-        self.pjs = info.result.get("players", -1)
-        self.mj = info.result.get("owner", self.requester)
-        self.channel = info.result.get("channel", self._initialChannelID)
-        self.extensions = info.result.get("extensions", [])
+        jdr.creation_date = info.result.get("creation", None)
+        jdr.pjs = info.result.get("players", -1)
+        jdr.mj = info.result.get("owner", jdr.requester)
+        jdr.channel = info.result.get("channel", jdr._initialChannelID)
+        jdr.extensions = info.result.get("extensions", [])
 
         cache = DataCache()
-        for i in [self.channel] + self.extensions:
-            if i != self._initialChannelID:
-                cache.mapitems("SRV://{}/{}".format(self.server, self._initialChannelID), "SRV://{}/{}".format(self.server, i))
+        for i in [jdr.channel] + jdr.extensions:
+            if i != jdr._initialChannelID:
+                cache.mapitems("SRV://{}/{}".format(jdr.server, jdr._initialChannelID), "SRV://{}/{}".format(jdr.server, i))
+
+        return jdr
 
     async def delete(self):
         info = await self.api(RequestType.DELETE, "JDR/delete", body={"server": self.server, "channel": self.channel},
@@ -83,7 +93,9 @@ class DBJDR:
 
         if info.status // 100 != 2:
             raise APIException("JDR copy error", srv=self.server, channel=self.channel, tochan=channel_id, code=info.status)
-        return DBJDR(self.server, channel_id, self.requester, self.requesterRole)
+
+        copied = await DBJDR.pull(self.server, channel_id, self.requester, self.requesterRole)
+        return copied
 
     async def charcreate(self, chardbkey, race, classe, **kwargs):
         reqbody = {

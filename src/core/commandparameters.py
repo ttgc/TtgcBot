@@ -89,7 +89,7 @@ class GenericCommandParameters:
                 await self._queue.queue(_populate_characters, task_name=f'{self.ID}-chars')
 
         if not self._populated:
-            self.srv = await DBServer(ctx.guild.id)
+            self.srv = await DBServer.pull(ctx.guild.id)
             lgcode = await DBMember.getuserlang(ctx.author.id)
             self.lang = get_lang(lgcode if lang_exist(lgcode) else "EN")
             await self._queue.queue(_populate_jdr, task_name=f'{self.ID}-jdr')

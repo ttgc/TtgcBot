@@ -23,28 +23,28 @@ from core.commandparameters import GenericCommandParameters, is_jdrchannel
 import discord.utils
 
 async def is_blacklisted(ID):
-    try: member = await DBMember(ID)
+    try: member = await DBMember.pull(ID)
     except Exception: return False, ""
     bl, rs = member.is_blacklisted()
     return bl, rs
 
 async def is_botmanager(ID):
-    try: member = await DBMember(ID)
+    try: member = await DBMember.pull(ID)
     except Exception: return False
     return member.is_manager()
 
 async def is_premium(ID):
-    try: member = await DBMember(ID)
+    try: member = await DBMember.pull(ID)
     except Exception: return False
     return member.is_premium()
 
 async def is_owner(ID):
-    try: member = await DBMember(ID)
+    try: member = await DBMember.pull(ID)
     except Exception: return False
     return member.is_owner()
 
 async def check_admin(ctx):
-    srv = await DBServer(ctx.guild.id)
+    srv = await DBServer.pull(ctx.guild.id)
     return discord.utils.get(ctx.guild.roles, id=srv.adminrole) in ctx.author.roles or ctx.author == ctx.guild.owner
 
 async def check_botmanager(ctx):
@@ -60,11 +60,11 @@ async def check_premium(ctx):
     return result
 
 async def check_mj(ctx):
-    srv = await DBServer(ctx.guild.id)
+    srv = await DBServer.pull(ctx.guild.id)
     return discord.utils.get(ctx.guild.roles, id=srv.mjrole) in ctx.author.roles
 
 async def check_jdrchannel(ctx):
-    srv = await DBServer(ctx.guild.id)
+    srv = await DBServer.pull(ctx.guild.id)
     role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
     if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
     jdrlist = await srv.jdrlist(ctx.author.id, role.id if role is not None else None)
@@ -74,12 +74,12 @@ async def check_chanmj(ctx):
     jdrchannel = await check_jdrchannel(ctx)
 
     if jdrchannel:
-        srv = await DBServer(ctx.guild.id)
+        srv = await DBServer.pull(ctx.guild.id)
         role = discord.utils.get(ctx.author.roles, id=srv.mjrole)
         if role is None: role = discord.utils.get(ctx.author.roles, id=srv.adminrole)
 
         try:
-            jdr = await DBJDR(ctx.guild.id, ctx.channel.id, ctx.author.id, role.id if role is not None else None)
+            jdr = await DBJDR.pull(ctx.guild.id, ctx.channel.id, ctx.author.id, role.id if role is not None else None)
             return ctx.author.id == jdr.mj
         except APIException as e:
             if e["code"] != 404: raise e

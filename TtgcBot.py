@@ -64,7 +64,7 @@ status = discord.Game(name=Config()["discord"]["default-game"])
 # Get prefix function
 # async def get_prefix(bot, message):
 #     try:
-#         srv = await DBServer(message.guild.id)
+#         srv = await DBServer.pull(message.guild.id)
 #         return srv.prefix
 #     except (AttributeError, DatabaseException): return Config()["discord"]["default-prefix"]
 
@@ -83,7 +83,7 @@ def isbot(ctx):
 
 # @client.check
 # async def blacklist(ctx):
-#     srv = DBServer(str(ctx.message.guild.id))
+#     srv = await DBServer.pull(str(ctx.message.guild.id))
 #     blacklisted, reason = await is_blacklisted(ctx.message.author.id)
 #     if blacklisted:
 #         lgcode = await getuserlang(ctx.message.author.id)
@@ -130,7 +130,7 @@ async def on_command_error(ctx, error):
 # @client.event
 # async def on_guild_remove(guild):
 #     logger = get_logger()
-#     srv = await DBServer(guild.id)
+#     srv = await DBServer.pull(guild.id)
 #     await srv.remove()
 #     logger.info("Removed server from the database : ID=%d", guild.id)
 
@@ -193,7 +193,7 @@ async def on_ready():
     # nbr = 0
     # for i in srvlist:
     #     if i not in srvid:
-    #         srv = await DBServer(i)
+    #         srv = await DBServer.pull(i)
     #         await srv.remove()
     #         nbr += 1
     #         logger.info("This server has kicked the bot during off period, removing it from the database : ID=%s", str(i))

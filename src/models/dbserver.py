@@ -24,15 +24,25 @@ from network import RequestType
 from models.dbjdr import DBJDR
 
 class DBServer:
-    async def __init__(self, ID):
+    def __init__(self, ID):
         self.ID = ID
         self.api = APIManager()
-        info = await self.api(RequestType.GET, "Server/{}".format(self.ID), resource="SRV://{}".format(self.ID))
+        self.mjrole = None
+        self.prefix = '/'
+        self.adminrole = None
+
+    @classmethod
+    async def pull(cls, ID):
+        srv = cls(ID)
+        info = await srv.api(RequestType.GET, "Server/{}".format(srv.ID), resource="SRV://{}".format(srv.ID))
+
         if info.status // 100 != 2:
-            raise APIException("Server not found", srv=self.ID, code=info.status)
-        self.mjrole = info.result.get("mjRole", None)
-        self.prefix = info.result.get("prefix", '/')
-        self.adminrole = info.result.get("adminRole", None)
+            raise APIException("Server not found", srv=srv.ID, code=info.status)
+
+        srv.mjrole = info.result.get("mjRole", None)
+        srv.prefix = info.result.get("prefix", '/')
+        srv.adminrole = info.result.get("adminRole", None)
+        return srv
 
     async def setmjrole(self, roleid, requester, requesterRole):
         info = await self.api(RequestType.PUT, "Server/{}/setrole".format(self.ID),
@@ -74,7 +84,7 @@ class DBServer:
             raise APIException("Server leave error", srv=self.ID, code=info.status)
 
     async def getJDR(self, channelid, requester, requesterRole):
-        jdr = await DBJDR(self.ID, channelid, requester, requesterRole)
+        jdr = await DBJDR.pull(self.ID, channelid, requester, requesterRole)
         return jdr
 
     async def jdrstart(self, mjid, requesterRole, *channels):

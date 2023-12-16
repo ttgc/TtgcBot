@@ -1,3 +1,29 @@
+-- Fixit old scripts
+INSERT INTO Extensions (universe, world) VALUES ('Cosmorigins', 'Xyord');
+
+DO $$
+<<fixit>>
+DECLARE
+    xyord Extensions.id_extension%TYPE;
+	idr Race.id_race%TYPE;
+	ido Organizations.id_org%TYPE;
+	sk RECORD;
+BEGIN
+    SELECT id_extension INTO xyord FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Xyord';
+	-- Race
+	INSERT INTO Race (nom, id_extension) VALUES ('Xyordien', xyord);
+	RAISE NOTICE 'Inserts in Race completed';
+	-- Class
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Xyordien' AND id_extension = xyord;
+	INSERT INTO Classe (id_race, nom) VALUES (idr, 'Backliner'), (idr, 'Invader'), (idr, 'Commander'), (idr, 'Pacifier'), (idr, 'Administrator');
+	RAISE NOTICE 'Inserts in Classe completed';
+	-- Organizations
+	INSERT INTO Organizations(nom, id_extension, hidden) VALUES
+	('Seigneur', xyord, false), ('Legionnaire', xyord, false), ('Esclave', xyord, false);
+	RAISE NOTICE 'Inserts in Organizations completed';
+	RAISE NOTICE 'Skipping xyord skills';
+END fixit $$;
+
 -- ADTAF
 INSERT INTO Extensions (universe, world) VALUES ('Abyssal Dive', 'The Ancient Fortress');
 

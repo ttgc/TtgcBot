@@ -6,8 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
       matrix:
-        max-parallel: 1
         python: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:

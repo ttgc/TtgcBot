@@ -45,6 +45,7 @@ jobs:
         psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_rewrite.sql
         psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_v4.sql
         psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/jdr_v5.sql
+        psql -v ON_ERROR_STOP=1 -p 5432 -d ttgcbot -f database-scripts/final.sql
 
     - name: Create config file
       env: 

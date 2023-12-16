@@ -12,3 +12,4 @@ First Create the Database, then Run the SQL script in the following order :
 10. jdr_rewrite.sql
 11. jdr_v4.sql
 12. jdr_v5.sql
+13. final.sql

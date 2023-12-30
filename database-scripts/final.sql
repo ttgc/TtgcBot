@@ -45,10 +45,10 @@ BEGIN
     SELECT id_extension INTO xyord FROM Extensions WHERE universe = 'Cosmorigins' AND world = 'Xyord';
     SELECT id_extension INTO adtaf FROM Extensions WHERE universe = 'Abyssal Dive' AND world = 'The Ancient Fortress';
 	-- Race
-	INSERT INTO Race (nom, id_extension) VALUES ('Humains', adtaf), ('Descendant des anciens', adtaf);
+	INSERT INTO Race (nom, id_extension) VALUES ('Humain', adtaf), ('Descendant des anciens', adtaf);
 	RAISE NOTICE 'Inserts in Race completed';
 	-- Class
-	SELECT id_race INTO idr FROM Race WHERE nom = 'Humains' AND id_extension = adtaf;
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Humain' AND id_extension = adtaf;
 	INSERT INTO Classe (id_race, nom) VALUES (idr, 'Standard'), (idr, 'Detenteur de mana');
 	SELECT id_race INTO idr FROM Race WHERE nom = 'Descendant des anciens' AND id_extension = adtaf;
 	INSERT INTO Classe (id_race, nom) VALUES (idr, 'Descendant des anciens');
@@ -139,20 +139,27 @@ BEGIN
 	('Ignifuge', 'Octroie une immunite totale aux degâts de feu et de chaleur', 'Ignos', 'symbiont ignos', xyord),
 	('Chaud bouillant', 'L''hote peut enflamme son corps a volonte sans coût ni jet', 'Ignos', 'symbiont ignos', xyord),
 	('Qui s''y frotte s''y brûle', 'Lorsque le corps de l''hote est entierement enflamme, il emet des faibles deflagrations repoussant les entites (1u) a proximite (≤ 2u)', 'Ignos', 'symbiont ignos', xyord),
-	('Sensibilite aquatique', 'L''eau et les degâts d''eau subits sont doubles et appliquent un effet similaire aux brûlures sur une cible normale. Si le corps de l''hote est entierement enflamme, les degâts d''eau eteignent le corps completement et l''empeche de s''enflammer a nouveau pendant 3 tours', 'Ignos', 'symbiont ignos', xyord);
+	('Sensibilite aquatique', 'L''eau et les degâts d''eau subits sont doubles et appliquent un effet similaire aux brûlures sur une cible normale. Si le corps de l''hote est entierement enflamme, les degâts d''eau eteignent le corps completement et l''empeche de s''enflammer a nouveau pendant 3 tours', 'Ignos', 'symbiont ignos', xyord),
+	('Faiblesse organique', 'Divise par deux les PM max et les PV max a la creation du personnage', 'Humain', 'adtaf human', adtaf),
+	('Irradie', 'Le personnage commence a 10+1d20 points de mutation a sa creation', 'Humain', 'adtaf human', adtaf),
+	('Expose', 'Possede un malus naturel cumulable de -10% sur tous les jets de mutation (chance)', 'Humain', 'adtaf human', adtaf),
+	('Sans mana fixe', 'Ne possede pas de PM (PM = 0)', 'Humain Standard', 'adtaf human standard', adtaf),
+	('Langue de bois', 'Octroie un bonus de +20% pour manipuler des humains (charisme)', 'Descendant des anciens', 'adtaf ancient', adtaf);
 	RAISE NOTICE 'Inserts in Skills completed';
-	-- TODO: RaceSkills
-	--SELECT id_race INTO idr FROM Race WHERE nom = 'Grits' AND id_extension = orianis;
-	--FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Grits' ORDER BY id_skill LIMIT 1) LOOP
-	--	INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
-	--END LOOP;
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Humain' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Humain' ORDER BY id_skill) LOOP
+		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
+	END LOOP;
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Descendant des anciens' AND id_extension = orianis;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Descendant des anciens' ORDER BY id_skill) LOOP
+		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
+	END LOOP;
 	RAISE NOTICE 'Inserts in RaceSkills completed';
-	-- TODO: OrgSkills
 	--SELECT id_org INTO ido FROM Organizations WHERE nom = 'Espion' AND id_extension = orianis;
 	--FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Espion' AND id_extension = orianis ORDER BY id_skill) LOOP
 	--	INSERT INTO OrgSkills VALUES (ido, sk.id_skill);
 	--END LOOP;
-	RAISE NOTICE 'Inserts in OrgSkills completed';
+	--RAISE NOTICE 'Inserts in OrgSkills completed';
 	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Horya' AND id_extension = orianis;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Horya' ORDER BY id_skill) LOOP
 		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);

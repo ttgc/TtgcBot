@@ -242,6 +242,8 @@ class Character:
         ext = None
         if org:
             ext, org = temp_extract_ext(org)
+            if ext:
+                ext = int(ext)
         db.call("affiliate",dbkey=self.key,idserv=self.jdr.server,idchan=self.jdr.channel,org=org,ext=ext)
         db.close()
 

@@ -260,27 +260,30 @@ DECLARE
 BEGIN
 	SELECT COUNT(*) INTO nbr FROM Organizations
 	WHERE (nom = org);
-	IF nbr > 0 OR org = NULL THEN
-		IF ext = NULL THEN
+	IF nbr > 0 OR org IS NULL THEN
+		IF ext IS NULL THEN
 			SELECT id_org INTO orgid FROM Organizations
 			WHERE (nom = org);
+            UPDATE Characterr
+    		SET affiliated_with = orgid
+    		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+            RAISE NOTICE 'Blabla';
+            IF org IS NOT NULL THEN
+                FOR sk IN (SELECT * FROM get_orgskills(org)) LOOP
+                    PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
+                END LOOP;
+    		END IF;
 		ELSE
 			SELECT id_org INTO orgid FROM Organizations
 			WHERE (nom = org AND id_extension = ext);
-		END IF;
-		UPDATE Characterr
-		SET affiliated_with = orgid
-		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
-		IF org IS NOT NULL THEN
-			IF ext = NULL THEN
-				FOR sk IN (SELECT * FROM get_orgskills(org)) LOOP
-					PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
-				END LOOP;
-			ELSE
-				FOR sk IN (SELECT * FROM get_orgskills(org) WHERE id_extension = ext) LOOP
-					PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
-				END LOOP;
-			END IF;
+            UPDATE Characterr
+    		SET affiliated_with = orgid
+    		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+            IF org IS NOT NULL THEN
+                FOR sk IN (SELECT * FROM get_orgskills(org) WHERE id_extension = ext) LOOP
+                    PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
+                END LOOP;
+            END IF;
 		END IF;
 	END IF;
 END;

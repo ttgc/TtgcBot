@@ -251,9 +251,9 @@ def isOrganizationHidden(orgname):
     cur = None
 
     if ext:
-        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",org=orgname.lower(),ext=ext)
+        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",org=orgname,ext=ext)
     else:
-        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s",org=orgname.lower())
+        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s",org=orgname)
 
     if cur is None:
         db.close()
@@ -268,9 +268,9 @@ def organizationExists(orgname):
     cur = None
 
     if ext:
-        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",org=orgname.lower(),ext=ext)
+        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",org=orgname,ext=ext)
     else:
-        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname.lower())
+        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname)
 
     if cur is None:
         db.close(True)

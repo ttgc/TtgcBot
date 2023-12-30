@@ -243,3 +243,45 @@ BEGIN
 	RAISE NOTICE 'Inserts in SymbiontSkills completed';
 	RAISE NOTICE 'Updates for v6 completed';
 END v6update $$;
+
+-- Functions
+CREATE OR REPLACE FUNCTION affiliate
+(
+	dbkey Characterr.charkey%TYPE,
+	idserv JDR.id_server%TYPE,
+	idchan JDR.id_channel%TYPE,
+	org Organizations.nom%TYPE,
+	ext Extensions.id_extension%TYPE
+) RETURNS void AS $$
+DECLARE
+	orgid Organizations.id_org%TYPE;
+	nbr INT;
+	sk RECORD;
+BEGIN
+	SELECT COUNT(*) INTO nbr FROM Organizations
+	WHERE (nom = org);
+	IF nbr > 0 OR org = NULL THEN
+		IF ext = NULL THEN
+			SELECT id_org INTO orgid FROM Organizations
+			WHERE (nom = org);
+		ELSE
+			SELECT id_org INTO orgid FROM Organizations
+			WHERE (nom = org AND id_extension = ext);
+		END IF;
+		UPDATE Characterr
+		SET affiliated_with = orgid
+		WHERE (charkey = dbkey AND id_server = idserv AND id_channel = idchan);
+		IF org IS NOT NULL THEN
+			IF ext = NULL THEN
+				FOR sk IN (SELECT * FROM get_orgskills(org)) LOOP
+					PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
+				END LOOP;
+			ELSE
+				FOR sk IN (SELECT * FROM get_orgskills(org) WHERE id_extension = ext) LOOP
+					PERFORM assign_skill(dbkey,idserv,idchan,sk.id_skill);
+				END LOOP;
+			END IF;
+		END IF;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;

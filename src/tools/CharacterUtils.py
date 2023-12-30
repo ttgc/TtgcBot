@@ -172,9 +172,30 @@ def retrieveClassID(rcid,clname):
     db.close()
     return row
 
+def temp_extract_ext(name):
+    split = rcname.split(":")
+    ext_dic = {
+        'adtaf': '4',
+        'xyord': '3',
+        'orianis': '2',
+        'terae': '1'
+    }
+
+    if len(split) > 1:
+        return ext_dict.get(split[0], '1'), split[1]
+    else:
+        return None, name
+
 def retrieveRaceID(rcname):
+    ext, rcname = temp_extract_ext(rcname)
     db = Database()
-    cur = db.execute("SELECT id_race FROM race WHERE lower(nom) = %(name)s",name=rcname.lower())
+    cur = None
+
+    if ext:
+        cur = db.execute("SELECT id_race FROM race WHERE lower(nom) = %(name)s AND id_extension = %(ext)s",name=rcname.lower(),ext=ext)
+    else:
+        cur = db.execute("SELECT id_race FROM race WHERE lower(nom) = %(name)s",name=rcname.lower())
+
     if cur is None:
         db.close(True)
         raise DatabaseException("Race Name not found")
@@ -225,8 +246,15 @@ def retrieveOrganization(orgid):
     return row[0] if row is not None else None
 
 def isOrganizationHidden(orgname):
+    ext, rcname = temp_extract_ext(rcname)
     db = Database()
-    cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s", org=orgname)
+    cur = None
+
+    if ext:
+        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",name=orgname.lower(),ext=ext)
+    else:
+        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s",name=orgname.lower())
+
     if cur is None:
         db.close()
         return False
@@ -235,8 +263,15 @@ def isOrganizationHidden(orgname):
     return row[0] if row is not None else False
 
 def organizationExists(orgname):
+    ext, rcname = temp_extract_ext(rcname)
     db = Database()
-    cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname)
+    cur = None
+
+    if ext:
+        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",name=orgname.lower(),ext=ext)
+    else:
+        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",name=orgname.lower())
+
     if cur is None:
         db.close(True)
         raise DatabaseException("Error when fetching organization table")
@@ -245,6 +280,7 @@ def organizationExists(orgname):
     return nbr > 0
 
 def retrieveOrganizationSkill(orgname):
+    ext, orgname = temp_extract_ext(orgname)
     db = Database()
     cur = db.call("get_orgskills",org=orgname)
     if cur is None:
@@ -252,11 +288,13 @@ def retrieveOrganizationSkill(orgname):
         return []
     ls = []
     for i in row:
-        ls.append(Skill(i[0]))
+        if not ext or str(i[5]) == ext:
+            ls.append(Skill(i[0]))
     db.close()
     return ls
 
 def retrieveRaceSkill(racename):
+    ext, racename = temp_extract_ext(racename)
     db = Database()
     cur = db.call("get_raceskills",racename=racename)
     if cur is None:
@@ -264,6 +302,7 @@ def retrieveRaceSkill(racename):
         return []
     ls = []
     for i in row:
-        ls.append(Skill(i[0]))
+        if not ext or str(i[5]) == ext:
+            ls.append(Skill(i[0]))
     db.close()
     return ls

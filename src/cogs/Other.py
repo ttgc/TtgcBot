@@ -64,7 +64,7 @@ class Other(commands.Cog):
         data = GenericCommandParameters(ctx)
         botaskperm = discord.Permissions().all()
         botaskperm.administrator = botaskperm.manage_channels = botaskperm.manage_guild = botaskperm.manage_webhooks = botaskperm.manage_emojis = botaskperm.manage_nicknames = botaskperm.move_members = False
-        url = discord.utils.oauth_url(str(self.bot.user.id),botaskperm)
+        url = discord.utils.oauth_url(self.bot.user.id, permissions=botaskperm)
         embd = discord.Embed(title="TtgcBot",description=data.lang["invite"],colour=discord.Color(randint(0,int('ffffff',16))),url=url)
         embd.set_footer(text=data.lang["invite_author"].format(Config()["version"]),icon_url=self.bot.user.display_avatar.url)
         embd.set_image(url=self.bot.user.display_avatar.url)

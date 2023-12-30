@@ -23,6 +23,9 @@ from src.utils.DatabaseManager import *
 import src.tools.Character as ch
 import src.tools.CharacterUtils as chutil
 
+def extract_channel(channel):
+    return channel.parent if isinstance(channel, discord.Thread) else channel
+
 class DBServer:
     def __init__(self,ID):
         self.ID = ID
@@ -278,7 +281,7 @@ class DBServer:
         db.close()
 
     def getJDR(self,channelid):
-        return DBJDR(self.ID,channelid)
+        return DBJDR(self.ID, channelid)
 
     def jdrstart(self,channelid,mjid):
         db = Database()

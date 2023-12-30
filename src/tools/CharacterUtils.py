@@ -246,14 +246,14 @@ def retrieveOrganization(orgid):
     return row[0] if row is not None else None
 
 def isOrganizationHidden(orgname):
-    ext, rcname = temp_extract_ext(rcname)
+    ext, orgname = temp_extract_ext(orgname)
     db = Database()
     cur = None
 
     if ext:
-        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",name=orgname.lower(),ext=ext)
+        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",org=orgname.lower(),ext=ext)
     else:
-        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s",name=orgname.lower())
+        cur = db.execute("SELECT hidden FROM organizations WHERE nom = %(org)s",org=orgname.lower())
 
     if cur is None:
         db.close()
@@ -263,14 +263,14 @@ def isOrganizationHidden(orgname):
     return row[0] if row is not None else False
 
 def organizationExists(orgname):
-    ext, rcname = temp_extract_ext(rcname)
+    ext, orgname = temp_extract_ext(orgname)
     db = Database()
     cur = None
 
     if ext:
-        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",name=orgname.lower(),ext=ext)
+        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s AND id_extension = %(ext)s",org=orgname.lower(),ext=ext)
     else:
-        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",name=orgname.lower())
+        cur = db.execute("SELECT COUNT(*) FROM organizations WHERE nom = %(org)s",org=orgname.lower())
 
     if cur is None:
         db.close(True)

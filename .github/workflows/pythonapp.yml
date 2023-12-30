@@ -65,14 +65,14 @@ jobs:
         repo-token: '${{ secrets.GITHUB_TOKEN }}'
     
     - name: Dump databases and gather artifacts
-      #if: ${{ failure() }}
+      if: ${{ failure() }}
       run: |
         mkdir output
         pg_dump ttgcbot > output/dump_bot.sql
         cp -R Logs/ output/Logs/
     
     - name: Upload artifacts
-      #if: ${{ failure() }}
+      if: ${{ failure() }}
       uses: actions/upload-artifact@v2.1.4
       with:
         name: artifacts

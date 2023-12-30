@@ -173,7 +173,7 @@ def retrieveClassID(rcid,clname):
     return row
 
 def temp_extract_ext(name):
-    split = rcname.split(":")
+    split = name.split(":")
     ext_dic = {
         'adtaf': '4',
         'xyord': '3',

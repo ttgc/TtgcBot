@@ -154,10 +154,10 @@ class MainJDR(commands.Cog, name="JDR"):
         Start a RP/JDR in the mentioned channel"""
         data = GenericCommandParameters(ctx)
         try:
-            data.srv.getJDR(str(chan.id))
+            data.srv.getJDR(str(extract_channel(chan).id))
             await ctx.message.channel.send(data.lang["jdr_exist"].format(chan.mention))
         except:
-            data.srv.jdrstart(str(chan.id),str(ctx.message.author.id))
+            data.srv.jdrstart(str(extract_channel(chan).id),str(ctx.message.author.id))
             self.logger.log(logging.DEBUG+1,"JDR created in channel %d of server %d",chan.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["jdr_start"].format(chan.mention,ctx.message.author.mention))
 
@@ -168,7 +168,7 @@ class MainJDR(commands.Cog, name="JDR"):
         """**Admin only**
         Delete the RP/JDR in the mentioned channel. This cannot be undone once performed and all data related to it will be lost forever and ever."""
         data = GenericCommandParameters(ctx)
-        curjdr = data.srv.getJDR(str(chan.id))
+        curjdr = data.srv.getJDR(str(extract_channel(chan).id))
         await ctx.message.channel.send(data.lang["jdr_delete_confirm"].format(chan.mention))
         chk = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel and m.content.lower() == 'confirm'
         try: answer = await self.bot.wait_for('message',check=chk,timeout=60)
@@ -198,7 +198,7 @@ class MainJDR(commands.Cog, name="JDR"):
             if answer is None:
                 await ctx.message.channel.send(data.lang["timeout"])
             else:
-                data.srv.getJDR(str(src.id)).copy(str(dest.id))
+                data.srv.getJDR(str(extract_channel(src).id)).copy(str(extract_channel(dest).id))
                 self.logger.log(logging.DEBUG+1,"JDR copy from channel %d to %d in server %d",src.id,dest.id,ctx.message.guild.id)
                 await ctx.message.channel.send(data.lang["jdrcopy"])
 
@@ -221,9 +221,9 @@ class MainJDR(commands.Cog, name="JDR"):
                 await ctx.message.channel.send(data.lang["timeout"])
             else:
                 try:
-                    data.srv.getJDR(str(dest.id)).delete()
+                    data.srv.getJDR(str(extract_channel(dest).id)).delete()
                 except: pass
-                data.srv.getJDR(str(src.id)).extend(str(dest.id))
+                data.srv.getJDR(str(extract_channel(src).id)).extend(str(extract_channel(dest).id))
                 self.logger.log(logging.DEBUG+1,"JDR extend from channel %d to %d in server %d",src.id,dest.id,ctx.message.guild.id)
                 await ctx.message.channel.send(data.lang["jdrextend"])
 
@@ -237,7 +237,7 @@ class MainJDR(commands.Cog, name="JDR"):
         if src.guild.id != ctx.message.guild.id or src.guild.id != dest.guild.id:
             await ctx.message.channel.send(data.lang["jdrcopy_serverror"])
         else:
-            data.srv.getJDR(str(src.id)).unextend(str(dest.id))
+            data.srv.getJDR(str(extract_channel(src).id)).unextend(str(extract_channel(dest).id))
             self.logger.log(logging.DEBUG+1,"JDR unextended from channel %d to %d in server %d",src.id,dest.id,ctx.message.guild.id)
             await ctx.message.channel.send(data.lang["jdrunextend"])
 
@@ -248,7 +248,7 @@ class MainJDR(commands.Cog, name="JDR"):
         """**Admin only**
         Remove all extensions for a RP/JDR. The data will be only avalaible in the source/origin channel after performing this"""
         data = GenericCommandParameters(ctx)
-        data.srv.getJDR(str(src.id)).unextend_all()
+        data.srv.getJDR(str(extract_channel(src).id)).unextend_all()
         self.logger.log(logging.DEBUG+1,"JDR unextended all from channel %d in server %d",src.id,ctx.message.guild.id)
         await ctx.message.channel.send(data.lang["jdrunextend"])
 

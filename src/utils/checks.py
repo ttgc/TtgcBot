@@ -57,12 +57,12 @@ def check_mj(ctx):
 def check_jdrchannel(ctx):
     srv = DBServer(str(ctx.message.guild.id))
     for i in srv.jdrlist():
-        if str(extract_channel(ctx.channel.id)) == i[0]: return True
-    return str(extract_channel(ctx.channel.id)) in srv.jdrextension()
+        if str(extract_channel(ctx.channel).id) == i[0]: return True
+    return str(extract_channel(ctx.channel).id) in srv.jdrextension()
 
 def check_chanmj(ctx):
     if check_jdrchannel(ctx):
-        jdr = DBJDR(str(ctx.message.guild.id),str(ctx.message.channel.id))
+        jdr = DBJDR(str(ctx.message.guild.id),str(extract_channel(ctx.channel).id))
         return str(ctx.message.author.id) == jdr.mj
     return False
 
@@ -84,7 +84,7 @@ class GenericCommandParameters:
         self._charbase = None
         self.char = None
         if check_jdrchannel(ctx):
-            self.jdr = self.srv.getJDR(str(ctx.message.channel.id))
+            self.jdr = self.srv.getJDR(str(extract_channel(ctx.channel).id))
             self.charlist = self.jdr.charlist()
             for key, linked in self.charlist:
                 if linked is not None and linked == str(ctx.message.author.id):

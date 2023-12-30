@@ -130,7 +130,16 @@ BEGIN
 	('Regeneration moleculaire', 'Supprime les saignements et hemorragies de l''hote, et regenere les membres perdus en 1 tour maximum, seul la tete et le cerveau ne peuvent etre regeneres', 'Omega-12', 'symbiont omega omega-12', orianis),
 	('Separation', 'Permet de subdiviser l''hote en plusieurs entites ayant chacune leur action et pouvant utiliser les memes aptitudes et competences que l''originale. PV et PM sont repartis equitablement a la division et les entites peuvent etre reabsorbes pour recuperer les PV/PM restants a cette derniere', 'Omega-12', 'symbiont omega omega-12', orianis),
 	('Cameleon', 'Permet d''alterer l''apparence pour se fondre dans n''importe quel decor tel un veritable cameleon ', 'Omega-13', 'symbiont omega omega-13', orianis),
-	('Memoire volatile', 'Permet d''effacer tout souvenir de l''hote et du symbiote chez n''importe quelle cible proche de l''hote', 'Omega-13', 'symbiont omega omega-13', orianis);
+	('Memoire volatile', 'Permet d''effacer tout souvenir de l''hote et du symbiote chez n''importe quelle cible proche de l''hote', 'Omega-13', 'symbiont omega omega-13', orianis),
+	('Furie', 'Lorsque l''hote tombe a 0 PV ou moins, ceux-ci sont entierement regeneres et passe en posture "Enrage". Dans cet etat l''hote perd alors 50*2x PV au Xe tour ', 'Furya', 'symbiont furya', xyord),
+	('Aura furieuse', 'En posture "Enrage", l''hote gagne 1 point d''aura par tour', 'Furya', 'symbiont furya', xyord),
+	('Double action', 'En posture "Enrage", l''hote possede deux actions par tour', 'Furya', 'symbiont furya', xyord),
+	('Agressivite', 'En posture "Enrage", les degâts infliges par l''hote sont augmentes. L''hote peut egalement parer mais ne peut pas esquiver ou effectuer d''autres actions defensives', 'Furya', 'symbiont furya', xyord),
+	('Retour au calme', 'Si tout les ennemis sont vaincus et que l''hote est en posture "Enrage", celle-ci prend alors fin immediatement', 'Furya', 'symbiont furya', xyord),
+	('Ignifuge', 'Octroie une immunite totale aux degâts de feu et de chaleur', 'Ignos', 'symbiont ignos', xyord),
+	('Chaud bouillant', 'L''hote peut enflamme son corps a volonte sans coût ni jet', 'Ignos', 'symbiont ignos', xyord),
+	('Qui s''y frotte s''y brûle', 'Lorsque le corps de l''hote est entierement enflamme, il emet des faibles deflagrations repoussant les entites (1u) a proximite (≤ 2u)', 'Ignos', 'symbiont ignos', xyord),
+	('Sensibilite aquatique', 'L''eau et les degâts d''eau subits sont doubles et appliquent un effet similaire aux brûlures sur une cible normale. Si le corps de l''hote est entierement enflamme, les degâts d''eau eteignent le corps completement et l''empeche de s''enflammer a nouveau pendant 3 tours', 'Ignos', 'symbiont ignos', xyord);
 	RAISE NOTICE 'Inserts in Skills completed';
 	-- TODO: RaceSkills
 	--SELECT id_race INTO idr FROM Race WHERE nom = 'Grits' AND id_extension = orianis;
@@ -214,6 +223,14 @@ BEGIN
 	END LOOP;
 	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Omega-13' AND id_extension = orianis;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Omega-13' ORDER BY id_skill) LOOP
+		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
+	END LOOP;
+	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Furya' AND id_extension = xyord;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Furya' ORDER BY id_skill) LOOP
+		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
+	END LOOP;
+	SELECT id_symbiont INTO ids FROM Symbiont WHERE nom = 'Ignos' AND id_extension = xyord;
+	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Ignos' ORDER BY id_skill) LOOP
 		INSERT INTO SymbiontSkills VALUES (ids, sk.id_skill);
 	END LOOP;
 	RAISE NOTICE 'Inserts in SymbiontSkills completed';

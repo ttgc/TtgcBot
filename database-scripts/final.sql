@@ -146,11 +146,11 @@ BEGIN
 	('Sans mana fixe', 'Ne possede pas de PM (PM = 0)', 'Humain Standard', 'adtaf human standard', adtaf),
 	('Langue de bois', 'Octroie un bonus de +20% pour manipuler des humains (charisme)', 'Descendant des anciens', 'adtaf ancient', adtaf);
 	RAISE NOTICE 'Inserts in Skills completed';
-	SELECT id_race INTO idr FROM Race WHERE nom = 'Humain' AND id_extension = orianis;
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Humain' AND id_extension = adtaf;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Humain' ORDER BY id_skill) LOOP
 		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
 	END LOOP;
-	SELECT id_race INTO idr FROM Race WHERE nom = 'Descendant des anciens' AND id_extension = orianis;
+	SELECT id_race INTO idr FROM Race WHERE nom = 'Descendant des anciens' AND id_extension = adtaf;
 	FOR sk IN (SELECT id_skill FROM Skills WHERE origine = 'Descendant des anciens' ORDER BY id_skill) LOOP
 		INSERT INTO RaceSkills VALUES (idr, sk.id_skill);
 	END LOOP;

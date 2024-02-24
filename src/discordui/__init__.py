@@ -32,5 +32,5 @@ Contains:
 """
 
 from discordui.button import Button, DefaultButtons
-from discordui.dropdown import Dropdown, StandaloneDropdown, send_dropdown
+from discordui.dropdown import Dropdown, StandaloneDropdown, send_dropdown, send_dropdown_custom_submit
 from discordui.textinput import TextInput

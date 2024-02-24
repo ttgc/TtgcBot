@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import time
-from src.utils.decorators import singleton
+from utils.decorators import singleton
 
 @singleton
 class DataCache:
@@ -26,11 +26,11 @@ class DataCache:
         self._cache = {}
         self._clock = {}
         self._mappeditem = {}
-        self.maxTime = 3600
+        self.maxTime = 300
 
     def __getitem__(self, res):
         res = self._mappeditem.get(res, res)
-        if res in self._cache and time.clock() - self._clock[res] > self.maxTime:
+        if res in self._cache and time.process_time() - self._clock[res] > self.maxTime:
             self._cache.pop(res)
             self._clock.pop(res)
         return self._cache.get(res, None)
@@ -39,7 +39,7 @@ class DataCache:
         if value.status // 100 == 2:
             res = self._mappeditem.get(res, res)
             self._cache[res] = value
-            self._clock[res] = time.clock()
+            self._clock[res] = time.process_time()
 
     def clear(self):
         self._cache = {}

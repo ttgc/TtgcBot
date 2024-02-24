@@ -18,9 +18,8 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import psycopg2 as sql
-from src.utils.config import *
-from src.exceptions.exceptions import *
-from src.utils.decorators import singleton
+from setup.config import Config
+from utils.decorators import deprecated
 
 @deprecated("Old database manager", raise_error=True)
 class Database:

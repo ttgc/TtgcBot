@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from discord.ext import commands
-from network.statuscode import HTTPErrorCode
+from exceptions.httpstatus import HTTPErrorCode
 
 class ManagerException(commands.CommandError):
     def __init__(self, message="Manager exception occured", **kwargs):
@@ -38,7 +38,7 @@ class DatabaseException(ManagerException):
 
 class APIException(ManagerException):
     def __str__(self):
-        return "APIException: {self.message} (with kwargs {self.kwargs})"
+        return f"APIException: {self.message} (with kwargs {self.kwargs})"
 
     def parse(self, lang):
         return HTTPErrorCode.get_code_from_int(self.kwargs.get("code", 502)).toString(lang, None, **self.kwargs)

@@ -17,17 +17,11 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discord.ext import commands
-from exceptions.httpstatus import HTTPErrorCode
-
-class HTTPException(commands.CommandError):
-    def __init__(self, errcode, message=None):
-        self.errcode = errcode
-        self.message = message if message else "No more details provided"
-        super().__init__(str(self))
-
-    def __str__(self):
-        return "HTTPException: Error Code {} ({})".format(self.errcode, self.message)
-
-    def parse(self, lang):
-        return HTTPErrorCode.get_code_from_int(self.errcode).toString(lang, self.message)
+from models.character import Character
+from models.dbjdr import DBJDR
+from models.dbmember import DBMember, MemberPermGrantable
+from models.dbserver import DBServer
+import models.enums as enums
+from models.inventory import Inventory, Item
+from models.pet import Pet
+from models.skills import Skill

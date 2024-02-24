@@ -20,3 +20,16 @@
 from discord.ext import commands
 
 class InternalCommandError(commands.CommandError): pass
+
+class NotBoundException(InternalCommandError):
+    def __init__(self, obj, msg):
+        super().__init__(f"{obj} not bound: {msg}")
+        self._obj = obj
+
+    @property
+    def obj(self):
+        return self._obj
+
+class RaisedExceptionCommandError(InternalCommandError):
+    def __init__(self, inner: Exception):
+        super().__init__(f"Command raised {type(inner).__name__}: {inner}")

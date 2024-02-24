@@ -17,17 +17,17 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discord.ext import commands
-from exceptions.httpstatus import HTTPErrorCode
+from exceptions import APIException, HTTPErrorCode, HTTPException
 
-class HTTPException(commands.CommandError):
-    def __init__(self, errcode, message=None):
-        self.errcode = errcode
-        self.message = message if message else "No more details provided"
-        super().__init__(str(self))
-
-    def __str__(self):
-        return "HTTPException: Error Code {} ({})".format(self.errcode, self.message)
-
-    def parse(self, lang):
-        return HTTPErrorCode.get_code_from_int(self.errcode).toString(lang, self.message)
+async def safe_request(request, *whitelist):
+    try:
+        await request
+    except APIException as e:
+        error = HTTPErrorCode.get_code_from_int(e.get("code", 502))
+        if error not in whitelist: raise e
+        return error
+    except HTTPException as e2:
+        error = HTTPErrorCode.get_code_from_int(e2.errcode)
+        if error not in whitelist: raise e2
+        return error
+    return None

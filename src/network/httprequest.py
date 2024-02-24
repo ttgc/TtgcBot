@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import aiohttp
-from src.exceptions.exceptions import *
+from exceptions import HTTPException
 
 class HTTP:
     def __init__(self, url, status, result=None, raiseClientException=False, raiseServerException=True):
@@ -38,14 +38,14 @@ class HTTP:
                 res = await r.json()
             else:
                 res = await r.text()
-        return cl(url, r.status, res)
+        return cl(r.url, r.status, res)
 
     @classmethod
     async def get(cl, url, *, query={}, headers={}, jsonResult=True):
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 if len(query) > 0:
-                    async with session.get(url, params=kwargs, headers=headers, ssl=False) as r:
+                    async with session.get(url, params=query, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, jsonResult=jsonResult)
                         return res
                 else:
@@ -54,7 +54,7 @@ class HTTP:
                         return res
             else:
                 if len(query) > 0:
-                    async with session.get(url, params=kwargs, ssl=False) as r:
+                    async with session.get(url, params=query, ssl=False) as r:
                         res = await cl._processResult(r, jsonResult=jsonResult)
                         return res
                 else:
@@ -79,20 +79,20 @@ class HTTP:
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 if body:
-                    async with session.post(url, json=body, headers=headers, ssl=False) as r:
+                    async with session.put(url, json=body, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, headers=headers, ssl=False) as r:
+                    async with session.put(url, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
             else:
                 if body:
-                    async with session.post(url, json=body, ssl=False) as r:
+                    async with session.put(url, json=body, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, ssl=False) as r:
+                    async with session.put(url, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
 
@@ -101,19 +101,19 @@ class HTTP:
         async with aiohttp.ClientSession() as session:
             if len(headers) > 0:
                 if body:
-                    async with session.post(url, json=body, headers=headers, ssl=False) as r:
+                    async with session.delete(url, json=body, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, headers=headers, ssl=False) as r:
+                    async with session.delete(url, headers=headers, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
             else:
                 if body:
-                    async with session.post(url, json=body, ssl=False) as r:
+                    async with session.delete(url, json=body, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res
                 else:
-                    async with session.post(url, ssl=False) as r:
+                    async with session.delete(url, ssl=False) as r:
                         res = await cl._processResult(r, hasResult, jsonResult)
                         return res

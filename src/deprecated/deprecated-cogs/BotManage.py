@@ -70,7 +70,7 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
     @commands.command()
     async def unblacklist(self, ctx, user: discord.User):
         mb = None
-        try: mb = await DBMember(user.id)
+        try: mb = await DBMember.pull(user.id)
         except: return
 
         await mb.unblacklist(ctx.author.id)

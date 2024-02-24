@@ -46,7 +46,7 @@ class Dropdown(discord.ui.Select):
         """
         self.ctx = ctx
         opt = [discord.SelectOption(label=i) for i in options]
-        opt += [discord.SelectOption(label=i, value=k) for i, k in kargs.items()]
+        opt += [discord.SelectOption(label=k, value=i) for i, k in kargs.items()]
         if id is not None:
             super().__init__(custom_id=id, placeholder=placeholder, min_values=minval, max_values=maxval, options=opt, disabled=disabled, row=row)
         else:
@@ -112,7 +112,7 @@ class Dropdown(discord.ui.Select):
         for i in args:
             self += i
         for i, k in kwargs.items():
-            self.add_option(label=i, value=k)
+            self.add_option(label=k, value=i)
 
 
 class StandaloneDropdown(Dropdown):
@@ -174,7 +174,7 @@ async def send_dropdown(ctx, *, placeholder=None, check_callback=None, timeout=N
         placeholder: the placeholder to display in the dropdown when no item is selected (default: None)
         check_callback: view check callback for interactions received (default: None)
         timeout: view's timeout (default: None)
-        options: list of dropdown's options to display (default: [])
+        options: list or dict of dropdown's options to display (default: [])
         select_msg: the message to display when an item is selected (default: '{}')
         timeout_msg: the message to display when the view has timeout (default: 'timeout')
         format_msg: whether to format or not the select_msg string with at least the selected value (default: True)
@@ -185,7 +185,6 @@ async def send_dropdown(ctx, *, placeholder=None, check_callback=None, timeout=N
         bool: whether (or not) the view has not timeout and succeeded
         string: the selected option in the dropdown (or None if no option where selected)
     """
-
     async def _on_select(dropdown, interaction):
         final_select_msg = select_msg
 
@@ -196,7 +195,39 @@ async def send_dropdown(ctx, *, placeholder=None, check_callback=None, timeout=N
         await interaction.response.edit_message(content=final_select_msg, view=None)
         dropdown.view.result = DefaultViewResults.SUBMIT
 
-    dropdown = StandaloneDropdown(ctx, placeholder=placeholder, check_callback=check_callback, timeout=timeout, options=options, onselection=_on_select)
+    timeout, selection = await send_dropdown_custom_submit(ctx, placeholder=placeholder, check_callback=check_callback, timeout=timeout, options=options, on_submit=_on_select, timeout_msg=timeout_msg)
+    return timeout, selection
+
+
+async def send_dropdown_custom_submit(ctx, *, placeholder=None, check_callback=None, timeout=None, options=[], on_submit=None, timeout_msg="timeout"):
+    """
+    send_dropdown(ctx, *options) -> bool, string
+    Create a StandaloneDropdown, display it, respond to the user interaction and return.
+    Shortcut for creating easily dropdowns with single selection and standard response to interactions
+
+    Parameters:
+        ctx: command context object
+        ----
+        placeholder: the placeholder to display in the dropdown when no item is selected (default: None)
+        check_callback: view check callback for interactions received (default: None)
+        timeout: view's timeout (default: None)
+        options: list or dict of dropdown's options to display (default: [])
+        on_submit: submit (selection) callback (default: None)
+        timeout_msg: the message to display when the view has timeout (default: 'timeout')
+
+    returns:
+        bool: whether (or not) the view has not timeout and succeeded
+        string: the selected option in the dropdown (or None if no option where selected)
+
+    Callback def:
+        async def on_submit(self: Dropdown, interaction: discord.Interaction) -> None
+    """
+    dropdown = StandaloneDropdown(ctx, placeholder=placeholder, check_callback=check_callback, timeout=timeout, onselection=on_submit)
+    if isinstance(options, dict):
+        dropdown.add_multiple_options(**options)
+    else:
+        dropdown.add_multiple_options(*options)
+
     msg = await ctx.send(view=dropdown.view, reference=ctx.message)
     timeout = await dropdown.wait()
 

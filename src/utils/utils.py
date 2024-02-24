@@ -18,10 +18,11 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import discord
+from enum import Enum
 
 def async_lambda(callback):
-    async def _execute(*args, **kargs):
-        await callback(*args, **kargs)
+    async def _execute(*args, **kwargs):
+        await callback(*args, **kwargs)
 
     return _execute
 
@@ -38,8 +39,18 @@ def async_conditional_lambda(check_callback, if_callback, else_callback):
 def try_parse_int(value: str, default_value: int = 0) -> int:
     try:
         return int(value)
-    except:
+    except ValueError:
         return default_value
 
 def get_color(hexvalue: str) -> discord.Color:
     return discord.Color(int(hexvalue, 16))
+
+class SerializableEnum(Enum):
+    def __str__(self):
+        return str(self.value)
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

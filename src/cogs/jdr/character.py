@@ -26,8 +26,15 @@ from discord.ext import commands
 import discord
 import asyncio
 from core.commandparameters import GenericCommandParameters
-from utils.emojis import Emoji
+from setup.loglevel import LogLevel
 from utils import async_lambda, async_conditional_lambda, try_parse_int, get_color
+from utils.checks import check_jdrchannel, check_haschar, check_chanmj
+from utils.converters import CharacterConverter
+from utils.emojis import Emoji
+from models import Character
+from models.enums import AutoPopulatedEnums, AttributeTag
+from exceptions import HTTPErrorCode
+from network import safe_request
 # from src.tools.Translator import *
 # from src.tools.Character import *
 # from src.tools.CharacterUtils import *
@@ -44,39 +51,43 @@ class CharacterCog(commands.Cog, name="Characters"):
         self.bot = bot
         self.logger = logger
 
-    #@commands.check(check_jdrchannel)
+    @commands.check(check_jdrchannel)
     @commands.hybrid_group(invoke_without_command=False, aliases=['char'])
     async def character(self, ctx): pass
 
-    #@commands.check(check_haschar)
+    @commands.check(check_haschar)
     @commands.cooldown(1, 5, commands.BucketType.user)
     @character.command(name="select", aliases=["switch"])
     async def character_select(self, ctx): #(self, ctx, key)
         """**PC/PJ only**
         Select a character from all characters linked to you"""
-        # data = await GenericCommandParameters(ctx)
-        # for i in self.charbase.get("linked", []):
-        #     if i.get("charkey") == key and i.get("member") == ctx.author.id:
-        #         await i.select(ctx.author.id)
-        #         self.logger.log(logging.DEBUG+1,"/charselect (%s -> %s) in channel %d of server %d", data.char.key, i.key, ctx.channel.id, ctx.guild.id)
-        #         await ctx.channel.send(data.lang["charselect"].format(data.char.key, i.key))
-        #         return
-        # await ctx.channel.send(data.lang["charnotexist"].format(key))
         data = await GenericCommandParameters.get_from_context(ctx)
-        chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_char_placeholder"], timeout=60, options=chars, select_msg=data.lang["charselect"], timeout_msg=data.lang["timeout"], format_args_before=["undefined"])
+        current_char = await data.char
+        chars = []
 
-        if success:
-            self.logger.info(selection)
+        async for i in data.charbase.get("linked", []):
+            if i.get("member", -1) == ctx.author.id:
+                chars.append(i.get("charkey"))
 
-    #@commands.check(check_chanmj)
+        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_char_placeholder"], timeout=60, options=chars, select_msg=data.lang["charselect"], timeout_msg=data.lang["timeout"], format_args_before=[current_char.key])
+
+        if success and selection != current_char.key:
+            jdr = await data.jdr
+            to_select = Character(charkey=selection, linked=ctx.author.id)
+            to_select.bind(jdr)
+            await to_select.select(ctx.author.id)
+            self.logger.log(LogLevel.DEBUG.value, "/charselect (%s -> %s) in channel %d of server %d", current_char.key, selection, ctx.channel.id, ctx.guild.id)
+            # await ctx.channel.send(data.lang["charselect"].format(data.char.key, i.key))
+
+    @commands.check(check_chanmj)
     @character.command(name="link", aliases=["assign"])
     async def character_link(self, ctx):
         """**GM/MJ only**
         Link a character with a member of your RP/JDR. This member will be able to use all commands related to the character linked (command specified as 'PC/PJ only')"""
         data = await GenericCommandParameters.get_from_context(ctx)
         view = ui.views.View(ctx, timeout=60)
-        chars = ["Sora", "Igor", "Akane"]### HARDCODED - TO BE REMOVED
+        chars = await data.charbase.get("characters", [])
+
         char_dd = ui.Dropdown(ctx, view, id="chars", placeholder=data.lang["dropdown_char_placeholder"], row=0, options=chars)
         user_dd = ui.Dropdown(ctx, view, id="users", placeholder=data.lang["dropdown_user_placeholder"], row=1)
 
@@ -88,7 +99,7 @@ class CharacterCog(commands.Cog, name="Characters"):
         submit_check = lambda b, i: char_dd.value is not None and user_dd.value is not None
         on_submit = async_conditional_lambda(
             asyncio.coroutine(lambda b, i: b.final),
-            lambda b, i: i.response.edit_message(content=data.lang["charlink"].format(char_dd.value, user_dd.value), view=None),
+            lambda b, i: i.response.edit_message(content=Emoji.HOURGLASS, view=None),
             lambda b, i: i.response.edit_message(content=data.lang["submit_failed"], view=b.view)
         )
 
@@ -100,97 +111,108 @@ class CharacterCog(commands.Cog, name="Characters"):
         if timeout:
             await msg.edit(content=data.lang["timeout"], view=None)
         elif view.result.is_success:
-            self.logger.info(f"linked {char_dd.value} to {user_dd.value}")
+            jdr = await data.jdr
+            character = Character(charkey=char_dd.value)
+            character.bind(jdr)
+            error = await safe_request(character.link(user_dd.value, ctx.author.id), HTTPErrorCode.CONFLICT, HTTPErrorCode.FORBIDDEN)
 
-        # try:
-        #     await character.link(player.id, ctx.author.id, override)
-        # except APIException as e:
-        #     if e["code"] == 409:
-        #         await ctx.channel.send(data.lang["charlink_conflict"].format(character.name))
-        #     elif e["code"] == 403:
-        #         await ctx.channel.send(data.lang["is_dead"].format(character.name))
-        #     else:
-        #         raise e
-        #     return
-        # finally:
-        #     self.logger.log(logging.DEBUG+1, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, player.id)
-        #
-        # await ctx.channel.send(data.lang["charlink"].format(character.name, player.mention))
+            if error is None:
+                await msg.edit(content=data.lang["charlink"].format(character.key, user_dd.value))
+                self.logger.log(LogLevel.DEBUG.value, "/charlink in channel %d of server %d between %s and %d", ctx.channel.id, ctx.guild.id, character.key, user_dd.value)
+            elif error == HTTPErrorCode.CONFLICT:
+                await msg.edit(content=data.lang["charlink_conflict"].format(character.key))
+            else:
+                await msg.edit(content=data.lang["is_dead"].format(character.key))
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="hybrid", aliases=["transgenic", "transgenique", "hybride"])
-    async def character_hybrid(self, ctx, char):#: CharacterConverter, *, race: RaceConverter):
+    async def character_hybrid(self, ctx, char: CharacterConverter): #, *, race: RaceConverter):
         """**GM/MJ only**
         Set a character as an hybrid, give him a second race and inherit all race's skills.
         This won't work if the character is already an hybrid"""
         data = await GenericCommandParameters.get_from_context(ctx)
-        races = ["Grits", "Alfys", "Nyfis", "Zyrfis", "Darfys", "Idylis", "Alwenys", "Vampirys", "Lythis"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_race_placeholder"], timeout=60, options=races, select_msg=data.lang["char_hybrid"], timeout_msg=data.lang["timeout"], format_args_before=[char, "Grits (fake)"])
+        Races = await AutoPopulatedEnums().get_races(char.extension)
+        filtered_races = Races.to_dict(lambda r: str(r) != str(char.race))
+        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_race_placeholder"], timeout=60, options=filtered_races, select_msg=data.lang["char_hybrid"], timeout_msg=data.lang["timeout"], format_args_before=[char, char.race])
 
         if success:
-            self.logger.info(selection)
-        # char = char.makehybrid(race)
-        # self.logger.log(logging.DEBUG+1, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
-        # await ctx.message.channel.send(data.lang["char_hybrid"].format(char.name, char.race, char.hybrid_race))
+            char = await char.makehybrid(Races(selection), ctx.author.id)
+            self.logger.log(LogLevel.DEBUG.value, "/charhybrid (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="symbiont", aliases=["symbiote", "symb", "sb"])
-    async def character_symbiont(self, ctx, char):#: CharacterConverter, *, symbiont: typing.Optional[SymbiontConverter] = None):
+    async def character_symbiont(self, ctx, char: CharacterConverter): #, *, symbiont: typing.Optional[SymbiontConverter] = None):
         """**GM/MJ only**
         Attach a symbiont to a character, if no symbiont is provided clear any symbiont from this character."""
         data = await GenericCommandParameters.get_from_context(ctx)
-        symbionts = [data.lang["none_m"], "Azort", "Iridyanis", "Enairo", "Horya", "Manahil"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_symbiont_placeholder"], timeout=60, options=symbionts, select_msg=data.lang["char_symbiont"], timeout_msg=data.lang["timeout"], format_args_before=[char])
+        Symbionts = await AutoPopulatedEnums().get_symbionts(char.extension)
+        sb_dict = {None: data.lang["none_m"]}
+        sb_dict.update({sb.name: sb.value for sb in Symbionts})
+        submit_callback = async_conditional_lambda(
+            asyncio.coroutine(lambda dd, i: dd.value is None),
+            lambda dd, i: i.response.edit_message(content=data.lang["char_nosymbiont"].format(char.name), view=None),
+            lambda dd, i: i.response.edit_message(content=data.lang["char_symbiont"].format(char.name, dd.value), view=None)
+        )
 
+        success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_symbiont_placeholder"], timeout=60, options=sb_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
         if success:
-            self.logger.info(selection)
-        # char = char.setsymbiont(symbiont)
-        # self.logger.log(logging.DEBUG+1, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.message.channel.id, ctx.message.guild.id)
-        # if char.symbiont is None:
-        #     await ctx.message.channel.send(data.lang["char_nosymbiont"].format(char.name))
-        # else:
-        #     await ctx.message.channel.send(data.lang["char_symbiont"].format(char.name, char.symbiont))
+            char = await char.setsymbiont(Symbionts(selection) if selection is not None else None, ctx.author.id)
+            self.logger.log(LogLevel.DEBUG.value, "/charsymbiont (%s) in channel %d of server %d", char.key, ctx.channel.id, ctx.guild.id)
 
-    #@commands.check(check_chanmj)
+    @commands.check(check_chanmj)
     @character.command(name="affiliation", aliases=["organization", "organisation", "org"])
-    async def character_affiliation(self, ctx, char):#: CharacterConverter, affiliation: typing.Optional[AffiliationConverter] = None):
+    async def character_affiliation(self, ctx, char: CharacterConverter): #, affiliation: typing.Optional[AffiliationConverter] = None):
         """**GM/MJ only**
         Affiliate the character with the specified organization, the organization should exists.
         This will automatically include all skills related to the organization.
         If no organization is provided, then the current character's affiliation will be removed."""
         data = await GenericCommandParameters.get_from_context(ctx)
-        orgs = [data.lang["none"], "Espion", "Religieux", "Scientifique", "Contrebandier", "Bureaucrate", "Militaire", "Federation du commerce", "Adphyra-Core"]### HARDCODED - TO BE REMOVED
-        success, selection = await ui.send_dropdown(ctx, placeholder=data.lang["dropdown_org_placeholder"], timeout=60, options=orgs, select_msg=data.lang["affiliate"], timeout_msg=data.lang["timeout"], format_args_before=[char])
-
-        if success:
-            self.logger.info(selection)
-        # char.affiliate(affiliation)
-        # self.logger.log(logging.DEBUG+1,"/char affiliate (%s with %s) in channel %d of server %d",char.key,affiliation,ctx.message.channel.id,ctx.message.guild.id)
-        # if affiliation is None:
-        #     await ctx.channel.send(data.lang["unaffiliate"].format(char.name))
-        # else:
-        #     await ctx.channel.send(data.lang["affiliate"].format(char.name,affiliation))
-
-    #@commands.check(check_chanmj)
-    @character.command(name="set")
-    async def character_set(self, ctx, char): #(self, ctx, key)
-        """**PC/PJ only**"""
-        data = await GenericCommandParameters.get_from_context(ctx)
-        modal = ui.views.Modal(ctx, "/character set", timeout=60)
-        val_field = ui.TextInput(ctx, modal, "Value", placeholder=data.lang["value_input"], minlen=1, maxlen=4)
-
-        btns_view = ui.views.ButtonGroup(ctx, 'operation', timeout=60)
-        on_click = async_lambda(lambda btn, i: i.response.send_modal(modal))
-        btns_view.addrange(
-            ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=on_click),
-            ui.DefaultButtons.SET.spawn(btns_view, onclick=on_click),
-            ui.DefaultButtons.ADD.spawn(btns_view, onclick=on_click)
+        Organizations = await AutoPopulatedEnums().get_orgs(char.extension)
+        org_dict = {None: data.lang["none"]}
+        org_dict.update({org.name: org.value for org in Organizations})
+        submit_callback = async_conditional_lambda(
+            asyncio.coroutine(lambda dd, i: dd.value is None),
+            lambda dd, i: i.response.edit_message(content=data.lang["unaffiliate"].format(char.name), view=None),
+            lambda dd, i: i.response.edit_message(data.lang["affiliate"].format(char.name, dd.value), view=None)
         )
 
-        settable = [data.lang["mental"], data.lang["karma"], data.lang["intuition"], f'{data.lang["PV"]} max', f'{data.lang["PM"]} max',
-                    data.lang["force"], data.lang["esprit"], data.lang["charisme"], data.lang["agilite"], data.lang["precision"],
-                    data.lang["chance"], data.lang["lp"], data.lang["dp"], data.lang["pilot_a"], data.lang["pilot_p"], data.lang["money"]]### HARDCODED - TO BE REMOVED
-        on_select = async_lambda(lambda d, i: i.response.edit_message(view=btns_view))
+        success, selection = await ui.send_dropdown_custom_submit(ctx, placeholder=data.lang["dropdown_org_placeholder"], timeout=60, options=org_dict, on_submit=submit_callback, timeout_msg=data.lang["timeout"])
+        if success:
+            char = await char.affiliate(Organizations(selection) if selection is not None else None, ctx.author.id)
+            self.logger.log(LogLevel.DEBUG.value, "/char affiliate (%s with %s) in channel %d of server %d", char.key, selection, ctx.channel.id, ctx.guild.id)
+
+    @commands.check(check_chanmj)
+    @character.command(name="set")
+    async def character_set(self, ctx, char: CharacterConverter): #(self, ctx, key)
+        """**PC/PJ only**"""
+        async def _send_modal(btn, interaction):
+            if AttributeTag(set_dd.value).isnumeric():
+                result = int(btns_view.result)
+                if result > 0:
+                    val_field.label = data.lang["value_input"].format(data.lang['add'])
+                elif result < 0:
+                    val_field.label = data.lang["value_input"].format(data.lang['remove'])
+
+            interaction.response.send_modal(modal)
+
+        data = await GenericCommandParameters.get_from_context(ctx)
+        if char.dead:
+            await ctx.channel.send(data.lang["is_dead"].format(char.name))
+
+        modal = ui.views.Modal(ctx, "/character set", timeout=60)
+        val_field = ui.TextInput(ctx, modal, data.lang["value_input"].format(data.lang['set']), placeholder=data.lang["value"], minlen=1, maxlen=4)
+
+        btns_view = ui.views.ButtonGroup(ctx, 'operation', timeout=60)
+        ui.DefaultButtons.REMOVE.spawn(btns_view, onclick=_send_modal)
+        ui.DefaultButtons.SET.spawn(btns_view, onclick=_send_modal)
+        ui.DefaultButtons.ADD.spawn(btns_view, onclick=_send_modal)
+
+        settable = AttributeTag.get_charset(lang=data.lang)
+        on_select = async_conditional_lambda(
+            asyncio.coroutine(lambda dd, i: AttributeTag(dd.value).isnumeric()),
+            lambda dd, i: i.response.edit_message(view=btns_view),
+            _send_modal
+        )
         set_dd = ui.StandaloneDropdown(ctx, placeholder=data.lang["dropdown_charset_placeholder"], timeout=60, options=[i.capitalize() for i in settable], onselection=on_select)
 
         msg = await ctx.send(view=set_dd.view, reference=ctx.message)
@@ -205,50 +227,34 @@ class CharacterCog(commands.Cog, name="Characters"):
         if timeout:
             await msg.edit(content=data.lang["timeout"], view=None)
         else:
-            res = int(btns_view.result)
-            op = '+' if res > 0 else '-' if res < 0 else None
+            tag = AttributeTag(set_dd.value)
+            value = val_field.value
             got = data.lang["new_value"]
-            stat = set_dd.value.lower()
-            amount = try_parse_int(val_field.value)
-            newval = amount
+            stat = tag.translate(data.lang)
+            op = None
 
-            if op is not None:
-                if op == '+':
+            if tag.isnumeric():
+                value = try_parse_int(val_field.value, tag.get_attribute(char))
+                res = int(btns_view.result)
+
+                if res > 0:
+                    value += tag.get_attribute_or_default(char, 0)
                     got = data.lang["recovered"]
-                    newval += 100#char.mental
-                else:
+                    op = '+'
+                elif res < 0:
+                    value = tag.get_attribute_or_default(char, 0) - value
                     got = data.lang["lost"]
-                    newval = 100 - amount#char.mental - amount
-            # char = char.charset('ment', newval)
+                    op = '-'
 
+            char.charrset(ctx.author.id, {tag: value})
+            final_value = tag.get_attribute_or_default(char, value)
             embd = discord.Embed(title=char, description=data.lang["charset"].format(got, stat), colour=get_color('5B005B'))
             embd.set_footer(text="The Tale of Great Cosmos")
             embd.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
             embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
             if op is not None:
-                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=str(amount), inline=True)
-            embd.add_field(name=data.lang["charset_current"].format(stat), value=str(newval), inline=True)
+                embd.add_field(name=data.lang["charset_amount"].format(stat, got), value=str(value), inline=True)
+            embd.add_field(name=data.lang["charset_current"].format(stat), value=str(final_value), inline=True)
 
             await msg.edit(content=None, embed=embd, view=None)
-            self.logger.info(f"set {set_dd.value} for {char} to {newval} ({op if op is not None else '='}{amount})")
-
-        # if char.dead:
-        #     await ctx.message.channel.send(data.lang["is_dead"].format(char.name))
-        # else:
-        #     got = data.lang["new_value"]
-        #     newval = amount
-        #     if op is not None:
-        #         if op == "+":
-        #             got = data.lang["recovered"]
-        #             newval += char.mental
-        #         else:
-        #             got = data.lang["lost"]
-        #             newval = char.mental - amount
-        #     char = char.charset('ment',newval)
-        #     embd = discord.Embed(title=char.name,description=data.lang["setmental"].format(got),colour=discord.Color(int('5B005B',16)))
-        #     embd.set_footer(text="The Tale of Great Cosmos")
-        #     embd.set_author(name=ctx.message.author.name,icon_url=ctx.message.author.avatar_url)
-        #     embd.set_thumbnail(url="https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png")
-        #     if op is not None: embd.add_field(name=data.lang["mental_amount"].format(got),value=amount,inline=True)
-        #     embd.add_field(name=data.lang["current_mental"],value=str(char.mental),inline=True)
-        #     await ctx.message.channel.send(embed=embd)
+            self.logger.info(f"set {set_dd.value} for {char} to {final_value} ({op if op is not None else '='}{value})")

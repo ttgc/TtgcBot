@@ -17,19 +17,14 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import base64, hashlib, time
+import base64
+import hashlib
+import time
 import argon2.low_level as argon2
-from enum import Enum
-from src.utils.config import *
-from src.exceptions.exceptions import *
-from src.utils.httprequest import *
-from src.tools.datahandler.DataCache import *
-
-class RequestType(Enum):
-    GET=0
-    POST=1
-    PUT=2
-    DELETE=3
+from setup.config import Config
+from exceptions import APIException
+from network import HTTP, RequestType
+from datahandler.cache import DataCache
 
 class APIManager:
     def __init__(self):
@@ -37,16 +32,16 @@ class APIManager:
         self.id = config["api-app"]["id"]
         self.appname = config["api-app"]["nom"]
         pwdargs = config["api-app"]["password"]
-        rawpwd = "{}-{}".format(pwdargs["pwd"], pwdargs["timestamp"])
-        self._pwd = argon2.hash_secret_raw(rawpwd, bytes(pwdargs["salt"]), time_cost=4, memory_cost=1024, parallelism=8, hash_len=32, type=argon2.Type.ID).hex()
+        rawpwd = "{}-{}".format(pwdargs["pwd"], pwdargs["timestamp"]).encode()
+        self._pwd = argon2.hash_secret_raw(rawpwd, bytes(pwdargs["salt"]), time_cost=4, memory_cost=1024, parallelism=8, hash_len=32, type=argon2.Type.ID).hex().upper()
         self.url = config["api-path"]
         self.logged = False
         self._token = None
 
-    async def _login(self, requesterID=None, roleID=None, *endpoints):
-        if self.logged: self._logout()
+    async def login(self, requesterID=None, roleID=None, *endpoints):
+        if self.logged: self.logout()
         timestamp = time.gmtime()
-        tohash = "{}-{}-{0:02d}-{1:02d}-{2:04d}".format(self.id, self.appname, timestamp.tm_mday, timestamp.tm_mon, timestamp.tm_year)
+        tohash = f"{self.id}-{self.appname}-{timestamp.tm_mday:02d}-{timestamp.tm_mon:02d}-{timestamp.tm_year:04d}"
         hash = base64.b64encode(hashlib.sha256(tohash.encode()).digest())
         body = {"app": {"id": self.id, "name": self.appname, "hash": hash.decode(), "pwd": self._pwd}, "endpoints": list(endpoints)}
         if requesterID is not None: body["member"] = requesterID
@@ -57,35 +52,37 @@ class APIManager:
             raise APIException("Error on login", code=req.status)
         self._token = req.result
 
-    async def _logout(self):
+    async def logout(self):
         req = await HTTP.delete("{}/api/Logout".format(self.url), headers={"token": self._token})
         if req.status_code // 100 != 2:
             raise APIException("Error on logout", code=req.status)
         self.logged = False
         self._token = None
 
-    async def __call__(self, reqType, endpoint, *, requesterID=None, roleID=None, body={}, query={}, hasResult=False, jsonResult=True, resource=None, forceGet=False):
-        self._login(requesterID, roleID, endpoint)
-        headers = {"token": self._token}
-        if requesterID: headers["member"] = requesterID
-        if roleID: headers["role"] = roleID
+    async def __call__(self, reqType, endpoint, *, requesterID=None, roleID=None, body={}, query={}, hasResult=False, jsonResult=True, resource=None, forceGet=False, disable_autologin=False):
         cache = DataCache()
-        result = None
-
         if resource is not None and not forceGet and reqType == RequestType.GET:
             result = cache[resource]
             if result is not None: return result
 
+        if not disable_autologin:
+            await self.login(requesterID, roleID, endpoint)
+
+        headers = {"token": self._token}
+        if requesterID: headers["member"] = requesterID
+        if roleID: headers["role"] = roleID
+        result = None
+
         if reqType == RequestType.GET:
-             result = await HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult)
+            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), query=query, headers=headers, jsonResult=jsonResult)
         if reqType == RequestType.POST:
             result = await HTTP.post("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.PUT:
             body = body if len(body) > 0 else None
-            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
+            result = await HTTP.put("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
         if reqType == RequestType.DELETE:
             body = body if len(body) > 0 else None
-            result = await HTTP.get("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
+            result = await HTTP.delete("{}/api/{}".format(self.url, endpoint), body, headers=headers, hasResult=hasResult, jsonResult=jsonResult)
 
         if resource is not None:
             if reqType == RequestType.GET:
@@ -93,5 +90,7 @@ class APIManager:
             else:
                 cache.remove(resource)
 
-        self._logout()
+        if not disable_autologin:
+            await self.logout()
+
         return result

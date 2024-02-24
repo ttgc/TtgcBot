@@ -17,15 +17,12 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-#from utils.checks import check_botowner
+from utils.checks import check_botowner, check_botmanager
 from discord.ext import commands
 from setup.loglevel import LogLevel
 import sys
 import asyncio
 import discord
-
-# Temp: Remove it after checks rewrite
-check_botmanager = check_botowner = lambda ctx: True
 
 class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=True)):
     def __init__(self, bot, logger):

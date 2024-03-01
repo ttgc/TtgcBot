@@ -4,12 +4,14 @@
 ![Generic badge](https://img.shields.io/badge/Bot&nbsp;Version-3.0.0-blue.svg) [![GitHub license](https://img.shields.io/github/license/ttgc/TtgcBot.svg)](https://github.com/ttgc/TtgcBot/blob/master/LICENSE) ![Generic badge](https://img.shields.io/badge/Python&nbsp;Version-3.5&nbsp;|&nbsp;3.6&nbsp;|&nbsp;3.7-blue.svg) [![Generic badge](https://img.shields.io/badge/Languages-EN&nbsp;|&nbsp;FR-green.svg)](https://github.com/ttgc/TtgcBot/tree/master/Lang) <br/>
 [![Generic badge](https://img.shields.io/badge/discord.py-1.5.0-blue.svg)](https://pypi.python.org/pypi/discord.py/) [![Generic badge](https://img.shields.io/badge/asyncio-3.4.3-blue.svg)](https://pypi.org/project/asyncio/) [![Generic badge](https://img.shields.io/badge/Pillow-8.1.1-blue.svg)](https://pypi.org/project/Pillow/) [![Generic badge](https://img.shields.io/badge/psycopg2-2.8.1-blue.svg)](https://pypi.org/project/psycopg2/) [![Generic badge](https://img.shields.io/badge/PyNaCl-1.3.0-blue.svg)](https://pypi.org/project/PyNaCl/) [![Generic badge](https://img.shields.io/badge/requests-2.25.1-blue.svg)](https://pypi.org/project/requests/) [![Generic badge](https://img.shields.io/badge/urllib3-1.26.5-blue.svg)](https://pypi.org/project/urllib3/) [![Generic badge](https://img.shields.io/badge/latex-0.7.0-blue.svg)](https://pypi.org/project/latex/) [![Generic badge](https://img.shields.io/badge/deepmerge-0.1.0-blue.svg)](https://pypi.org/project/deepmerge/)
 
-TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of Great Cosmos universe ([French Website here](http://thetaleofgreatcosmos.fr)). But, today the bot is having many useful tools and features such as Keeprole system that allow leaving member to keep their roles after joining again your server, warn users that doesn't follow your rules, and more things (list of commands below). The bot is developed in Python 3 using [discord.py](https://github.com/Rapptz/discord.py/tree/async) lib and use also a postgresql 9 database.
+TtgcBot is a bot for Discord made at the beginning for RP (JDR) on The Tale of Great Cosmos universe ([French Website here](http://thetaleofgreatcosmos.fr)). But, today the bot is having many useful tools and features such as Keeprole system that allow leaving member to keep their roles after joining again your server, warn users that doesn't follow your rules, and more things (list of commands below). The bot is developed in Python 3 using [discord.py](https://github.com/Rapptz/discord.py/tree/async) lib and use also a postgresql database.
 
 **[Invite link](https://discordapp.com/oauth2/authorize?client_id=331147011938320396&scope=bot&permissions=385350855)**
 
 *you can invit him from a server with command* `/invite`  
 *Also available on The Tale of Great Cosmos discord*
+
+Please note this version is currently in alpha to fit discord API requirements, some bugs may still occurs and the stable release will be available later.
 
 <hr/>
 
@@ -68,6 +70,7 @@ The `/` refers to the prefix on your server by default `/`, but if you have chan
 `[opt1|opt2]` is an optional argument and if it's provided, it could only be one of the 2 options (`opt1` or `opt2`) <br/>
 `(name1|name2)` same as above, but used for commands group names instead. You can use the name1 or name2 for each subcommands. <br/>
 `[,...]` means that you can pass as many as you want parameters of the same type <br/>
+`✔️` indicates the command supports discord slash command <br/>
 There are also some features (commands) reserved for some users, it will be precised for each of them. <br/>
 Each commands must be used on servers only, else they won't work. <br/>
 Bot is casse insensitive, you can use uppercasse like lowercase for calling commands <br/>
@@ -76,30 +79,28 @@ For some commands there are alliases avalaible wich will be given for each comma
 ### Basic commands
 - `/help [command]` <br/>
 Show the help message. If a command, or group of command is provided, show detailled information about it.
-- `/invite` <br/>
+- `/invite` ✔️ <br/>
 Get the [invitation link](https://discordapp.com/oauth2/authorize?client_id=331147011938320396&scope=bot&permissions=385350855) of the bot. <br/>
 Alias : `invit`
-- `/setlang <language>` <br/>
+- `/setlang <language>` ✔️ <br/>
 Set your language for bot messages, language represents the code of your language and there are currently only two languages supported : `EN` for English and `FR` for French <br/>
 NB : language code is case insensitive so you can precise it in upper or lower case as you wish
 Alias : `setlanguage`
-- `/ping` <br/>
+- `/ping` ✔️ <br/>
 pong ! :ping_pong:
 
 ### Fun commands
-- `/pi` <br/>
+- `/pi` ✔️ <br/>
 Display the first decimals of pi
-- `/joke [language]` <br/>
-Display a joke in the requested language (by default in French)
-- `/yay` <br/>
+- `/yay` ✔️ <br/>
 Use the power of yay
-- `/choquedecu` <br/>
+- `/choquedecu` ✔️ <br/>
 #ChoquéEtDéçu
-- `/onichan` <br/>
+- `/onichan` ✔️ <br/>
 Because you want to have a little sister who loves you :heart:
-- `/tell <msg>` <br/>
+- `/tell <msg>` ✔️ <br/>
 The bot will tell your message and erase the command input (all tell commands are saved in logs)
-- `/ttstell <msg>` <br/>
+- `/ttstell <msg>` ✔️ <br/>
 Same as the tell command but the bot will use tts <br/>
 Alias : `telltts`
 
@@ -110,62 +111,6 @@ Alias : `prefix`
 - `/setadminrole <role>` (Administrator only) <br/>
 Set the admin role for your server <br/>
 Alias : `adminrole`
-- `/contentban <content>` (Administrator only) <br/>
-Forbid the usage of a string on your server, all message that will contains this string will automatically deleted by the bot and provide a DM to the author to explain why it has been deleted. You can only ban 20 strings per servers
-- `/contentunban <content>` (Administrator only) <br/>
-Unban a string from your server
-- `/warn <member[,...]> <reason>` (Administrator only) <br/>
-Warn a user (or multiple users), number of warns are stored by the bot
-- `/unwarn <member[,...]>` (Administrator only) <br/>
-Unwarn a user (or multiple users)
-- `/configwarn <number> <kick|ban|assign role>` (Adminstrator only) <br/>
-Configure the bot on your server to apply a punishment when a user has received the number of warn given. When assign is asked, you have to provide by mentioning it the role to assign.
-- `/warnlist` (Administrator only) <br/>
-Display all users warned on your server with the number of warn for each of them <br/>
-Alias : `warnls`
-- `/warnconfiglist` (Administrator only) <br/>
-Display all punishment on your server <br/>
-Aliases : `warnconfigls`, `warncfgls`, `warncfglist`
-- `/userblock <username>` (Admin only) <br/>
-Block users wich have a username matching the username mask parameter given and avoid them to join your server. If someone matching the template try to join, it will be banned instantly
-- `/userunblock <username>` (Admin only) <br/>
-Delete a template of usernames blocked on your server
-
-### Keeprole commands (Administrator only)
-Keeprole system allow you to set roles that will be automatically reassigned to member when they leave with theese roles and join again your server
-- `/(keeprole|kr) enabled` <br/>
-enable or disable the keeprole system on your server <br/>
-Alias : `switch`
-- `/(keeprole|kr) clear` <br/>
-Delete all users stored for the keeprole system, they won't get their roles after joining after using that
-- `/(keeprole|kr) roles list` <br/>
-Show the list of roles registered in the keeprole system for your server
-- `/(keeprole|kr) roles add <role[,...]>` <br/>
-Add the roles mentionned to the list of roles that should be kept. If the role is above or equal to the highest role of the bot, it won't be added <br/>
-Alias : `+`
-- `/(keeprole|kr) roles delete <role[,...]>` <br/>
-Remove role(s) mentionned from the keeprole list <br/>
-Aliases : `del`, `-`, `remove`, `rm`
-- `/(keeprole|kr) members list` <br/>
-Show the list of members that will get roles after joining your server (the list show also the roles concerned for each user)
-
-### Vocal commands (Premium user only)
-- `/(vocal|music) <on/off>` <br/>
-Make the bot join or leave your voice channel
-- ~~`/(vocal|music) play <url>`~~ **(DISABLED)** <br/>
-Make the bot play the youtube video given. You can provide keywords instead of url and the bot will search and play the first result of your query. <br/>
-Alias : `ytplay`
-- `/(vocal|music) playlocal <song>` (Bot owner only) <br/>
-Play the song given from the music directory of the bot <br/>
-Alias : `localplay`
-- `/(vocal|music) skip` <br/>
-Skip the current song
-- `/(vocal|music) pause` (Administrator only) <br/>
-Pause the current playing song
-- `/(vocal|music) resume` (Administrator only) <br/>
-Resume the previously paused song
-- `/(vocal|music) disconnectvocal` (Bot manager only) <br/>
-Instant leave all the vocal channels where the bot is connected
 
 ### NSFW commands (NSFW channels only)
 - `/nsfwjoke [language]` <br/>
@@ -178,7 +123,7 @@ Rule 34 of the internet : *if it exists, there is porn on it* <br/>
 
 ### RP/JDR commands
 #### Main commands
-- `/roll <expression>` <br/>
+- `/roll <expression>` ✔️ <br/>
 Roll dice and perform operations (supported symbols and operations : `*,+,-,/,()`) if given in the expression field. For rolling a dice, you have to use the litteral expression `xdy` where `x` is the number of dice rolled,  `d` the letter `d` and `y` the number of side of the dice (`1d100` will roll 1 dice with 100 sides for example). You can also roll special dice with your own values by writing them between brackets as following : `1d{red,blue,yellow,green}`. <br/>
 Full example : `/roll (10+1d100)*(2d10-5d8)` will return the result of the following expression : `(10+(1 dice with 100 sides))*((2 dice with 10 sides)-(5 dice with 8 sides))` <br/>
 Special dice example : `/roll 1d{1,2,3,4,5,6,7,8,9,10,Jack,Queen,King}+1d{Clubs,Diamonds,Hearts,Spades}` will return a single card with its value and its color (example : Queen of Spades) <br/>
@@ -188,9 +133,9 @@ Set the role that every user need on your server to create JDR and use GM/MJ com
 Aliases : `setgmrole`
 - `/apart [mention[,...]]` (GM/MJ only and RP/JDR channel only) <br/>
 Mute and deafen all the players that are not mentionned by the command. If there is no single mention, the bot will unmute and undeafen all the players. (Spectators and GM/MJ will not be affected by this)
-- `/wiki <topic>` <br/>
+- `/wiki <topic>` ✔️ <br/>
 Search on the wiki the given topic, if found a summary will be displayed with the link to the page
-- `/randomfact` <br/>
+- `/randomfact` ✔️ <br/>
 Get a random fact about TTGC <br/>
 Aliases : `rf`, `rdmfact`, `randomwiki`, `rw`, `rdmwiki`
 - `/jointhegame` <br/>
@@ -305,7 +250,7 @@ Give one more level to the character and announce the bonus for this level <br/>
 Alias : `levelup`
 - `/(character|char) kill <charkey>` (MJ only and JDR channel only) <br/>
 Kill definitively a character, this will unlink it from its owner and the character wont be playable anymore
-- `/(character|char) export <charkey> [language]` (MJ only and JDR channel only) <br/>
+- ~~`/(character|char) export <charkey> [language]` (MJ only and JDR channel only)~~ **(DISABLED)** <br/>
 Export a character to PDF format using LaTeX technology, and send the generated file through discord. By default, the generated PDF is in french, use `EN` value for `language` to output in english your character.
 - `/(character|char) xp <charkey> <amount> [allowlevelup]` (MJ only and JDR channel only) <br/>
 Give XP to a character. XP is printed on exported PDF from the character, but it can also be used by the level system. if allowlevelup is true, then every 100 XP, the character will automatically earn one level. It is highly recomended to use all the time the same value for allowlevelup parameter to avoid xp to level conversion errors. <br/>

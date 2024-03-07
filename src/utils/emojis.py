@@ -2,7 +2,7 @@
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
-##    Copyright (C) 2017-2024  Thomas PIOT
+##    Copyright (C) 2017  Thomas PIOT
 ##
 ##    This program is free software: you can redistribute it and/or modify
 ##    it under the terms of the GNU General Public License as published by
@@ -17,4 +17,19 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .utils import async_lambda, async_conditional_lambda, try_parse_int, get_color
+
+from typing import Self
+from enum import StrEnum
+
+
+class Emoji(StrEnum):
+    X = '❌'
+    WHITE_CHECK_MARK = '✅'
+    EQUAL = '🟰'
+    PLUS = '➕'
+    MINUS = '➖'
+    HOURGLASS = '⏳'
+
+    @classmethod
+    def from_str(cls, string: str) -> Self:
+        return cls(string.strip(':').upper())

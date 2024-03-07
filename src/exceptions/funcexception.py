@@ -2,7 +2,7 @@
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
-##    Copyright (C) 2017-2024  Thomas PIOT
+##    Copyright (C) 2017  Thomas PIOT
 ##
 ##    This program is free software: you can redistribute it and/or modify
 ##    it under the terms of the GNU General Public License as published by
@@ -17,5 +17,14 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .deprecated import DeprecatedException
-from .funcexception import AlreadyCalledFunctionException
+
+from typing import Callable
+
+
+class AlreadyCalledFunctionException(Exception):
+    def __init__(self, fct: Callable) -> None:
+        self.fct = fct
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f"The function {self.fct.__name__} has already been called and should only be called once!"

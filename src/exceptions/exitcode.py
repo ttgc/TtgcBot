@@ -2,7 +2,7 @@
 #-*-coding:utf-8-*-
 
 ##    TtgcBot - a bot for discord
-##    Copyright (C) 2017-2024  Thomas PIOT
+##    Copyright (C) 2017  Thomas PIOT
 ##
 ##    This program is free software: you can redistribute it and/or modify
 ##    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,10 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .deprecated import DeprecatedException
-from .funcexception import AlreadyCalledFunctionException
-from .exitcode import ExitCode
+
+from enum import IntEnum
+
+
+class ExitCode(IntEnum):
+    SAFE = 0
+    DEFAULT_CRITICAL_EXCEPTION = 1

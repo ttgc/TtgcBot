@@ -111,6 +111,7 @@ token.ini
 config.*.json
 fonts/
 __deprecated__/
+.vscode/
 
 # Custom files
 NSFW/

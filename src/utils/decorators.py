@@ -51,7 +51,7 @@ def call_once(raise_error: bool = False) -> Callable:
     return call_once_decorator
 
 
-def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callable[[str], None]] = None) -> Callable:
+def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callable[..., None]] = None) -> Callable:
     def deprecated_decorator(fct: Callable | Type) -> Callable:
         log_method = logger if logger else print
         log_method(f"Deprecated function/class: {fct.__name__}\nReason: {reason}")
@@ -63,7 +63,7 @@ def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callab
             if raise_error:
                 raise exception
 
-            log_method(exception)
+            log_method(str(exception))
             return fct(*args, **kwargs)
 
         return deprecated_call

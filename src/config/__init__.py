@@ -17,6 +17,5 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .deprecated import DeprecatedException
-from .funcexception import AlreadyCalledFunctionException
-from .exitcode import ExitCode
+from .logger import Log, get_logger
+from .config import Config, Environment

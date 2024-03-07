@@ -88,6 +88,5 @@ class LogConfig:
 
     @classmethod
     def load_all(cls):
-        log_configs = []
         config = Config()['logs']
         return [cls(config['directory'], **cfg) for cfg in config['list']]

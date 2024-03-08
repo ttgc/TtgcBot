@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Type, Callable, Optional, Any
+from typing import Type, Callable, Optional, Self, Any, final
 import functools
 from exceptions import DeprecatedException, AlreadyCalledFunctionException
 
@@ -33,6 +33,32 @@ def singleton(cls: Type) -> Callable:
         return instances[cls]
 
     return get_instance
+
+
+def unique(attr: int | str) -> Callable:
+    def _decorator(cls: Type) -> Type:
+        _instance = {}
+
+        @final
+        class _Wrapper(cls):
+            def __new__(cls, *args, **kwargs) -> Self:
+                if cls not in _instance:
+                    _instance[cls] = {}
+
+                to_fetch = args if isinstance(attr, int) else kwargs
+                if (attr_value := to_fetch[attr]) not in _instance[cls]: # type: ignore
+                    _instance[cls][attr_value] = object.__new__(cls)
+                    _instance[cls][attr_value]._initialized = False
+
+                return _instance[cls][attr_value]
+
+            def __init__(self, *args, **kwargs) -> None:
+                if not self._initialized:
+                    super().__init__(*args, **kwargs)
+                    self._initialized = True
+
+        return _Wrapper
+    return _decorator
 
 
 def call_once(raise_error: bool = False) -> Callable:

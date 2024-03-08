@@ -17,7 +17,20 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .deprecated import DeprecatedException
-from .funcexception import AlreadyCalledFunctionException
-from .exitcode import ExitCode
-from .networkexception import HTTPException
+
+from typing import Optional
+from discord.ext import commands
+from network.statuscode import HTTPErrorCode
+
+
+class HTTPException(commands.CommandError):
+    def __init__(self, errcode: HTTPErrorCode, message: Optional[str] = None):
+        self.errcode = errcode
+        self.message = message if message else "No more details provided"
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f"HTTPException: Error Code {self.errcode} ({self.message})"
+
+    def parse(self, lang) -> str:
+        return HTTPErrorCode.get_code_from_int(self.errcode).to_string(lang, self.message)

@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Awaitable, Any
+from typing import Any
 import discord
 from .aliases import AsyncCallable
 
@@ -45,7 +45,7 @@ def async_conditional_lambda(check_callback: AsyncCallable[bool], if_callback: A
 def try_parse_int(value: str, default_value: int = 0) -> int:
     try:
         return int(value)
-    except:
+    except ValueError:
         return default_value
 
 

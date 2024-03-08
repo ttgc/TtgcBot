@@ -44,8 +44,17 @@ class Language(Enum):
                 self._translations[raw_split[0]] = content
 
     def __getitem__(self, name: str) -> str:
-        return self._translations[name]
+        return self._translations.get(
+            name, self.__class__.get_default()._translations[name]
+        )
 
     @classmethod
     def get_default(cls) -> Self:
         return cls.EN
+
+    @classmethod
+    def get(cls, code: str) -> Self:
+        for lang in cls:
+            if lang.name == code:
+                return lang
+        return cls.get_default()

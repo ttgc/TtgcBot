@@ -23,7 +23,27 @@ from enum import IntEnum
 from lang import Language
 
 
-class HTTPErrorCode(IntEnum):
+class HttpRequestStatus(IntEnum):
+    INFO = 1
+    SUCCESS = 2
+    REDIRECT = 3
+    CLIENT_ERROR = 4
+    SERVER_ERROR = 5
+
+    @classmethod
+    def get_status(cls, code: int) -> Self:
+        return cls(code // 100)
+
+    @property
+    def ok(self) -> bool:
+        return self <= 2
+
+    @property
+    def ko(self) -> bool:
+        return not self.ok
+
+
+class HttpErrorCode(IntEnum):
     UNKNOWN = -1
 
     MULTIPLE_CHOICE = 300
@@ -71,7 +91,7 @@ class HTTPErrorCode(IntEnum):
         try:
             return cls(code)
         except ValueError:
-            return cls.UNKNOWN
+            return cls.UNKNOWN # type: ignore
 
     def is_redirect(self) -> bool:
         return self.value // 100 == 3
@@ -112,3 +132,6 @@ class HTTPErrorCode(IntEnum):
         final_error = mapped_errors.get(self, self)
         err_details = lang[f"http_{final_error if not final_error.is_unknown() else 'unknown'}"]
         return err_details.format(message)
+
+
+type HttpStatus = HttpRequestStatus | HttpErrorCode

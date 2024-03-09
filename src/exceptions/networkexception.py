@@ -20,11 +20,11 @@
 
 from typing import Optional
 from discord.ext import commands
-from network.statuscode import HTTPErrorCode
+from network.statuscode import HttpErrorCode
 
 
 class HTTPException(commands.CommandError):
-    def __init__(self, errcode: HTTPErrorCode, message: Optional[str] = None):
+    def __init__(self, errcode: HttpErrorCode, message: Optional[str] = None):
         self.errcode = errcode
         self.message = message if message else "No more details provided"
         super().__init__(str(self))
@@ -33,4 +33,4 @@ class HTTPException(commands.CommandError):
         return f"HTTPException: Error Code {self.errcode} ({self.message})"
 
     def parse(self, lang) -> str:
-        return HTTPErrorCode.get_code_from_int(self.errcode).to_string(lang, self.message)
+        return HttpErrorCode.get_code_from_int(self.errcode).to_string(lang, self.message)

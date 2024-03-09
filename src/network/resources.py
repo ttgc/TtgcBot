@@ -19,7 +19,6 @@
 
 
 from typing import Callable, Optional, Any
-from enum import Enum
 import functools
 import time
 from utils.aliases import AsyncCallable
@@ -36,11 +35,11 @@ class _Resource[T]:
 
     @property
     def value(self) -> T:
-        if not self._value:
+        if not self.is_set:
             raise ValueError('Resource not initialized') # TODO: better exceptions
         if not self.alive:
             raise ValueError('TTL expired') # TODO: better exceptions
-        return self._value
+        return self._value # type: ignore
 
     @value.setter
     def value(self, value: T) -> None:
@@ -49,7 +48,11 @@ class _Resource[T]:
 
     @property
     def alive(self) -> bool:
-        return time.time() - self.creation < self.ttl * 3600
+        return self.ttl < 0 or time.time() - self.creation < self.ttl * 3600
+
+    @property
+    def is_set(self) -> bool:
+        return self._value is not None
 
     def kill(self) -> None:
         self.creation = 0
@@ -65,7 +68,7 @@ def pull_resource[T](name: str, *, ttl: int = 24, force: bool = False) -> Callab
 
             if force:
                 res.kill()
-            if not res.alive:
+            if not res.is_set or not res.alive:
                 res.value = await fct(*args, **kwargs)
 
             return res.value
@@ -84,12 +87,3 @@ def invalidate_resource(name: str) -> Callable:
 
         return _wrapper
     return _decorator
-
-
-class ResourceAction(Enum):
-    PULL = pull_resource
-    INVALIDATE = invalidate_resource
-    FORCE_PULL = functools.partial(pull_resource, force=True)
-
-    def __call__(self, name: str, **kwargs) -> Callable:
-        return self.value(name, **kwargs)

@@ -18,4 +18,5 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from .logger import Log, get_logger
-from .config import Config, Environment
+from .config import Config, Environment, set_working_directory
+from .client import get_client

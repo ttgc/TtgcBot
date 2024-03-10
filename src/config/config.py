@@ -24,7 +24,7 @@ import sys
 from enum import Enum
 from typing import Optional, Self, Any
 from deepmerge import Merger
-from utils.decorators import singleton
+from utils.decorators import singleton, call_once
 
 
 class Environment(Enum):
@@ -36,6 +36,7 @@ class Environment(Enum):
     def __new__(cls, value: int, label: Optional[str]) -> Self:
         self = object.__new__(cls)
         self._value_ = value
+        return self
 
     def __init__(self, value: int, label: Optional[str]) -> None:
         self._label = label
@@ -50,7 +51,7 @@ class Environment(Enum):
     def __eq__(self, __value: Self) -> bool:
         return self.value in (Environment.NONE.value, __value.value)
 
-    def __ne__(self, __value: object) -> bool:
+    def __ne__(self, __value: Self) -> bool:
         return not self.__eq__(__value)
 
     @classmethod
@@ -58,7 +59,7 @@ class Environment(Enum):
         for env in cls:
             if str(env).lower() == envstr.lower():
                 return env
-        return cls.NONE
+        return cls.NONE # type: ignore
 
 
 @singleton
@@ -68,11 +69,11 @@ class Config:
         self._dev = {}
         self._staging = {}
         self._prod = {}
-        dev_path = os.path.join("..", "config", "config.development.json")
-        staging_path = os.path.join("..", "config", "config.staging.json")
-        prod_path = os.path.join("..", "config", "config.production.json")
+        dev_path = os.path.join("config", "config.development.json")
+        staging_path = os.path.join("config", "config.staging.json")
+        prod_path = os.path.join("config", "config.production.json")
 
-        with open(os.path.join("..", "config", "config.json"), "r") as f:
+        with open(os.path.join("config", "config.json"), "r") as f:
             self._base = json.load(f)
 
         if os.access(dev_path, os.R_OK):
@@ -103,3 +104,18 @@ class Config:
     @property
     def env(self) -> Environment:
         return self._environment
+
+
+@call_once()
+def set_working_directory() -> tuple[bool, str]:
+    cwd = os.getcwd()
+
+    while not os.access('src', os.R_OK):
+        previous = os.getcwd()
+        os.chdir('..')
+
+        if previous == os.getcwd():
+            os.chdir(cwd)
+            return False, cwd
+
+    return True, os.getcwd()

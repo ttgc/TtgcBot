@@ -18,18 +18,32 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from config import set_working_directory, get_client, Log, Config
-from exceptions import ExitCode
+import discord
+import discord.ext.commands
+from utils.decorators import call_once
+from .config import Config
 
 
-def main():
-    success, cwd = set_working_directory()
-    if not success:
-        Log.critical('Invalid working directory: %s. Detection failed', cwd, kill_code=ExitCode.WORKING_DIR_NOT_FOUND)
-    
-    Log.info('Starting TtgcBot v%s', Config()['version'])
-    get_client().run(Config()["token"])
+@call_once()
+def get_client() -> discord.ext.commands.Bot:
+    return discord.ext.commands.Bot(
+        Config()['discord']['default-prefix'],
+        case_insensitive=True,
+        activity=discord.Game(name=Config()['discord']['default-game']),
+        intents=discord.Intents.all()
+    )
 
 
-if __name__ == '__main__':
-    main()
+_client = get_client()
+
+
+@_client.check
+def no_dm(ctx: discord.ext.commands.Context) -> bool:
+    return ctx.guild is not None
+
+@_client.check
+def no_bot(ctx: discord.ext.commands.Context) -> bool:
+    return not ctx.author.bot
+
+
+del _client

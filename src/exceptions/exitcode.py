@@ -24,3 +24,4 @@ from enum import IntEnum
 class ExitCode(IntEnum):
     SAFE = 0
     DEFAULT_CRITICAL_EXCEPTION = 1
+    WORKING_DIR_NOT_FOUND = 2

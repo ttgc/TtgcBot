@@ -97,7 +97,7 @@ class API:
             Log.info("Logged out from the API successfully")
 
         if exc:
-            Log.error('{} raised when querying API: {}.\n{}', exc_type.__name__, exc, tb)
+            Log.error('%s raised when querying API: %s.\n%s', exc_type.__name__, str(exc), str(tb))
             raise exc
 
     async def __call__(

@@ -13,3 +13,5 @@ RUN apk update && \
     rm -rf ~/.cache/pip/* && \
     apk del gcc make libc-dev libffi-dev && \
     rm -rf /etc/apk/cache/*
+
+CMD [ "python3", "src/TtgcBot.py", "staging" ]

@@ -16,26 +16,3 @@
 ##
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
-
-
-from typing import Self
-from enum import StrEnum
-
-
-class Emoji(StrEnum):
-    X = '❌'
-    WHITE_CHECK_MARK = '✅'
-    EQUAL = '🟰'
-    PLUS = '➕'
-    MINUS = '➖'
-    HOURGLASS = '⏳'
-
-    @classmethod
-    def from_str(cls, string: str) -> Self:
-        searched = string.strip(':').upper()
-
-        for emoji in cls:
-            if emoji.name == searched:
-                return emoji
-
-        raise ValueError(f"'{string}' is not a valid Emoji")

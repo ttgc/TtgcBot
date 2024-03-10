@@ -29,12 +29,13 @@ class Language(Enum):
 
     def __new__(cls, value: str) -> Self:
         self = object.__new__(cls)
-        self._value_ = os.path.join('..', 'Lang', value)
+        self._value_ = os.path.join('Lang', value)
+        return self
 
     def __init__(self, value: str) -> None:
         self._translations = {}
 
-        with open(value, 'r', encoding='utf-8') as f:
+        with open(self.value, 'r', encoding='utf-8') as f:
             for line in f.readlines():
                 if line.startswith('#'):
                     continue
@@ -50,7 +51,7 @@ class Language(Enum):
 
     @classmethod
     def get_default(cls) -> Self:
-        return cls.EN
+        return cls.EN # type: ignore
 
     @classmethod
     def get(cls, code: str) -> Self:

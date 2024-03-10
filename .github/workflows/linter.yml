@@ -51,7 +51,7 @@ jobs:
 #        if-no-files-found: warn
 #        retention-days: 1
 
-#    - name: Test with pytest
-#      run: |
-#        pip install pytest
-#        pytest
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest -W ignore::DeprecationWarning --rootdir=src

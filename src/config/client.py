@@ -18,20 +18,23 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
+import asyncio
 import discord
 import discord.ext.commands
-from utils.decorators import call_once
+from utils.decorators import call_once, catch
 from .config import Config
 
 
 @call_once()
 def get_client() -> discord.ext.commands.Bot:
-    return discord.ext.commands.Bot(
+    client = discord.ext.commands.Bot(
         Config()['discord']['default-prefix'],
         case_insensitive=True,
         activity=discord.Game(name=Config()['discord']['default-game']),
         intents=discord.Intents.all()
     )
+    client.wait_for = catch(asyncio.TimeoutError, error_value=None, asynchronous=True)(client.wait_for)
+    return client
 
 
 _client = get_client()

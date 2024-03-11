@@ -21,6 +21,7 @@
 from typing import Optional, Self
 from enum import IntEnum
 from lang import Language
+from utils.decorators import catch
 
 
 class HttpRequestStatus(IntEnum):
@@ -86,12 +87,10 @@ class HttpErrorCode(IntEnum):
     HTTP_VERSION_NOT_SUPPORTED = 505
     BANDWIDTH_LIMIT_EXCEEDED = 509
 
+    @catch(ValueError, error_value=UNKNOWN)
     @classmethod
     def get_code_from_int(cls, code: int) -> Self:
-        try:
-            return cls(code)
-        except ValueError:
-            return cls.UNKNOWN # type: ignore
+        return cls(code)
 
     def is_redirect(self) -> bool:
         return self.value // 100 == 3

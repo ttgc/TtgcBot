@@ -20,7 +20,8 @@
 
 from typing import Type, Callable, Optional, Self, Any, final
 import functools
-from exceptions import DeprecatedException, AlreadyCalledFunctionException
+from .exceptions import DeprecatedException, AlreadyCalledFunctionException
+from .aliases import AsyncCallable
 
 
 def singleton(cls: Type) -> Callable:
@@ -94,3 +95,42 @@ def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callab
 
         return deprecated_call
     return deprecated_decorator
+
+
+def catch(
+        exception: Type[Exception], *,
+        error_value: Optional[Any] = None,
+        error_arg: Optional[str | int] = None,
+        logger: Optional[Callable[..., None]] = None,
+        asynchronous: bool = False
+) -> Callable:
+    def _decorator(fct: Callable | AsyncCallable[Any]) -> Callable | AsyncCallable[Any]:
+        def _get_error_value(*args, **kwargs) -> Any:
+            if isinstance(error_arg, int):
+                return args[error_arg]
+            if isinstance(error_arg, str):
+                return kwargs[error_arg]
+            return error_value
+
+        @functools.wraps(fct)
+        def _wrapper(*args, **kwargs) -> Any:
+            try:
+                return fct(*args, **kwargs)
+            except exception as exc:
+                if logger:
+                    logger('%s', exc)
+
+                return _get_error_value(*args, **kwargs)
+
+        @functools.wraps(fct)
+        async def _async_wrapper(*args, **kwargs) -> Any:
+            try:
+                return await fct(*args, **kwargs)
+            except exception as exc:
+                if logger:
+                    logger('%s', exc)
+
+                return _get_error_value(*args, **kwargs)
+
+        return _async_wrapper if asynchronous else _wrapper
+    return _decorator

@@ -21,6 +21,7 @@
 from typing import Any
 import discord
 from .aliases import AsyncCallable
+from .decorators import catch
 
 
 def async_lambda(callback: AsyncCallable[Any]) -> AsyncCallable[Any]:
@@ -42,11 +43,9 @@ def async_conditional_lambda(check_callback: AsyncCallable[bool], if_callback: A
     return _execute
 
 
-def try_parse_int(value: str, default_value: int = 0) -> int:
-    try:
-        return int(value)
-    except ValueError:
-        return default_value
+@catch(ValueError, error_arg='default_value')
+def try_parse_int(value: str, *, default_value: int) -> int:
+    return int(value)
 
 
 def get_color(hexvalue: str) -> discord.Color:

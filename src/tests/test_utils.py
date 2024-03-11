@@ -23,8 +23,8 @@ import time
 import pytest
 from utils import get_color, try_parse_int
 from utils.emojis import Emoji
-from utils.decorators import deprecated, call_once, singleton, unique
-from exceptions import DeprecatedException, AlreadyCalledFunctionException
+from utils.decorators import deprecated, call_once, singleton, unique, catch
+from utils.exceptions import DeprecatedException, AlreadyCalledFunctionException
 
 
 class TestUtils:
@@ -98,10 +98,32 @@ class TestUtils:
         assert _Unique(1, 1).param2 == 0
         assert _Unique(1, 0).param == 1
 
+    def test_catch(self) -> None:
+        @catch(ZeroDivisionError, error_value=-1)
+        def _caught(a: int, b: int) -> float:
+            return a / b
+
+        @catch(ZeroDivisionError, error_arg=0)
+        def _caught_arg(a: int, b: int) -> float:
+            return a / b
+
+        @catch(ZeroDivisionError, error_arg='b')
+        def _caught_kwarg(a: int, *, b: int) -> float:
+            return a / b
+
+        assert _caught(5, 2) == 2.5
+        assert _caught(5, 0) == -1
+        assert _caught_arg(5, 2) == 2.5
+        assert _caught_arg(5, 0) == 5
+        assert _caught_arg(3, 0) == 3
+        assert _caught_kwarg(5, b=2) == 2.5
+        assert _caught_kwarg(5, b=0) == 0
+        assert _caught_kwarg(3, b=0) == 0
+
     def test_try_parse_int(self) -> None:
-        assert try_parse_int('1', 0) == 1
-        assert try_parse_int('-1', 0) == -1
-        assert try_parse_int('one', 0) == 0
+        assert try_parse_int('1', default_value=0) == 1
+        assert try_parse_int('-1', default_value=0) == -1
+        assert try_parse_int('one', default_value=0) == 0
 
     def test_get_color(self) -> None:
         r, g, b = get_color('FF882A').to_rgb()

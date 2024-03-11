@@ -14,4 +14,4 @@ RUN apk update && \
     apk del gcc make libc-dev libffi-dev && \
     rm -rf /etc/apk/cache/*
 
-CMD [ "python3", "src/TtgcBot.py", "staging" ]
+CMD [ "./boot.sh" ]

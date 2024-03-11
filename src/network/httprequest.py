@@ -22,7 +22,7 @@ from typing import Optional, Self
 from enum import Enum, IntEnum, auto
 import functools
 import aiohttp
-from exceptions import HTTPException
+from .exceptions import HTTPException
 from .statuscode import HttpRequestStatus, HttpErrorCode
 
 

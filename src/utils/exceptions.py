@@ -40,3 +40,12 @@ class DeprecatedException(DeprecationWarning):
         }))
 
         return f"DeprecatedException: The function/class {self.fct.__name__} is deprecated\nReason: {self.reason}\nTried to invoke: {invok}"
+
+
+class AlreadyCalledFunctionException(Exception):
+    def __init__(self, fct: Callable) -> None:
+        self.fct = fct
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f"The function {self.fct.__name__} has already been called and should only be called once!"

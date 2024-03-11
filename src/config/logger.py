@@ -23,7 +23,7 @@ import os
 import sys
 import logging
 from utils.decorators import call_once
-from exceptions import ExitCode
+from utils import ExitCode
 from .logconfig import LogConfig
 from .config import Config
 

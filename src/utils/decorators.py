@@ -62,8 +62,8 @@ def unique(attr: int | str) -> Callable:
     return _decorator
 
 
-def call_once(raise_error: bool = False) -> Callable:
-    def call_once_decorator(fct: Callable) -> Callable:
+def call_once(raise_error: bool = False, *, asynchronous: bool = False) -> Callable:
+    def call_once_decorator(fct: Callable | AsyncCallable[Any]) -> Callable | AsyncCallable[Any]:
         called = {}
 
         @functools.wraps(fct)
@@ -74,7 +74,15 @@ def call_once(raise_error: bool = False) -> Callable:
                 raise AlreadyCalledFunctionException(fct)
             return called[fct]
 
-        return call_fct
+        @functools.wraps(fct)
+        async def call_fct_async(*args, **kwargs) -> Any:
+            if fct not in called:
+                called[fct] = await fct(*args, **kwargs)
+            elif raise_error:
+                raise AlreadyCalledFunctionException(fct)
+            return called[fct]
+
+        return call_fct_async if asynchronous else call_fct
     return call_once_decorator
 
 

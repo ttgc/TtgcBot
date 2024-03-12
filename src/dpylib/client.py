@@ -21,8 +21,12 @@
 import asyncio
 import discord
 import discord.ext.commands
+from utils import async_lambda
 from utils.decorators import call_once, catch
-from .config import Config
+from config import Config
+
+from .events.connect import on_connect as on_connect_internal
+from .events.connect import on_resumed as on_resumed_internal
 
 
 @call_once()
@@ -33,6 +37,7 @@ def get_client() -> discord.ext.commands.Bot:
         activity=discord.Game(name=Config()['discord']['default-game']),
         intents=discord.Intents.all()
     )
+
     client.wait_for = catch(asyncio.TimeoutError, error_value=None, asynchronous=True)(client.wait_for)
     return client
 
@@ -44,9 +49,20 @@ _client = get_client()
 def no_dm(ctx: discord.ext.commands.Context) -> bool:
     return ctx.guild is not None
 
+
 @_client.check
 def no_bot(ctx: discord.ext.commands.Context) -> bool:
     return not ctx.author.bot
+
+
+@_client.event
+async def on_connect():
+    await on_connect_internal(get_client())
+
+
+@_client.event
+async def on_resumed():
+    await on_resumed_internal()
 
 
 del _client

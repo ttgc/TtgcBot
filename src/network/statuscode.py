@@ -87,8 +87,8 @@ class HttpErrorCode(IntEnum):
     HTTP_VERSION_NOT_SUPPORTED = 505
     BANDWIDTH_LIMIT_EXCEEDED = 509
 
-    @catch(ValueError, error_value=UNKNOWN)
     @classmethod
+    @catch(ValueError, error_value=UNKNOWN)
     def get_code_from_int(cls, code: int) -> Self:
         return cls(code)
 

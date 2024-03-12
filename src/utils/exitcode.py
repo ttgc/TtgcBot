@@ -18,10 +18,11 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from enum import IntEnum
+from enum import IntEnum, auto
 
 
 class ExitCode(IntEnum):
     SAFE = 0
-    DEFAULT_CRITICAL_EXCEPTION = 1
-    WORKING_DIR_NOT_FOUND = 2
+    DEFAULT_CRITICAL_EXCEPTION = auto()
+    WORKING_DIR_NOT_FOUND = auto()
+    UNREGISTERED_COGS = auto()

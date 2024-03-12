@@ -29,7 +29,7 @@ from .config import Config
 
 
 @call_once()
-def get_logger() -> logging.Logger:
+def _get_logger_internal() -> logging.Logger:
     config = Config()["logs"]
 
     if not os.access(config["directory"], os.F_OK):
@@ -37,11 +37,21 @@ def get_logger() -> logging.Logger:
 
     logger = logging.getLogger('discord')
     logging.basicConfig(level=logging.DEBUG + 1)
+    logger.setLevel(logging.DEBUG + 1)
 
     for config in LogConfig.load_all():
         logger.addHandler(config.to_handler())
 
     logger.info("Logger configured")
+    return logger
+
+
+def get_logger() -> logging.Logger:
+    logger = _get_logger_internal()
+
+    if logger.getEffectiveLevel() > logging.DEBUG + 1:
+        logger.setLevel(logging.DEBUG + 1)
+
     return logger
 
 

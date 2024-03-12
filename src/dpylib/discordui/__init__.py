@@ -16,22 +16,3 @@
 ##
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
-
-
-import discord
-from config import set_working_directory, Log, Config
-from dpylib import get_client
-from utils import ExitCode
-
-
-def main():
-    success, cwd = set_working_directory()
-    if not success:
-        Log.critical('Invalid working directory: %s. Detection failed', cwd, kill_code=ExitCode.WORKING_DIR_NOT_FOUND)
-
-    Log.info('Starting TtgcBot v%s', Config()['version'])
-    get_client().run(Config()["token"])
-
-
-if __name__ == '__main__':
-    main()

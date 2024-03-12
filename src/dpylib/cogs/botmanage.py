@@ -18,36 +18,34 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-#from utils.checks import check_botowner
-from discord.ext import commands
 import sys
-import asyncio
 import discord
-from config import Log, get_client
+from discord.ext import commands
+from config import Log, Config, Environment, LogConfig
 
-
-# Temp: Remove it after checks rewrite
-check_botmanager = check_botowner = lambda ctx: True
 
 class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=True)):
-    def __init__(self) -> None:
-        self.bot = get_client()
+    def __init__(self, client: commands.Bot) -> None:
+        self.bot = client
         self.status = self.bot.activity
 
-    @commands.check(check_botowner)
-    @commands.command(aliases=["eval"])
+    @commands.is_owner()
+    @commands.command(aliases=["eval"], enabled=Config().env != Environment.PROD)
     async def debug(self, ctx: commands.Context, *, arg: str) -> None:
         instruction = arg.replace("```python", "").replace("```py", "").replace("```", "")
         Log.debug("running debug instruction : %s", instruction)
         exec(instruction)
+        logfiles = [discord.File(cfg.filepath) for cfg in LogConfig.load_all()]
+        await ctx.author.send('Debug finished. Here are the logs:', files=logfiles)
+        Log.debug("sent logs to %d", ctx.author)
 
-    @commands.check(check_botowner)
+    @commands.is_owner()
     @commands.command()
     async def setgame(self, ctx: commands.Context, *, game: str) -> None:
         self.status = discord.Game(name=game)
         await self.bot.change_presence(activity=self.status)
 
-    @commands.check(check_botmanager)
+    @commands.is_owner()
     @commands.command()
     async def shutdown(self, ctx: commands.Context) -> None:
         await ctx.send("You are requesting a shutdown, please ensure that you want to performe it by typing `confirm`")

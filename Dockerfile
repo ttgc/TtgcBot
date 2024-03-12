@@ -6,6 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 COPY ./ /
 
+VOLUME ./Logs/
+
 RUN apk update && \
     apk add gcc make libc-dev libffi-dev git && \
     python3 -m pip install --upgrade pip && \

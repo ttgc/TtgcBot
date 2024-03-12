@@ -22,6 +22,7 @@ from typing import Optional, Self
 from enum import IntEnum
 import logging
 import os
+from utils.decorators import call_once
 from .config import Config
 
 
@@ -69,13 +70,13 @@ class LogConfig:
 
     @property
     def minlevel(self) -> int:
-        return self._level_map.get(self._logconfig.get("minlevel", None), 0)
+        return self._level_map.get(self._logconfig.get("minlevel", None), logging.DEBUG + 1)
 
     @property
     def filter(self) -> Optional[LogFilter]:
         return LogFilter.parse(self._logconfig.get("filter", ""))
 
-    def to_handler(self, *, encoding='utf-8'):
+    def to_handler(self, *, encoding='utf-8') -> logging.Handler:
         handler = logging.FileHandler(filename=self.filepath, encoding=encoding, mode=self.mode)
         handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 
@@ -87,6 +88,14 @@ class LogConfig:
         return handler
 
     @classmethod
-    def load_all(cls):
+    def _register_levels(cls) -> None:
+        for lvlname, lvlval in cls._level_map.items():
+            if lvlval % 10 != 0:
+                logging.addLevelName(lvlval, lvlname.upper())
+
+    @classmethod
+    @call_once()
+    def load_all(cls) -> list[Self]:
+        cls._register_levels()
         config = Config()['logs']
         return [cls(config['directory'], **cfg) for cfg in config['list']]

@@ -19,4 +19,4 @@
 
 from .logger import Log, get_logger
 from .config import Config, Environment, set_working_directory
-from .client import get_client
+from .logconfig import LogConfig

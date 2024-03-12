@@ -105,13 +105,13 @@ def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callab
     return deprecated_decorator
 
 
-def catch(
+def catch( # noqa: C901
         exception: Type[Exception], *,
         error_value: Optional[Any] = None,
         error_arg: Optional[str | int] = None,
         logger: Optional[Callable[..., None]] = None,
         asynchronous: bool = False
-) -> Callable: # noqa: C901
+) -> Callable:
     def _decorator(fct: Callable | AsyncCallable[Any]) -> Callable | AsyncCallable[Any]:
         def _get_error_value(*args, **kwargs) -> Any:
             if isinstance(error_arg, int):

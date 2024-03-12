@@ -1,0 +1,116 @@
+name: Python application
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+        token: ${{ secrets.API_ACCESS_TOKEN }}
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.12
+
+    - name: Install Postgresql
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qy postgresql postgresql-server-dev-14 sudo
+        sudo service postgresql start
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip3 install -r Cosmo-Network/API/Tools/requirements.pip
+        pip3 install -r requirements.txt
+
+    - name: Setup API database
+      env:
+        DBPWD: ${{ secrets.localdb_password }}
+      run: Cosmo-Network/API/Tools/createdb/installdb.sh --api=ttgcapi --pwd=$DBPWD --generate-prod -c -u
+
+    - name: Setup .NET Core 2.2
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+      env:
+        ASPNETCORE_ENVIRONMENT: Production
+
+    - name: Setup .NET Core 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Build and Run DatabaseConverter Tool
+      run: |
+        dotnet publish Cosmo-Network/API/Tools/DatabaseConverter/DatabaseConverter.csproj -c Release
+        dotnet Cosmo-Network/API/Tools/DatabaseConverter/bin/Release/netcoreapp3.1/DatabaseConverter.dll -yc -d ttgcbot -p 5432 -u $(id -u -n) --pwd root --src Cosmo-Network/API/Tools --db-version-path "Cosmo-Network/API/Tools/DatabaseConverter/DBVersioning/Version Files" --throw-on-failure
+
+    - name: Build API
+      run: Cosmo-Network/API/Tools/deploy.sh --gmk --aspenv-prod --https
+      env:
+        ASPNETCORE_ENVIRONMENT: Production
+
+    - name: Setup API environment
+      env:
+        API_REGISTERAPP_PWD: ${{ secrets.API_REGISTERAPP_PWD }}
+        API_REGISTERAPP_SALT: ${{ secrets.API_REGISTERAPP_SALT }}
+        DBPWD: ${{ secrets.localdb_password }}
+      run: |
+        cd Cosmo-Network/API
+        echo "{\"apiurl\": \"https://localhost:5001\", \"register_test\": \"ttgcbotapp.json\", \"register_app\": {\"pwd\": \""$API_REGISTERAPP_PWD"\", \"timestamp\": \"05-10-2020-20-12-35\", \"salt\": "$API_REGISTERAPP_SALT"}}" > Tools/toolsProperties.json
+        sleep 10
+        Tools/populatedb/populate.sh --api=ttgcapi --scan=dynamic --pwd=$DBPWD
+        python3 "Tools/API Register/register.py"
+        python3 Tools/populatedb/scannode.py ttgcbot ttgcapi $(id -u -n) $DBPWD
+        cd ../..
+
+    - name: Create config file
+      env: 
+        token: ${{ secrets.token }}
+      run: |
+        echo '{"token": "'$token'"}' > config/config.staging.json
+
+    - name: Launch application
+      run: |
+        timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
+
+    - name: Unregister bot app
+      run: |
+        cd Cosmo-Network/API
+        python3 "Tools/API Register/unregister.py"
+        cd ../..
+
+    - name: Approve pull request
+      if: github.event_name == 'pull_request'
+      uses: andrewmusgrave/automatic-pull-request-review@0.0.5
+      with:
+        repo-token: '${{ secrets.GITHUB_TOKEN }}'
+        event: APPROVE
+
+    - name: Dump databases and gather artifacts
+      if: ${{ failure() }}
+      run: |
+        mkdir output
+        pg_dump ttgcbot > output/dump_bot.sql
+        pg_dump ttgcapi > output/dump_api.sql
+        cp Cosmo-Network/API/Tools/toolsProperties.json output/toolsProperties.json
+        cp Cosmo-Network/API/Tools/ttgcbotapp.json output/ttgcbotapp.json
+        cp Cosmo-Network/API/API/Properties/launchSettings.json output/launchSettings.json
+        cp Cosmo-Network/API/API/appsettings.Production.json output/appsettings.Production.json
+        cp -R Logs/ output/Logs/
+
+    - name: Upload artifacts
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifacts
+        path: output/
+        if-no-files-found: warn
+        retention-days: 1

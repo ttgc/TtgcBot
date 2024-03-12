@@ -21,7 +21,6 @@
 import asyncio
 import discord
 import discord.ext.commands
-from utils import async_lambda
 from utils.decorators import call_once, catch
 from config import Config
 

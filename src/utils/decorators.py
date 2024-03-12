@@ -111,7 +111,7 @@ def catch(
         error_arg: Optional[str | int] = None,
         logger: Optional[Callable[..., None]] = None,
         asynchronous: bool = False
-) -> Callable:
+) -> Callable: # noqa: C901
     def _decorator(fct: Callable | AsyncCallable[Any]) -> Callable | AsyncCallable[Any]:
         def _get_error_value(*args, **kwargs) -> Any:
             if isinstance(error_arg, int):

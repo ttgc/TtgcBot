@@ -18,7 +18,6 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-import discord
 from config import set_working_directory, Log, Config
 from dpylib import get_client
 from utils import ExitCode

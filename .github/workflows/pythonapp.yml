@@ -79,7 +79,7 @@ jobs:
 
     - name: Launch application
       run: |
-        timeout --preserve-status -s SIGINT --kill-after=30 60 python3 TtgcBot.py staging
+        timeout --preserve-status -s SIGINT --kill-after=30 60 python3 src/TtgcBot.py staging
 
     - name: Unregister bot app
       run: |

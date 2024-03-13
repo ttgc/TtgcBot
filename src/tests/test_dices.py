@@ -70,3 +70,4 @@ class TestDices:
     def test_expressions(self) -> None:
         assert int(float(Expression('4 - 5 * (5+4-2d1)')())) == -31
         assert Expression(r'5+1d{foo}')() == '5+foo'
+        assert int(float(Expression('5 * (4 + 1) * (3 * (4 - 2))')())) == 150

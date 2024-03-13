@@ -96,7 +96,9 @@ class ExpressionPatterns(Enum):
         return self._weight
 
     def __call__(self, expr: str) -> str:
-        return self.value.sub(self._func, expr)
+        while self.value.search(expr):
+            expr = self.value.sub(self._func, expr)
+        return expr
 
     @classmethod
     def get_ordered(cls) -> list[Self]:
@@ -116,4 +118,3 @@ class Expression:
             expr = pattern(expr)
 
         return expr
-

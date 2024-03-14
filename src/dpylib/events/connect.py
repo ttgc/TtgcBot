@@ -25,7 +25,9 @@ from config import Config, Log, Environment
 from utils.decorators import call_once, catch
 from utils.exceptions import AlreadyCalledFunctionException
 from utils import ExitCode
+
 from ..cogs import BotManage
+from ..cogs.jdr import Jdr
 
 
 @catch(AlreadyCalledFunctionException,
@@ -35,6 +37,7 @@ from ..cogs import BotManage
 async def _add_cogs(client: commands.Bot) -> None:
     Log.debug_v4('Registering V4 cogs')
     await client.add_cog(BotManage(client))
+    await client.add_cog(Jdr(client))
     Log.debug_v4('End of registering V4 cogs')
 
 

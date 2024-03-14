@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Optional, Type
+from typing import Optional, Type, Self
 from types import TracebackType
 import time
 import base64
@@ -55,7 +55,7 @@ class API:
         self.requester = requester
         self.requester_role = requester_role
 
-    async def __aenter__(self) -> None:
+    async def __aenter__(self) -> Self:
         if self.logged:
             raise ConnectionError("Cannot enter an API context manager inside another one")
 
@@ -82,6 +82,7 @@ class API:
         self.logged = response.status.ok
         self._token = str(response.result)
         Log.info("Logged into the API successfully")
+        return self
 
     async def __aexit__(
             self,
@@ -115,5 +116,7 @@ class API:
             headers["member"] = requester
         if role:
             headers["role"] = role
+        if 'headers' in kwargs:
+            headers.update(kwargs['headers'])
 
-        return await request_type(f"{self.url}/api/{endpoint}", *args, **kwargs)
+        return await request_type(f"{self.url}/api/{endpoint}", *args, headers=headers, **kwargs)

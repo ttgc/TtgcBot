@@ -60,16 +60,21 @@ class _Resource[T]:
 
 
 def pull_resource[T](name: str, *, ttl: int = 24, force: bool = False) -> Callable:
-    def _decorator(fct: AsyncCallable[T]) -> AsyncCallable[T]:
+    def _decorator(fct: AsyncCallable[Optional[T]]) -> AsyncCallable[Optional[T]]:
 
         @functools.wraps(fct)
-        async def _wrapper(*args, **kwargs) -> T:
+        async def _wrapper(*args, **kwargs) -> Optional[T]:
             res = _Resource(name, ttl=ttl)
 
             if force:
                 res.kill()
             if not res.is_set or not res.alive:
-                res.value = await fct(*args, **kwargs)
+                val = await fct(*args, **kwargs)
+
+                if not val:
+                    return None
+
+                res.value = val
 
             return res.value
 

@@ -97,7 +97,7 @@ class API:
             self._token = None
             Log.info("Logged out from the API successfully")
 
-        if exc:
+        if exc and exc_type:
             Log.error('%s raised when querying API: %s.\n%s', exc_type.__name__, str(exc), str(tb))
             raise exc
 

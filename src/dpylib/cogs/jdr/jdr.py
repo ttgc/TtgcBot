@@ -45,4 +45,4 @@ class Jdr(commands.Cog):
         result = parser()
         Log.info("rolled '%s' in channel %d of server %d", result, ctx.channel.id, ctx.guild.id) # pyright: ignore
         await fetch_task
-        await ctx.send(member.lang['rollindep'].format(result))
+        await ctx.send(member.lang['rollindep'].format(result), reference=ctx.message)

@@ -17,4 +17,13 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .defercmd import deffered_command
+
+from discord.ext import commands
+
+
+def deffered_command(cmd: commands.HybridCommand) -> commands.HybridCommand:
+    @cmd.before_invoke
+    async def _wrapper(cog, ctx: commands.Context):
+        await ctx.defer()
+
+    return cmd

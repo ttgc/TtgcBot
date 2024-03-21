@@ -22,6 +22,8 @@ from typing import Optional, Self
 from enum import Enum, IntEnum, auto
 import functools
 import aiohttp
+from utils.decorators import catch
+from config import Log
 from .exceptions import HTTPException
 from .statuscode import HttpRequestStatus, HttpErrorCode
 
@@ -179,10 +181,11 @@ class HttpRequest:
 
 
 class HTTP(Enum):
-    GET = HttpRequest.get
-    POST = HttpRequest.post
-    PUT = HttpRequest.put
-    DELETE = HttpRequest.delete
+    GET = functools.partial(HttpRequest.get)
+    POST = functools.partial(HttpRequest.post)
+    PUT = functools.partial(HttpRequest.put)
+    DELETE = functools.partial(HttpRequest.delete)
 
+    @catch(aiohttp.ClientError, error_value=HttpRequest('', 400), logger=Log.error, asynchronous=True)
     async def __call__(self, *args, **kwargs) -> HttpRequest:
         return await self.value(*args, **kwargs)

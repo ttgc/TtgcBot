@@ -18,12 +18,18 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
+import json
+from typing import Optional, Any
 from discord.ext import commands
+from utils.decorators import catch
 
 
-def deffered_command(cmd: commands.HybridCommand) -> commands.HybridCommand:
-    @cmd.before_invoke
-    async def _wrapper(cog, ctx: commands.Context):
-        await ctx.defer()
+class JsonConverter(commands.Converter):
+    @catch(json.JSONDecodeError)
+    def _internal_convert(self, argument: str) -> Optional[dict[str, Any]]:
+        return json.loads(argument)
 
-    return cmd
+    async def convert(self, ctx: commands.Context, argument: str) -> dict[str, Any]:
+        if (result := self._internal_convert(argument)) is not None:
+            return result
+        raise commands.BadArgument(f'Invalid JSON provided: {argument}')

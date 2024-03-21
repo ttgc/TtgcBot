@@ -64,4 +64,9 @@ async def on_resumed():
     await on_resumed_internal()
 
 
+@_client.before_invoke
+async def before_invoke(ctx: discord.ext.commands.Context) -> None:
+    await ctx.defer()
+
+
 del _client

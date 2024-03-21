@@ -22,14 +22,12 @@ from discord.ext import commands
 from dices import Expression
 from config import Log
 from models import MemberDTO
-from ...common import deffered_command
 
 
 class Jdr(commands.Cog):
     def __init__(self, client: commands.Bot) -> None:
         self.bot = client
 
-    @deffered_command
     @commands.cooldown(10, 2, commands.BucketType.guild)
     @commands.cooldown(5, 2, commands.BucketType.member)
     @commands.hybrid_command(aliases=["rollindep", "r", "rolldice"], description="Roll dice and perform operations")

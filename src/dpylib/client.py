@@ -31,7 +31,7 @@ from .events.connect import on_resumed as on_resumed_internal
 
 class Bot(discord.ext.commands.Bot):
     async def get_context(self, message, *, cls=ExtendedContext) -> ExtendedContext:
-        return await super().get_context(message, cls = cls)
+        return await super().get_context(message, cls=cls)
 
 
 @call_once()

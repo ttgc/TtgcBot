@@ -21,7 +21,6 @@
 from discord.ext import commands
 from dices import Expression
 from config import Log
-from models import MemberDTO
 from ...common.contextext import ExtendedContext, prepare_ctx
 
 

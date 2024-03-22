@@ -23,14 +23,20 @@ import discord
 import discord.ext.commands
 from utils.decorators import call_once, catch
 from config import Config
+from .common.contextext import ExtendedContext
 
 from .events.connect import on_connect as on_connect_internal
 from .events.connect import on_resumed as on_resumed_internal
 
 
+class Bot(discord.ext.commands.Bot):
+    async def get_context(self, message, *, cls=ExtendedContext) -> ExtendedContext:
+        return await super().get_context(message, cls = cls)
+
+
 @call_once()
-def get_client() -> discord.ext.commands.Bot:
-    client = discord.ext.commands.Bot(
+def get_client() -> Bot:
+    client = Bot(
         Config()['discord']['default-prefix'],
         case_insensitive=True,
         activity=discord.Game(name=Config()['discord']['default-game']),

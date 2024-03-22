@@ -28,7 +28,7 @@ from network.statuscode import HttpErrorCode
 from network.exceptions import HTTPException
 from lang import Language
 from config import Log
-from utils.decorators import catch
+from utils.decorators import catch, call_once
 
 
 class MemberPerms(StrEnum):
@@ -36,6 +36,25 @@ class MemberPerms(StrEnum):
     PREMIUM = 'Premium'
     MANAGER = 'Manager'
     OWNER = 'Owner'
+
+    @call_once(False)
+    @classmethod
+    def get_ordered_list(cls) -> list[Self]:
+        return [cls.NONE, cls.PREMIUM, cls.MANAGER, cls.OWNER] # type: ignore
+
+    def __gt__(self, __value: Self) -> bool:
+        idx = self.get_ordered_list().index(self)
+        idother = self.get_ordered_list().index(__value)
+        return idx > idother
+
+    def __ge__(self, __value: str) -> bool:
+        return self > __value or self == __value
+
+    def __lt__(self, __value: str) -> bool:
+        return not (self >= __value)
+
+    def __le__(self, __value: str) -> bool:
+        return self < __value or self == __value
 
 
 @dataclass

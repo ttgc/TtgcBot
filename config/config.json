@@ -39,7 +39,11 @@
     "discord": {
         "default-prefix": "/",
         "default-game": "Ohayo !",
-        "test-guild": null
+        "test-guild": null,
+        "sub-guild": {
+            "gid": 0,
+            "sub-role": 0
+        }
     },
     "directories": {
         "music": "Music",

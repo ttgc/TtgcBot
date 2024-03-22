@@ -66,11 +66,11 @@ class MemberDTO:
 
     def __init__(self, member_id: int) -> None:
         self.id = member_id
-        self.fetch = pull_resource(f'MEMBER://{self.id}', ttl=1)(self.fetch)
+        self.fetch = pull_resource(f'MEMBER://{self.id}', ttl=72)(self.fetch)
 
     @catch(HTTPException, error_value=None, logger=Log.error, asynchronous=True)
     async def fetch(self) -> Optional[Self]:
-        async with API('/api/Member/{memberID}', requester=self.id) as api:
+        async with API('/api/member/{memberID}', requester=self.id) as api:
             response = await api(HTTP.GET, f'/api/Member/{self.id}', requester=self.id) # type: ignore
 
         response.whitelist(HttpErrorCode.NOT_FOUND, HttpErrorCode.FORBIDDEN)

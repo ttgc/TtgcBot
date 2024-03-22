@@ -18,35 +18,27 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Optional
 import discord
-from models import MemberPerms
-from config import Config
 from ..common.contextext import ExtendedContext
 
 
-async def check_botmanager(ctx: ExtendedContext) -> bool:
-    member = await ctx.ext.member
-    return member.perms >= MemberPerms.MANAGER
+def check_server_owner(ctx: ExtendedContext) -> bool:
+    return ctx.guild and ctx.guild.owner == ctx.author # type: ignore
 
 
-async def check_premium(ctx: ExtendedContext) -> bool:
-    member = await ctx.ext.member
-    return member.perms >= MemberPerms.PREMIUM
+async def check_server_admin(ctx: ExtendedContext) -> bool:
+    if check_server_owner(ctx):
+        return True
+
+    srv = await ctx.ext.server
+
+    return isinstance(ctx.author, discord.Member) and srv.admin_role and ctx.author.get_role(srv.admin_role) # type: ignore
 
 
-def check_subbed(ctx: ExtendedContext) -> bool:
-    config = Config()['discord']['sub-guild']
-    gid = config['gid']
-    role_id = config['sub-role']
-    subguild: Optional[discord.Guild] = discord.utils.get(ctx.bot.guilds, id=gid)
+async def check_mj(ctx: ExtendedContext) -> bool:
+    srv = await ctx.ext.server
 
-    if not subguild:
-        return False
+    if not srv.mj_role:
+        return await check_server_admin(ctx)
 
-    member = subguild.get_member(ctx.author.id)
-    return member and member.get_role(role_id) # type: ignore
-
-
-async def check_subbed_or_premium(ctx: ExtendedContext) -> bool:
-    return check_subbed(ctx) or await check_premium(ctx)
+    return isinstance(ctx.author, discord.Member) and srv.mj_role and ctx.author.get_role(srv.mj_role) # type: ignore

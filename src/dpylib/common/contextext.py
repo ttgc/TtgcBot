@@ -21,20 +21,23 @@
 from enum import StrEnum
 import asyncio
 from discord.ext import commands
-from models import MemberDTO
+from models import MemberDTO, ServerDTO
 
 
 class ContextExtension:
     class _QueryableMembers(StrEnum):
         MEMBER = 'member'
+        SERVER = 'server'
 
     def __init__(self, ctx: commands.Context) -> None:
         self._member = MemberDTO(ctx.author.id)
+        self._server = ServerDTO(ctx.guild.id) # type: ignore
         self._tasks: dict[str, asyncio.Task] = {}
 
     def prepare(self) -> None:
         if not self._tasks:
             self._tasks[self._QueryableMembers.MEMBER] = asyncio.create_task(self._member.fetch())
+            self._tasks[self._QueryableMembers.SERVER] = asyncio.create_task(self._server.fetch())
 
     async def _get_query_task[T](self, attr: _QueryableMembers) -> T: # type: ignore
         if attr not in self._tasks:
@@ -49,6 +52,12 @@ class ContextExtension:
     def member(self) -> asyncio.Task[MemberDTO]:
         return asyncio.create_task(
             self._get_query_task(self._QueryableMembers.MEMBER)
+        )
+
+    @property
+    def server(self) -> asyncio.Task[ServerDTO]:
+        return asyncio.create_task(
+            self._get_query_task(self._QueryableMembers.SERVER)
         )
 
 

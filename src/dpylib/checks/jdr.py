@@ -17,6 +17,20 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .member import MemberPerms, MemberDTO
-from .server import ServerDTO
-from .jdr import JdrDTO
+
+from ..common.contextext import ExtendedContext
+
+
+async def check_jdr_channel(ctx: ExtendedContext) -> bool:
+    jdr = await ctx.ext.jdr
+    return jdr is not None
+
+
+async def check_mj(ctx: ExtendedContext) -> bool:
+    jdr = await ctx.ext.jdr
+    return jdr and jdr.owner_id == ctx.author.id # type: ignore
+
+
+async def check_has_character(ctx: ExtendedContext) -> bool:
+    # TODO: todo when Character model is created
+    return True

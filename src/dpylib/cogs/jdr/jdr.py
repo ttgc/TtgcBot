@@ -21,6 +21,7 @@
 from discord.ext import commands
 from dices import Expression
 from config import Log
+from lang import localize
 from ...common.contextext import ExtendedContext, prepare_ctx
 
 
@@ -41,5 +42,5 @@ class Jdr(commands.Cog):
         parser = Expression(expression)
         result = parser()
         Log.info("rolled '%s' in channel %d of server %d", result, ctx.channel.id, ctx.guild.id) # pyright: ignore
-        member = await ctx.ext.member
-        await ctx.send(member.lang['rollindep'].format(result), reference=ctx.message)
+        await ctx.send(await localize(ctx, 'rollindep', result), reference=ctx.message)
+

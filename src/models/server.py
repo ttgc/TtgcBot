@@ -21,12 +21,13 @@
 from typing import Self, Optional
 from dataclasses import dataclass
 from network.api import API
-from network.httprequest import HTTP
+from network.httprequest import HTTP, HttpResultType
 from network.resources import pull_resource
 from network.statuscode import HttpErrorCode
 from network.exceptions import HTTPException
 from config import Log
 from utils.decorators import catch
+from utils import try_parse_int
 
 
 @dataclass
@@ -42,11 +43,10 @@ class ServerDTO:
 
     @catch(HTTPException, error_value=None, logger=Log.error, asynchronous=True)
     async def fetch(self) -> Optional[Self]:
-        async with API('/api/server/{serverID}', requester=self.id) as api:
-            response = await api(HTTP.GET, f'/api/Server/{self.id}', requester=self.id) # type: ignore
-
-        response.whitelist(HttpErrorCode.NOT_FOUND, HttpErrorCode.FORBIDDEN)
-        response.raise_errors()
+        async with API('/api/server/{serverID}') as api:
+            response = await api(HTTP.GET, f'/api/Server/{self.id}')
+            response.whitelist(HttpErrorCode.NOT_FOUND, HttpErrorCode.FORBIDDEN)
+            response.raise_errors()
 
         if response.status.ko:
             Log.warn('HTTP server fetch failure (%d) for id=%d', response.error_code, self.id)
@@ -59,3 +59,23 @@ class ServerDTO:
         self.mj_role = response.result.get('mjRole', 0)
         self.prefix = response.result.get('prefix', '/')
         return self
+
+    @catch(HTTPException, error_value=[], logger=Log.error, asynchronous=True)
+    @classmethod
+    async def get_server_list(cls) -> list[Self]:
+        async with API('/api/server/list') as api:
+            response = await api(HTTP.GET, '/api/Server/list')
+            response.raise_errors()
+
+        if response.status.ok and response.result and isinstance(response.result, dict):
+            return [cls(x) for x in response.result.get('servers', [])]
+        return []
+
+    @catch(HTTPException, error_value=None, logger=Log.warn, asynchronous=True)
+    @staticmethod
+    async def purge(days: int) -> int:
+        async with API('/api/server/purge') as api:
+            response = await api(HTTP.DELETE, '/api/Server/purge', body={'days': days}, expected_result=HttpResultType.TEXT)
+            response.raise_errors()
+
+        return try_parse_int(str(response.result), default_value=-1)

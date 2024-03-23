@@ -32,13 +32,13 @@ async def check_server_admin(ctx: ExtendedContext) -> bool:
 
     srv = await ctx.ext.server
 
-    return isinstance(ctx.author, discord.Member) and srv.admin_role and ctx.author.get_role(srv.admin_role) # type: ignore
+    return srv and isinstance(ctx.author, discord.Member) and srv.admin_role and ctx.author.get_role(srv.admin_role) # type: ignore
 
 
 async def check_mj(ctx: ExtendedContext) -> bool:
     srv = await ctx.ext.server
 
-    if not srv.mj_role:
+    if not srv or not srv.mj_role:
         return await check_server_admin(ctx)
 
     return isinstance(ctx.author, discord.Member) and srv.mj_role and ctx.author.get_role(srv.mj_role) # type: ignore

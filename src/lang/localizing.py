@@ -17,5 +17,10 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from .language import Language
-from .localizing import localize
+
+from dpylib.common.contextext import ExtendedContext
+
+
+async def localize(ctx: ExtendedContext, msgkey: str, *args) -> str:
+    lang = await ctx.ext.get_lang()
+    return lang[msgkey].format(*args)

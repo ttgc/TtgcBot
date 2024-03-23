@@ -21,6 +21,7 @@
 from typing import Optional
 from enum import StrEnum
 import asyncio
+import discord
 from discord.ext import commands
 from models import MemberDTO, ServerDTO, JdrDTO
 from lang import Language
@@ -80,6 +81,13 @@ class ExtendedContext(commands.Context):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.ext = ContextExtension(self)
+
+    @discord.utils.cached_property
+    def guild(self) -> discord.Guild:
+        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. None if not available."""
+        if not (guild := super().guild):
+            raise commands.GuildNotFound('CTX')
+        return guild
 
 
 def prepare_ctx(cmd: commands.Command) -> commands.Command:

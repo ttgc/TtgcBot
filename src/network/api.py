@@ -72,11 +72,6 @@ class API:
             }
         }
 
-        if self.requester:
-            body["member"] = self.requester
-        if self.requester_role:
-            body["role"] = self.requester_role
-
         response = await HTTP.POST(f"{self.url}/api/Login", body, expected_result=HttpResultType.TEXT, https=self.https)
         response.raise_errors()
         self.logged = response.status.ok

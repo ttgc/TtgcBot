@@ -18,9 +18,15 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Awaitable, Callable
+from typing import Optional
 import discord
+from models import ServerDTO
 
 
-type AsyncCallable[T] = Callable[..., Awaitable[T]]
-type JdrChannel = discord.TextChannel | discord.ForumChannel | discord.VoiceChannel
+def extract_top_role(srv: ServerDTO, user: discord.Member) -> Optional[int]:
+    if srv.admin_role and (role := user.get_role(srv.admin_role)):
+        return role.id
+    elif srv.mj_role and (role := user.get_role(srv.mj_role)):
+        return role.id
+
+    return None

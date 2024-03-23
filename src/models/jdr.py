@@ -18,7 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Self, Optional
+from typing import Self, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 from network.api import API
 from network.httprequest import HTTP
@@ -27,6 +27,11 @@ from network.statuscode import HttpErrorCode
 from network.exceptions import HTTPException
 from config import Log
 from utils.decorators import catch
+from dpylib.common.user import extract_top_role
+
+if TYPE_CHECKING:
+    import discord
+    from .server import ServerDTO
 
 
 @dataclass
@@ -91,3 +96,24 @@ class JdrDTO:
             ) for x in response.result.get('jdr', [])]
 
         return []
+
+    @catch(HTTPException, error_value=None, logger=Log.error, asynchronous=True)
+    @classmethod
+    async def create(cls, srv: 'ServerDTO', chan_id: int, owner: 'discord.Member', *, fetch: bool = True, **params) -> Optional[Self]:
+        async with API('/api/jdr/create') as api:
+            body = {
+                'server': srv.id,
+                'channel': chan_id,
+                'extensions': list(params.get('extensions', [])),
+                'owner': owner.id,
+                'label': params.get('label', None)
+            }
+            response = await api(HTTP.POST, f'/api/jdr/create', body, requester=owner.id, role=extract_top_role(srv, owner))
+            response.raise_errors()
+
+        dto = cls(srv.id, chan_id)
+
+        if fetch:
+            await dto.fetch()
+
+        return dto

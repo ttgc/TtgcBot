@@ -18,10 +18,14 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
+from typing import Optional
+import discord
 from discord.ext import commands
 from dices import Expression
 from config import Log
 from lang import localize
+from models import JdrDTO
+from utils.aliases import JdrChannel
 from ...common.contextext import ExtendedContext, prepare_ctx
 
 
@@ -41,6 +45,38 @@ class Jdr(commands.Cog):
         Special dice example : `/rollindep 1d{1,2,3,4,5,6,7,8,9,10,Jack,Queen,King}+1d{Clubs,Diamonds,Hearts,Spades}` will return a single card with its value and its color (example : Queen of Spades)"""
         parser = Expression(expression)
         result = parser()
-        Log.info("rolled '%s' in channel %d of server %d", result, ctx.channel.id, ctx.guild.id) # pyright: ignore
+        Log.info("rolled '%s' in channel %d of server %d", result, ctx.channel.id, ctx.guild.id)
         await ctx.send(await localize(ctx, 'rollindep', result), reference=ctx.message)
 
+    @commands.hybrid_group(aliases=['rp'])
+    async def jdr(self, ctx: ExtendedContext) -> None:
+        pass
+
+    @prepare_ctx
+    @commands.cooldown(1, 60, commands.BucketType.guild)
+    @jdr.command(name='start', aliases=['new', '+'], description="Create a new JDR in this channel")
+    async def jdr_start(self, ctx: ExtendedContext, channel: discord.abc.GuildChannel, label: Optional[str] = None) -> None:
+        """TBD"""
+        srv = await ctx.ext.server
+
+        if not isinstance(channel, JdrChannel.__value__):
+            await ctx.send(await localize(ctx, ''), reference=ctx.message)
+
+        if not srv or not isinstance(ctx.author, discord.Member):
+            Log.error(
+                "JDR create unexpected init error for guild %d and channel %d with owner %d",
+                ctx.guild.id,
+                channel.id,
+                ctx.author.id
+            )
+            await ctx.send(await localize(ctx, ''), reference=ctx.message)
+            return
+
+        jdr = await JdrDTO.create(srv, channel.id, ctx.author, fetch=False, label=label)
+
+        if jdr:
+            Log.info("JDR created in guild %d, channel %d with owner %d", ctx.guild.id, channel.id, ctx.author.id)
+            await ctx.send(await localize(ctx, ''), reference=ctx.message)
+        else:
+            Log.warn("JDR cannot be created in guild %d, channel %d with owner %d", ctx.guild.id, channel.id, ctx.author.id)
+            await ctx.send(await localize(ctx, ''), reference=ctx.message)

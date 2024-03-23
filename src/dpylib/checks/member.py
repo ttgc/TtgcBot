@@ -27,12 +27,12 @@ from ..common.contextext import ExtendedContext
 
 async def check_botmanager(ctx: ExtendedContext) -> bool:
     member = await ctx.ext.member
-    return member.perms >= MemberPerms.MANAGER
+    return member.perms >= MemberPerms.MANAGER if member else False
 
 
 async def check_premium(ctx: ExtendedContext) -> bool:
     member = await ctx.ext.member
-    return member.perms >= MemberPerms.PREMIUM
+    return member.perms >= MemberPerms.PREMIUM if member else False
 
 
 def check_subbed(ctx: ExtendedContext) -> bool:

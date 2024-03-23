@@ -72,9 +72,8 @@ class MemberDTO:
     async def fetch(self) -> Optional[Self]:
         async with API('/api/member/{memberID}', requester=self.id) as api:
             response = await api(HTTP.GET, f'/api/Member/{self.id}', requester=self.id) # type: ignore
-
-        response.whitelist(HttpErrorCode.NOT_FOUND, HttpErrorCode.FORBIDDEN)
-        response.raise_errors()
+            response.whitelist(HttpErrorCode.NOT_FOUND, HttpErrorCode.FORBIDDEN)
+            response.raise_errors()
 
         if response.status.ko:
             Log.warn('HTTP member fetch failure (%d) for id=%d', response.error_code, self.id)

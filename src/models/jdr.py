@@ -108,7 +108,7 @@ class JdrDTO:
                 'owner': owner.id,
                 'label': params.get('label', None)
             }
-            response = await api(HTTP.POST, f'/api/jdr/create', body, requester=owner.id, role=extract_top_role(srv, owner))
+            response = await api(HTTP.POST, '/api/jdr/create', body, requester=owner.id, role=extract_top_role(srv, owner))
             response.raise_errors()
 
         dto = cls(srv.id, chan_id)

@@ -142,3 +142,38 @@ def catch( # noqa: C901
 
         return _async_wrapper if asynchronous else _wrapper
     return _decorator
+
+
+def convert_none_to_list(converted_arg: int | str):
+    def _decorator[T](fct: Callable[..., T]) -> Callable[..., T]:
+
+        @functools.wraps(fct)
+        def _wrapper(*args, **kwargs) -> T:
+            if isinstance(converted_arg, int) and args[converted_arg] is None:
+                args = list(args)
+                args = args[:converted_arg] + [[]] + args[converted_arg + 1:]
+            elif isinstance(converted_arg, str) and kwargs[converted_arg] is None:
+                kwargs[converted_arg] = []
+
+            return fct(*args, **kwargs)
+
+        return _wrapper
+    return _decorator
+
+
+def convert_none_to_dict(converted_arg: int | str):
+    def _decorator[T](fct: Callable[..., T]) -> Callable[..., T]:
+
+        @functools.wraps(fct)
+        def _wrapper(*args, **kwargs) -> T:
+            if isinstance(converted_arg, int) and args[converted_arg] is None:
+                args = list(args)
+                args = args[:converted_arg] + [{}] + args[converted_arg + 1:]
+            elif isinstance(converted_arg, str) and kwargs[converted_arg] is None:
+                kwargs[converted_arg] = {}
+
+            return fct(*args, **kwargs)
+
+        return _wrapper
+    return _decorator
+

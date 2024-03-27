@@ -17,11 +17,5 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-
-from typing import Awaitable, Callable
-import discord
-
-
-type AsyncCallable[T] = Callable[..., Awaitable[T]]
-type JdrChannel = discord.TextChannel | discord.ForumChannel | discord.VoiceChannel
-type UserType = discord.User | discord.Member
+from .view import View
+from .button import Button, button

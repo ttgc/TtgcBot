@@ -24,6 +24,6 @@ if TYPE_CHECKING:
     from dpylib.common.contextext import ExtendedContext
 
 
-async def localize(ctx: 'ExtendedContext', msgkey: str, *args) -> str:
+async def localize(ctx: 'ExtendedContext', msgkey: str, *args, **kwargs) -> str:
     lang = await ctx.ext.get_lang()
-    return lang[msgkey].format(*args)
+    return lang[msgkey].format(*args, **kwargs)

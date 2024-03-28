@@ -23,6 +23,11 @@ import discord
 from discord.ext import commands
 from config import Log, Config, Environment, LogConfig
 
+# test imports
+from ..common.contextext import ExtendedContext
+from ..ui import EmbedBrowserView
+from ..common.embed import DiscordEmbedMeta, EmbedFieldMeta
+
 
 class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=True)):
     def __init__(self, client: commands.Bot) -> None:
@@ -58,3 +63,11 @@ class BotManage(commands.Cog, name="Bot Management", command_attrs=dict(hidden=T
             Log.warn("Shutdown requested by %s", ctx.author)
             await self.bot.close()
             sys.exit(0)
+
+    @commands.is_owner()
+    @commands.hybrid_command()
+    async def test(self, ctx: ExtendedContext) -> None:
+        fields = [EmbedFieldMeta(f'item {x}', 'Lorem ipsum dolor sit amet') for x in range(156)]
+        embed = DiscordEmbedMeta(title="Title", color="FF0000", descr="Lorem ipsum dolor sit amet", fields=fields)
+        browser = EmbedBrowserView(embed, owner=ctx.author)
+        await browser.send(ctx)

@@ -18,7 +18,8 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Self, Optional, Callable, Awaitable, Any, override, TYPE_CHECKING
+import functools
+from typing import Optional, Self, Awaitable, Callable, override, TYPE_CHECKING
 from discord import ui
 import discord
 from utils.decorators import forbidden
@@ -37,13 +38,14 @@ class Modal(View, ui.Modal):
             self,
             title: str,
             on_submit: AsyncCallable[None], *,
-            timeout: Optional[float] = None,
             custom_id: str = discord.utils.MISSING,
+            on_error: Optional[Callable[[Self, discord.Interaction, Exception], Awaitable[None]]] = None,
             **kwargs
     ) -> None:
-        ui.Modal.__init__(self, timeout=timeout, title=title, custom_id=custom_id)
-        View.__init__(self, **kwargs)
+        ui.Modal.__init__(self, timeout=None, title=title, custom_id=custom_id)
+        View.__init__(self, timeout=None, **kwargs)
         self._on_submit = on_submit
+        self._on_error = on_error
 
     @forbidden(logger=Log.error)
     async def send(self, ctx: 'ExtendedContext') -> None:
@@ -61,16 +63,21 @@ class Modal(View, ui.Modal):
         self.stop()
         await self._on_submit(self, interaction)
 
+    @override
+    async def on_error(self, interaction: discord.Interaction[discord.Client], error: Exception) -> None:
+        if self._on_error:
+            await self._on_error(self, interaction, error)
+        else:
+            await ui.Modal.on_error(self, interaction, error)
 
-def modal(title: str, *,
-        timeout: Optional[float] = None,
-        custom_id: str = discord.utils.MISSING
-) -> Callable[[AsyncCallable[None]], Modal]:
-    def _decorator(func: AsyncCallable[None]) -> Modal:
-        return Modal(
-            title,
-            func,
-            timeout=timeout,
-            custom_id=custom_id
-        )
+
+def modal(title: str, *, custom_id: str = discord.utils.MISSING) -> Callable[[AsyncCallable[None]], Callable[..., Modal]]:
+    def _decorator(func: AsyncCallable[None]) -> Callable[..., Modal]:
+        def _wrapper(*args, **kwargs) -> Modal:
+            return Modal(
+                title,
+                functools.partial(func, *args, **kwargs),
+                custom_id=custom_id
+            )
+        return _wrapper
     return _decorator

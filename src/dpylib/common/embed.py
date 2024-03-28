@@ -19,7 +19,7 @@
 
 
 from typing import Optional, Self
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, auto
 import discord
 from utils import get_color
@@ -118,7 +118,7 @@ class DiscordEmbedMeta:
     thumbnail: Optional[str] = None
     author: Optional[str | EmbedAuthorMeta] = None
     footer: Optional[str | EmbedIconTexttMeta] = None
-    fields: list[EmbedFieldMeta] = []
+    fields: list[EmbedFieldMeta] = field(default_factory=list)
 
     def __iadd__(self, field: EmbedFieldMeta) -> Self:
         self.fields.append(field)

@@ -37,7 +37,7 @@ class View(ui.View, ILocalizable[None]):
     def __init__(
             self, *,
             timeout: Optional[float] = None,
-            owner: Optional[UserType],
+            owner: Optional[UserType] = None,
             checks: list[Callable[[Self, discord.Interaction], bool]] = None, # type: ignore
             on_timeout: Optional[Callable[[Self], Awaitable[None]]] = None,
             on_error: Optional[Callable[[Self, discord.Interaction, Exception, ui.Item], Awaitable[None]]] = None

@@ -49,6 +49,8 @@ class ContextExtension:
         if attr not in self._tasks:
             self.prepare()
 
+        res = None
+
         if not self._tasks[attr].done():
             res = await self._tasks[attr]
 

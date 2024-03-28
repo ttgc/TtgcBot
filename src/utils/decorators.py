@@ -105,6 +105,9 @@ def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callab
     return deprecated_decorator
 
 
+forbidden = functools.partial(deprecated, 'Forbidden call', raise_error=True)
+
+
 def catch( # noqa: C901
         exception: Type[Exception], *,
         error_value: Optional[Any] = None,

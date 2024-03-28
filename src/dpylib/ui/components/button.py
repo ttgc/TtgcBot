@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
+import functools
 from typing import Any, Optional, Callable, override, TYPE_CHECKING
 import discord
 from discord import ui
@@ -61,16 +62,18 @@ def button(
         url: Optional[str] = None,
         emoji: Optional[str | discord.Emoji | discord.PartialEmoji] = None,
         row: Optional[int] = None
-) -> Callable[[AsyncCallable[Any]], Button]:
-    def _decorator(func: AsyncCallable[Any]) -> Button:
-        return Button(
-            on_click=func,
-            label=label,
-            style=style,
-            disabled=disabled,
-            custom_id=custom_id,
-            url=url,
-            emoji=emoji,
-            row=row
-        )
+) -> Callable[[AsyncCallable[Any]], Callable[..., Button]]:
+    def _decorator(func: AsyncCallable[Any]) -> Callable[..., Button]:
+        def _wrapper(*args, **kwargs) -> Button:
+            return Button(
+                on_click=functools.partial(func, *args, **kwargs),
+                label=label,
+                style=style,
+                disabled=disabled,
+                custom_id=custom_id,
+                url=url,
+                emoji=emoji,
+                row=row
+            )
+        return _wrapper
     return _decorator

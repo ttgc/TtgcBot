@@ -318,3 +318,7 @@
 # charset_amount=Amount of {} {} :
 # charset_current=Current {} :
 rollindep=You rolled : `{}`
+goto_input=Goto:
+goto_placeholder=Type page number
+goto_modal=Goto page
+goto=Goto page

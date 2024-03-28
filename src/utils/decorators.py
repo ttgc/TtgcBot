@@ -155,7 +155,7 @@ def convert_none_to_list(converted_arg: int | str):
             if isinstance(converted_arg, int) and args[converted_arg] is None:
                 args = list(args)
                 args = args[:converted_arg] + [[]] + args[converted_arg + 1:]
-            elif isinstance(converted_arg, str) and kwargs[converted_arg] is None:
+            elif isinstance(converted_arg, str) and kwargs.get(converted_arg, None) is None:
                 kwargs[converted_arg] = []
 
             return fct(*args, **kwargs)
@@ -172,7 +172,7 @@ def convert_none_to_dict(converted_arg: int | str):
             if isinstance(converted_arg, int) and args[converted_arg] is None:
                 args = list(args)
                 args = args[:converted_arg] + [{}] + args[converted_arg + 1:]
-            elif isinstance(converted_arg, str) and kwargs[converted_arg] is None:
+            elif isinstance(converted_arg, str) and kwargs.get(converted_arg, None) is None:
                 kwargs[converted_arg] = {}
 
             return fct(*args, **kwargs)

@@ -18,13 +18,17 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Any, Optional, Callable, override
+from typing import Any, Optional, Callable, override, TYPE_CHECKING
 import discord
 from discord import ui
 from utils.aliases import AsyncCallable
+from lang import ILocalizable, LocalizedStr
+
+if TYPE_CHECKING:
+    from ...common.contextext import ExtendedContext
 
 
-class Button(ui.Button):
+class Button(ui.Button, ILocalizable[None]):
     def __init__(
             self, *,
             on_click: AsyncCallable[Any],
@@ -43,6 +47,11 @@ class Button(ui.Button):
     async def callback(self, interaction: discord.Interaction) -> Any:
         return await self.on_click(self, interaction)
 
+    @override
+    async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
+        if isinstance(self.label, LocalizedStr):
+            self.label = await self.label.localize(ctx, *args, **kwargs)
+
 
 def button(
         *, style: discord.ButtonStyle = discord.ButtonStyle.secondary,
@@ -53,7 +62,7 @@ def button(
         emoji: Optional[str | discord.Emoji | discord.PartialEmoji] = None,
         row: Optional[int] = None
 ) -> Callable[[AsyncCallable[Any]], Button]:
-    def _decorator(func:AsyncCallable[Any]) -> Button:
+    def _decorator(func: AsyncCallable[Any]) -> Button:
         return Button(
             on_click=func,
             label=label,

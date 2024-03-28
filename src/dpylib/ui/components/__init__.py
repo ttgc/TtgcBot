@@ -19,3 +19,5 @@
 
 from .view import View
 from .button import Button, button
+from .modal import Modal, modal
+from .textinput import TextInput

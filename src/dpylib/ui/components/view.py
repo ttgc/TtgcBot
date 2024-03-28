@@ -19,25 +19,26 @@
 
 
 import asyncio
-from typing import Self, Optional, Callable, Awaitable, override, TYPE_CHECKING
+from typing import Self, Optional, Callable, Awaitable, Type, override, TYPE_CHECKING
 from discord import ui
 import discord
 from utils.aliases import UserType
 from utils.decorators import convert_none_to_list, deprecated
 from config import Log
+from lang import ILocalizable
 
 if TYPE_CHECKING:
     from ...common.contextext import ExtendedContext
 
 
-class View(ui.View):
+class View(ui.View, ILocalizable[None]):
     @convert_none_to_list('checks')
     @override
     def __init__(
             self, *,
             timeout: Optional[float] = None,
             owner: Optional[UserType],
-            checks: list[Callable[[discord.Interaction], bool]] = None, # type: ignore
+            checks: list[Callable[[Self, discord.Interaction], bool]] = None, # type: ignore
             on_timeout: Optional[Callable[[Self], Awaitable[None]]] = None,
             on_error: Optional[Callable[[Self, discord.Interaction, Exception, ui.Item], Awaitable[None]]] = None
     ) -> None:
@@ -53,8 +54,7 @@ class View(ui.View):
         return await super().wait()
 
     def __iadd__(self, item: ui.Item) -> Self:
-        self.add_item(item)
-        return self
+        return self.add_item(item)
 
     @override
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -63,10 +63,10 @@ class View(ui.View):
 
         for chk in self.checks:
             if asyncio.iscoroutinefunction(chk):
-                if await chk(interaction):
+                if not await chk(self, interaction):
                     return False
             else:
-                if chk(interaction):
+                if not chk(self, interaction):
                     return False
 
         return True
@@ -87,3 +87,15 @@ class View(ui.View):
 
     async def send(self, ctx: 'ExtendedContext') -> None:
         await ctx.send(view=self, reference=ctx.message)
+
+    @override
+    async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
+        for widget in self.children:
+            if isinstance(widget, ILocalizable):
+                await widget.localize(ctx, *args, **kwargs)
+
+    def search(self, custom_id: str) -> Optional[ui.Item]:
+        for child in self.children:
+            if custom_id and hasattr(child, 'custom_id') and getattr(child, 'custom_id') == custom_id:
+                return child
+        return None

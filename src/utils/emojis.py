@@ -29,6 +29,11 @@ class Emoji(StrEnum):
     PLUS = '➕'
     MINUS = '➖'
     HOURGLASS = '⏳'
+    TRACK_PREVIOUS = '⏮️'
+    TRACK_NEXT = '⏭️'
+    FAST_FORWARD = '⏩'
+    REWIND = '⏪'
+    HASH = '#️⃣'
 
     @classmethod
     def from_str(cls, string: str) -> Self:

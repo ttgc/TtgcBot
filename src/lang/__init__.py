@@ -18,4 +18,4 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from .language import Language
-from .localizing import localize
+from .localizing import localize, LocalizedStr, ILocalizable

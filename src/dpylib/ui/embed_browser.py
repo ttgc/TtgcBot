@@ -24,7 +24,7 @@ from utils.aliases import UserType
 from utils.emojis import Emoji
 from lang import LocalizedStr
 from .components import View, Button, button, Modal, modal, TextInput
-from ..common.embed import DiscordEmbedMeta, EmbedConversionPolicy, EmbedLimits, EmbedIconTexttMeta
+from ..common.embed import DiscordEmbedMeta, EmbedConversionPolicy, EmbedLimits, EmbedIconTextMeta
 
 if TYPE_CHECKING:
     from ..common.contextext import ExtendedContext
@@ -81,7 +81,7 @@ class EmbedBrowserView(View):
 
         if not footer:
             footer = page_str
-        elif isinstance(footer, EmbedIconTexttMeta):
+        elif isinstance(footer, EmbedIconTextMeta):
             footer.text = f'{footer.text}\n{page_str}'
         else:
             footer = f'{footer}\n{page_str}'

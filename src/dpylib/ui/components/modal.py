@@ -44,6 +44,7 @@ class Modal(View, ui.Modal):
     ) -> None:
         ui.Modal.__init__(self, timeout=None, title=title, custom_id=custom_id)
         View.__init__(self, timeout=None, **kwargs)
+        self.disable_on_stop = False
         self._on_submit = on_submit
         self._on_error = on_error
 

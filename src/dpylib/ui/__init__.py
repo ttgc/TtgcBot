@@ -18,3 +18,4 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from .embed_browser import EmbedBrowserView
+from .embed_view import EmbedView

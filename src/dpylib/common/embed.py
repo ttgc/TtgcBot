@@ -18,11 +18,13 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import Optional, Self
-from dataclasses import dataclass, field
+from typing import Optional, Self, override
+from dataclasses import dataclass, field as datafield
 from enum import IntEnum, auto
 import discord
+from dpylib.common.contextext import ExtendedContext
 from utils import get_color
+from lang import LocalizedStr, ILocalizable
 from .exceptions import DiscordLimitOverflowException
 
 
@@ -77,26 +79,38 @@ class LocalImageAttachment:
 
 
 @dataclass
-class EmbedIconTexttMeta:
+class EmbedIconTextMeta(ILocalizable[str]):
     text: str
     icon_url: str
 
     def __len__(self) -> int:
         return len(self.text)
 
+    @override
+    async def localize(self, ctx: ExtendedContext, *args, **kwargs) -> str:
+        if isinstance(self.text, LocalizedStr):
+            self.text = await self.text.localize(ctx, *args, **kwargs)
+        return self.text
+
 
 @dataclass
-class EmbedAuthorMeta:
+class EmbedAuthorMeta(ILocalizable[str]):
     name: str
-    url: Optional[str]
-    icon_url: Optional[str]
+    url: Optional[str] = None
+    icon_url: Optional[str] = None
 
     def __len__(self) -> int:
         return len(self.name)
 
+    @override
+    async def localize(self, ctx: ExtendedContext, *args, **kwargs) -> str:
+        if isinstance(self.name, LocalizedStr):
+            self.name = await self.name.localize(ctx, *args, **kwargs)
+        return self.name
+
 
 @dataclass
-class EmbedFieldMeta:
+class EmbedFieldMeta(ILocalizable[None]):
     name: str
     content: str
     inlined: bool = True
@@ -107,9 +121,16 @@ class EmbedFieldMeta:
             if len(self.content) > EmbedLimits.FIELD_CONTENT_LENGTH else self.content
         return self.__class__(name, content, self.inlined)
 
+    @override
+    async def localize(self, ctx: ExtendedContext, *args, **kwargs) -> None:
+        if isinstance(self.name, LocalizedStr):
+            self.name = await self.name.localize(ctx, *args, **kwargs)
+        if isinstance(self.content, LocalizedStr):
+            self.content = await self.content.localize(ctx, *args, **kwargs)
+
 
 @dataclass
-class DiscordEmbedMeta:
+class DiscordEmbedMeta(ILocalizable[None]):
     title: str
     color: str
     descr: Optional[str] = None
@@ -117,8 +138,8 @@ class DiscordEmbedMeta:
     img: Optional[str] = None
     thumbnail: Optional[str] = None
     author: Optional[str | EmbedAuthorMeta] = None
-    footer: Optional[str | EmbedIconTexttMeta] = None
-    fields: list[EmbedFieldMeta] = field(default_factory=list)
+    footer: Optional[str | EmbedIconTextMeta] = None
+    fields: list[EmbedFieldMeta] = datafield(default_factory=list)
 
     def __iadd__(self, field: EmbedFieldMeta) -> Self:
         self.fields.append(field)
@@ -199,10 +220,30 @@ class DiscordEmbedMeta:
 
         if isinstance(self.footer, str):
             embed.set_footer(text=self.footer)
-        elif isinstance(self.footer, EmbedIconTexttMeta):
+        elif isinstance(self.footer, EmbedIconTextMeta):
             embed.set_footer(text=self.footer.text, icon_url=self.footer.icon_url)
 
         for field in self.fields:
             embed.add_field(name=field.name, value=field.content, inline=field.inlined)
 
         return embed
+
+    @override
+    async def localize(self, ctx: ExtendedContext, *args, **kwargs) -> None:
+        if isinstance(self.title, LocalizedStr):
+            self.title = await self.title.localize(ctx, *args, **kwargs)
+        if isinstance(self.descr, LocalizedStr):
+            self.descr = await self.descr.localize(ctx, *args, **kwargs)
+
+        if isinstance(self.author, LocalizedStr):
+            self.author = await self.author.localize(ctx, *args, **kwargs)
+        elif isinstance(self.author, EmbedAuthorMeta):
+            await self.author.localize(ctx, *args, **kwargs)
+
+        if isinstance(self.footer, LocalizedStr):
+            self.footer = await self.footer.localize(ctx, *args, **kwargs)
+        elif isinstance(self.footer, EmbedIconTextMeta):
+            await self.footer.localize(ctx, *args, **kwargs)
+
+        for field in self.fields:
+            await field.localize(ctx, *args, **kwargs)

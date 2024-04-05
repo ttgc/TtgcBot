@@ -47,6 +47,7 @@ class View(ui.View, ILocalizable[None]):
         self.checks = checks
         self._on_timeout = on_timeout
         self._on_error = on_error
+        self.disable_on_stop = True
 
     @deprecated('Wait on views is not recommended', raise_error=False, logger=Log.debug_v4)
     @override
@@ -79,14 +80,22 @@ class View(ui.View, ILocalizable[None]):
             await super().on_error(interaction, error, item)
 
     @override
+    def stop(self) -> None:
+        for child in self.children:
+            if self.disable_on_stop and hasattr(child, 'disabled'):
+                setattr(child, 'disabled', True)
+
+        super().stop()
+
+    @override
     async def on_timeout(self) -> None:
         self.stop()
 
         if self._on_timeout:
             await self._on_timeout(self)
 
-    async def send(self, ctx: 'ExtendedContext') -> None:
-        await ctx.send(view=self, reference=ctx.message)
+    async def send(self, ctx: 'ExtendedContext', *, content: Optional[str] = None, **kwargs) -> None:
+        await ctx.send(content, view=self, reference=ctx.message, **kwargs)
 
     @override
     async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
@@ -94,8 +103,16 @@ class View(ui.View, ILocalizable[None]):
             if isinstance(widget, ILocalizable):
                 await widget.localize(ctx, *args, **kwargs)
 
-    def search(self, custom_id: str) -> Optional[ui.Item]:
+    def search[T](self, custom_id: str, return_type: Type[T] = ui.Item) -> Optional[T]:
         for child in self.children:
-            if custom_id and hasattr(child, 'custom_id') and getattr(child, 'custom_id') == custom_id:
+            if isinstance(child, return_type) and hasattr(child, 'custom_id') and getattr(child, 'custom_id') == custom_id:
                 return child
         return None
+
+    def find[T](self, custom_id: str, return_type: Type[T] = ui.Item) -> T:
+        found = self.search(custom_id, return_type)
+
+        if not found:
+            raise ValueError(f'Custom ID {custom_id} does not exist in this view or is not of type {return_type.__name__}')
+
+        return found

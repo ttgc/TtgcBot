@@ -29,6 +29,9 @@ from utils import ExitCode
 from ..cogs import BotManage
 from ..cogs.jdr import Jdr
 
+# test cog - REMOVE before release
+from ..cogs.tcog import TCog
+
 
 @catch(AlreadyCalledFunctionException,
        logger=functools.partial(Log.critical, kill_code=ExitCode.UNREGISTERED_COGS),
@@ -38,6 +41,7 @@ async def _add_cogs(client: commands.Bot) -> None:
     Log.debug_v4('Registering V4 cogs')
     await client.add_cog(BotManage(client))
     await client.add_cog(Jdr(client))
+    await client.add_cog(TCog(client))
     Log.debug_v4('End of registering V4 cogs')
 
 

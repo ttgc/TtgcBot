@@ -20,6 +20,8 @@
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, override, Optional
+from enum import Enum
+import functools
 
 if TYPE_CHECKING:
     from dpylib.common.contextext import ExtendedContext
@@ -36,11 +38,33 @@ class ILocalizable[T](ABC):
         pass
 
 
+class LocalizeStrCase(Enum):
+    REGULAR = None
+    LOWER = functools.partial(str.lower)
+    UPPER = functools.partial(str.upper)
+    CAPITALIZED = functools.partial(str.capitalize)
+
+    def __call__(self, text: str) -> str:
+        return self.value(text) if self.value else text
+
+
+
 class LocalizedStr(str, ILocalizable[str]):
-    def __init__(self, _: str, *, argc: int = -1, kwargs_inuse: Optional[list[str]] = None) -> None:
+    def __new__(cls, string: str, *args, **kwargs):
+        self = super().__new__(cls, string)
+        return self
+
+    def __init__(
+            self,
+            _: str, *,
+            argc: int = -1,
+            kwargs_inuse: Optional[list[str]] = None,
+            treatment: LocalizeStrCase = LocalizeStrCase.REGULAR
+    ) -> None:
         super().__init__()
         self.argc = argc
         self.kwargs_inuse = kwargs_inuse
+        self.treatment = treatment
 
     @override
     async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> str:
@@ -55,4 +79,4 @@ class LocalizedStr(str, ILocalizable[str]):
 
             kwargs = saved
 
-        return await localize(ctx, str(self), *args, **kwargs)
+        return self.treatment(await localize(ctx, str(self), *args, **kwargs))

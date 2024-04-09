@@ -116,3 +116,9 @@ class View(ui.View, ILocalizable[None]):
             raise ValueError(f'Custom ID {custom_id} does not exist in this view or is not of type {return_type.__name__}')
 
         return found
+
+    def get_first_child[T](self, return_type: Type[T] = ui.Item) -> T:
+        for child in self.children:
+            if isinstance(child, return_type):
+                return child
+        raise ValueError(f'No child is matching return type {return_type.__name__}')

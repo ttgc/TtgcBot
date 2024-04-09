@@ -36,6 +36,16 @@ class Emoji(StrEnum):
     HASH = '#️⃣'
     CROSSED_SWORDS = '⚔️'
     SHIELD = '🛡️'
+    MUSCLE = '💪'
+    GHOST = '👻'
+    HEART_EYES = '😍'
+    CLOUD_TORNADO = '🌪️'
+    DART = '🎯'
+    FOUR_LEAF_CLOVER = '🍀'
+    EYES = '👀'
+    PILL = '💊'
+    MAGIC_WAND = '🪄'
+    PASSPORT_CONTROL = '🛂'
 
     @classmethod
     def from_str(cls, string: str) -> Self:

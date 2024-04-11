@@ -142,6 +142,29 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         )
         return view
 
+    @setup_view(CharcreateViewID.SET_PILOTING)
+    def view_set_piloting(self) -> View:
+        view = self.modal_set_piloting()
+        view += TextInput(
+            LocalizedStr('planet_piloting', treatment=LocalizeStrCase.CAPITALIZED),
+            placeholder=LocalizedStr('input_value_placeholder', treatment=LocalizeStrCase.CAPITALIZED),
+            required=False,
+            max_length=2,
+            row=0,
+            cast=int,
+            custom_id='planet'
+        )
+        view += TextInput(
+            LocalizedStr('astral_piloting', treatment=LocalizeStrCase.CAPITALIZED),
+            placeholder=LocalizedStr('input_value_placeholder', treatment=LocalizeStrCase.CAPITALIZED),
+            required=False,
+            max_length=2,
+            row=1,
+            cast=int,
+            custom_id='astral'
+        )
+        return view
+
     # @setup_view(CharcreateViewID.SET_STATS_1)
     # def view_set_stats_1(self) -> View:
     #     def _check_values(view: View, interaction: discord.Interaction) -> bool:
@@ -475,6 +498,26 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
 
         if child.custom_id and child.value:
             self.data[child.custom_id] = child.value
+
+        await self.send_verification(interaction, True)
+
+    @button(style=discord.ButtonStyle.primary, label=LocalizedStr('set_piloting'), emoji=Emoji.ROCKET)
+    async def btn_set_piloting(self, btn: Button, interaction: discord.Interaction) -> None:
+        view: Modal = self[self.CharcreateViewID.SET_PILOTING] # type: ignore
+        await interaction.response.send_modal(view)
+        self.view_set_piloting()
+        await self[self.CharcreateViewID.SET_PILOTING].localize(self.ctx)
+
+    @modal(LocalizedStr('charcreate_set_pilot'))
+    async def modal_set_piloting(self, modal: Modal, interaction: discord.Interaction) -> None:
+        planet_input = modal.find('planet', TextInput)
+        astral_input = modal.find('astral', TextInput)
+        self.data['pilot'] = {}
+
+        if planet_input:
+            self.data['pilot']['planet'] = planet_input.value
+        if astral_input:
+            self.data['pilot']['astral'] = planet_input.value
 
         await self.send_verification(interaction, True)
 

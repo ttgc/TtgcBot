@@ -57,6 +57,9 @@ class TextInput[T](ui.TextInput, ILocalizable[None]):
         )
         self.cast = cast
 
+    def __bool__(self) -> bool:
+        return self.value is not None
+
     @property
     @catch(Exception, error_value=None, logger=Log.debug)
     @override

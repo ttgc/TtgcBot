@@ -46,6 +46,7 @@ class Emoji(StrEnum):
     PILL = '💊'
     MAGIC_WAND = '🪄'
     PASSPORT_CONTROL = '🛂'
+    ROCKET = '🚀'
 
     @classmethod
     def from_str(cls, string: str) -> Self:

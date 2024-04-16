@@ -50,7 +50,7 @@ def _generate_invite_link(client: commands.Bot) -> str:
     if Config().env == Environment.DEV:
         botaskperm = discord.Permissions.all()
     else:
-        botaskperm = discord.Permissions().none()
+        botaskperm = discord.Permissions.none()
         botaskperm.add_reactions = True
         botaskperm.attach_files = True
         botaskperm.change_nickname = True

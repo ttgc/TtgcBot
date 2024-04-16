@@ -24,6 +24,7 @@ from enum import StrEnum
 from abc import ABC, abstractmethod
 from lang import ILocalizable
 from ..ui.components import View
+from ..common.exceptions import WorkflowAlreadyStartedException
 
 if TYPE_CHECKING:
     from ..common.contextext import ExtendedContext
@@ -43,7 +44,7 @@ class IWorkflow[T](ILocalizable[None], ABC):
     @final
     async def __call__(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
         if self._started:
-            raise Exception('TEMP') # TODO: proper exception
+            raise WorkflowAlreadyStartedException(self)
 
         self._started = True
         await self.localize(ctx, *args, **kwargs)

@@ -18,7 +18,13 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
+from typing import TYPE_CHECKING
 from discord.ext import commands
+
+from dpylib.workflow.iworkflow import IWorkflow
+
+if TYPE_CHECKING:
+    from ..workflow.iworkflow import IWorkflow
 
 
 class DiscordLimitOverflowException(commands.CommandInvokeError):
@@ -30,3 +36,18 @@ class DiscordLimitOverflowException(commands.CommandInvokeError):
 
     def __str__(self) -> str:
         return f'DiscordLimitOverflow: {self.limit} overflow. Got {self.got}. Expected {self.expected}'
+
+
+class DiscordWorkflowException(commands.CommandInvokeError):
+    def __init__(self, workflow: 'IWorkflow', msg: str) -> None:
+        self.name = workflow.__class__.__name__
+        self._instance = workflow
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__} on workflow {self.name}: {self.msg}'
+
+
+class WorkflowAlreadyStartedException(DiscordWorkflowException):
+    def __init__(self, workflow: 'IWorkflow') -> None:
+        super().__init__(workflow, 'Workflow was already started and can only be started once')

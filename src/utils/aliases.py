@@ -24,4 +24,5 @@ import discord
 
 type AsyncCallable[T] = Callable[..., Awaitable[T]]
 type JdrChannel = discord.TextChannel | discord.ForumChannel | discord.VoiceChannel
+type JdrChannelThreads = JdrChannel | discord.Thread
 type UserType = discord.User | discord.Member

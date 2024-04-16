@@ -18,11 +18,12 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import TYPE_CHECKING, Callable, Any, override
+from typing import TYPE_CHECKING, Any, Optional, override
 import discord
 from lang import LocalizedStr, LocalizeStrCase
 from utils.emojis import Emoji
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta
+from ..common.threadholder import DiscordThreadHolder
 from ..ui.components import Dropdown, DropdownOption, View, Button, Modal, TextInput, button, dropdown, modal
 from ..ui import EmbedView
 from .iworkflow import IWorkflow, setup_view
@@ -66,6 +67,7 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         self.race = ''
         self.classe = ''
         self.field_map = ['name', 'hp', 'mp', 'str', 'spr', 'cha', 'agi', 'prec', 'luck', 'int', 'karma', 'gmod']
+        self.thread: Optional[DiscordThreadHolder] = None
 
         self.view_select_ext()
         self.view_select_race()
@@ -304,20 +306,30 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
 
     @override
     async def start(self, ctx: 'ExtendedContext') -> None:
-        if isinstance(ctx.channel, discord.TextChannel):
-            msg = await ctx.send(f'Starting creation of character {self.charkey}...')
+        self.thread = DiscordThreadHolder(ctx.channel, private=False)
+        content = f'Starting creation of character {self.charkey}...'
+        msg = None
+
+        if self.thread.needs_message:
+            msg = await ctx.send(content)
             msg = await ctx.channel.fetch_message(msg.id)
-            thread = await msg.create_thread(
-                name=f'/char create {self.charkey}',
-                auto_archive_duration=60
-            )
-            await thread.send(view=self[self.CharcreateViewID.SELECT_EXT])
-        elif isinstance(ctx.channel, discord.Thread):
-            thread = ctx.channel
-            await thread.edit(archived=False, locked=False, reason=f'/char create {self.charkey}')
-            await self[self.CharcreateViewID.SELECT_EXT].send(ctx)
-        else:
-            raise Exception('TEMP') # TODO: proper exception
+
+        thread = await self.thread.spawn(f'/char create {self.charkey}', origin_msg=msg, post_content=content)
+        await thread.send(view=self[self.CharcreateViewID.SELECT_EXT])
+        # if isinstance(ctx.channel, discord.TextChannel):
+        #     msg = await ctx.send(f'Starting creation of character {self.charkey}...')
+        #     msg = await ctx.channel.fetch_message(msg.id)
+        #     thread = await msg.create_thread(
+        #         name=f'/char create {self.charkey}',
+        #         auto_archive_duration=60
+        #     )
+        #     await thread.send(view=self[self.CharcreateViewID.SELECT_EXT])
+        # elif isinstance(ctx.channel, discord.Thread):
+        #     thread = ctx.channel
+        #     await thread.edit(archived=False, locked=False, reason=f'/char create {self.charkey}')
+        #     await self[self.CharcreateViewID.SELECT_EXT].send(ctx)
+        # else:
+        #     raise Exception('TEMP') # TODO: proper exception
 
     async def on_timeout(self, view: View) -> None:
         pass

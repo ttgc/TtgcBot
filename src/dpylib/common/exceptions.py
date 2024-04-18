@@ -20,8 +20,7 @@
 
 from typing import TYPE_CHECKING
 from discord.ext import commands
-
-from dpylib.workflow.iworkflow import IWorkflow
+from utils.aliases import JdrChannelThreads
 
 if TYPE_CHECKING:
     from ..workflow.iworkflow import IWorkflow
@@ -43,6 +42,7 @@ class DiscordWorkflowException(commands.CommandInvokeError):
         self.name = workflow.__class__.__name__
         self._instance = workflow
         self.msg = msg
+        super().__init__(self)
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__} on workflow {self.name}: {self.msg}'
@@ -51,3 +51,13 @@ class DiscordWorkflowException(commands.CommandInvokeError):
 class WorkflowAlreadyStartedException(DiscordWorkflowException):
     def __init__(self, workflow: 'IWorkflow') -> None:
         super().__init__(workflow, 'Workflow was already started and can only be started once')
+
+
+class UnsupportedThread(commands.CommandInvokeError):
+    def __init__(self, channel: JdrChannelThreads, msg: str) -> None:
+        self.channel = channel
+        self.msg = msg
+        super().__init__(self)
+
+    def __str__(self) -> str:
+        return f'Unsupported channel #{self.channel.name} for threads: {self.msg}'

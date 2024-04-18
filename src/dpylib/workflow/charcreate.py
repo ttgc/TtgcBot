@@ -74,9 +74,6 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         self.view_select_class()
         self.view_select_gmod()
         self.view_select_dkar()
-        # self.view_set_stats_1()
-        # self.view_set_stats_2()
-        # self.view_set_stats_3()
         self.view_verify()
         self.view_set_value()
 
@@ -167,121 +164,6 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         )
         return view
 
-    # @setup_view(CharcreateViewID.SET_STATS_1)
-    # def view_set_stats_1(self) -> View:
-    #     def _check_values(view: View, interaction: discord.Interaction) -> bool:
-    #         return input_hp.value and input_int.value and input_int.value <= 6 # type: ignore
-
-    #     view = self.modal_set_stats_1()
-    #     view += (input_hp := TextInput(
-    #         LocalizedStr('hp', treatment=LocalizeStrCase.UPPER),
-    #         default='1',
-    #         required=True,
-    #         min_length=1,
-    #         max_length=5,
-    #         row=0,
-    #         cast=int,
-    #         custom_id='hp'
-    #     ))
-    #     view += TextInput(
-    #         LocalizedStr('mp', treatment=LocalizeStrCase.UPPER),
-    #         placeholder='0',
-    #         max_length=5,
-    #         row=1,
-    #         cast=int,
-    #         custom_id='mp'
-    #     )
-    #     view += (input_int := TextInput(
-    #         LocalizedStr('int', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='3',
-    #         required=True,
-    #         min_length=1,
-    #         max_length=1,
-    #         row=2,
-    #         cast=int,
-    #         custom_id='int'
-    #     ))
-    #     view.checks.append(_check_values)
-    #     return view
-
-    # @setup_view(CharcreateViewID.SET_STATS_2)
-    # def view_set_stats_2(self) -> View:
-    #     def _check_values(view: View, interaction: discord.Interaction) -> bool:
-    #         return input_str.value and input_spr.value and input_cha.value # type: ignore
-
-    #     view = self.modal_set_stats_2()
-    #     view += (input_str := TextInput(
-    #         LocalizedStr('str', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='50',
-    #         required=True,
-    #         min_length=2,
-    #         max_length=2,
-    #         row=0,
-    #         cast=int,
-    #         custom_id='str'
-    #     ))
-    #     view += (input_spr := TextInput(
-    #         LocalizedStr('spr', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='50',
-    #         required=True,
-    #         min_length=2,
-    #         max_length=2,
-    #         row=1,
-    #         cast=int,
-    #         custom_id='spr'
-    #     ))
-    #     view += (input_cha := TextInput(
-    #         LocalizedStr('cha', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='50',
-    #         required=True,
-    #         min_length=2,
-    #         max_length=2,
-    #         row=2,
-    #         cast=int,
-    #         custom_id='cha'
-    #     ))
-    #     view.checks.append(_check_values)
-    #     return view
-
-    # @setup_view(CharcreateViewID.SET_STATS_3)
-    # def view_set_stats_3(self) -> View:
-    #     def _check_values(view: View, interaction: discord.Interaction) -> bool:
-    #         return input_agi.value and input_prec.value and input_luck.value # type: ignore
-
-    #     view = self.modal_set_stats_3()
-    #     view += (input_agi := TextInput(
-    #         LocalizedStr('agi', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='50',
-    #         required=True,
-    #         min_length=2,
-    #         max_length=2,
-    #         row=0,
-    #         cast=int,
-    #         custom_id='agi'
-    #     ))
-    #     view += (input_prec := TextInput(
-    #         LocalizedStr('prec', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='50',
-    #         required=True,
-    #         min_length=2,
-    #         max_length=2,
-    #         row=1,
-    #         cast=int,
-    #         custom_id='prec'
-    #     ))
-    #     view += (input_luck := TextInput(
-    #         LocalizedStr('luck', treatment=LocalizeStrCase.CAPITALIZED),
-    #         default='50',
-    #         required=True,
-    #         min_length=2,
-    #         max_length=2,
-    #         row=2,
-    #         cast=int,
-    #         custom_id='luck'
-    #     ))
-    #     view.checks.append(_check_values)
-    #     return view
-
     @setup_view(CharcreateViewID.VERIFY)
     def view_verify(self) -> View:
         embed = DiscordEmbedMeta(
@@ -306,30 +188,10 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
 
     @override
     async def start(self, ctx: 'ExtendedContext') -> None:
-        self.thread = DiscordThreadHolder(ctx.channel, private=False)
+        self.thread = DiscordThreadHolder(ctx.channel, private=True)
         content = f'Starting creation of character {self.charkey}...'
-        msg = None
-
-        if self.thread.needs_message:
-            msg = await ctx.send(content)
-            msg = await ctx.channel.fetch_message(msg.id)
-
-        thread = await self.thread.spawn(f'/char create {self.charkey}', origin_msg=msg, post_content=content)
+        thread = await self.thread.spawn(f'/char create {self.charkey}', post_content=content)
         await thread.send(view=self[self.CharcreateViewID.SELECT_EXT])
-        # if isinstance(ctx.channel, discord.TextChannel):
-        #     msg = await ctx.send(f'Starting creation of character {self.charkey}...')
-        #     msg = await ctx.channel.fetch_message(msg.id)
-        #     thread = await msg.create_thread(
-        #         name=f'/char create {self.charkey}',
-        #         auto_archive_duration=60
-        #     )
-        #     await thread.send(view=self[self.CharcreateViewID.SELECT_EXT])
-        # elif isinstance(ctx.channel, discord.Thread):
-        #     thread = ctx.channel
-        #     await thread.edit(archived=False, locked=False, reason=f'/char create {self.charkey}')
-        #     await self[self.CharcreateViewID.SELECT_EXT].send(ctx)
-        # else:
-        #     raise Exception('TEMP') # TODO: proper exception
 
     async def on_timeout(self, view: View) -> None:
         pass
@@ -532,58 +394,6 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
             self.data['pilot']['astral'] = planet_input.value
 
         await self.send_verification(interaction, True)
-
-    # @modal(LocalizedStr('charcreate_setstat_modal'))
-    # async def modal_set_stats_1(self, modal: Modal, interaction: discord.Interaction) -> None:
-    #     self.data.update({
-    #         'pv': modal.find('hp', TextInput).value,
-    #         'pm': modal.find('mp', TextInput).value,
-    #         'intuition': modal.find('int', TextInput).value
-    #     })
-
-    #     await interaction.response.send_modal(self[self.CharcreateViewID.SET_STATS_2]) # type: ignore
-
-    # @modal(LocalizedStr('charcreate_setstat_modal'))
-    # async def modal_set_stats_2(self, modal: Modal, interaction: discord.Interaction) -> None:
-    #     self.data.update({
-    #         'strength': modal.find('str', TextInput).value,
-    #         'spirit': modal.find('spr', TextInput).value,
-    #         'charisma': modal.find('cha', TextInput).value
-    #     })
-
-    #     await interaction.response.send_modal(self[self.CharcreateViewID.SET_STATS_3]) # type: ignore
-
-    # @modal(LocalizedStr('charcreate_setstat_modal'))
-    # async def modal_set_stats_3(self, modal: Modal, interaction: discord.Interaction) -> None:
-    #     self.data.update({
-    #         # TODO: temp, remove later
-    #         'pv': 100,
-    #         'pm': 0,
-    #         'intuition': 2,
-    #         'strength': 60,
-    #         'spirit': 60,
-    #         'charisma': 60,
-    #         # END OF REMOVAL
-    #         'agility': modal.find('agi', TextInput).value,
-    #         'precision': modal.find('prec', TextInput).value,
-    #         'luck': modal.find('luck', TextInput).value,
-    #     })
-
-    #     view: EmbedView = self[self.CharcreateViewID.VERIFY] # type: ignore
-    #     view.embed.descr = f'{self.ext}\n{self.race} {self.classe}'
-    #     view.embed.fields[self.field_map.index('name')].content = self.data['name']
-    #     view.embed.fields[self.field_map.index('hp')].content = str(self.data['pv'])
-    #     view.embed.fields[self.field_map.index('mp')].content = str(self.data['pm'])
-    #     view.embed.fields[self.field_map.index('str')].content = str(self.data['strength'])
-    #     view.embed.fields[self.field_map.index('spr')].content = str(self.data['spirit'])
-    #     view.embed.fields[self.field_map.index('cha')].content = str(self.data['charisma'])
-    #     view.embed.fields[self.field_map.index('agi')].content = str(self.data['agility'])
-    #     view.embed.fields[self.field_map.index('prec')].content = str(self.data['precision'])
-    #     view.embed.fields[self.field_map.index('luck')].content = str(self.data['luck'])
-    #     view.embed.fields[self.field_map.index('int')].content = str(self.data['intuition'])
-    #     view.embed.fields[self.field_map.index('karma')].content = str(self.data['karma'])
-    #     view.embed.fields[self.field_map.index('gmod')].content = self.data['gamemod']
-    #     await interaction.response.send_message(view=view, embed=view.embed.convert())
 
     @override
     async def finalize(self) -> None:

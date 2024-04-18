@@ -22,6 +22,7 @@ from enum import IntEnum
 from typing import Optional
 import discord
 from utils.aliases import JdrChannelThreads
+from ..common.exceptions import UnsupportedThread
 
 
 class ThreadArchiveDuration(IntEnum):
@@ -92,10 +93,13 @@ class DiscordThreadHolder[T: JdrChannelThreads]:
                 **post_params
             )
         elif not isinstance(self.src, discord.VoiceChannel) or self.thread_only:
-            raise Exception('TEMP') # TODO: proper exception
+            raise UnsupportedThread(
+                self.src,
+                "Thread use is required while current channel is a voice channel and doesn't support threads"
+            )
 
         if not self.channel:
-            raise Exception('TEMP') # TODO: proper exception
+            raise UnsupportedThread(self.dest, "No valid thread/channel can be used")
 
         return self.channel
 

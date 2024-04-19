@@ -50,3 +50,7 @@ def try_parse_int(value: str, *, default_value: int) -> int:
 
 def get_color(hexvalue: str) -> discord.Color:
     return discord.Color(int(hexvalue, 16))
+
+
+def snake_to_pascal_case(text: str) -> str:
+    return ''.join([x.capitalize() for x in text.split('_')])

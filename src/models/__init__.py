@@ -20,3 +20,5 @@
 from .member import MemberPerms, MemberDTO
 from .server import ServerDTO
 from .jdr import JdrDTO
+from .enumerations import BaseClasses, BaseRaces, BaseExtensions, BaseOrganizations, \
+    BaseSymbionts, BaseGamemods, fetch_extensions, fetch_gamemods

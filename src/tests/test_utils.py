@@ -21,7 +21,7 @@
 from typing import Self
 import time
 import pytest
-from utils import get_color, try_parse_int
+from utils import get_color, try_parse_int, snake_to_pascal_case
 from utils.emojis import Emoji
 from utils.decorators import deprecated, call_once, singleton, unique, catch
 from utils.exceptions import DeprecatedException, AlreadyCalledFunctionException
@@ -130,3 +130,7 @@ class TestUtils:
         assert r == 255
         assert g == 0x88
         assert b == 0x2A
+
+    def test_snake_to_pascal_case(self) -> None:
+        assert snake_to_pascal_case('FOO') == 'Foo'
+        assert snake_to_pascal_case('FOO_BAR') == 'FooBar'

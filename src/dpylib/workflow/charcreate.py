@@ -18,10 +18,11 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import TYPE_CHECKING, Any, Optional, override
+from typing import TYPE_CHECKING, Any, Optional, Type, override
 import discord
 from lang import LocalizedStr, LocalizeStrCase
 from utils.emojis import Emoji
+from models import fetch_extensions, BaseExtensions, BaseRaces, BaseClasses
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta
 from ..common.threadholder import DiscordThreadHolder
 from ..ui.components import Dropdown, DropdownOption, View, Button, Modal, TextInput, button, dropdown, modal
@@ -63,11 +64,14 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
             'precision': 50,
             'luck': 50
         }
-        self.ext = ''
-        self.race = ''
-        self.classe = ''
+        self.ext: Optional[BaseExtensions] = None
+        self.race: Optional[BaseRaces] = None
+        self.classe: Optional[BaseClasses] = None
         self.field_map = ['name', 'hp', 'mp', 'str', 'spr', 'cha', 'agi', 'prec', 'luck', 'int', 'karma', 'gmod']
         self.thread: Optional[DiscordThreadHolder] = None
+        self._extensions_enum: Optional[Type[BaseExtensions]] = None
+        self._races_enum: Optional[Type[BaseRaces]] = None
+        self._classes_enum: Optional[Type[BaseClasses]] = None
 
         self.view_select_ext()
         self.view_select_race()
@@ -80,36 +84,19 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
     @setup_view(CharcreateViewID.SELECT_EXT)
     def view_select_ext(self) -> View:
         view = View(timeout=300, owner=self.owner, on_timeout=self.on_timeout)
-        dd = self.dropdown_ext()
-        dd += [
-            DropdownOption('ADTAF', 'adtaf'),
-            DropdownOption('Cosmorigins Terae', 'terae'),
-            DropdownOption('Cosmorings Orianis', 'orianis'),
-            DropdownOption('Cosmorigins Xyord', 'xyord')
-        ] # Hardcoded
-        view += dd
+        view += self.dropdown_ext()
         return view
 
     @setup_view(CharcreateViewID.SELECT_RACE)
     def view_select_race(self) -> View:
         view = View(timeout=300, owner=self.owner, on_timeout=self.on_timeout)
-        dd = self.dropdown_race()
-        dd += [
-            DropdownOption('Humains', 'human'),
-            DropdownOption('Descendant des anciens', 'ancient'),
-        ] # Hardcoded
-        view += dd
+        view += self.dropdown_race()
         return view
 
     @setup_view(CharcreateViewID.SELECT_CLASS)
     def view_select_class(self) -> View:
         view = View(timeout=300, owner=self.owner, on_timeout=self.on_timeout)
-        dd = self.dropdown_class()
-        dd += [
-            DropdownOption('Standard', 'standard'),
-            DropdownOption('Détenteur de mana', 'mana'),
-        ] # Hardcoded
-        view += dd
+        view += self.dropdown_class()
         return view
 
     @setup_view(CharcreateViewID.SELECT_GMOD)
@@ -191,7 +178,12 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         self.thread = DiscordThreadHolder(ctx.channel, private=True)
         content = f'Starting creation of character {self.charkey}...'
         thread = await self.thread.spawn(f'/char create {self.charkey}', post_content=content)
-        await thread.send(view=self[self.CharcreateViewID.SELECT_EXT])
+        self._extensions_enum = await fetch_extensions()
+        view = self[self.CharcreateViewID.SELECT_EXT]
+        dd = view.get_first_child(Dropdown)
+        dd += [DropdownOption(x.value, x.name) for x in self._extensions_enum]
+        await dd.localize(ctx)
+        await thread.send(view=view)
 
     async def on_timeout(self, view: View) -> None:
         pass
@@ -199,29 +191,43 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
     @dropdown(options=[], placeholder=LocalizedStr('charcreate_ext_dd'))
     async def dropdown_ext(self, dd: Dropdown, interaction: discord.Interaction) -> None:
         self[self.CharcreateViewID.SELECT_EXT].stop()
-        self.ext = dd.value
-        await interaction.response.send_message(view=self[self.CharcreateViewID.SELECT_RACE])
+        self.ext = self._extensions_enum.from_name(dd.value) # type: ignore
+        await interaction.response.defer(thinking=True)
+        self._races_enum = await self.ext.fetch_races()
+        view = self[self.CharcreateViewID.SELECT_RACE]
+        dd = view.get_first_child(Dropdown)
+        dd += [DropdownOption(x.value, x.value) for x in self._races_enum]
+        await dd.localize(self.ctx)
+        await interaction.followup.send(view=view)
+        #await interaction.response.send_message(':arrows_counterclockwise: loading', view=self[self.CharcreateViewID.SELECT_RACE])
 
         if interaction.message:
-            await interaction.followup.edit_message(interaction.message.id, view=None, content=f':white_check_mark: Selected extension: {self.ext}')
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_EXT])
 
     @dropdown(options=[], placeholder=LocalizedStr('charcreate_race_dd'))
     async def dropdown_race(self, dd: Dropdown, interaction: discord.Interaction) -> None:
         self[self.CharcreateViewID.SELECT_RACE].stop()
-        self.race = dd.value
-        await interaction.response.send_message(view=self[self.CharcreateViewID.SELECT_CLASS])
+        self.race = self._races_enum(dd.value) # type: ignore
+        await interaction.response.defer(thinking=True)
+        self._classes_enum = await self.race.fetch_classes()
+        view = self[self.CharcreateViewID.SELECT_CLASS]
+        dd = view.get_first_child(Dropdown)
+        dd += [DropdownOption(x.value, x.value) for x in self._classes_enum]
+        await dd.localize(self.ctx)
+        await interaction.followup.send(view=view)
+        #await interaction.response.send_message(view=self[self.CharcreateViewID.SELECT_CLASS])
 
         if interaction.message:
-            await interaction.followup.edit_message(interaction.message.id, view=None, content=f':white_check_mark: Selected race: {self.race}')
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_RACE])
 
     @dropdown(options=[], placeholder=LocalizedStr('charcreate_class_dd'))
     async def dropdown_class(self, dd: Dropdown, interaction: discord.Interaction) -> None:
         self[self.CharcreateViewID.SELECT_CLASS].stop()
-        self.classe = dd.value
+        self.classe = self._classes_enum(dd.value) # type: ignore
         await interaction.response.send_message(view=self[self.CharcreateViewID.SELECT_GMOD])
 
         if interaction.message:
-            await interaction.followup.edit_message(interaction.message.id, view=None, content=f':white_check_mark: Selected class: {self.classe}')
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_CLASS])#None, content=f':white_check_mark: Selected class: {self.classe}')
 
     async def btn_gmod(self, interaction: discord.Interaction, value: str) -> None:
         self[self.CharcreateViewID.SELECT_GMOD].stop()

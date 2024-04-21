@@ -147,6 +147,20 @@ class BaseExtensions(Enum):
 
         return BaseSymbionts(value=enum_name, names={}) # type: ignore
 
+    @classmethod
+    def find(cls, universe: str, world: str) -> Self:
+        for ext in cls:
+            if ext.universe == universe and ext.world == world:
+                return ext
+        raise ValueError(f"Unable to find extension for universe '{universe}' and world '{world}'")
+
+    @classmethod
+    def from_name(cls, name: str) -> Self:
+        for ext in cls:
+            if ext.name == name:
+                return ext
+        raise ValueError(f"Unable to find extension named '{name}")
+
 
 class BaseGamemods(StrEnum):
     def __init__(self, value: str, system_only: bool) -> None:

@@ -48,7 +48,6 @@ class LocalizeStrCase(Enum):
         return self.value(text) if self.value else text
 
 
-
 class LocalizedStr(str, ILocalizable[str]):
     def __new__(cls, string: str, *args, **kwargs):
         self = super().__new__(cls, string)

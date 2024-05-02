@@ -21,7 +21,6 @@
 from typing import Optional, Callable, Self, Awaitable, TYPE_CHECKING, override
 import discord
 from discord import ui
-from dpylib.common.contextext import ExtendedContext
 from utils.decorators import convert_none_to_list
 from utils.aliases import UserType
 from ..common.embed import DiscordEmbedMeta
@@ -51,6 +50,6 @@ class EmbedView(View):
         await super().send(ctx, content=content, embed=self.embed.convert(), **kwargs)
 
     @override
-    async def localize(self, ctx: ExtendedContext, *args, **kwargs) -> None:
+    async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
         await super().localize(ctx, *args, **kwargs)
         await self.embed.localize(ctx, *args, **kwargs)

@@ -23,7 +23,7 @@ from dataclasses import dataclass, field as datafield
 from enum import IntEnum, auto
 import discord
 from dpylib.common.contextext import ExtendedContext
-from utils import get_color
+from utils import get_color, get_random_color
 from lang import LocalizedStr, ILocalizable
 from .exceptions import DiscordLimitOverflowException
 
@@ -132,7 +132,7 @@ class EmbedFieldMeta(ILocalizable[None]):
 @dataclass
 class DiscordEmbedMeta(ILocalizable[None]):
     title: str
-    color: str
+    color: Optional[str] = None
     descr: Optional[str] = None
     link: Optional[str] = None
     img: Optional[str] = None
@@ -207,7 +207,8 @@ class DiscordEmbedMeta(ILocalizable[None]):
 
     def convert(self, *, policy: EmbedConversionPolicy = EmbedConversionPolicy.RAISE_ERROR) -> discord.Embed:
         self._apply_policy(policy)
-        embed = discord.Embed(color=get_color(self.color), title=self.title)
+        color = get_color(self.color) if self.color else get_random_color()
+        embed = discord.Embed(color=color, title=self.title)
         embed.description = self.descr
         embed.url = self.link
         embed.set_image(url=self.img)

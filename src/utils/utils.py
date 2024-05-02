@@ -19,6 +19,7 @@
 
 
 from typing import Any
+from random import randint
 import discord
 from .aliases import AsyncCallable
 from .decorators import catch
@@ -50,6 +51,10 @@ def try_parse_int(value: str, *, default_value: int) -> int:
 
 def get_color(hexvalue: str) -> discord.Color:
     return discord.Color(int(hexvalue, 16))
+
+
+def get_random_color() -> discord.Color:
+    return discord.Color(randint(0, int('FFFFFF', 16)))
 
 
 def snake_to_pascal_case(text: str) -> str:

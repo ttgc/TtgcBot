@@ -21,7 +21,7 @@
 from typing import Self
 import time
 import pytest
-from utils import get_color, try_parse_int, snake_to_pascal_case
+from utils import get_color, get_random_color, try_parse_int, snake_to_pascal_case
 from utils.emojis import Emoji
 from utils.decorators import deprecated, call_once, singleton, unique, catch
 from utils.exceptions import DeprecatedException, AlreadyCalledFunctionException
@@ -130,6 +130,17 @@ class TestUtils:
         assert r == 255
         assert g == 0x88
         assert b == 0x2A
+
+    def test_get_rdm_color(self, monkeypatch: pytest.MonkeyPatch):
+        def rdm(*args) -> int:
+            return int('00FF88', 16)
+
+        with monkeypatch.context() as ctx:
+            ctx.setattr('utils.utils.randint', rdm)
+            r, g, b = get_random_color().to_rgb()
+            assert r == 0
+            assert g == 255
+            assert b == 0x88
 
     def test_snake_to_pascal_case(self) -> None:
         assert snake_to_pascal_case('FOO') == 'Foo'

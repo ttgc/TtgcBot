@@ -23,6 +23,7 @@ import discord
 from lang import LocalizedStr, LocalizeStrCase
 from utils.emojis import Emoji
 from models import fetch_extensions, BaseExtensions, BaseRaces, BaseClasses
+from dices import DiceCombinator, Dice
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta
 from ..common.threadholder import DiscordThreadHolder
 from ..ui.components import Dropdown, DropdownOption, View, Button, Modal, TextInput, button, dropdown, modal
@@ -47,10 +48,11 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         SET_HYBRID = 'set_hybrid'
         SET_SYMBIONT = 'set_symbiont'
 
-    def __init__(self, ctx: 'ExtendedContext', charkey: str) -> None:
+    def __init__(self, ctx: 'ExtendedContext', charkey: str, pj: Optional[discord.Member] = None) -> None:
         super().__init__()
         self.charkey = charkey
         self.owner = ctx.author
+        self.pj = pj
         self.ctx = ctx
         self.data: dict[str, Any] = {
             'name': self.charkey,
@@ -177,7 +179,11 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
     async def start(self, ctx: 'ExtendedContext') -> None:
         self.thread = DiscordThreadHolder(ctx.channel, private=True)
         content = f'Starting creation of character {self.charkey}...'
-        thread = await self.thread.spawn(f'/char create {self.charkey}', post_content=content)
+        thread = await self.thread.spawn(self.owner, f'/char create {self.charkey}', post_content=content) # type: ignore
+
+        if self.pj:
+            await self.thread.invite(self.pj)
+
         self._extensions_enum = await fetch_extensions()
         view = self[self.CharcreateViewID.SELECT_EXT]
         dd = view.get_first_child(Dropdown)

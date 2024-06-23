@@ -64,6 +64,7 @@ class DiscordThreadHolder[T: JdrChannelThreads]:
 
     async def spawn(
             self,
+            owner: discord.Member,
             thread_name: str, *,
             origin_msg: Optional[discord.Message] = None,
             post_content: str = '',
@@ -80,11 +81,11 @@ class DiscordThreadHolder[T: JdrChannelThreads]:
                 self.dest = await self.src.create_thread(
                     name=thread_name,
                     auto_archive_duration=self.auto_archive_duration, # type: ignore
-                    type=discord.ChannelType.private_thread if self.private else discord.ChannelType.public_thread,
-                    invitable=False
+                    type=discord.ChannelType.private_thread if self.private else discord.ChannelType.public_thread
                 )
         elif isinstance(self.src, discord.Thread):
             await self.src.edit(archived=False, locked=False)
+            await self.src.join()
         elif isinstance(self.src, discord.ForumChannel) and origin_msg:
             self.dest, _ = await self.src.create_thread(
                 name=thread_name,
@@ -101,8 +102,14 @@ class DiscordThreadHolder[T: JdrChannelThreads]:
         if not self.channel:
             raise UnsupportedThread(self.dest, "No valid thread/channel can be used")
 
+        await self.invite(owner)
         return self.channel
 
     async def close(self) -> None:
         if isinstance(self.dest, discord.Thread):
             await self.dest.edit(archived=self.auto_archive, locked=self.auto_lock)
+
+    async def invite(self, *users: discord.Member) -> None:
+        if isinstance(self.dest, discord.Thread):
+            for user in users:
+                await self.dest.add_user(user)

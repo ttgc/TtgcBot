@@ -1,7 +1,7 @@
 asyncio==3.4.3
-discord.py==2.3.2
+discord.py==2.4.0
 argon2-cffi>=20.1.0
-requests==2.31.0
-urllib3==1.26.18
+requests==2.32.0
+urllib3==1.26.19
 latex==0.7.0
 deepmerge==0.1.0

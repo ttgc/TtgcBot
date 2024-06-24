@@ -21,7 +21,7 @@
 from enum import IntEnum
 from typing import Optional
 import discord
-from utils.aliases import JdrChannelThreads
+from utils.aliases import JdrChannelThreads, UserType
 from ..common.exceptions import UnsupportedThread
 
 
@@ -64,7 +64,7 @@ class DiscordThreadHolder[T: JdrChannelThreads]:
 
     async def spawn(
             self,
-            owner: discord.Member,
+            owner: UserType,
             thread_name: str, *,
             origin_msg: Optional[discord.Message] = None,
             post_content: str = '',
@@ -109,7 +109,7 @@ class DiscordThreadHolder[T: JdrChannelThreads]:
         if isinstance(self.dest, discord.Thread):
             await self.dest.edit(archived=self.auto_archive, locked=self.auto_lock)
 
-    async def invite(self, *users: discord.Member) -> None:
+    async def invite(self, *users: UserType) -> None:
         if isinstance(self.dest, discord.Thread):
             for user in users:
                 await self.dest.add_user(user)

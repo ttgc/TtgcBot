@@ -60,14 +60,17 @@ class View(ui.View, ILocalizable[None]):
     @override
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if self.owner and interaction.user != self.owner:
+            await interaction.response.defer()
             return False
 
         for chk in self.checks:
             if asyncio.iscoroutinefunction(chk):
                 if not await chk(self, interaction):
+                    await interaction.response.defer()
                     return False
             else:
                 if not chk(self, interaction):
+                    await interaction.response.defer()
                     return False
 
         return True

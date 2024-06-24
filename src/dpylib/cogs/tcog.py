@@ -20,7 +20,7 @@
 
 from discord.ext import commands
 from ..common.contextext import ExtendedContext
-from ..ui import EmbedBrowserView
+from ..ui.embed import EmbedBrowserView
 from ..common.embed import DiscordEmbedMeta, EmbedFieldMeta
 from ..workflow import CharcreateWorkflow
 

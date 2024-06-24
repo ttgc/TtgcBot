@@ -20,14 +20,15 @@
 
 from typing import TYPE_CHECKING, Any, Optional, Type, override
 import discord
-from lang import LocalizedStr, LocalizeStrCase
+from lang import LocalizedStr, LocalizeStrCase, localize
 from utils.emojis import Emoji
+from utils.aliases import UserType
 from models import fetch_extensions, BaseExtensions, BaseRaces, BaseClasses
 from dices import DiceCombinator, Dice
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta
 from ..common.threadholder import DiscordThreadHolder
 from ..ui.components import Dropdown, DropdownOption, View, Button, Modal, TextInput, button, dropdown, modal
-from ..ui import EmbedView
+from ..ui.embed import EmbedView, EmbedBrowserSelectorView
 from .iworkflow import IWorkflow, setup_view
 
 if TYPE_CHECKING:
@@ -41,6 +42,14 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         SELECT_CLASS = 'select_class'
         SELECT_GMOD = 'select_gmod'
         SELECT_DKAR = 'select_dkar'
+        SELECT_HPMP_COMBINATION = 'select_hpmp_combination'
+        INVERT_HPMP = 'invert_hpmp'
+        ASSIGN_STAT_1 = 'assign_stat_1'
+        ASSIGN_STAT_2 = 'assign_stat_2'
+        ASSIGN_STAT_3 = 'assign_stat_3'
+        ASSIGN_STAT_4 = 'assign_stat_4'
+        ASSIGN_STAT_5 = 'assign_stat_5'
+        ASSIGN_STAT_6 = 'assign_stat_6'
         VERIFY = 'verify'
         SET_VALUE = 'set_value'
         SET_PILOTING = 'set_piloting'
@@ -48,7 +57,7 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         SET_HYBRID = 'set_hybrid'
         SET_SYMBIONT = 'set_symbiont'
 
-    def __init__(self, ctx: 'ExtendedContext', charkey: str, pj: Optional[discord.Member] = None) -> None:
+    def __init__(self, ctx: 'ExtendedContext', charkey: str, pj: Optional[UserType] = None) -> None:
         super().__init__()
         self.charkey = charkey
         self.owner = ctx.author
@@ -74,12 +83,15 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         self._extensions_enum: Optional[Type[BaseExtensions]] = None
         self._races_enum: Optional[Type[BaseRaces]] = None
         self._classes_enum: Optional[Type[BaseClasses]] = None
+        self._hpmp_combi: dict[str, tuple[int, int]] = {}
 
         self.view_select_ext()
         self.view_select_race()
         self.view_select_class()
         self.view_select_gmod()
         self.view_select_dkar()
+        self.view_select_hpmp_combination()
+        self.view_invert_hpmp()
         self.view_verify()
         self.view_set_value()
 
@@ -116,6 +128,32 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
         view += self.btn_dkar_neutral()
         view += self.btn_dkar_4()
         view += self.btn_dkar_5()
+        return view
+
+    @setup_view(CharcreateViewID.SELECT_HPMP_COMBINATION)
+    def view_select_hpmp_combination(self) -> View:
+        embed = DiscordEmbedMeta(
+            title=LocalizedStr('charcreate_hpmp_combi_title'),
+            descr=LocalizedStr('charcreate_hpmp_combi_descr'),
+            color='BF40BF',
+            author=EmbedAuthorMeta(self.owner.name, icon_url=self.owner.display_avatar.url),
+            footer=f'/char create {self.charkey}',
+            fields=[EmbedFieldMeta(LocalizedStr('combination', treatment=LocalizeStrCase.CAPITALIZED), '')]
+        )
+        view = EmbedBrowserSelectorView(
+            embed,
+            self.validate_hpmp_combination,
+            on_reject=self.reject_hpmp_combination,
+            timeout=None,
+            owner=self.owner
+        )
+        return view
+
+    @setup_view(CharcreateViewID.INVERT_HPMP)
+    def view_invert_hpmp(self) -> View:
+        view = View(timeout=300, owner=self.owner, on_timeout=self.on_timeout)
+        view += self.btn_invert_hpmp()
+        view += self.btn_dont_invert_hpmp()
         return view
 
     @setup_view(CharcreateViewID.SET_VALUE)
@@ -179,7 +217,7 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
     async def start(self, ctx: 'ExtendedContext') -> None:
         self.thread = DiscordThreadHolder(ctx.channel, private=True)
         content = f'Starting creation of character {self.charkey}...'
-        thread = await self.thread.spawn(self.owner, f'/char create {self.charkey}', post_content=content) # type: ignore
+        thread = await self.thread.spawn(self.owner, f'/char create {self.charkey}', post_content=content)
 
         if self.pj:
             await self.thread.invite(self.pj)
@@ -260,7 +298,17 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
     async def btn_dkar(self, interaction: discord.Interaction, value: int) -> None:
         self[self.CharcreateViewID.SELECT_DKAR].stop()
         self.data['karma'] = value
-        await self.send_verification(interaction)
+        view: EmbedBrowserSelectorView = self[self.CharcreateViewID.SELECT_HPMP_COMBINATION] # type: ignore
+        combinations = list(DiceCombinator(10, Dice.D100).combinations)
+        combinations.sort(key=lambda x: x[0])
+        combination_word = view.embed.fields[0].name
+        view.embed.fields = [EmbedFieldMeta(
+            f'{combination_word} #{idx}',
+            f'{hp} / {mp}'
+        ) for idx, (hp, mp) in enumerate(combinations)]
+        self._hpmp_combi = {f'{combination_word} #{idx}': x for idx, x in enumerate(combinations)}
+        embed = await view.get_initial_page(self.ctx, localize=False)
+        await interaction.response.send_message(view=view, embed=embed)
 
         if interaction.message:
             await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_DKAR])
@@ -284,6 +332,42 @@ class CharcreateWorkflow(IWorkflow[None]): # TODO: Change return type
     @button(style=discord.ButtonStyle.success, label='5', row=0)
     async def btn_dkar_5(self, btn: Button, interaction: discord.Interaction) -> None:
         await self.btn_dkar(interaction, 5)
+
+    async def validate_hpmp_combination(self, value: str, interaction: discord.Interaction) -> None:
+        self[self.CharcreateViewID.SELECT_HPMP_COMBINATION].stop()
+        msg = await localize(self.ctx, 'charcreate_invert_hpmp')
+        self.data['pv'], self.data['pm'] = self._hpmp_combi[value]
+        await interaction.response.send_message(
+            msg.format(self.data['pv'], self.data['pm']),
+            view=self[self.CharcreateViewID.INVERT_HPMP]
+        )
+
+        if interaction.message:
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_HPMP_COMBINATION])
+
+    async def reject_hpmp_combination(self, interaction: discord.Interaction) -> None:
+        self[self.CharcreateViewID.SELECT_HPMP_COMBINATION].stop()
+        await self.send_verification(interaction)
+
+        if interaction.message:
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_HPMP_COMBINATION])
+
+    @button(style=discord.ButtonStyle.success, label=LocalizedStr('charcreate_invert_hpmp'), row=0)
+    async def btn_invert_hpmp(self, btn: Button, interaction: discord.Interaction) -> None:
+        self[self.CharcreateViewID.INVERT_HPMP].stop()
+        self.data['pv'], self.data['pm'] = self.data['pm'], self.data['pv']
+        await self.send_verification(interaction)
+
+        if interaction.message:
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.INVERT_HPMP])
+
+    @button(style=discord.ButtonStyle.danger, label=LocalizedStr('charcreate_no_invert_hpmp'), row=1)
+    async def btn_dont_invert_hpmp(self, btn: Button, interaction: discord.Interaction) -> None:
+        self[self.CharcreateViewID.INVERT_HPMP].stop()
+        await self.send_verification(interaction)
+
+        if interaction.message:
+            await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.INVERT_HPMP])
 
     async def send_verification(self, interaction: discord.Interaction, edit: bool = False) -> None:
         view: EmbedView = self[self.CharcreateViewID.VERIFY] # type: ignore

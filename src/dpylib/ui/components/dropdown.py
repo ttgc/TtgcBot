@@ -20,7 +20,8 @@
 
 import functools
 from dataclasses import dataclass
-from typing import Any, Optional, Callable, Sequence, override, TYPE_CHECKING
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Callable, Sequence, Type, override, final, TYPE_CHECKING
 import discord
 from discord import ui
 from utils.aliases import AsyncCallable
@@ -45,7 +46,37 @@ class DropdownOption:
 type OptionType = str | DropdownOption
 
 
-class Dropdown(ui.Select, ILocalizable[None]):
+class BaseDropdown[T](ILocalizable[None], ABC):
+    def __init__(
+            self, *,
+            on_select: Optional[AsyncCallable[Any]] = None,
+            placeholder: Optional[str] = None,
+    ) -> None:
+        self.on_select = on_select
+        self.placeholder = placeholder
+
+    @property
+    @abstractmethod
+    def _values(self) -> list[T]:
+        pass
+
+    @property
+    def value(self) -> Optional[T]:
+        return self._values[0] if self._values else None
+
+    @final
+    async def callback(self, interaction: discord.Interaction) -> Any:
+        if self.on_select:
+            return await self.on_select(self, interaction)
+        return None
+
+    @override
+    async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
+        if isinstance(self.placeholder, LocalizedStr):
+            self.placeholder = await self.placeholder.localize(ctx, *args, **kwargs)
+
+
+class Dropdown(BaseDropdown[str], ui.Select):
     def __init__(
             self, *,
             options: list[OptionType],
@@ -57,8 +88,10 @@ class Dropdown(ui.Select, ILocalizable[None]):
             disabled: bool = False,
             custom_id: str = discord.utils.MISSING,
             row: Optional[int] = None
-    ):
-        super().__init__(
+    ) -> None:
+        BaseDropdown.__init__(self, on_select=on_select, placeholder=placeholder)
+        ui.Select.__init__(
+            self,
             custom_id=custom_id,
             placeholder=placeholder,
             min_values=min_values,
@@ -85,6 +118,11 @@ class Dropdown(ui.Select, ILocalizable[None]):
         return self
 
     @property
+    @override
+    def _values(self) -> list[str]:
+        return self.values
+
+    @property
     def default(self) -> list[str] | str:
         items = [x.value for x in self.options if x.default]
         return items if len(items) != 1 else items[0]
@@ -101,20 +139,9 @@ class Dropdown(ui.Select, ILocalizable[None]):
         for opt in self.options:
             opt.default = False
 
-    @property
-    def value(self) -> Optional[str]:
-        return self.values[0] if self.values else None
-
-    @override
-    async def callback(self, interaction: discord.Interaction) -> Any:
-        if self.on_select:
-            return await self.on_select(self, interaction)
-        return None
-
     @override
     async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:
-        if isinstance(self.placeholder, LocalizedStr):
-            self.placeholder = await self.placeholder.localize(ctx, *args, **kwargs)
+        await super().localize(ctx, *args, **kwargs)
 
         for opt in self.options:
             if isinstance(opt.label, LocalizedStr):
@@ -123,28 +150,70 @@ class Dropdown(ui.Select, ILocalizable[None]):
                 opt.description = await opt.description.localize(ctx, *args, **kwargs)
 
 
-def dropdown(
-        *, options: list[OptionType],
-        default: Optional[str | list[str]] = None,
+class RoleDropdown(BaseDropdown[discord.Role], ui.RoleSelect):
+    def __init__(
+            self, *,
+            default: Optional[discord.Role | list[discord.Role]] = None,
+            on_select: Optional[AsyncCallable[Any]] = None,
+            placeholder: Optional[str] = None,
+            min_values: int = 1,
+            max_values: int = 1,
+            disabled: bool = False,
+            custom_id: str = discord.utils.MISSING,
+            row: Optional[int] = None
+    ) -> None:
+        BaseDropdown.__init__(self, on_select=on_select, placeholder=placeholder)
+        ui.RoleSelect.__init__(
+            self,
+            custom_id=custom_id,
+            placeholder=placeholder,
+            min_values=min_values,
+            max_values=max_values,
+            disabled=disabled,
+            row=row,
+            default_values=[default] if isinstance(default, discord.Role) else default if default else discord.utils.MISSING
+        )
+        self.on_select = on_select
+
+    @property
+    @override
+    def _values(self) -> list[discord.Role]:
+        return self.values
+
+
+def dropdown[T: BaseDropdown, K](
+        *, options: Optional[list[OptionType]] = None,
+        default: Optional[K | list[K]] = None,
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         custom_id: str = discord.utils.MISSING,
-        row: Optional[int] = None
-) -> Callable[[AsyncCallable[Any]], Callable[..., Dropdown]]:
-    def _decorator(func: AsyncCallable[Any]) -> Callable[..., Dropdown]:
-        def _wrapper(*args, **kwargs) -> Dropdown:
-            return Dropdown(
-                options=options,
-                default=default,
+        row: Optional[int] = None,
+        cls: Type[T] = Dropdown
+) -> Callable[[AsyncCallable[Any]], Callable[..., T]]:
+    def _decorator(func: AsyncCallable[Any]) -> Callable[..., cls]:
+        if options and not issubclass(cls, Dropdown):
+            raise TypeError(f'Invalid dropdown: {cls.__name__} cannot have custom options')
+
+        kwargs = {
+            'default': default,
+            'min_values': min_values,
+            'max_values': max_values,
+            'disabled': disabled,
+            'custom_id': custom_id,
+            'row': row
+        }
+
+        if issubclass(cls, Dropdown):
+            kwargs['options'] = options if options else []
+
+        def _wrapper(*args, **kwargs) -> cls:
+            return cls(
                 on_select=functools.partial(func, *args, **kwargs),
                 placeholder=placeholder,
-                min_values=min_values,
-                max_values=max_values,
-                disabled=disabled,
-                custom_id=custom_id,
-                row=row
+                **kwargs
             )
+
         return _wrapper
     return _decorator

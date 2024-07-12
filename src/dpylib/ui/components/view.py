@@ -97,8 +97,8 @@ class View(ui.View, ILocalizable[None]):
         if self._on_timeout:
             await self._on_timeout(self)
 
-    async def send(self, ctx: 'ExtendedContext', *, content: Optional[str] = None, **kwargs) -> None:
-        await ctx.send(content, view=self, reference=ctx.message, **kwargs)
+    async def send(self, ctx: 'ExtendedContext', *, content: Optional[str] = None, **kwargs) -> discord.Message:
+        return await ctx.send(content, view=self, reference=ctx.message, **kwargs)
 
     @override
     async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> None:

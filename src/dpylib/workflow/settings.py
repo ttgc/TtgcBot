@@ -1,0 +1,209 @@
+#!usr/bin/env python3
+#-*-coding:utf-8-*-
+
+##    TtgcBot - a bot for discord
+##    Copyright (C) 2017-2024  Thomas PIOT
+##
+##    This program is free software: you can redistribute it and/or modify
+##    it under the terms of the GNU General Public License as published by
+##    the Free Software Foundation, either version 3 of the License, or
+##    (at your option) any later version.
+##
+##    This program is distributed in the hope that it will be useful,
+##    but WITHOUT ANY WARRANTY; without even the implied warranty of
+##    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##    GNU General Public License for more details.
+##
+##    You should have received a copy of the GNU General Public License
+##    along with this program. If not, see <http://www.gnu.org/licenses/>
+
+
+from typing import TYPE_CHECKING, Any, Optional, Type, override
+import discord
+from lang import LocalizedStr, LocalizeStrCase, localize
+from utils.emojis import Emoji
+from utils.aliases import UserType
+from models import fetch_extensions, BaseExtensions, BaseRaces, BaseClasses
+from dices import DiceCombinator, Dice
+from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta, EmbedIconTextMeta
+from ..common.threadholder import DiscordThreadHolder
+from ..ui.components import Dropdown, DropdownOption, RoleDropdown, View, Button, Modal, TextInput, button, dropdown, modal
+from ..ui.embed import EmbedView, EmbedBrowserSelectorView
+from .iworkflow import IWorkflow, setup_view
+
+if TYPE_CHECKING:
+    from ..common.contextext import ExtendedContext
+    from models import ServerDTO
+
+
+class SettingsWorkflow(IWorkflow[bool]):
+    class SettingsViewID(IWorkflow.ViewID):
+        PANEL = 'panel'
+        SET_PREFIX = 'set_prefix'
+        SET_ROLE = 'set_role'
+
+    def __init__(self, ctx: 'ExtendedContext', srv: 'ServerDTO', bot_avatar: str) -> None:
+        super().__init__()
+        self.srv = srv
+        self.owner = ctx.author
+        self.ctx = ctx
+        avatar = ctx.author.avatar.url if ctx.author.avatar else None
+        self.prefix = self.srv.prefix
+        self.admin_role = ctx.guild.get_role(srv.admin_role) if srv and srv.admin_role else None
+        self.mj_role = ctx.guild.get_role(srv.mj_role) if srv and srv.mj_role else None
+        self._initial_admin_role = self.admin_role
+        self._initial_mj_role = self.mj_role
+        self.panel_msg: Optional[discord.Message] = None
+        self.edit_role_msg: Optional[discord.Message] = None
+        self.buttons = [self.btn_set_prefix(), self.btn_set_admin_role(), self.btn_set_mj_role(), self.btn_close()]
+
+        self.view_panel(DiscordEmbedMeta(
+            title='TtgcBot',
+            color='FF0000',
+            descr=LocalizedStr('settings'),
+            img=avatar,
+            thumbnail='https://www.thetaleofgreatcosmos.fr/wp-content/uploads/2019/11/TTGC_Text.png',
+            author=EmbedAuthorMeta(ctx.author.name, icon_url=avatar),
+            footer=EmbedIconTextMeta(LocalizedStr('settings_footer'), bot_avatar),
+            fields=[
+                EmbedFieldMeta(LocalizedStr('prefix', treatment=LocalizeStrCase.CAPITALIZED), f'`/`'),
+                EmbedFieldMeta(LocalizedStr('admin_role', treatment=LocalizeStrCase.CAPITALIZED), ':no_entry_sign:'),
+                EmbedFieldMeta(LocalizedStr('mj_role', treatment=LocalizeStrCase.CAPITALIZED), ':no_entry_sign:')
+            ]
+        ))
+
+        self.view_set_prefix()
+        self.update_embed()
+
+    @property
+    def embed(self) -> DiscordEmbedMeta:
+        view: EmbedView = self[self.SettingsViewID.PANEL] # type: ignore
+        return view.embed
+
+    @setup_view(SettingsViewID.PANEL)
+    def view_panel(self, embed: DiscordEmbedMeta) -> View:
+        view = EmbedView(embed, owner=self.owner)
+        for btn in self.buttons:
+            view += btn
+        return view
+
+    @setup_view(SettingsViewID.SET_PREFIX)
+    def view_set_prefix(self) -> View:
+        view = self.modal_set_prefix()
+        view += TextInput(
+            LocalizedStr('prefix', treatment=LocalizeStrCase.CAPITALIZED),
+            placeholder=LocalizedStr('prefix', treatment=LocalizeStrCase.CAPITALIZED),
+            default=self.srv.prefix,
+            required=True,
+            min_length=1,
+            max_length=3,
+            row=0
+        )
+        return view
+
+    @setup_view(SettingsViewID.SET_ROLE)
+    def view_set_role(self, cur_role: discord.Role) -> View:
+        view = View(timeout=60, owner=self.owner, on_timeout=self.on_timeout)
+        view += RoleDropdown(placeholder=LocalizedStr('role_select'), custom_id='role', row=0, default=cur_role)
+        # view += self.dropdown_class()
+        return view
+
+    @override
+    async def start(self, ctx: 'ExtendedContext') -> None:
+        await self.localize(ctx)
+        self.panel_msg = await self[self.SettingsViewID.PANEL].send(ctx)
+
+    async def on_timeout(self, view: View) -> None:
+        if self.edit_role_msg:
+            await self.edit_role_msg.delete()
+        if self.panel_msg:
+            self.toggle_panel(True)
+            await self.panel_msg.edit(view=self[self.SettingsViewID.PANEL])
+
+    def toggle_panel(self, enabled: bool) -> None:
+        for btn in self.buttons:
+            btn.disabled = not enabled
+
+    def update_embed(self) -> None:
+        self.embed.fields[0].content = f'{self.prefix}'
+        self.embed.fields[1].content = self.admin_role.mention if self.admin_role else ':no_entry_sign:'
+        self.embed.fields[2].content = self.mj_role.mention if self.mj_role else ':no_entry_sign:'
+
+    @button(style=discord.ButtonStyle.success, label=LocalizedStr('prefix', treatment=LocalizeStrCase.CAPITALIZED), row=0)
+    async def btn_set_prefix(self, btn: Button, interaction: discord.Interaction) -> None:
+        await interaction.response.send_modal(self[self.SettingsViewID.SET_PREFIX]) # type: ignore
+
+    @button(style=discord.ButtonStyle.success, label=LocalizedStr('admin_role', treatment=LocalizeStrCase.CAPITALIZED), row=0)
+    async def btn_set_admin_role(self, btn: Button, interaction: discord.Interaction) -> None:
+        self.toggle_panel(False)
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
+        view = self.view_set_role(self.admin_role)
+        await view.localize(self.ctx)
+        content = await localize(self.ctx, 'test')
+
+        await interaction.followup.edit_message(self.panel_msg.id, view=self[self.SettingsViewID.PANEL]) # type: ignore
+        await interaction.followup.send(content, view=view)
+
+    @button(style=discord.ButtonStyle.success, label=LocalizedStr('mj_role', treatment=LocalizeStrCase.CAPITALIZED), row=0)
+    async def btn_set_mj_role(self, btn: Button, interaction: discord.Interaction) -> None:
+        self.toggle_panel(False)
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
+        view = self.view_set_role(self.mj_role)
+        await view.localize(self.ctx)
+        content = await localize(self.ctx, 'test')
+
+        await interaction.followup.edit_message(self.panel_msg.id, view=self[self.SettingsViewID.PANEL]) # type: ignore
+        await interaction.followup.send(content, view=view, ephemeral=True)
+
+    @button(style=discord.ButtonStyle.secondary,
+            label=LocalizedStr('close', treatment=LocalizeStrCase.CAPITALIZED),
+            row=0,
+            emoji=Emoji.X)
+    async def btn_close(self, btn: Button, interaction: discord.Interaction) -> None:
+        self[self.SettingsViewID.PANEL].stop()
+        await interaction.response.edit_message(view=None, delete_after=30)
+
+        if not await self.finalize():
+            await interaction.followup.send('ERROR')
+
+    @modal(LocalizedStr(''))
+    async def modal_set_prefix(self, modal: Modal, interaction: discord.Interaction) -> None:
+        child = modal.get_first_child(TextInput)
+
+        if prefix := child.value:
+            self.prefix = prefix
+            self.update_embed()
+
+        await interaction.response.edit_message(view=self[self.SettingsViewID.PANEL])
+        await self.view_set_prefix().localize(self.ctx)
+
+    # @dropdown(options=[], placeholder=LocalizedStr('charcreate_ext_dd'))
+    # async def dropdown_ext(self, dd: Dropdown, interaction: discord.Interaction) -> None:
+    #     self[self.CharcreateViewID.SELECT_EXT].stop()
+    #     self.ext = self._extensions_enum.from_name(dd.value) # type: ignore
+    #     await interaction.response.defer(thinking=True)
+    #     self._races_enum = await self.ext.fetch_races()
+    #     view = self[self.CharcreateViewID.SELECT_RACE]
+    #     dd = view.get_first_child(Dropdown)
+    #     dd += [DropdownOption(x.value, x.value) for x in self._races_enum]
+    #     await dd.localize(self.ctx)
+    #     await interaction.followup.send(view=view)
+    #     #await interaction.response.send_message(':arrows_counterclockwise: loading', view=self[self.CharcreateViewID.SELECT_RACE])
+
+    #     if interaction.message:
+    #         await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_EXT])
+
+    # @button(style=discord.ButtonStyle.danger,
+    #         label=LocalizedStr('gmod_offensive', treatment=LocalizeStrCase.CAPITALIZED),
+    #         emoji=Emoji.CROSSED_SWORDS,
+    #         row=0)
+    # async def btn_gmod_offensive(self, btn: Button, interaction: discord.Interaction) -> None:
+    #     await self.btn_gmod(interaction, 'offensive')
+
+    @override
+    async def finalize(self) -> bool:
+        # TODO: send data and return if it succeed or not
+        return self.prefix == self.srv.prefix and self.admin_role == self._initial_admin_role and \
+            self.mj_role == self._initial_mj_role

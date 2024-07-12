@@ -24,6 +24,8 @@ from config import Config, Log
 from ..common.contextext import ExtendedContext
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta, EmbedIconTextMeta
 from ..common.invite import InviteLink
+from ..checks.server import check_server_admin
+from ..workflow import SettingsWorkflow
 
 
 class Utilities(commands.Cog):
@@ -48,3 +50,32 @@ class Utilities(commands.Cog):
         await embed.localize(ctx, Config()['version'])
         await ctx.send(embed=embed.convert())
         Log.info("Invite generated on channel %d from server %d by %d", ctx.channel.id, ctx.guild.id, ctx.author.id)
+
+    @commands.check(check_server_admin)
+    @commands.hybrid_command(aliases=['config', 'parameters', 'params'])
+    async def settings(self, ctx: ExtendedContext) -> None:
+        srv = await ctx.ext.server
+        flow = SettingsWorkflow(ctx, srv, self.bot.user.avatar.url) # type: ignore
+        await flow(ctx)
+
+        prefix_input = TextInput(
+            LocalizedStr('prefix'),
+            default=srv.prefix, # type: ignore
+            required=True,
+            max_length=3,
+            placeholder=LocalizedStr('prefix_placeholder'),
+            row=1
+        )
+        admin_input = TextInput(LocalizedStr('admin_role'), )
+
+        view = EmbedView(
+            # embed: DiscordEmbedMeta,
+            # timeout: Optional[float] = None,
+            # owner: Optional[UserType] = None,
+            # checks: list[Callable[[Self, discord.Interaction], bool]] = None, # type: ignore
+            # on_timeout: Optional[Callable[[Self], Awaitable[None]]] = None,
+            # on_error: Optional[Callable[[Self, discord.Interaction, Exception, ui.Item], Awaitable[None]]] = None
+        )
+
+        await view.localize(ctx)
+        await view.send(ctx)

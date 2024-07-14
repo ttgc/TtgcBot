@@ -25,6 +25,7 @@ from enum import StrEnum
 class Emoji(StrEnum):
     X = '❌'
     WHITE_CHECK_MARK = '✅'
+    HEAVY_CHECK_MARK = '✔️'
     EQUAL = '🟰'
     PLUS = '➕'
     MINUS = '➖'
@@ -47,6 +48,7 @@ class Emoji(StrEnum):
     MAGIC_WAND = '🪄'
     PASSPORT_CONTROL = '🛂'
     ROCKET = '🚀'
+    WASTEBASKET = '🗑️'
 
     @classmethod
     def from_str(cls, string: str) -> Self:

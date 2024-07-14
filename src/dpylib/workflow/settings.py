@@ -19,6 +19,7 @@
 
 
 from typing import TYPE_CHECKING, Any, Optional, Type, override
+from enum import IntEnum, auto
 import discord
 from lang import LocalizedStr, LocalizeStrCase, localize
 from utils.emojis import Emoji
@@ -42,6 +43,10 @@ class SettingsWorkflow(IWorkflow[bool]):
         SET_PREFIX = 'set_prefix'
         SET_ROLE = 'set_role'
 
+    class RoleID(IntEnum):
+        ADMIN = auto()
+        MJ = auto()
+
     def __init__(self, ctx: 'ExtendedContext', srv: 'ServerDTO', bot_avatar: str) -> None:
         super().__init__()
         self.srv = srv
@@ -54,8 +59,9 @@ class SettingsWorkflow(IWorkflow[bool]):
         self._initial_admin_role = self.admin_role
         self._initial_mj_role = self.mj_role
         self.panel_msg: Optional[discord.Message] = None
-        self.edit_role_msg: Optional[discord.Message] = None
+        self.edit_role_msg: Optional[discord.WebhookMessage] = None
         self.buttons = [self.btn_set_prefix(), self.btn_set_admin_role(), self.btn_set_mj_role(), self.btn_close()]
+        self._set_role = self.RoleID.ADMIN
 
         self.view_panel(DiscordEmbedMeta(
             title='TtgcBot',
@@ -104,8 +110,8 @@ class SettingsWorkflow(IWorkflow[bool]):
     @setup_view(SettingsViewID.SET_ROLE)
     def view_set_role(self, cur_role: discord.Role) -> View:
         view = View(timeout=60, owner=self.owner, on_timeout=self.on_timeout)
-        view += RoleDropdown(placeholder=LocalizedStr('role_select'), custom_id='role', row=0, default=cur_role)
-        # view += self.dropdown_class()
+        view += RoleDropdown(placeholder=LocalizedStr('role_select'), custom_id='role', row=0, default=cur_role, min_values=0)
+        view += self.btn_validate_role()
         return view
 
     @override
@@ -138,24 +144,26 @@ class SettingsWorkflow(IWorkflow[bool]):
         self.toggle_panel(False)
         await interaction.response.defer(ephemeral=True, thinking=True)
 
+        self._set_role = self.RoleID.ADMIN
         view = self.view_set_role(self.admin_role)
         await view.localize(self.ctx)
         content = await localize(self.ctx, 'test')
 
         await interaction.followup.edit_message(self.panel_msg.id, view=self[self.SettingsViewID.PANEL]) # type: ignore
-        await interaction.followup.send(content, view=view)
+        self.edit_role_msg = await interaction.followup.send(content, view=view, wait=True)
 
     @button(style=discord.ButtonStyle.success, label=LocalizedStr('mj_role', treatment=LocalizeStrCase.CAPITALIZED), row=0)
     async def btn_set_mj_role(self, btn: Button, interaction: discord.Interaction) -> None:
         self.toggle_panel(False)
         await interaction.response.defer(ephemeral=True, thinking=True)
 
+        self._set_role = self.RoleID.MJ
         view = self.view_set_role(self.mj_role)
         await view.localize(self.ctx)
         content = await localize(self.ctx, 'test')
 
         await interaction.followup.edit_message(self.panel_msg.id, view=self[self.SettingsViewID.PANEL]) # type: ignore
-        await interaction.followup.send(content, view=view, ephemeral=True)
+        self.edit_role_msg = await interaction.followup.send(content, view=view, ephemeral=True, wait=True)
 
     @button(style=discord.ButtonStyle.secondary,
             label=LocalizedStr('close', treatment=LocalizeStrCase.CAPITALIZED),
@@ -176,8 +184,52 @@ class SettingsWorkflow(IWorkflow[bool]):
             self.prefix = prefix
             self.update_embed()
 
-        await interaction.response.edit_message(view=self[self.SettingsViewID.PANEL])
+        await interaction.response.edit_message(embed=self.embed.convert(), view=self[self.SettingsViewID.PANEL])
         await self.view_set_prefix().localize(self.ctx)
+
+    @button(style=discord.ButtonStyle.success,
+            label=LocalizedStr('validate', treatment=LocalizeStrCase.CAPITALIZED),
+            row=1,
+            emoji=Emoji.HEAVY_CHECK_MARK)
+    async def btn_validate_role(self, btn: Button, interaction: discord.Interaction) -> None:
+        self.toggle_panel(True)
+        await interaction.response.edit_message(content=':white_check_mark:', view=None, delete_after=5)
+        role = self[self.SettingsViewID.SET_ROLE].find('role', RoleDropdown).value
+
+        match self._set_role:
+            case self.RoleID.ADMIN:
+                self.admin_role = role
+            case self.RoleID.MJ:
+                self.mj_role = role
+
+        self.update_embed()
+
+        await interaction.followup.edit_message(
+            self.panel_msg.id, # type: ignore
+            embed=self.embed.convert(),
+            view=self[self.SettingsViewID.PANEL]
+        )
+
+    @button(style=discord.ButtonStyle.danger,
+            label=LocalizedStr('clear', treatment=LocalizeStrCase.CAPITALIZED),
+            row=1,
+            emoji=Emoji.WASTEBASKET)
+    async def btn_clear_role(self, btn: Button, interaction: discord.Interaction) -> None:
+        view = self[self.SettingsViewID.SET_ROLE]
+        view.find('role', RoleDropdown).default_values = []
+        await interaction.response.edit_message(view=view)
+
+    @button(style=discord.ButtonStyle.secondary,
+            label=LocalizedStr('cancel', treatment=LocalizeStrCase.CAPITALIZED),
+            row=1,
+            emoji=Emoji.X)
+    async def btn_cancel_role(self, btn: Button, interaction: discord.Interaction) -> None:
+        self.toggle_panel(True)
+        await interaction.response.edit_message(content=':x:', view=None, delete_after=5)
+        await interaction.followup.edit_message(
+            self.panel_msg.id, # type: ignore
+            view=self[self.SettingsViewID.PANEL]
+        )
 
     # @dropdown(options=[], placeholder=LocalizedStr('charcreate_ext_dd'))
     # async def dropdown_ext(self, dd: Dropdown, interaction: discord.Interaction) -> None:

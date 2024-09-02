@@ -95,6 +95,20 @@ class ServerDTO:
             response.raise_errors()
             return response.status.ok
 
+    @catch(HTTPException, error_value=False, logger=Log.error, asynchronous=True)
+    async def join(self) -> bool:
+        async with API('/api/server/{serverID}/join') as api:
+            response = await api(HTTP.PUT, f'/api/server/{self.id}/join')
+            response.raise_errors()
+            return response.status.ok
+
+    @catch(HTTPException, error_value=False, logger=Log.error, asynchronous=True)
+    async def leave(self) -> bool:
+        async with API('/api/server/{serverID}/leave') as api:
+            response = await api(HTTP.PUT, f'/api/server/{self.id}/leave')
+            response.raise_errors()
+            return response.status.ok
+
     @catch(HTTPException, error_value=[], logger=Log.error, asynchronous=True)
     @classmethod
     async def get_server_list(cls) -> list[Self]:

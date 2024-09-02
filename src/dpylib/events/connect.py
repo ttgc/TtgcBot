@@ -25,6 +25,7 @@ from config import Config, Log
 from utils.decorators import call_once, catch
 from utils.exceptions import AlreadyCalledFunctionException
 from utils import ExitCode
+from models import ServerDTO
 from ..common.invite import InviteLink
 
 from ..cogs import BotManage, Utilities
@@ -47,6 +48,53 @@ async def _add_cogs(client: commands.Bot) -> None:
     Log.debug_v4('End of registering V4 cogs')
 
 
+async def _register_missed_servers(client: commands.Bot, registered_srv_list: list[ServerDTO]) -> None:
+    Log.info('Looking for servers that joined during inactivity period...')
+    current_srv = set(x.id for x in client.guilds)
+    diff = current_srv.difference(set(x.id for x in registered_srv_list))
+
+    if diff:
+        Log.info('Found %d servers that joined during inactivity period', len(diff))
+        for srv in diff:
+            full_guild = client.get_guild(srv)
+            Log.info('Registering server %s (%d)...', str(full_guild), srv)
+            success = await ServerDTO(srv).join()
+
+            if success:
+                Log.info('Registered server %s (%d)', str(full_guild), srv)
+            else:
+                Log.warn('Unable to register server %s (%d)', str(full_guild), srv)
+    else:
+        Log.info('No new server to register found')
+
+
+async def _unregister_missed_servers(client: commands.Bot, registered_srv_list: list[ServerDTO]) -> None:
+    Log.info('Looking for servers that left during inactivity period...')
+    current_srv = set(x.id for x in client.guilds)
+    diff = set(x.id for x in registered_srv_list).difference(current_srv)
+
+    if diff:
+        Log.info('Found %d servers that left during inactivity period', len(diff))
+        for srv in diff:
+            Log.info('Unregistering server %d...', srv)
+            success = await ServerDTO(srv).leave()
+
+            if success:
+                Log.info('Unregistered server %d', srv)
+            else:
+                Log.warn('Unable to unregister server %d', srv)
+    else:
+        Log.info('No new server to unregister found')
+
+
+async def _handle_servers(client: commands.Bot) -> None:
+    purged = await ServerDTO.purge(30)
+    Log.info('Purged %d servers that left over than 30 days', purged)
+    servers = await ServerDTO.get_server_list()
+    await _unregister_missed_servers(client, servers)
+    await _register_missed_servers(client, servers)
+
+
 async def on_connect(client: commands.Bot) -> None:
     if len(client.cogs) > 0:
         return
@@ -61,7 +109,9 @@ async def on_connect(client: commands.Bot) -> None:
 
     await client.tree.sync()
     Log.debug_v4('on_connect first sync done')
+    await _handle_servers(client)
 
 
-async def on_resumed() -> None:
+async def on_resumed(client: commands.Bot) -> None:
+    await _handle_servers(client)
     Log.info("Resumed session")

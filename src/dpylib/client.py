@@ -27,6 +27,8 @@ from .common.contextext import ExtendedContext
 
 from .events.connect import on_connect as on_connect_internal
 from .events.connect import on_resumed as on_resumed_internal
+from .events.guilds import on_guild_join as on_guild_join_internal
+from .events.guilds import on_guild_removed as on_guild_removed_internal
 
 
 class Bot(discord.ext.commands.Bot):
@@ -67,7 +69,17 @@ async def on_connect():
 
 @_client.event
 async def on_resumed():
-    await on_resumed_internal()
+    await on_resumed_internal(get_client())
+
+
+@_client.event
+async def on_guild_join(guild: discord.Guild):
+    await on_guild_join_internal(get_client(), guild)
+
+
+@_client.event
+async def on_guild_removed(guild: discord.Guild):
+    await on_guild_removed_internal(get_client(), guild)
 
 
 @_client.before_invoke

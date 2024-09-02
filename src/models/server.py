@@ -60,6 +60,41 @@ class ServerDTO:
         self.prefix = response.result.get('prefix', '/')
         return self
 
+    @catch(HTTPException, error_value=False, logger=Log.error, asynchronous=True)
+    async def update_roles(
+            self,
+            requester: int,
+            requester_role: Optional[int], *,
+            admin_role: Optional[int] = None,
+            mj_role: Optional[int] = None
+    ) -> bool:
+        async with API('/api/Server/{serverID}/setrole') as api:
+            response = await api(
+                HTTP.PUT,
+                f'/api/Server/{self.id}/setrole',
+                requester=requester,
+                role=requester_role,
+                body={
+                    'admin': admin_role,
+                    'mj': mj_role
+                }
+            )
+            response.raise_errors()
+            return response.status.ok
+
+    @catch(HTTPException, error_value=False, logger=Log.error, asynchronous=True)
+    async def update_prefix(self, requester: int, requester_role: Optional[int], prefix: str) -> bool:
+        async with API('/api/server/{serverID}/setprefix') as api:
+            response = await api(
+                HTTP.PUT,
+                f'/api/server/{self.id}/setprefix',
+                requester=requester,
+                role=requester_role,
+                body={'prefix': prefix}
+            )
+            response.raise_errors()
+            return response.status.ok
+
     @catch(HTTPException, error_value=[], logger=Log.error, asynchronous=True)
     @classmethod
     async def get_server_list(cls) -> list[Self]:

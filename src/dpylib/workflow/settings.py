@@ -18,23 +18,19 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import TYPE_CHECKING, Any, Optional, Type, override
+from typing import TYPE_CHECKING, Optional, override
 from enum import IntEnum, auto
 import discord
 from lang import LocalizedStr, LocalizeStrCase, localize
 from utils.emojis import Emoji
-from utils.aliases import UserType
-from models import fetch_extensions, BaseExtensions, BaseRaces, BaseClasses
-from dices import DiceCombinator, Dice
+from models import ServerDTO
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta, EmbedIconTextMeta
-from ..common.threadholder import DiscordThreadHolder
-from ..ui.components import Dropdown, DropdownOption, RoleDropdown, View, Button, Modal, TextInput, button, dropdown, modal
-from ..ui.embed import EmbedView, EmbedBrowserSelectorView
+from ..ui.components import RoleDropdown, View, Button, Modal, TextInput, button, modal
+from ..ui.embed import EmbedView
 from .iworkflow import IWorkflow, setup_view
 
 if TYPE_CHECKING:
     from ..common.contextext import ExtendedContext
-    from models import ServerDTO
 
 
 class SettingsWorkflow(IWorkflow[bool]):
@@ -47,7 +43,7 @@ class SettingsWorkflow(IWorkflow[bool]):
         ADMIN = auto()
         MJ = auto()
 
-    def __init__(self, ctx: 'ExtendedContext', srv: 'ServerDTO', bot_avatar: str) -> None:
+    def __init__(self, ctx: 'ExtendedContext', srv: ServerDTO, bot_avatar: str) -> None:
         super().__init__()
         self.srv = srv
         self.owner = ctx.author
@@ -231,31 +227,24 @@ class SettingsWorkflow(IWorkflow[bool]):
             view=self[self.SettingsViewID.PANEL]
         )
 
-    # @dropdown(options=[], placeholder=LocalizedStr('charcreate_ext_dd'))
-    # async def dropdown_ext(self, dd: Dropdown, interaction: discord.Interaction) -> None:
-    #     self[self.CharcreateViewID.SELECT_EXT].stop()
-    #     self.ext = self._extensions_enum.from_name(dd.value) # type: ignore
-    #     await interaction.response.defer(thinking=True)
-    #     self._races_enum = await self.ext.fetch_races()
-    #     view = self[self.CharcreateViewID.SELECT_RACE]
-    #     dd = view.get_first_child(Dropdown)
-    #     dd += [DropdownOption(x.value, x.value) for x in self._races_enum]
-    #     await dd.localize(self.ctx)
-    #     await interaction.followup.send(view=view)
-    #     #await interaction.response.send_message(':arrows_counterclockwise: loading', view=self[self.CharcreateViewID.SELECT_RACE])
-
-    #     if interaction.message:
-    #         await interaction.followup.edit_message(interaction.message.id, view=self[self.CharcreateViewID.SELECT_EXT])
-
-    # @button(style=discord.ButtonStyle.danger,
-    #         label=LocalizedStr('gmod_offensive', treatment=LocalizeStrCase.CAPITALIZED),
-    #         emoji=Emoji.CROSSED_SWORDS,
-    #         row=0)
-    # async def btn_gmod_offensive(self, btn: Button, interaction: discord.Interaction) -> None:
-    #     await self.btn_gmod(interaction, 'offensive')
-
     @override
     async def finalize(self) -> bool:
-        # TODO: send data and return if it succeed or not
-        return self.prefix == self.srv.prefix and self.admin_role == self._initial_admin_role and \
-            self.mj_role == self._initial_mj_role
+        success = True
+        owner_role = self.owner.get_role(self.srv.admin_role) # type: ignore
+
+        if self.srv.admin_role != self.admin_role or self.srv.mj_role != self.mj_role:
+            success = await self.srv.update_roles(
+                self.owner.id,
+                owner_role.id if owner_role else None,
+                admin_role=self.admin_role.id, # type: ignore
+                mj_role=self.mj_role.id # type: ignore
+            )
+
+        if self.srv.prefix != self.prefix:
+            success = success and await self.srv.update_prefix(
+                self.owner.id,
+                owner_role.id if owner_role else None,
+                self.prefix
+            )
+
+        return success

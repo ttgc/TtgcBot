@@ -39,9 +39,10 @@ class Button(ui.Button, ILocalizable[None]):
             custom_id: Optional[str] = None,
             url: Optional[str] = None,
             emoji: Optional[str | discord.Emoji | discord.PartialEmoji] = None,
-            row: Optional[int] = None
+            row: Optional[int] = None,
+            id: Optional[int] = None,
     ):
-        super().__init__(style=style, label=label, disabled=disabled, custom_id=custom_id, url=url, emoji=emoji, row=row)
+        super().__init__(style=style, label=label, disabled=disabled, custom_id=custom_id, url=url, emoji=emoji, row=row, id=id)
         self.on_click = on_click
 
     @override
@@ -61,7 +62,8 @@ def button(
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[str | discord.Emoji | discord.PartialEmoji] = None,
-        row: Optional[int] = None
+        row: Optional[int] = None,
+        id: Optional[int] = None,
 ) -> Callable[[AsyncCallable[Any]], Callable[..., Button]]:
     def _decorator(func: AsyncCallable[Any]) -> Callable[..., Button]:
         def _wrapper(*args, **kwargs) -> Button:
@@ -73,7 +75,8 @@ def button(
                 custom_id=custom_id,
                 url=url,
                 emoji=emoji,
-                row=row
+                row=row,
+                id=id
             )
         return _wrapper
     return _decorator

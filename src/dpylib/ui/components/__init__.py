@@ -25,3 +25,4 @@ from .modal import Modal, modal
 from .textinput import TextInput
 from .dropdown import Dropdown, DropdownOption, dropdown
 from .layout import LayoutSection, LayoutActionSection, LayoutBuilder
+from .media import Media, MediaGallery

@@ -18,12 +18,64 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-from typing import TYPE_CHECKING
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, override, Optional
+from enum import Enum
+import functools
 
 if TYPE_CHECKING:
     from dpylib.common.contextext import ExtendedContext
 
 
-async def localize(ctx: 'ExtendedContext', msgkey: str, *args) -> str:
+async def localize(ctx: 'ExtendedContext', msgkey: str, *args, **kwargs) -> str:
     lang = await ctx.ext.get_lang()
-    return lang[msgkey].format(*args)
+    return lang[msgkey].format(*args, **kwargs)
+
+
+class ILocalizable[T](ABC):
+    @abstractmethod
+    async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> T:
+        pass
+
+
+class LocalizeStrCase(Enum):
+    REGULAR = None
+    LOWER = functools.partial(str.lower)
+    UPPER = functools.partial(str.upper)
+    CAPITALIZED = functools.partial(str.capitalize)
+
+    def __call__(self, text: str) -> str:
+        return self.value(text) if self.value else text
+
+
+class LocalizedStr(str, ILocalizable[str]):
+    def __new__(cls, string: str, *args, **kwargs):
+        self = super().__new__(cls, string)
+        return self
+
+    def __init__(
+            self,
+            _: str, *,
+            argc: int = -1,
+            kwargs_inuse: Optional[list[str]] = None,
+            treatment: LocalizeStrCase = LocalizeStrCase.REGULAR
+    ) -> None:
+        super().__init__()
+        self.argc = argc
+        self.kwargs_inuse = kwargs_inuse
+        self.treatment = treatment
+
+    @override
+    async def localize(self, ctx: 'ExtendedContext', *args, **kwargs) -> str:
+        if self.argc >= 0 and len(args) > self.argc:
+            args = list(args)[:self.argc]
+
+        if self.kwargs_inuse is not None:
+            saved = {}
+
+            for key in self.kwargs_inuse:
+                saved[key] = kwargs[key]
+
+            kwargs = saved
+
+        return self.treatment(await localize(ctx, str(self), *args, **kwargs))

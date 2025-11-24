@@ -21,13 +21,17 @@
 import functools
 import discord
 from discord.ext import commands
-from config import Config, Log, Environment
+from config import Config, Log
 from utils.decorators import call_once, catch
 from utils.exceptions import AlreadyCalledFunctionException
 from utils import ExitCode
+from ..common.invite import InviteLink
 
-from ..cogs import BotManage
+from ..cogs import BotManage, Utilities
 from ..cogs.jdr import Jdr
+
+# test cog - REMOVE before release
+from ..cogs.tcog import TCog
 
 
 @catch(AlreadyCalledFunctionException,
@@ -37,43 +41,10 @@ from ..cogs.jdr import Jdr
 async def _add_cogs(client: commands.Bot) -> None:
     Log.debug_v4('Registering V4 cogs')
     await client.add_cog(BotManage(client))
+    await client.add_cog(Utilities(client))
     await client.add_cog(Jdr(client))
+    await client.add_cog(TCog(client))
     Log.debug_v4('End of registering V4 cogs')
-
-
-def _generate_invite_link(client: commands.Bot) -> str:
-    # TODO: move this under appropriate cog
-    if Config().env == Environment.DEV:
-        botaskperm = discord.Permissions.all()
-    else:
-        botaskperm = discord.Permissions().none()
-        botaskperm.add_reactions = True
-        botaskperm.attach_files = True
-        botaskperm.change_nickname = True
-        botaskperm.create_instant_invite = True
-        botaskperm.create_private_threads = True
-        botaskperm.create_public_threads = True
-        botaskperm.deafen_members = True
-        botaskperm.embed_links = True
-        botaskperm.manage_messages = True
-        botaskperm.manage_nicknames = True
-        botaskperm.manage_threads = True
-        botaskperm.mention_everyone = True
-        botaskperm.mute_members = True
-        botaskperm.read_message_history = True
-        botaskperm.read_messages = True
-        botaskperm.send_messages = True
-        botaskperm.send_messages_in_threads = True
-        botaskperm.send_tts_messages = True
-        botaskperm.use_application_commands = True
-
-    if not client.user:
-        Log.error('Cannot get client ID. Invite link generation aborted')
-        return ''
-
-    url = discord.utils.oauth_url(client.user.id, permissions=botaskperm)
-    Log.info("Generated invite link : %s", url)
-    return url
 
 
 async def on_connect(client: commands.Bot) -> None:
@@ -82,7 +53,7 @@ async def on_connect(client: commands.Bot) -> None:
 
     Log.info("Successful connected. Initializing bot system")
     await _add_cogs(client)
-    _generate_invite_link(client)
+    InviteLink(client)
 
     if (test_guild := Config()['discord']['test-guild']):
         Log.debug_v4("Test guild provided. Copying global command to test guild.")

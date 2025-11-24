@@ -17,4 +17,6 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from .dice import roll, Dice, CustomDice, AnyDice, get_dice
 from .expression import Expression, ExpressionPatterns
+from .combinator import DiceCombinator

@@ -105,6 +105,9 @@ def deprecated(reason: str, *, raise_error: bool = True, logger: Optional[Callab
     return deprecated_decorator
 
 
+forbidden = functools.partial(deprecated, 'Forbidden call', raise_error=True)
+
+
 def catch( # noqa: C901
         exception: Type[Exception], *,
         error_value: Optional[Any] = None,
@@ -141,4 +144,38 @@ def catch( # noqa: C901
                 return _get_error_value(*args, **kwargs)
 
         return _async_wrapper if asynchronous else _wrapper
+    return _decorator
+
+
+def convert_none_to_list(converted_arg: int | str):
+    def _decorator[T](fct: Callable[..., T]) -> Callable[..., T]:
+
+        @functools.wraps(fct)
+        def _wrapper(*args, **kwargs) -> T:
+            if isinstance(converted_arg, int) and args[converted_arg] is None:
+                args = list(args)
+                args = args[:converted_arg] + [[]] + args[converted_arg + 1:]
+            elif isinstance(converted_arg, str) and kwargs.get(converted_arg, None) is None:
+                kwargs[converted_arg] = []
+
+            return fct(*args, **kwargs)
+
+        return _wrapper
+    return _decorator
+
+
+def convert_none_to_dict(converted_arg: int | str):
+    def _decorator[T](fct: Callable[..., T]) -> Callable[..., T]:
+
+        @functools.wraps(fct)
+        def _wrapper(*args, **kwargs) -> T:
+            if isinstance(converted_arg, int) and args[converted_arg] is None:
+                args = list(args)
+                args = args[:converted_arg] + [{}] + args[converted_arg + 1:]
+            elif isinstance(converted_arg, str) and kwargs.get(converted_arg, None) is None:
+                kwargs[converted_arg] = {}
+
+            return fct(*args, **kwargs)
+
+        return _wrapper
     return _decorator

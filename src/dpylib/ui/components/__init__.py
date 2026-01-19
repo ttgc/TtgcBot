@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discord.ui import File, FileUpload, Thumbnail, TextDisplay, Separator, Label
+from discord.ui import File, Thumbnail, TextDisplay, Separator, Label #, FileUpload
 
 from .view import View, LayoutView
 from .button import Button, button

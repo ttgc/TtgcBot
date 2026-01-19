@@ -28,7 +28,7 @@ from utils import ExitCode
 from ..common.invite import InviteLink
 
 from ..cogs import BotManage, Utilities
-from ..cogs.jdr import Jdr
+from ..cogs.jdr import Jdr, Character
 
 # test cog - REMOVE before release
 from ..cogs.tcog import TCog
@@ -44,6 +44,7 @@ async def _add_cogs(client: commands.Bot) -> None:
     await client.add_cog(Utilities(client))
     await client.add_cog(Jdr(client))
     await client.add_cog(TCog(client))
+    await client.add_cog(Character(client))
     Log.debug_v4('End of registering V4 cogs')
 
 

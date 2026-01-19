@@ -18,6 +18,7 @@
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
+import functools
 from enum import Enum, StrEnum
 from typing import Self, Type
 from network.api import API
@@ -27,7 +28,7 @@ from network.statuscode import HttpErrorCode
 from network.exceptions import HTTPException
 from config import Log
 from utils import snake_to_pascal_case
-from utils.decorators import catch
+from utils.decorators import catch, prevent_call
 
 
 class BaseExtBoundEnum(StrEnum):
@@ -60,7 +61,14 @@ class BaseRaces(BaseExtBoundEnum):
         BaseExtBoundEnum.__init__(self, value, extension)
         self.fetch_classes = pull_resource(f'RACE://{value}/classes', ttl=168)(self.fetch_classes)
 
+    def _replace_fetch_classes(self) -> Type[BaseRaces]:
+        return BaseRaces(value='AbyssalDiveTheDeepestPointElfes', names={
+            'Q-ELFES': ('Q-Elfes', self),
+            'STANDARD': ('Elfes Standard', self)
+        })
+
     @catch(HTTPException, error_value=None, logger=Log.error, asynchronous=True)
+    @prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), replacement_function=_replace_fetch_classes)
     async def fetch_classes(self) -> Type[BaseClasses]:
         async with API(f'/api/jdr/{self.ext.universe}/{self.ext.world}/{self}/classes') as api:
             response = await api(HTTP.GET, f'/api/jdr/{self.ext.universe}/{self.ext.world}/{self}/classes')
@@ -100,7 +108,21 @@ class BaseExtensions(Enum):
     def __str__(self) -> str:
         return self.value
 
+    def _replace_fetch_races(self) -> Type[BaseRaces]:
+        return BaseRaces(value='AbyssalDiveTheDeepestPointRaces', names={
+            'Q-HUMAINS': ('Q-Humains', self),
+            'ELFES': ('Elfes', self),
+            'NAINS': ('Nains', self),
+            'CELESTIENS': ('Célestiens', self),
+            'FORASIENS': ('Forasiens', self),
+            'DARAST': ('Darast', self),
+            'FELINYAS': ('Félinyas', self),
+            'FEES': ('Fées', self),
+            'VAMPIRES': ('Vampires', self)
+        })
+
     @catch(HTTPException, error_value=None, logger=Log.error, asynchronous=True)
+    @prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), replacement_function=_replace_fetch_races)
     async def fetch_races(self) -> Type[BaseRaces]:
         async with API(f'/api/jdr/{self.universe}/{self.world}/races') as api:
             response = await api(HTTP.GET, f'/api/jdr/{self.universe}/{self.world}/races')
@@ -114,7 +136,14 @@ class BaseExtensions(Enum):
 
         return BaseRaces(value=enum_name, names={}) # type: ignore
 
+    def _replace_fetch_orgs(self) -> Type[BaseOrganizations]:
+        return BaseOrganizations(value='AbyssalDiveTheDeepestPointOrganizations', names={
+            'MINEUR': ('Mineur', self, False),
+            'CONTREBANDIER': ('Contrebandier', self, False)
+        })
+
     @catch(HTTPException, error_value=None, logger=Log.error, asynchronous=True)
+    @prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), replacement_function=_replace_fetch_orgs)
     async def fetch_organizations(self) -> Type[BaseOrganizations]:
         async with API(f'/api/jdr/{self.universe}/{self.world}/organizations') as api:
             response = await api(HTTP.GET, f'/api/jdr/{self.universe}/{self.world}/organizations')
@@ -180,6 +209,14 @@ class BaseGamemods(StrEnum):
 
 @catch(HTTPException, error_value=BaseExtensions(value='Extensions', names={}), logger=Log.error, asynchronous=True)
 @pull_resource('EXT://...', ttl=168)
+@prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), return_value=BaseExtensions(value='Extensions', names={
+    'COSMORIGINS_TERAE': ('Cosmorigins', 'Terae'),
+    'COSMORIGINS_ORIANIS': ('Cosmorigins', 'Orianis'),
+    'COSMORIGINS_XYORDIA': ('Cosmorigins', 'Xyord'),
+    'ABYSSAL_DIVE_THE_ANCIENT_FORTRESS': ('Abyssal Dive', 'The Ancient Fortress'),
+    'ABYSSAL_DIVE_THE_DEEPEST_POINT': ('Abyssal Dive', 'The Deepest Point'),
+    'ABYSSAL_DIVE_THE_FORGOTTEN_ONES': ('Abyssal Dive', 'The Forgotten Ones')
+}))
 async def fetch_extensions() -> Type[BaseExtensions]:
     async with API('/api/jdr/extensions') as api:
         response = await api(HTTP.GET, '/api/jdr/extensions')
@@ -197,6 +234,12 @@ async def fetch_extensions() -> Type[BaseExtensions]:
 
 @catch(HTTPException, error_value=BaseGamemods(value='Gamemods', names={}), logger=Log.error, asynchronous=True)
 @pull_resource('GM://...', ttl=168)
+@prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), return_value=BaseGamemods(value='Gamemods', names={
+    'O': ('Offensive', False),
+    'D': ('Defensive', False),
+    'I': ('Illumination', True),
+    'S': ('Sepulchral', True)
+}))
 async def fetch_gamemods() -> Type[BaseGamemods]:
     async with API('/api/jdr/gamemods') as api:
         response = await api(HTTP.GET, '/api/jdr/gamemods')

@@ -43,7 +43,7 @@ class _Resource[T]:
 
     @value.setter
     def value(self, value: T) -> None:
-        self.value = value
+        self._value = value
         self.creation = time.time()
 
     @property

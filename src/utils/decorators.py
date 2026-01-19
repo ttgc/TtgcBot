@@ -185,20 +185,22 @@ def prevent_call[T](
         *,
         asynchronous: bool = False,
         logger: Optional[Callable[..., None]] = None,
-        return_value: Optional[T] = None
+        return_value: Optional[T] = None,
+        replacement_function: Optional[Callable[..., T] | AsyncCallable[T]] = None
 ) -> Callable:
     def _decorator(fct: Callable[..., T] | AsyncCallable[T]) -> Callable[..., T] | AsyncCallable[T]:
         log_method = logger if logger else print
+        logger('prevent_call registered for function: %s', fct.__name__)
 
         @functools.wraps(fct)
         def _wrapper(*args, **kwargs) -> Optional[T]:
             log_method(f"Prevented call to function: {fct.__name__}")
-            return return_value
+            return replacement_function(*args, **kwargs) if replacement_function else return_value
 
         @functools.wraps(fct)
         async def _async_wrapper(*args, **kwargs) -> Optional[T]:
             log_method(f"Prevented call to function: {fct.__name__}")
-            return return_value
+            return await replacement_function(*args, **kwargs) if replacement_function else return_value
 
         return _async_wrapper if asynchronous else _wrapper
     return _decorator

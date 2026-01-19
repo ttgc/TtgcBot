@@ -23,9 +23,11 @@ from types import TracebackType
 import time
 import base64
 import hashlib
+import functools
 import argon2.low_level as argon2
 from config import Config
 from config.logger import Log
+from utils.decorators import prevent_call
 from .httprequest import HTTP, HttpResultType, HttpRequest
 
 
@@ -72,13 +74,21 @@ class API:
             }
         }
 
-        response = await HTTP.POST(f"{self.url}/api/Login", body, expected_result=HttpResultType.TEXT, https=self.https)
-        response.raise_errors()
-        self.logged = response.status.ok
-        self._token = str(response.result)
-        Log.info("Logged into the API successfully")
+        ### TO REMOVE: ###
+        Log.critical("API Login disabled", kill_code=None)
+        self.logged = True
+        self._token = ''
         return self
+        ##################################
 
+        # response = await HTTP.POST(f"{self.url}/api/Login", body, expected_result=HttpResultType.TEXT, https=self.https)
+        # response.raise_errors()
+        # self.logged = response.status.ok
+        # self._token = str(response.result)
+        # Log.info("Logged into the API successfully")
+        # return self
+
+    @prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), return_value=None)
     async def __aexit__(
             self,
             exc_type: Optional[Type[BaseException]],
@@ -96,6 +106,7 @@ class API:
             Log.error('%s raised when querying API: %s.\n%s', exc_type.__name__, str(exc), str(tb))
             raise exc
 
+    @prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), return_value=HttpRequest('', 200))
     async def __call__(
             self,
             request_type: HTTP,

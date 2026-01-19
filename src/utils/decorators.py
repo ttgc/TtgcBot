@@ -179,3 +179,26 @@ def convert_none_to_dict(converted_arg: int | str):
 
         return _wrapper
     return _decorator
+
+
+def prevent_call[T](
+        *,
+        asynchronous: bool = False,
+        logger: Optional[Callable[..., None]] = None,
+        return_value: Optional[T] = None
+) -> Callable:
+    def _decorator(fct: Callable[..., T] | AsyncCallable[T]) -> Callable[..., T] | AsyncCallable[T]:
+        log_method = logger if logger else print
+
+        @functools.wraps(fct)
+        def _wrapper(*args, **kwargs) -> Optional[T]:
+            log_method(f"Prevented call to function: {fct.__name__}")
+            return return_value
+
+        @functools.wraps(fct)
+        async def _async_wrapper(*args, **kwargs) -> Optional[T]:
+            log_method(f"Prevented call to function: {fct.__name__}")
+            return return_value
+
+        return _async_wrapper if asynchronous else _wrapper
+    return _decorator

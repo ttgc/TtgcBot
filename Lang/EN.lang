@@ -182,7 +182,6 @@
 # invite=Invite TtgcBot to your server !
 # invite_srv=TtgcBot is currently on :
 # invite_author=TtgcBot version {} developed by Ttgc
-# ping=:ping_pong: pong ! :ping_pong:\nping value is currently : `{} ms`
 # error=Your command throw the following error :\n```python\n{}\n```
 # setlang=Language updated to {}
 # #Pet update v1.2
@@ -367,3 +366,4 @@ set_prec=Set precision
 set_luck=Set luck
 set_int=Set intuition
 set_piloting=Set piloting
+ping=:ping_pong: pong ! :ping_pong:\nping value is currently : `{} ms`

@@ -48,3 +48,9 @@ class Utilities(commands.Cog):
         await embed.localize(ctx, Config()['version'])
         await ctx.send(embed=embed.convert())
         Log.info("Invite generated on channel %d from server %d by %d", ctx.channel.id, ctx.guild.id, ctx.author.id)
+
+    @commands.hybrid_command()
+    @commands.cooldown(1, 60, commands.BucketType.guild)
+    async def ping(self, ctx: ExtendedContext) -> None:
+        ping = await LocalizedStr('ping', round(self.bot.latency * 1000)).localize(ctx)
+        await ctx.send(ping)

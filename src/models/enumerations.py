@@ -234,12 +234,12 @@ async def fetch_extensions() -> Type[BaseExtensions]:
 
 @catch(HTTPException, error_value=BaseGamemods(value='Gamemods', names={}), logger=Log.error, asynchronous=True)
 @pull_resource('GM://...', ttl=168)
-@prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), return_value=BaseGamemods(value='Gamemods', names={
-    'O': ('Offensive', False),
-    'D': ('Defensive', False),
-    'I': ('Illumination', True),
-    'S': ('Sepulchral', True)
-}))
+# @prevent_call(asynchronous=True, logger=functools.partial(Log.critical, kill_code=None), return_value=BaseGamemods(value='Gamemods', names={
+#     'O': ('Offensive', False),
+#     'D': ('Defensive', False),
+#     'I': ('Illumination', True),
+#     'S': ('Sepulchral', True)
+# }))
 async def fetch_gamemods() -> Type[BaseGamemods]:
     async with API('/api/jdr/gamemods') as api:
         response = await api(HTTP.GET, '/api/jdr/gamemods')

@@ -23,7 +23,7 @@ from enum import StrEnum
 import asyncio
 import discord
 from discord.ext import commands
-from models import MemberDTO, ServerDTO, JdrDTO
+from models import MemberDTO, ServerDTO, JdrDTO, CharacterDTO
 from lang import Language
 
 
@@ -32,11 +32,14 @@ class ContextExtension:
         MEMBER = 'member'
         SERVER = 'server'
         JDR = 'jdr'
+        CHARACTER = 'character'
 
     def __init__(self, ctx: commands.Context) -> None:
         self._member = MemberDTO(ctx.author.id)
         self._server = ServerDTO(ctx.guild.id) # type: ignore
         self._jdr = JdrDTO(self._server.id, ctx.channel.id)
+        # self._character = CharacterDTO('', self._server.id, ctx.channel.id)
+        # TODO: character list
         self._tasks: dict[str, asyncio.Task] = {}
 
     def prepare(self) -> None:
@@ -44,6 +47,7 @@ class ContextExtension:
             self._tasks[self._QueryableMembers.MEMBER] = asyncio.create_task(self._member.fetch())
             self._tasks[self._QueryableMembers.SERVER] = asyncio.create_task(self._server.fetch())
             self._tasks[self._QueryableMembers.JDR] = asyncio.create_task(self._jdr.fetch())
+            # self._tasks[self._QueryableMembers.CHARACTER] = asyncio.create_task(self._character.fetch())
 
     async def _get_query_task[T](self, attr: _QueryableMembers) -> Optional[T]: # type: ignore
         if attr not in self._tasks:
@@ -76,6 +80,12 @@ class ContextExtension:
     def jdr(self) -> asyncio.Task[Optional[JdrDTO]]:
         return asyncio.create_task(
             self._get_query_task(self._QueryableMembers.JDR)
+        )
+
+    @property
+    def character(self) -> asyncio.Task[Optional[CharacterDTO]]:
+        return asyncio.create_task(
+            self._get_query_task(self._QueryableMembers.CHARACTER)
         )
 
 

@@ -36,6 +36,13 @@ class BaseExtBoundEnum(StrEnum):
         object.__init__(self)
         self.ext = extension
 
+    @classmethod
+    def from_name(cls, name: str) -> Self:
+        for member in cls:
+            if member == name:
+                return member
+        raise ValueError(f"Unable to find {cls.__name__} with name '{name}'")
+
 
 class BaseClasses(BaseExtBoundEnum):
     def __init__(self, value: str, race: 'BaseRaces') -> None:

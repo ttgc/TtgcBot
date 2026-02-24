@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from .server import ServerDTO
 
 
-@dataclass
+@dataclass(init=False)
 class JdrDTO:
     srv_id: int
     chan_id: int

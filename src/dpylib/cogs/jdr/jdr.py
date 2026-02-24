@@ -27,6 +27,7 @@ from lang import localize
 from models import JdrDTO
 from utils.aliases import JdrChannel
 from ...common.contextext import ExtendedContext, prepare_ctx
+from ...checks.jdr import check_jdr_channel, check_has_mj_role
 
 
 class Jdr(commands.Cog):
@@ -53,6 +54,7 @@ class Jdr(commands.Cog):
         pass
 
     @prepare_ctx
+    @commands.check(check_has_mj_role)
     @commands.cooldown(1, 60, commands.BucketType.guild)
     @jdr.command(name='start', aliases=['new', '+'], description="Create a new JDR in this channel")
     async def jdr_start(self, ctx: ExtendedContext, channel: discord.abc.GuildChannel, label: Optional[str] = None) -> None:

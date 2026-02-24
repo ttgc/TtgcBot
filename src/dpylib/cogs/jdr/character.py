@@ -40,7 +40,7 @@ class Character(commands.Cog):
         pass
 
     @prepare_ctx
-    # @commands.check(check_mj)
+    @commands.check(check_mj)
     @commands.cooldown(1, 10, commands.BucketType.member)
     @character.command(name='create', aliases=['new', '+'], description="Create a new character")
     async def character_create(self, ctx: ExtendedContext, charkey: str, pj: Optional[discord.Member]) -> None:

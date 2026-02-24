@@ -26,6 +26,11 @@ async def check_jdr_channel(ctx: ExtendedContext) -> bool:
     return jdr is not None
 
 
+async def check_has_mj_role(ctx: ExtendedContext) -> bool:
+    srv = await ctx.ext.server
+    return srv and srv.mj_role and srv.mj_role in ctx.author.roles
+
+
 async def check_mj(ctx: ExtendedContext) -> bool:
     jdr = await ctx.ext.jdr
     return jdr and jdr.owner_id == ctx.author.id # type: ignore

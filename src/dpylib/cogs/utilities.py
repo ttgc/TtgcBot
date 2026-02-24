@@ -19,7 +19,7 @@
 
 
 from discord.ext import commands
-from lang import LocalizedStr
+from lang import LocalizedStr, localize
 from config import Config, Log
 from ..common.contextext import ExtendedContext
 from ..common.embed import DiscordEmbedMeta, EmbedAuthorMeta, EmbedFieldMeta, EmbedIconTextMeta
@@ -52,5 +52,5 @@ class Utilities(commands.Cog):
     @commands.hybrid_command()
     @commands.cooldown(1, 60, commands.BucketType.guild)
     async def ping(self, ctx: ExtendedContext) -> None:
-        ping = await LocalizedStr('ping', round(self.bot.latency * 1000)).localize(ctx)
+        ping = await localize(ctx, 'ping', round(self.bot.latency * 1000))
         await ctx.send(ping)

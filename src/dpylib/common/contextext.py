@@ -37,17 +37,31 @@ class ContextExtension:
     def __init__(self, ctx: commands.Context) -> None:
         self._member = MemberDTO(ctx.author.id)
         self._server = ServerDTO(ctx.guild.id) # type: ignore
-        self._jdr = JdrDTO(self._server.id, ctx.channel.id)
-        # self._character = CharacterDTO('', self._server.id, ctx.channel.id)
-        # TODO: character list
+        self._channel = ctx.channel.id
+        self._jdr: Optional[JdrDTO] = None
+        self._character: Optional[CharacterDTO] = None
         self._tasks: dict[str, asyncio.Task] = {}
 
     def prepare(self) -> None:
+        async def _fetch_jdr() -> Optional[JdrDTO]:
+            jdrlist = await JdrDTO.get_jdr_list(self._server.id)
+            for jdr in jdrlist:
+                if jdr.chan_id == self._channel:
+                    self._jdr = jdr
+                    await self._jdr.fetch()
+                    break
+            return self._jdr
+
+        async def _fetch_char() -> Optional[CharacterDTO]:
+            jdr = await self.jdr
+            self._character = CharacterDTO.find_active_character(jdr, self._member.id)
+            return self._character
+
         if not self._tasks:
             self._tasks[self._QueryableMembers.MEMBER] = asyncio.create_task(self._member.fetch())
             self._tasks[self._QueryableMembers.SERVER] = asyncio.create_task(self._server.fetch())
-            self._tasks[self._QueryableMembers.JDR] = asyncio.create_task(self._jdr.fetch())
-            # self._tasks[self._QueryableMembers.CHARACTER] = asyncio.create_task(self._character.fetch())
+            self._tasks[self._QueryableMembers.JDR] = asyncio.create_task(_fetch_jdr())
+            self._tasks[self._QueryableMembers.CHARACTER] = asyncio.create_task(_fetch_char())
 
     async def _get_query_task[T](self, attr: _QueryableMembers) -> Optional[T]: # type: ignore
         if attr not in self._tasks:

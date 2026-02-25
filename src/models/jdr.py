@@ -28,6 +28,7 @@ from network.exceptions import HTTPException
 from config import Log
 from utils.decorators import catch
 from dpylib.common.user import extract_top_role
+from .char_ident import CharacterIdentityDTO, CharacterListDTO
 
 if TYPE_CHECKING:
     import discord
@@ -117,3 +118,41 @@ class JdrDTO:
             await dto.fetch()
 
         return dto
+
+    @catch(HTTPException, error_value=False, logger=Log.error, asynchronous=True)
+    async def get_character_list(self) -> CharacterListDTO:
+        async with API('/api/character/{serverID}/{channelID}') as api:
+            response = await api(HTTP.GET, f'/api/character/{self.srv_id}/{self.chan_id}')
+            response.raise_errors()
+
+        charlist = CharacterListDTO()
+
+        if response.status.ok and response.result and isinstance(response.result, dict):
+            charlist.characters = [
+                CharacterIdentityDTO(
+                    charkey=x
+                ) for x in response.result.get('characters', [])
+            ]
+
+            for linked_char in response.result.get('linked', []):
+                char = charlist.find(linked_char.get('charkey', ''))
+                if not char:
+                    charlist.characters.append(CharacterIdentityDTO(charkey=linked_char.get('charkey', '')))
+                char.member = linked_char.get('member', -1)
+                char.selected = linked_char.get('selected', False)
+
+            for dead_char in response.result.get('dead', []):
+                if dead_char not in charlist:
+                    charlist.characters.append(CharacterIdentityDTO(charkey=dead_char))
+                charlist.find(dead_char).dead = True
+
+            if len(charlist) != response.result.get('count', -1):
+                Log.warn(
+                    'Invalid character count in charlist of JDR(%d, %d). Expected %d, got %d.',
+                    self.srv_id,
+                    self.chan_id,
+                    response.result.get('count', -1),
+                    len(charlist)
+                )
+
+        return charlist

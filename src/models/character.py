@@ -29,12 +29,14 @@ from config import Log
 from utils.decorators import catch
 from dpylib.common.user import extract_top_role
 from .enumerations import fetch_gamemods, fetch_extensions
+from .char_ident import CharacterIdentityDTO
+from .member import MemberDTO
+
 
 if TYPE_CHECKING:
     import discord
     from .enumerations import BaseGamemods, BaseRaces, BaseClasses, BaseExtensions, BaseOrganizations, BaseSymbionts
     from .jdr import JdrDTO
-    from .member import MemberDTO
 
 
 @dataclass(kw_only=True)
@@ -56,9 +58,8 @@ class CharacterStatsDTO:
         return ((self.super_crit_failure * 2) + self.crit_failure) / self.rolled if self.rolled else 0
 
 
-@dataclass
-class CharacterDTO(init=False):
-    charkey: str
+@dataclass(init=False)
+class CharacterDTO(CharacterIdentityDTO):
     srv_id: int
     chan_id: int
     name: str
@@ -83,12 +84,9 @@ class CharacterDTO(init=False):
     intuition: int
     mental: int
     lvl: int
-    linked: Optional[MemberDTO]
-    selected: bool
     inventory: None # TODO: inventory DTO
     pets: dict[str, None] # TODO: pet DTO
     skills: list[None] # TODO: skill DTO
-    dead: bool
     ext: Optional[BaseExtensions]
     race: Optional[BaseRaces]
     classe: Optional[BaseClasses]
@@ -128,7 +126,7 @@ class CharacterDTO(init=False):
         self.intuition = kwargs.get('intuition', 3)
         self.mental = kwargs.get('mental', 100)
         self.lvl = kwargs.get('lvl', 1)
-        self.linked = kwargs.get('linked', None)
+        self.member = kwargs.get('linked', None)
         self.selected = kwargs.get('selected', False)
         self.inventory = kwargs.get('inventory', None) # TODO: inventory DTO
         self.pets = kwargs.get('pets', {})
@@ -192,8 +190,7 @@ class CharacterDTO(init=False):
         self.intuition = response.result.get('Intuition', self.intuition)
         self.mental = response.result.get('Mental', self.mental)
         self.lvl = response.result.get('Lvl', self.lvl)
-        _member_id = response.result.get('IdMember', None)
-        self.linked = MemberDTO(_member_id) if _member_id else None
+        self.member = response.result.get('IdMember', None)
         self.selected = response.result.get('Linked', self.selected)
         self.dead = response.result.get('Dead', self.dead)
         _universe = response.result.get('Extension', {}).get('universe', 'Cosmorigins')
@@ -216,5 +213,27 @@ class CharacterDTO(init=False):
         self.astral_pilot = response.result.get('PilotP', self.astral_pilot)
         return self
 
+    @property
+    def linked(self) -> Optional[MemberDTO]:
+        return MemberDTO(self.member) if self.member else None
+
     def bind(self, jdr: JdrDTO) -> None:
-        self.jdr = jdr
+        if not self.jdr:
+            self.jdr = jdr
+
+    @classmethod
+    async def find_active_character(cls, jdr: JdrDTO, member_id: int) -> Optional[Self]:
+        charlist = await jdr.get_character_list()
+        for member, char in charlist.active_characters.items():
+            if member == member_id:
+                full_char = cls(
+                    char.charkey,
+                    jdr.srv_id,
+                    jdr.chan_id,
+                    member=member_id,
+                    selected=char.selected,
+                    dead=char.dead
+                )
+                full_char.bind(jdr)
+                return full_char
+        return None

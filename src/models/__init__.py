@@ -19,6 +19,7 @@
 
 from .member import MemberPerms, MemberDTO
 from .server import ServerDTO
+from .char_ident import CharacterIdentityDTO, CharacterListDTO
 from .jdr import JdrDTO
 from .character import CharacterDTO, CharacterStatsDTO
 from .enumerations import BaseClasses, BaseRaces, BaseExtensions, BaseOrganizations, \

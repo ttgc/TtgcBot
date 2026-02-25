@@ -27,14 +27,13 @@ from network.statuscode import HttpErrorCode
 from network.exceptions import HTTPException
 from config import Log
 from utils.decorators import catch
-from dpylib.common.user import extract_top_role
 from .enumerations import fetch_gamemods, fetch_extensions
 from .char_ident import CharacterIdentityDTO
 from .member import MemberDTO
+from .inventory import inv_maxsize_from_strength, InventoryDTO
 
 
 if TYPE_CHECKING:
-    import discord
     from .enumerations import BaseGamemods, BaseRaces, BaseClasses, BaseExtensions, BaseOrganizations, BaseSymbionts
     from .jdr import JdrDTO
 
@@ -84,7 +83,7 @@ class CharacterDTO(CharacterIdentityDTO):
     intuition: int
     mental: int
     lvl: int
-    inventory: None # TODO: inventory DTO
+    inventory: InventoryDTO
     pets: dict[str, None] # TODO: pet DTO
     skills: list[None] # TODO: skill DTO
     ext: Optional[BaseExtensions]
@@ -128,7 +127,7 @@ class CharacterDTO(CharacterIdentityDTO):
         self.lvl = kwargs.get('lvl', 1)
         self.member = kwargs.get('linked', None)
         self.selected = kwargs.get('selected', False)
-        self.inventory = kwargs.get('inventory', None) # TODO: inventory DTO
+        self.inventory = kwargs.get('inventory', InventoryDTO(srv_id, chan_id, charkey, inv_maxsize_from_strength(self.force)))
         self.pets = kwargs.get('pets', {})
         self.skills = kwargs.get('skills', [])
         self.dead = kwargs.get('dead', False)
@@ -211,6 +210,7 @@ class CharacterDTO(CharacterIdentityDTO):
         self.symbiont = Symbionts.from_name(response.result.get('Symbiont')) if response.result.get('Symbiont', None) else None
         self.planet_pilot = response.result.get('PilotA', self.planet_pilot)
         self.astral_pilot = response.result.get('PilotP', self.astral_pilot)
+        self.inventory.max_size = inv_maxsize_from_strength(self.force)
         return self
 
     @property

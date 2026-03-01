@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from discord.ui import File, Thumbnail, TextDisplay, Separator, Label, FileUpload
+from discord.ui import File, Thumbnail, TextDisplay, Separator, Label, FileUpload, Checkbox
 
 from .view import View, LayoutView
 from .button import Button, button
@@ -26,3 +26,4 @@ from .textinput import TextInput
 from .dropdown import Dropdown, DropdownOption, dropdown
 from .layout import LayoutSection, LayoutActionSection, LayoutBuilder
 from .media import Media, MediaGallery
+from .boxes import BoxItem, BoxItemValue, CheckboxGroup, RadioGroup
